@@ -30,6 +30,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent          # backend/
 DATA_DIR = Path(os.environ.get("TGA_DATA_DIR", BASE_DIR / "data"))
 STORAGE_DIR = DATA_DIR / "jobs"                            # per-job artifacts
 DB_PATH = Path(os.environ.get("TGA_DB_PATH", DATA_DIR / "tga.sqlite3"))
+# Pre-made tactile vector library (Dot Space collection, etc.)
+LIBRARY_DIR = Path(os.environ.get("TGA_LIBRARY_DIR", BASE_DIR.parent / "tactile_library"))
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)

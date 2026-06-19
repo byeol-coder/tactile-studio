@@ -37,4 +37,8 @@ export const api = {
 
   artifactUrl: (id, name) => `${BASE}/api/jobs/${id}/export/${name}`,
   zipUrl: (id) => `${BASE}/api/jobs/${id}/export.zip`,
+
+  listLibrary: () => fetch(`${BASE}/api/library`).then(json),
+  librarySvgUrl: (file) => `${BASE}/api/library/svg/${file}`,
+  librarySvg: (file) => fetch(`${BASE}/api/library/svg/${file}`).then((r) => r.text()),
 };

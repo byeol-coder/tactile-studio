@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "./api.js";
 import UploadScreen from "./screens/UploadScreen.jsx";
+import LibraryScreen from "./screens/LibraryScreen.jsx";
 import AnalysisScreen from "./screens/AnalysisScreen.jsx";
 import DesignScreen from "./screens/DesignScreen.jsx";
 import SvgPreviewScreen from "./screens/SvgPreviewScreen.jsx";
@@ -10,6 +11,7 @@ import QaScreen from "./screens/QaScreen.jsx";
 import ExportScreen from "./screens/ExportScreen.jsx";
 
 const SCREENS = [
+  { key: "library", label: "★ 도안 라이브러리", icon: "▦", always: true },
   { key: "upload", label: "1. 이미지 업로드", icon: "⬆" },
   { key: "analysis", label: "2. 이미지 분석", icon: "🔍" },
   { key: "design", label: "3. 촉각 설계안", icon: "✎" },
@@ -82,7 +84,7 @@ export default function App() {
       <div className="layout">
         <nav className="sidenav" aria-label="작업 단계">
           {SCREENS.map((s) => {
-            const disabled = s.key !== "upload" && !ready;
+            const disabled = !s.always && s.key !== "upload" && !ready;
             return (
               <button
                 key={s.key}
@@ -106,6 +108,7 @@ export default function App() {
           )}
           {busy && <div className="alert info" role="status">처리 중입니다…</div>}
 
+          {active === "library" && <LibraryScreen onUpload={handleUpload} busy={busy} />}
           {active === "upload" && <UploadScreen onUpload={handleUpload} busy={busy} />}
           {active === "analysis" && <AnalysisScreen {...screenProps} />}
           {active === "design" && <DesignScreen {...screenProps} />}

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import config, db
-from .routers import jobs
+from .routers import jobs, library
 
 app = FastAPI(
     title="Tactile Graphic Agent",
@@ -22,6 +22,7 @@ app.add_middleware(
 )
 
 app.include_router(jobs.router)
+app.include_router(library.router)
 
 # Idempotent — ensure the schema exists whenever the app module is imported
 # (covers both `uvicorn` startup and embedded/TestClient use).
