@@ -261,8 +261,9 @@
    - 60×40 = 30×10 D3 셀, 셀당 2×4핀 column-major(bit0-3 왼쪽열, bit4-7 오른쪽열) — tactile_agent/Dot Fossil 동일
    - 업로드→자동변환→촉각 선명도(threshold) 실시간→DotPad 라이브→DTMS/HEX/PNG 저장
    - 서버 없이 동작, DotPad 미연결 시 시뮬레이터 미리보기만, Web Bluetooth 지원 시에만 연결 */
+/* SDK는 맨 아래에서 비차단으로 로드합니다. (top-level await를 쓰면 로드가 늦어질 때
+   그 아래의 모든 핸들러 바인딩·layout()이 실행되지 않아 업로드/샘플 버튼이 죽습니다) */
 let SDKMod=null;
-try{ SDKMod=await import('./DotPadSDK-3_0_0.js'); }catch(e){ console.warn('SDK 미로드 → 시뮬레이터',e); }
 
 const $=s=>document.getElementById(s);
 const live=$('live');
@@ -471,19 +472,21 @@ const statusEl=$('status'),statusText=$('statusText');
 function setStatus(mode,text){statusEl.className='status '+(mode==='on'?'on':mode==='connecting'?'connecting':mode==='err'?'err':'');statusText.textContent=text;}
 function setConnectBtn(on){$('connectBtn').innerHTML=(on?'<svg class="ic" viewBox="0 0 24 24"><path d="M8 7l8 5-5 4V4l5 4-8 5"/></svg>라이브 반영 ON':'<svg class="ic" viewBox="0 0 24 24"><path d="M8 7l8 5-5 4V4l5 4-8 5"/></svg>DotPad 연결');}
 
-if(!navigator.bluetooth){
-  $('connectBtn').disabled=true;$('connectBtn').textContent='BLE 미지원';setStatus('err','연결 불가');
-  $('liveDesc').textContent='Chrome 또는 Edge에서 HTTPS 환경으로 열면 DotPad 연결을 사용할 수 있습니다.';
-}else if(!window.isSecureContext){
-  $('connectBtn').disabled=true;$('connectBtn').textContent='HTTPS 필요';setStatus('err','HTTPS 필요');
-  $('liveDesc').textContent='Chrome 또는 Edge에서 HTTPS 환경(또는 localhost)으로 열면 DotPad 연결을 사용할 수 있습니다.';
-}else if(!SDKMod){
-  $('connectBtn').disabled=true;$('connectBtn').textContent='SDK 없음';setStatus('err','SDK 로드 실패');
-  $('liveDesc').textContent='DotPadSDK-3_0_0.js를 같은 폴더에 두고 다시 열어주세요.';
-}else{
-  sdk=new SDKMod.DotPadSDK();sdk.setCallBack(onMsg,onKey);
-  $('connectBtn').onclick=connect;
-  tryAuto();
+function initDotPad(){
+  if(!navigator.bluetooth){
+    $('connectBtn').disabled=true;$('connectBtn').textContent='BLE 미지원';setStatus('err','연결 불가');
+    $('liveDesc').textContent='Chrome 또는 Edge에서 HTTPS 환경으로 열면 DotPad 연결을 사용할 수 있습니다.';
+  }else if(!window.isSecureContext){
+    $('connectBtn').disabled=true;$('connectBtn').textContent='HTTPS 필요';setStatus('err','HTTPS 필요');
+    $('liveDesc').textContent='Chrome 또는 Edge에서 HTTPS 환경(또는 localhost)으로 열면 DotPad 연결을 사용할 수 있습니다.';
+  }else if(!SDKMod){
+    $('connectBtn').disabled=true;$('connectBtn').textContent='SDK 없음';setStatus('err','SDK 로드 실패');
+    $('liveDesc').textContent='DotPadSDK-3_0_0.js를 같은 폴더에 두고 다시 열어주세요.';
+  }else{
+    sdk=new SDKMod.DotPadSDK();sdk.setCallBack(onMsg,onKey);
+    $('connectBtn').onclick=connect;
+    tryAuto();
+  }
 }
 async function connect(){try{const sc=new SDKMod.DotPadScanner();const dev=await sc.startBleScan();if(!dev)return;setStatus('connecting','연결 중…');dotDevice=await sdk.connectBleDevice(dev);if(!dotDevice)setStatus('err','연결 실패');}catch(e){setStatus('err','오류');}}
 async function tryAuto(){if(!navigator.bluetooth.getDevices)return;try{const ds=await navigator.bluetooth.getDevices();const dp=ds.find(d=>(d.name||'').toLowerCase().startsWith('dotpad'));if(!dp)return;setStatus('connecting','이전 기기 재연결 중…');dotDevice=await sdk.connectBleDevice(dp);}catch(e){}}
@@ -499,3 +502,11 @@ $('mobtab').onclick=()=>{const p=$('panel');const open=p.classList.toggle('open'
 /* ---------- init ---------- */
 window.addEventListener('resize',layout);
 layout();updateScore();
+/* SDK 비차단 로드 — 업로드/샘플/변환은 SDK 없이도 동작, DotPad 연결만 SDK 준비 후 활성화 */
+import('./DotPadSDK-3_0_0.js')
+  .then(m=>{ SDKMod=m; })
+  .catch(e=>{ console.warn('SDK 미로드 → 시뮬레이터',e); })
+  .finally(initDotPad);
+</script>
+</body>
+</html>
