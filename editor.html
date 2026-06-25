@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
 <title>Dot Tactile Studio · 라이브 에디터</title>
+<base href="./">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -321,7 +322,9 @@
    - 텍스트→이미지: FLUX.1-schnell 생성 서버(server/) 호출. 미설정 시 안내.
    - 자동 추천(자동으로 맞추기): Otsu / Sauvola / Adaptive + 외곽선 1·2줄 후보 → 촉각 품질 점수로 Best 선택 (서버 변환엔진과 동일 로직을 JS로 재구현). */
 let SDKMod=null;
-try{ SDKMod=await import('./DotPadSDK-3_0_0.js'); }catch(e){ console.warn('SDK 미로드 → 시뮬레이터',e); }
+const BASE_URL = new URL('.', import.meta.url).href;
+const SDK_PATH = new URL('DotPadSDK-3_0_0.js', BASE_URL).href;
+try{ SDKMod=await import(SDK_PATH); }catch(e){ console.warn('SDK 미로드 → 시뮬레이터',e); }
 const GEN_API=(new URLSearchParams(location.search).get('api')||'').replace(/\/$/,''); // ?api=https://flux-server
 
 const $=s=>document.querySelector(s);
@@ -629,7 +632,12 @@ function onMessage(device,code,value){
 function onKey(device,keyCode,value){ $('#kvKey').textContent=keyCode+(value?(' · '+value):''); say('기기 입력 '+keyCode); }
 
 /* ---------- init ---------- */
-if(GEN_API)$('#genHint').textContent='생성 서버: '+GEN_API;
+if(GEN_API){
+  $('#genHint').textContent='생성 서버: '+GEN_API;
+}else{
+  $('#genHint').textContent='텍스트 생성 서버가 연결되어 있지 않습니다. `?api=https://flux-server` 또는 로컬 `server/`를 연결해 주세요.';
+  $('#genBtn').disabled=true;
+}
 window.addEventListener('resize',layout);layout();scheduleStream();
 </script>
 </body>
