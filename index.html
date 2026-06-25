@@ -3,1482 +3,1222 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Dot Fossil Studio — 촉각그래픽 변환기</title>
+<title>Dot Fossil Studio — Tactile Graphic Editor</title>
 <style>
-  :root {
-    --bg:       #F8F4EC;
-    --card:     #FFFFFF;
-    --text:     #2B2118;
-    --muted:    #7A6A58;
-    --primary:  #3B2413;
-    --accent:   #FFB340;
-    --line:     #E8D8BE;
-    --success:  #19C37D;
-    --warn:     #FF8C00;
-    --error:    #E84040;
-    --r-card:   24px;
-    --r-btn:    16px;
-    --shadow:   0 2px 12px rgba(59,36,19,.07), 0 1px 3px rgba(59,36,19,.05);
-    --shadow-md:0 4px 24px rgba(59,36,19,.10), 0 1px 6px rgba(59,36,19,.06);
-    color-scheme: light;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    min-height: 100vh;
-  }
+/* ── Variables ───────────────────────────────────────────────── */
+:root {
+  --bg:        #111113;
+  --titlebar:  #191A1D;
+  --panel:     #1C1D20;
+  --panel-2:   #242528;
+  --card:      #2C2D31;
+  --border:    #35363C;
+  --border-2:  #464750;
+  --text:      #F0F0F2;
+  --text-2:    #C4C4CC;
+  --muted:     #8A8A96;
+  --muted-2:   #5A5A64;
+  --accent:    #FF9500;
+  --accent-dim:#3A2800;
+  --blue:      #4D9EFF;
+  --success:   #30D158;
+  --danger:    #FF453A;
+  --warning:   #FF9F0A;
+  --canvas-bg: #0C0C0E;
+}
+/* ── Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; }
+input[type=range] { cursor: pointer; }
 
-  /* ── HERO ───────────────────────────────────────────────────── */
-  .hero {
-    background: var(--primary);
-    padding: 52px 0 44px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse 80% 100% at 75% 50%, rgba(255,179,64,.13) 0%, transparent 65%);
-    pointer-events: none;
-  }
-  .hero::after {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px),
-      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.025) 40px);
-    pointer-events: none;
-  }
-  .hero-inner {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    position: relative; z-index: 1;
-  }
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: rgba(255,179,64,.14);
-    border: 1px solid rgba(255,179,64,.28);
-    color: var(--accent);
-    font-size: 12.5px;
-    font-weight: 700;
-    padding: 4px 13px;
-    border-radius: 20px;
-    letter-spacing: .04em;
-    margin-bottom: 14px;
-  }
-  .hero-title {
-    font-size: 2.1rem;
-    font-weight: 800;
-    color: #FFF8F0;
-    line-height: 1.22;
-    letter-spacing: -.025em;
-    margin-bottom: 12px;
-  }
-  .hero-desc {
-    color: rgba(255,248,240,.62);
-    font-size: .93rem;
-    line-height: 1.7;
-    max-width: 420px;
-  }
+/* ── App Shell ───────────────────────────────────────────────── */
+#app { display: flex; flex-direction: column; height: 100vh; }
 
-  /* DotPad Status Card */
-  .dp-card {
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.13);
-    border-radius: 20px;
-    padding: 22px 24px;
-    min-width: 220px;
-    max-width: 272px;
-    flex-shrink: 0;
-    backdrop-filter: blur(10px);
-  }
-  .dp-card-header {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-bottom: 6px;
-  }
-  .dp-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    transition: background .3s;
-    background: #666;
-  }
-  .dp-dot.off  { background: #888; }
-  .dp-dot.ing  { background: var(--accent); animation: blink 1.1s infinite; }
-  .dp-dot.on   { background: var(--success); }
-  .dp-dot.err  { background: var(--error); }
-  @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.55;transform:scale(.82)} }
-  .dp-card-title {
-    font-size: .88rem;
-    font-weight: 700;
-    color: rgba(255,248,240,.95);
-  }
-  .dp-card-sub {
-    font-size: .77rem;
-    color: rgba(255,248,240,.48);
-    line-height: 1.45;
-    padding-left: 18px;
-    margin-bottom: 12px;
-  }
-  .dp-device-chip {
-    display: none;
-    align-items: center;
-    gap: 5px;
-    background: rgba(25,195,125,.14);
-    border: 1px solid rgba(25,195,125,.28);
-    color: #74F0A8;
-    font-size: .75rem;
-    font-weight: 600;
-    padding: 4px 11px;
-    border-radius: 12px;
-    width: fit-content;
-  }
-  .dp-device-chip.show { display: flex; }
+/* ── Title Bar ───────────────────────────────────────────────── */
+.titlebar {
+  flex-shrink: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--titlebar);
+  border-bottom: 1px solid var(--border);
+  z-index: 20;
+}
+.tb-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+.tb-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.tb-name { color: var(--text); }
+.tb-ver {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--muted);
+  padding: 1px 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.tb-sep { flex: 1; }
+.tb-hint-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  max-width: 340px;
+  overflow: hidden;
+}
+.tb-hint-bar.warn { border-color: var(--warning); color: var(--warning); background: rgba(255,159,10,.08); }
+.tb-hint-bar.info { border-color: var(--blue); color: var(--blue); background: rgba(77,158,255,.08); }
+.tb-hint-bar.hidden { display: none; }
+.tb-conn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+.dp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dp-dot.off { background: var(--muted-2); }
+.dp-dot.on  { background: var(--success); box-shadow: 0 0 7px rgba(48,209,88,.7); }
+.dp-dot.ing { background: var(--warning); animation: blink .9s ease-in-out infinite; }
+.dp-dot.err { background: var(--danger); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+.dp-name-chip {
+  display: none;
+  font-size: 10px;
+  padding: 1px 6px;
+  background: rgba(48,209,88,.12);
+  border: 1px solid rgba(48,209,88,.2);
+  border-radius: 4px;
+  color: var(--success);
+}
+.dp-name-chip.show { display: inline-block; }
 
-  /* ── ACTION BAR ─────────────────────────────────────────────── */
-  .action-bar {
-    background: var(--card);
-    border-bottom: 1px solid var(--line);
-    padding: 14px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 12px rgba(59,36,19,.06);
-  }
-  .action-inner {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .action-left  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .action-right { position: relative; }
+/* ── Workspace ───────────────────────────────────────────────── */
+.workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
 
-  .btn-primary {
-    background: var(--primary);
-    color: #FFF8F0;
-    border: none;
-    border-radius: var(--r-btn);
-    padding: 10px 22px;
-    font-size: .9rem;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .15s, transform .15s, box-shadow .15s;
-    box-shadow: 0 2px 8px rgba(59,36,19,.24);
-  }
-  .btn-primary:hover { background: #4E3020; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(59,36,19,.3); }
-  .btn-primary:active { transform: none; }
-  .btn-primary:disabled { opacity: .4; cursor: default; transform: none; box-shadow: none; }
+/* ── Panels ──────────────────────────────────────────────────── */
+.panel {
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--panel);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.panel::-webkit-scrollbar { width: 4px; }
+.panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.panel-left  { width: 220px; border-right: 1px solid var(--border); }
+.panel-right { width: 264px; border-left: 1px solid var(--border); }
 
-  .btn-send {
-    background: #0B4829;
-    color: #6EF0A0;
-    border: 1.5px solid rgba(110,240,160,.22);
-    border-radius: var(--r-btn);
-    padding: 10px 22px;
-    font-size: .9rem;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .15s, transform .15s;
-    box-shadow: 0 2px 8px rgba(11,72,41,.25);
-  }
-  .btn-send:hover:not(:disabled) { background: #105A34; transform: translateY(-1px); }
-  .btn-send:disabled { opacity: .38; cursor: default; transform: none; }
+.p-section { border-bottom: 1px solid var(--border); }
+.p-section-hd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  background: var(--panel-2);
+}
+.p-section-hd:hover { color: var(--text-2); }
+.p-section-hd .chev { margin-left: auto; transition: transform .15s; }
+.p-section-hd.open .chev { transform: rotate(180deg); }
+.p-section-body { padding: 12px 12px; }
+.p-section-body.closed { display: none; }
 
-  /* Custom toggle */
-  .toggle-wrap {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 8px 14px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    cursor: pointer;
-    user-select: none;
-    transition: border-color .15s;
-  }
-  .toggle-wrap:hover { border-color: #C0A878; }
-  .toggle-wrap input { display: none; }
-  .toggle-track {
-    width: 36px; height: 20px;
-    background: #C8B8A0;
-    border-radius: 10px;
-    position: relative;
-    transition: background .2s;
-    flex-shrink: 0;
-  }
-  .toggle-track::after {
-    content: '';
-    position: absolute;
-    width: 16px; height: 16px;
-    background: #fff;
-    border-radius: 50%;
-    top: 2px; left: 2px;
-    transition: transform .2s;
-    box-shadow: 0 1px 4px rgba(0,0,0,.18);
-  }
-  .toggle-wrap input:checked ~ .toggle-track { background: var(--primary); }
-  .toggle-wrap input:checked ~ .toggle-track::after { transform: translateX(16px); }
-  .toggle-label { font-size: .84rem; font-weight: 600; color: var(--muted); }
+/* ── Upload Zone ─────────────────────────────────────────────── */
+.upload-zone {
+  border: 1.5px dashed var(--border-2);
+  border-radius: 8px;
+  padding: 18px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone:hover, .upload-zone.over {
+  border-color: var(--accent);
+  background: rgba(255,149,0,.05);
+}
+.upload-zone.has-img {
+  border-style: solid;
+  border-color: rgba(255,149,0,.5);
+  background: rgba(255,149,0,.04);
+}
+.upload-preview-thumb {
+  width: 100%;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 6px;
+  display: none;
+}
+.upload-zone.has-img .upload-preview-thumb { display: block; }
+.upload-zone.has-img .upload-icon { display: none; }
+.upload-icon { color: var(--muted-2); margin-bottom: 6px; }
+.upload-main-text { font-size: 11.5px; font-weight: 600; color: var(--text-2); }
+.upload-sub-text  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.upload-file-name {
+  font-size: 10px;
+  color: var(--accent);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: none;
+}
+.upload-zone.has-img .upload-file-name { display: block; }
 
-  .btn-ghost {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--line);
-    border-radius: var(--r-btn);
-    padding: 9px 15px;
-    font-size: .84rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .14s, border-color .14s;
-  }
-  .btn-ghost:hover { background: var(--bg); border-color: #C0A878; }
-  .btn-ghost svg { transition: transform .2s; }
-  .btn-ghost.open svg { transform: rotate(180deg); }
+.upload-actions { display: flex; gap: 6px; margin-top: 8px; }
 
-  .adv-menu {
-    display: none;
-    position: absolute;
-    right: 0; top: calc(100% + 8px);
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 7px;
-    box-shadow: var(--shadow-md);
-    min-width: 185px;
-    z-index: 300;
-  }
-  .adv-menu.open { display: block; }
-  .adv-menu button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    text-align: left;
-    background: transparent;
-    border: none;
-    border-radius: 10px;
-    padding: 9px 12px;
-    font-size: .84rem;
-    font-weight: 600;
-    color: var(--text);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .12s;
-  }
-  .adv-menu button:hover:not(:disabled) { background: var(--bg); }
-  .adv-menu button:disabled { opacity: .35; cursor: default; }
-  .adv-menu hr { border: none; border-top: 1px solid var(--line); margin: 5px 4px; }
+/* ── Recent files ────────────────────────────────────────────── */
+.recent-list { display: flex; flex-direction: column; gap: 3px; }
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text-2);
+}
+.recent-item:hover { background: var(--panel-2); }
+.recent-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  object-fit: contain;
+  background: var(--card);
+  flex-shrink: 0;
+}
+.recent-name { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.recent-empty { font-size: 11px; color: var(--muted); text-align: center; padding: 8px 0; }
 
-  /* ── HINT BAR ───────────────────────────────────────────────── */
-  .hint-bar { max-width: 1240px; margin: 20px auto 0; padding: 0 48px; }
-  .hint-inner {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-radius: 14px;
-    font-size: .86rem;
-    font-weight: 500;
-    color: #7A5820;
-    background: #FFF8E8;
-    border: 1px solid #F0D888;
-    transition: all .25s;
-  }
-  .hint-inner.warn { background: #FFF8E8; border-color: #F0D888; color: #7A5820; }
-  .hint-inner.info { background: #F0F8FF; border-color: #B0D4F0; color: #205880; }
-  .hint-inner.ok   { background: #F0FFF6; border-color: #A8E8C8; color: #1A6A40; }
+/* ── Preset List ─────────────────────────────────────────────── */
+.cat-tabs {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.cat-tab {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  transition: all .12s;
+}
+.cat-tab:hover { border-color: var(--border-2); color: var(--text-2); }
+.cat-tab.active { background: var(--accent); border-color: var(--accent); color: #111; }
 
-  /* ── PAGE BODY ──────────────────────────────────────────────── */
-  .page-body {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 32px 48px 56px;
-  }
-  .main-grid {
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-  .left-col { display: flex; flex-direction: column; gap: 20px; }
+.preset-list { display: flex; flex-direction: column; gap: 1px; max-height: 300px; overflow-y: auto; }
+.preset-list::-webkit-scrollbar { width: 3px; }
+.preset-list::-webkit-scrollbar-thumb { background: var(--border); }
+.preset-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.preset-item:hover { background: var(--panel-2); }
+.preset-item.active { background: rgba(255,149,0,.1); outline: 1px solid rgba(255,149,0,.25); }
+.preset-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: var(--canvas-bg);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.preset-labels { flex: 1; min-width: 0; }
+.preset-ko  { font-size: 11.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.preset-sub { font-size: 10px; color: var(--muted); }
+.preset-del {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 1;
+}
+.preset-item:hover .preset-del.show { display: block; }
+.preset-del:hover { background: rgba(255,69,58,.15); }
 
-  /* ── CARD ───────────────────────────────────────────────────── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--r-card);
-    padding: 28px 28px 24px;
-    box-shadow: var(--shadow);
-  }
-  .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 22px;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .card-header h2 {
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: -.01em;
-  }
-  .card-en {
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: .09em;
-    text-transform: uppercase;
-    background: var(--bg);
-    padding: 3px 10px;
-    border-radius: 8px;
-  }
+/* ── Load DTM/DTMS ───────────────────────────────────────────── */
+.load-btns { display: flex; gap: 6px; }
 
-  /* ── DROP ZONE ──────────────────────────────────────────────── */
-  .drop-zone {
-    border: 2px dashed var(--line);
-    border-radius: 16px;
-    padding: 32px 20px;
-    text-align: center;
-    cursor: pointer;
-    background: #FDFAF4;
-    transition: background .15s, border-color .15s, transform .15s;
-    margin-bottom: 22px;
-  }
-  .drop-zone:hover { background: #F8F0E4; border-color: #C0A068; }
-  .drop-zone.over  { background: #F0E4C8; border-color: #987040; border-style: solid; }
-  .drop-zone.has-img { border-color: var(--primary); background: #F5EFE6; }
-  .drop-icon { font-size: 1.8rem; margin-bottom: 9px; line-height: 1; }
-  .drop-text { font-size: .9rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-  .drop-hint { font-size: .77rem; color: var(--muted); }
+/* ── Canvas Area ─────────────────────────────────────────────── */
+.canvas-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--canvas-bg);
+}
+.canvas-toolbar {
+  flex-shrink: 0;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.tool-group + .tool-group { padding-left: 8px; margin-left: 8px; border-left: 1px solid var(--border); }
+.tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 5px;
+  font-size: 11px;
+  transition: all .12s;
+}
+.tool-btn:hover { background: var(--panel-2); color: var(--text-2); border-color: var(--border); }
+.tool-btn.active { background: rgba(255,149,0,.15); color: var(--accent); border-color: rgba(255,149,0,.3); }
+.zoom-level {
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 34px;
+  text-align: center;
+  font-weight: 600;
+}
+.tb-spacer { flex: 1; }
+.view-tabs { display: flex; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.view-tab {
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all .12s;
+}
+.view-tab + .view-tab { border-left: 1px solid var(--border); }
+.view-tab.active { background: var(--card); color: var(--text-2); }
 
-  /* ── PRESET SYSTEM ──────────────────────────────────────────── */
-  .divider-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .divider-line { flex: 1; height: 1px; background: var(--line); }
-  .divider-label {
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: .07em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
+.canvas-viewport {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.canvas-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: transform .12s;
+  transform-origin: center center;
+}
+.canvas-pane { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.canvas-pane-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.canvas-frame {
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--canvas-bg);
+  position: relative;
+}
+.canvas-frame canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.grid-overlay.show { opacity: 1; }
+.empty-canvas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--muted-2);
+  font-size: 11px;
+  text-align: center;
+  padding: 12px;
+}
+.empty-canvas svg { opacity: .4; }
+.empty-canvas.hidden { display: none; }
 
-  /* Category tabs */
-  .cat-tabs {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-  .cat-tab {
-    background: transparent;
-    border: 1.5px solid var(--line);
-    border-radius: 20px;
-    padding: 5px 13px;
-    font-size: .78rem;
-    font-weight: 700;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .12s, border-color .12s, color .12s;
-    white-space: nowrap;
-  }
-  .cat-tab:hover:not(.active) { background: #F0E8D4; border-color: #A88050; color: var(--text); }
-  .cat-tab.active { background: var(--primary); color: #FFF8F0; border-color: var(--primary); }
+.canvas-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+}
 
-  /* Preset grid */
-  .preset-grid { display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; }
-  .preset-btn {
-    background: #FDFAF4;
-    border: 1.5px solid var(--line);
-    color: var(--text);
-    border-radius: 20px;
-    padding: 5px 13px;
-    font-size: .82rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .12s, border-color .12s;
-    line-height: 1.45;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-  }
-  .preset-btn:hover { background: #F0E8D4; border-color: #A88050; }
-  .preset-btn.active { background: var(--primary); color: #FFF8F0; border-color: var(--primary); }
-  .preset-btn .sub {
-    font-size: .65rem;
-    opacity: .6;
-    font-weight: 500;
-    line-height: 1;
-    margin-top: 1px;
-  }
-  .preset-btn.active .sub { opacity: .72; }
-  /* Delete button on custom presets */
-  .preset-del {
-    position: absolute;
-    top: -5px; right: -5px;
-    width: 16px; height: 16px;
-    background: var(--error);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-size: 9px;
-    line-height: 16px;
-    text-align: center;
-    cursor: pointer;
-    padding: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-  }
-  .preset-btn:hover .preset-del { display: flex; }
+/* ── Right Panel Controls ────────────────────────────────────── */
+.ctrl-group { margin-bottom: 14px; }
+.ctrl-group:last-child { margin-bottom: 0; }
+.ctrl-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ctrl-row:last-child { margin-bottom: 0; }
+.ctrl-label { font-size: 11.5px; color: var(--text-2); flex: 1; }
+.ctrl-sublabel { font-size: 10.5px; color: var(--muted); }
+.ctrl-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 26px;
+  text-align: right;
+}
 
-  /* Custom preset add area */
-  .custom-section { margin-top: 12px; }
-  .add-preset-card {
-    border: 2px dashed var(--line);
-    border-radius: 14px;
-    padding: 16px;
-    background: #FDFAF4;
-    transition: border-color .15s, background .15s;
-  }
-  .add-preset-card:hover { border-color: #C0A068; }
-  .add-preset-trigger {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    font-size: .85rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 0;
-    width: 100%;
-  }
-  .add-preset-trigger:hover { color: var(--text); }
-  .add-icon {
-    width: 24px; height: 24px;
-    background: var(--line);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    line-height: 1;
-    flex-shrink: 0;
-    transition: background .12s;
-  }
-  .add-preset-trigger:hover .add-icon { background: #C8B89A; }
+/* Slider */
+.ctrl-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--panel-2);
+  border-radius: 2px;
+  outline: none;
+  border: none;
+  margin: 5px 0;
+}
+.ctrl-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid rgba(255,255,255,.18);
+  cursor: pointer;
+  transition: transform .1s;
+}
+.ctrl-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.ctrl-slider.blue::-webkit-slider-thumb { background: var(--blue); }
+.slider-row { display: flex; align-items: center; gap: 8px; }
+.slider-row .ctrl-slider { flex: 1; }
+.slider-minmax { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--muted-2); margin-top: -3px; }
 
-  /* Add form */
-  .add-form {
-    margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .add-drop {
-    border: 1.5px dashed var(--line);
-    border-radius: 10px;
-    padding: 16px;
-    text-align: center;
-    cursor: pointer;
-    background: #fff;
-    transition: background .14s, border-color .14s;
-    position: relative;
-  }
-  .add-drop:hover { background: #F8F0E4; border-color: #C0A068; }
-  .add-drop.over  { background: #F0E4C8; border-color: #987040; border-style: solid; }
-  .add-drop.has-img { border-color: var(--primary); }
-  .add-drop-text { font-size: .8rem; color: var(--muted); }
-  .add-drop canvas { display: block; margin: 0 auto 4px; border-radius: 6px; background: #1A120A; }
-  .add-row { display: flex; gap: 8px; align-items: center; }
-  .add-name-input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: .85rem;
-    color: var(--text);
-    background: #fff;
-    outline: none;
-  }
-  .add-name-input:focus { border-color: var(--primary); }
-  .add-th-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: .78rem;
-    color: var(--muted);
-  }
-  .add-th-row .slider { flex: 1; }
-  .add-th-val {
-    background: var(--primary);
-    color: #FFF8F0;
-    font-size: .72rem;
-    font-weight: 700;
-    padding: 2px 9px;
-    border-radius: 8px;
-    min-width: 34px;
-    text-align: center;
-  }
-  .btn-save {
-    background: var(--primary);
-    color: #FFF8F0;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 18px;
-    font-size: .84rem;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .14s;
-  }
-  .btn-save:hover { background: #4E3020; }
-  .btn-cancel {
-    background: transparent;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    padding: 8px 14px;
-    font-size: .84rem;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .14s;
-  }
-  .btn-cancel:hover { background: var(--bg); }
-  .empty-state {
-    text-align: center;
-    color: var(--muted);
-    font-size: .82rem;
-    padding: 12px 0 4px;
-  }
+/* Toggle */
+.toggle-wrap {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.toggle-input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  left: 2px; top: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left .15s;
+}
+.toggle-input:checked + .toggle-track::after { left: 16px; }
 
-  /* ── SLIDER ─────────────────────────────────────────────────── */
-  .slider-section { margin-bottom: 20px; }
-  .slider-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .slider-title { font-size: .88rem; font-weight: 600; }
-  .slider-badge {
-    background: var(--primary);
-    color: #FFF8F0;
-    font-size: .78rem;
-    font-weight: 700;
-    padding: 2px 11px;
-    border-radius: 10px;
-    min-width: 38px;
-    text-align: center;
-  }
-  .slider-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 7px;
-  }
-  .slider-end { font-size: .73rem; color: var(--muted); font-weight: 500; white-space: nowrap; }
-  .slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 4px;
-    background: var(--line);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-  }
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: var(--primary);
-    cursor: pointer;
-    box-shadow: 0 2px 7px rgba(59,36,19,.32);
-    transition: transform .15s, box-shadow .15s;
-  }
-  .slider::-webkit-slider-thumb:hover { transform: scale(1.15); box-shadow: 0 3px 12px rgba(59,36,19,.42); }
-  .slider-desc { font-size: .77rem; color: var(--muted); line-height: 1.55; }
+/* Quick Buttons */
+.quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; }
+.quick-btn {
+  padding: 5px 3px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  text-align: center;
+  transition: all .12s;
+}
+.quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+.quick-btn.active { background: var(--accent); border-color: var(--accent); color: #111; }
 
-  /* ── CHECKBOXES ─────────────────────────────────────────────── */
-  .opts-col { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .chk-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: .86rem;
-    color: var(--text);
-    cursor: pointer;
-    user-select: none;
-  }
-  .chk-label input { display: none; }
-  .chk-box {
-    width: 18px; height: 18px;
-    border: 2px solid var(--line);
-    border-radius: 6px;
-    background: #FDFAF4;
-    flex-shrink: 0;
-    position: relative;
-    transition: background .14s, border-color .14s;
-  }
-  .chk-label input:checked + .chk-box { background: var(--primary); border-color: var(--primary); }
-  .chk-label input:checked + .chk-box::after {
-    content: '';
-    position: absolute;
-    left: 3px; top: 0;
-    width: 5px; height: 9px;
-    border: 2px solid #fff;
-    border-top: none; border-left: none;
-    transform: rotate(45deg);
-  }
+/* Segment */
+.seg-ctrl {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.seg-btn {
+  flex: 1;
+  padding: 5px 6px;
+  border: none;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  transition: all .12s;
+}
+.seg-btn + .seg-btn { border-left: 1px solid var(--border); }
+.seg-btn:hover { color: var(--text-2); }
+.seg-btn.active { background: var(--accent); color: #111; }
 
-  /* ── FIELD ──────────────────────────────────────────────────── */
-  .field-lbl {
-    display: block;
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    margin-bottom: 7px;
-  }
-  .field-input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid var(--line);
-    border-radius: 12px;
-    font-family: ui-monospace, 'Cascadia Code', monospace;
-    font-size: .87rem;
-    color: var(--text);
-    background: #FDFAF4;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .field-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,36,19,.09); }
+/* Number Input */
+.num-input {
+  width: 52px;
+  padding: 4px 7px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-2);
+  font-size: 12px;
+  font-family: inherit;
+  text-align: center;
+}
+.num-input:focus { outline: none; border-color: var(--accent); }
 
-  /* ── PREVIEW CARD ───────────────────────────────────────────── */
-  .view-tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--bg);
-    border-radius: 12px;
-    padding: 3px;
-  }
-  .tab-btn {
-    background: transparent;
-    border: none;
-    border-radius: 9px;
-    padding: 6px 12px;
-    font-size: .77rem;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .14s, color .14s;
-    white-space: nowrap;
-  }
-  .tab-btn.active {
-    background: var(--card);
-    color: var(--text);
-    box-shadow: 0 1px 4px rgba(59,36,19,.1);
-  }
+/* Outline subgroup */
+.outline-sub {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.outline-sub.hidden { display: none; }
 
-  .preview-grid {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-  .canvas-wrap {}
-  .canvas-lbl {
-    font-size: .7rem;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .canvas-box {
-    background: #1A120A;
-    border-radius: 14px;
-    padding: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 3/2;
-    overflow: hidden;
-  }
-  .canvas-box.light { background: #F0EAE0; }
-  canvas { image-rendering: pixelated; display: block; max-width: 100%; height: auto; }
-  .canvas-arrow { color: var(--line); font-size: 1.3rem; text-align: center; }
+/* Mode select */
+.mode-select {
+  width: 100%;
+  padding: 5px 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: inherit;
+}
+.mode-select:focus { outline: none; border-color: var(--accent); }
 
-  /* ── STATUS BAR ─────────────────────────────────────────────── */
-  .status-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    overflow: hidden;
-    gap: 1px;
-    background: var(--line);
-  }
-  .stat-item {
-    background: var(--card);
-    padding: 12px 10px;
-    text-align: center;
-  }
-  .stat-lbl {
-    display: block;
-    font-size: .67rem;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-bottom: 3px;
-  }
-  .stat-val {
-    display: block;
-    font-size: .9rem;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .stat-val.muted  { color: var(--muted); font-weight: 500; font-size: .82rem; }
-  .stat-val.green  { color: var(--success); }
-  .stat-val.warn   { color: var(--warn); }
-  .stat-val.err    { color: var(--error); }
+/* Settings presets */
+.sp-grid { display: flex; flex-direction: column; gap: 3px; }
+.sp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--panel-2);
+  transition: all .12s;
+}
+.sp-item:hover { border-color: var(--border-2); background: var(--card); }
+.sp-item.active { border-color: var(--accent); background: rgba(255,149,0,.08); }
+.sp-name { font-size: 11.5px; font-weight: 600; }
+.sp-desc { font-size: 10px; color: var(--muted); }
+.sp-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.sp-item.active .sp-badge { background: var(--accent); color: #111; border-color: var(--accent); }
 
-  /* ── ACCORDION ──────────────────────────────────────────────── */
-  .accordion {
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    overflow: hidden;
-    margin-top: 16px;
-    background: var(--card);
-    box-shadow: var(--shadow);
-  }
-  .accordion-hd {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 22px;
-    background: transparent;
-    border: none;
-    font-family: inherit;
-    font-size: .86rem;
-    font-weight: 700;
-    color: var(--muted);
-    cursor: pointer;
-    text-align: left;
-    transition: background .14s;
-  }
-  .accordion-hd:hover { background: #FDFAF4; }
-  .accordion-hd svg { transition: transform .22s; flex-shrink: 0; }
-  .accordion-hd.open svg { transform: rotate(180deg); }
-  .accordion-body {
-    display: none;
-    padding: 0 22px 22px;
-    border-top: 1px solid var(--line);
-  }
-  .accordion-body.open { display: block; }
+/* Pin state display */
+.pin-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.pin-stat { text-align: center; }
+.pin-stat-val { font-size: 16px; font-weight: 700; color: var(--accent); }
+.pin-stat-lbl { font-size: 9.5px; color: var(--muted); margin-top: 1px; }
+.pin-divider { width: 1px; height: 32px; background: var(--border); }
 
-  .dev-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    padding-top: 18px;
-    margin-bottom: 12px;
-  }
-  .btn-outline {
-    background: transparent;
-    border: 1.5px solid var(--line);
-    border-radius: 12px;
-    padding: 8px 14px;
-    font-size: .82rem;
-    font-weight: 600;
-    color: var(--text);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .12s, border-color .12s;
-  }
-  .btn-outline:hover { background: var(--bg); border-color: #C0A878; }
-  .copy-ok { font-size: .82rem; font-weight: 700; color: var(--success); }
+/* ── Bottom Status Bar ───────────────────────────────────────── */
+.statusbar {
+  flex-shrink: 0;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--titlebar);
+  border-top: 1px solid var(--border);
+}
+.sb-conn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 14px;
+  margin-right: 4px;
+  border-right: 1px solid var(--border);
+}
+.sb-conn-name { font-size: 12px; color: var(--text-2); font-weight: 600; }
+.sb-conn-sub { font-size: 10px; color: var(--muted); }
+.sb-send-status {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.sb-send-status.green { background: rgba(48,209,88,.1); border-color: rgba(48,209,88,.2); color: var(--success); }
+.sb-send-status.err   { background: rgba(255,69,58,.1);  border-color: rgba(255,69,58,.2);  color: var(--danger); }
+.sb-save-group { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+.sb-flash {
+  font-size: 11px;
+  color: var(--success);
+  opacity: 0;
+  transition: opacity .2s;
+  white-space: nowrap;
+}
+.sb-flash.show { opacity: 1; }
 
-  .hex-out {
-    width: 100%;
-    height: 100px;
-    font-family: ui-monospace, 'Cascadia Code', monospace;
-    font-size: 11px;
-    border: 1.5px solid var(--line);
-    border-radius: 12px;
-    padding: 10px 12px;
-    background: #FDFAF4;
-    color: var(--text);
-    resize: vertical;
-    outline: none;
-  }
-  .hex-out:focus { border-color: var(--primary); }
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--border-2); color: var(--text); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #111; }
+.btn.primary:hover { background: #FFA820; }
+.btn.danger  { border-color: rgba(255,69,58,.4); color: var(--danger); }
+.btn.danger:hover { background: rgba(255,69,58,.1); }
+.btn.ghost   { background: transparent; }
+.btn.sm { padding: 5px 10px; font-size: 11px; border-radius: 5px; }
+.btn.icon { padding: 6px 7px; }
+.btn:disabled { opacity: .35; cursor: default; pointer-events: none; }
+.btn-ext {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: .04em;
+}
+.btn.dtm  .btn-ext { background: rgba(77,158,255,.2); color: #6ABAFF; }
+.btn.dtms .btn-ext { background: rgba(175,82,222,.2); color: #CF8EFF; }
 
-  .dp-log {
-    background: #0F0A04;
-    color: #B0A060;
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-family: ui-monospace, 'Cascadia Code', monospace;
-    font-size: 11px;
-    height: 130px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
-    margin-top: 18px;
-  }
+/* ── Log ─────────────────────────────────────────────────────── */
+.log-area {
+  font-family: "Fira Code", "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px;
+  height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.log-area::-webkit-scrollbar { width: 3px; }
+.log-area::-webkit-scrollbar-thumb { background: var(--border); }
 
-  /* ── RIGHT COLUMN ───────────────────────────────────────────── */
-  .right-col {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .right-col .accordion { margin-top: 0; }
+/* ── HEX Output ──────────────────────────────────────────────── */
+.hex-output {
+  font-family: "Fira Code", "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px;
+  height: 68px;
+  overflow-y: auto;
+  resize: none;
+  word-break: break-all;
+  width: 100%;
+}
 
-  /* ── SAVE ROW ───────────────────────────────────────────────── */
-  .save-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--line);
-    flex-wrap: wrap;
-  }
-  .save-row-label {
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    margin-right: 2px;
-  }
-  .btn-save-preset {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--primary);
-    color: #FFF8F0;
-    border: none;
-    border-radius: 12px;
-    padding: 8px 15px;
-    font-size: .82rem;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .14s, transform .12s, opacity .14s;
-    box-shadow: 0 2px 6px rgba(59,36,19,.22);
-  }
-  .btn-save-preset:hover:not(:disabled) { background: #4E3020; transform: translateY(-1px); }
-  .btn-save-preset:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
+/* ── Save preset inline form ────────────────────────────────────*/
+.save-form {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.save-form.show { display: flex; }
+.save-form input {
+  flex: 1;
+  padding: 5px 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 11.5px;
+  font-family: inherit;
+}
+.save-form input:focus { outline: none; border-color: var(--accent); }
 
-  .btn-dl {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: transparent;
-    border: 1.5px solid var(--line);
-    border-radius: 12px;
-    padding: 7px 14px;
-    font-size: .82rem;
-    font-weight: 700;
-    color: var(--text);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .12s, border-color .12s, opacity .14s;
-  }
-  .btn-dl:hover:not(:disabled) { background: var(--bg); border-color: #C0A878; }
-  .btn-dl:disabled { opacity: .35; cursor: default; }
-  .btn-dl .dl-ext {
-    font-size: .68rem;
-    font-weight: 800;
-    padding: 1px 5px;
-    border-radius: 4px;
-    letter-spacing: .04em;
-  }
-  .btn-dl.dtm  .dl-ext { background: #E8F4FF; color: #2060A8; }
-  .btn-dl.dtms .dl-ext { background: #F0EBF8; color: #6030A0; }
-
-  /* Inline preset-name form */
-  .preset-save-form {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px 14px;
-    background: var(--bg);
-    border-radius: 12px;
-    border: 1px solid var(--line);
-    flex-wrap: wrap;
-  }
-  .preset-save-form.show { display: flex; }
-  .psf-label { font-size: .78rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
-  .psf-input {
-    flex: 1;
-    min-width: 140px;
-    padding: 7px 12px;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: .86rem;
-    color: var(--text);
-    background: var(--card);
-    outline: none;
-    transition: border-color .14s;
-  }
-  .psf-input:focus { border-color: var(--primary); }
-  .psf-ok {
-    background: var(--primary);
-    color: #FFF8F0;
-    border: none;
-    border-radius: 10px;
-    padding: 7px 16px;
-    font-size: .84rem;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    white-space: nowrap;
-    transition: background .14s;
-  }
-  .psf-ok:hover { background: #4E3020; }
-  .psf-cancel {
-    background: transparent;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    padding: 6px 12px;
-    font-size: .82rem;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .12s;
-  }
-  .psf-cancel:hover { background: var(--line); }
-  .save-flash {
-    font-size: .8rem;
-    font-weight: 700;
-    color: var(--success);
-    margin-left: 4px;
-    opacity: 0;
-    transition: opacity .25s;
-  }
-  .save-flash.show { opacity: 1; }
-
-  /* ── COMPACT CONVERT STRIP ───────────────────────────────────── */
-  /*
-   * 변환 설정을 미리보기 바로 위에 배치 — 슬라이더를 움직이는 손과
-   * 결과를 확인하는 눈이 같은 영역에 머물도록 의도한 배치.
-   */
-  .convert-strip {
-    padding: 18px 24px 16px;
-    border-top: 3px solid var(--accent);
-    position: relative;
-  }
-  .cstrip-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 9px;
-  }
-  .cstrip-title {
-    font-size: .86rem;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .cstrip-title::before {
-    content: '';
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .cstrip-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  /* Make the main threshold slider more prominent */
-  .cstrip-range {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 6px;
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
-    background: var(--line);
-  }
-  .cstrip-range::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    background: var(--primary);
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(59,36,19,.35);
-    transition: transform .15s, box-shadow .15s;
-    border: 2.5px solid rgba(255,255,255,.6);
-  }
-  .cstrip-range::-webkit-slider-thumb:hover {
-    transform: scale(1.18);
-    box-shadow: 0 4px 14px rgba(59,36,19,.45);
-  }
-  .cstrip-badge {
-    background: var(--primary);
-    color: #FFF8F0;
-    font-size: .82rem;
-    font-weight: 700;
-    padding: 3px 12px;
-    border-radius: 10px;
-    min-width: 44px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-  .cstrip-opts {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-  .cstrip-name {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 160px;
-  }
-  .cstrip-name .field-lbl { margin-bottom: 0; white-space: nowrap; }
-  .cstrip-input {
-    flex: 1;
-    padding: 7px 12px;
-    border: 1.5px solid var(--line);
-    border-radius: 10px;
-    font-family: ui-monospace, 'Cascadia Code', monospace;
-    font-size: .84rem;
-    color: var(--text);
-    background: #FDFAF4;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-    min-width: 0;
-  }
-  .cstrip-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,36,19,.09); }
-  .cstrip-hint {
-    font-size: .72rem;
-    color: var(--muted);
-    margin-top: 5px;
-    line-height: 1.4;
-  }
-
-  /* ── RESPONSIVE ─────────────────────────────────────────────── */
-  @media (max-width: 960px) {
-    .hero-inner { flex-direction: column; align-items: flex-start; }
-    .dp-card { max-width: none; width: 100%; }
-    .main-grid { grid-template-columns: 1fr; }
-    .page-body, .hero-inner, .action-inner, .hint-bar { padding-left: 20px; padding-right: 20px; }
-    .hero-title { font-size: 1.6rem; }
-    .status-bar { grid-template-columns: repeat(2,1fr); }
-    .preview-grid { grid-template-columns: 1fr; }
-    .canvas-arrow { transform: rotate(90deg); margin: 0 auto; }
-  }
-  @media (max-width: 580px) {
-    .hero { padding: 36px 0 30px; }
-    .btn-primary, .btn-send { padding: 9px 16px; font-size: .85rem; }
-    .action-left { gap: 8px; }
-  }
+/* ── Scrollbar global ────────────────────────────────────────── */
+.panel *::-webkit-scrollbar { width: 3px; }
+.panel *::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 <body>
+<div id="app">
 
-<!-- ────────────────────────────────────────────────────────────── -->
-<!--  HERO                                                         -->
-<!-- ────────────────────────────────────────────────────────────── -->
-<header class="hero">
-  <div class="hero-inner">
-    <div>
-      <div class="hero-badge">🦴 Dot Fossil Studio</div>
-      <h1 class="hero-title">이미지를 DotPad<br>촉각그래픽으로</h1>
-      <p class="hero-desc">이미지를 업로드하거나 공룡을 선택하면,<br>DotPad로 바로 전송할 수 있는 촉각그래픽으로 변환됩니다.</p>
-    </div>
-    <div class="dp-card">
-      <div class="dp-card-header">
-        <div class="dp-dot off" id="dpDot"></div>
-        <div class="dp-card-title" id="dpCardTitle">DotPad 미연결</div>
-      </div>
-      <div class="dp-card-sub" id="dpCardSub">연결하면 바로 전송할 수 있어요</div>
-      <div class="dp-device-chip" id="dpDeviceChip">
-        <span>📡</span>
-        <span id="dpDevName"></span>
-      </div>
-    </div>
+<!-- ── Title Bar ─────────────────────────────────────────────── -->
+<header class="titlebar">
+  <div class="tb-brand">
+    <div class="tb-icon">🦴</div>
+    <span class="tb-name">Dot Fossil Studio</span>
+    <span class="tb-ver">v2.0</span>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-hint-bar hidden" id="hintBar">
+    <span id="hintEmoji"></span>
+    <span id="hintText"></span>
+  </div>
+  <div style="width:12px"></div>
+  <div class="tb-conn">
+    <span class="dp-dot off" id="dpDot"></span>
+    <span id="dpLabel">DotPad 미연결</span>
+    <span class="dp-name-chip" id="dpChip"><span id="dpDevName"></span></span>
   </div>
 </header>
 
-<!-- ────────────────────────────────────────────────────────────── -->
-<!--  ACTION BAR                                                   -->
-<!-- ────────────────────────────────────────────────────────────── -->
-<div class="action-bar">
-  <div class="action-inner">
-    <div class="action-left">
-      <button class="btn-primary" id="btnConn">DotPad 연결하기</button>
-      <button class="btn-send" id="btnSend" disabled>📤 DotPad로 보내기</button>
-      <label class="toggle-wrap">
-        <input type="checkbox" id="autoSend" checked>
-        <span class="toggle-track"></span>
-        <span class="toggle-label">자동 전송</span>
-      </label>
-    </div>
-    <div class="action-right">
-      <button class="btn-ghost" id="btnAdvTrigger">
-        고급 옵션
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="adv-menu" id="advMenu">
-        <button id="btnDisc" disabled>🔌 연결 해제</button>
-        <hr>
-        <button id="btnUp" disabled>⬆️ 전체 핀 올리기</button>
-        <button id="btnDn" disabled>⬇️ 전체 핀 내리기</button>
+<!-- ── Workspace ─────────────────────────────────────────────── -->
+<div class="workspace">
+
+  <!-- ── Left Panel ──────────────────────────────────────────── -->
+  <aside class="panel panel-left">
+
+    <!-- File Upload -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-upload">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="10" height="10" rx="2" fill="currentColor" opacity=".4"/></svg>
+        이미지 파일
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
       </div>
+      <div class="p-section-body" id="body-upload">
+        <div class="upload-zone" id="drop">
+          <img class="upload-preview-thumb" id="uploadThumb" src="" alt=""/>
+          <div class="upload-icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <path d="M14 19V9M14 9L10 13M14 9L18 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M5 21h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="upload-main-text">이미지를 놓거나 클릭</div>
+          <div class="upload-sub-text">PNG · JPG · SVG · GIF</div>
+          <div class="upload-file-name" id="uploadFileName"></div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none"/>
+        <div class="upload-actions" style="margin-top:8px">
+          <button class="btn sm ghost" style="flex:1" id="btnLoadDtm">
+            <span class="btn-ext dtm" style="background:rgba(77,158,255,.2);color:#6ABAFF">DTM</span> 불러오기
+          </button>
+          <button class="btn sm ghost" style="flex:1" id="btnLoadDtms">
+            <span class="btn-ext dtms" style="background:rgba(175,82,222,.2);color:#CF8EFF">DTMS</span> 불러오기
+          </button>
+        </div>
+        <input type="file" id="dtmInput"  accept=".dtm,.txt" style="display:none"/>
+        <input type="file" id="dtmsInput" accept=".dtms,.json" style="display:none"/>
+      </div>
+    </div>
+
+    <!-- Recent Files -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-recent">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M5 3v2.5L6.5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        최근 파일
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-recent">
+        <div class="recent-list" id="recentList">
+          <div class="recent-empty">최근 파일 없음</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Presets -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-presets">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="3.5" height="3.5" rx="1" fill="currentColor"/><rect x="5.5" y="1" width="3.5" height="3.5" rx="1" fill="currentColor" opacity=".5"/><rect x="1" y="5.5" width="3.5" height="3.5" rx="1" fill="currentColor" opacity=".5"/><rect x="5.5" y="5.5" width="3.5" height="3.5" rx="1" fill="currentColor"/></svg>
+        이미지 프리셋
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-presets">
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="preset-list" id="presetList"></div>
+      </div>
+    </div>
+
+  </aside><!-- /panel-left -->
+
+  <!-- ── Center Canvas ───────────────────────────────────────── -->
+  <main class="canvas-area">
+
+    <!-- Toolbar -->
+    <div class="canvas-toolbar">
+      <div class="tool-group">
+        <button class="tool-btn" id="btnZoomOut" title="축소">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 6h4M10 10l1.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <span class="zoom-level" id="zoomLevel">100%</span>
+        <button class="tool-btn" id="btnZoomIn" title="확대">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M6 4v4M4 6h4M10 10l1.5 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tool-btn" id="btnZoomFit" title="화면에 맞추기">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 4.5V2h2.5M9 2h2.5v2.5M11.5 8.5V11H9M4 11H1.5v-2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="tool-group">
+        <button class="tool-btn" id="btnGrid" title="그리드 표시">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 5h11M1 9h11M5 1v11M9 1v11" stroke="currentColor" stroke-width=".9" opacity=".7"/></svg>
+        </button>
+      </div>
+      <div class="tb-spacer"></div>
+      <div class="view-tabs">
+        <button class="view-tab active" data-mode="dots">점 보기</button>
+        <button class="view-tab" data-mode="dotpad">DotPad 느낌</button>
+        <button class="view-tab" data-mode="split">나란히 보기</button>
+      </div>
+    </div>
+
+    <!-- Viewport -->
+    <div class="canvas-viewport" id="viewport">
+      <div class="canvas-stage" id="canvasStage">
+        <!-- Original pane (shown in split mode) -->
+        <div class="canvas-pane" id="origPane" style="display:none">
+          <div class="canvas-pane-label">원본 이미지</div>
+          <div class="canvas-frame">
+            <canvas id="src" width="60" height="40" style="width:240px;height:160px;image-rendering:pixelated"></canvas>
+          </div>
+        </div>
+        <div class="canvas-divider" id="splitDivider" style="display:none"></div>
+        <!-- Tactile pane -->
+        <div class="canvas-pane" id="tactilePane">
+          <div class="canvas-pane-label">촉각 그래픽 미리보기 · <span id="cellCount">0</span> / 2400 핀</div>
+          <div class="canvas-frame" style="position:relative">
+            <canvas id="dots" width="540" height="360"></canvas>
+            <canvas id="gridCanvas" width="540" height="360" class="grid-overlay" style="position:absolute;inset:0;pointer-events:none"></canvas>
+            <div class="empty-canvas" id="emptyCanvas">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="2" y="2" width="36" height="36" rx="6" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="16" r="2" fill="currentColor"/><circle cx="20" cy="16" r="2" fill="currentColor"/><circle cx="27" cy="16" r="2" fill="currentColor"/><circle cx="13" cy="24" r="2" fill="currentColor"/><circle cx="20" cy="24" r="2" fill="currentColor"/><circle cx="27" cy="24" r="2" fill="currentColor"/></svg>
+              <span>이미지를 업로드하거나<br/>프리셋을 선택하세요</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- /canvas-area -->
+
+  <!-- ── Right Panel ─────────────────────────────────────────── -->
+  <aside class="panel panel-right">
+
+    <!-- 변환 -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-convert">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M3 5h4M5 3v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        변환 설정
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-convert">
+        <!-- Quick threshold presets -->
+        <div class="quick-grid">
+          <button class="quick-btn" data-th="80">Soft</button>
+          <button class="quick-btn active" data-th="128">Balanced</button>
+          <button class="quick-btn" data-th="180">Sharp</button>
+          <button class="quick-btn" data-th="220">Hi-Con</button>
+        </div>
+        <!-- Threshold slider -->
+        <div class="ctrl-row">
+          <span class="ctrl-label">임계값</span>
+          <span class="ctrl-value" id="thVal">128</span>
+        </div>
+        <div class="slider-row">
+          <span class="ctrl-sublabel">연하게</span>
+          <input type="range" class="ctrl-slider" id="th" min="0" max="255" value="128">
+          <span class="ctrl-sublabel">진하게</span>
+        </div>
+        <div class="slider-minmax"><span>0</span><span>255</span></div>
+        <!-- Controls -->
+        <div class="ctrl-group" style="margin-top:12px">
+          <div class="ctrl-row">
+            <span class="ctrl-label">반전 (밝은 부분을 점으로)</span>
+            <label class="toggle-wrap"><input type="checkbox" class="toggle-input" id="inv"><span class="toggle-track"></span></label>
+          </div>
+          <div class="ctrl-row">
+            <span class="ctrl-label">비율 유지 (Fit to Grid)</span>
+            <label class="toggle-wrap"><input type="checkbox" class="toggle-input" id="fit" checked><span class="toggle-track"></span></label>
+          </div>
+        </div>
+        <!-- Pattern name -->
+        <div class="ctrl-row" style="margin-top:4px">
+          <span class="ctrl-label">패턴 이름</span>
+          <input type="text" id="fid" value="tactile" style="width:110px;padding:4px 7px;background:var(--panel-2);border:1px solid var(--border);border-radius:5px;color:var(--text-2);font-size:11.5px;font-family:inherit;"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 외곽선 -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-outline">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1.5" y="1.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>
+        외곽선
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-outline">
+        <div class="ctrl-row">
+          <span class="ctrl-label">외곽선 사용</span>
+          <label class="toggle-wrap"><input type="checkbox" class="toggle-input" id="outlineOn"><span class="toggle-track"></span></label>
+        </div>
+        <div class="outline-sub hidden" id="outlineSub">
+          <!-- Line weight -->
+          <div class="ctrl-row" style="margin-bottom:6px">
+            <span class="ctrl-label">외곽선 두께</span>
+          </div>
+          <div class="seg-ctrl">
+            <button class="seg-btn active" data-lines="1">1줄 (섬세)</button>
+            <button class="seg-btn" data-lines="2">2줄 (강조)</button>
+          </div>
+          <!-- Strength -->
+          <div class="ctrl-row" style="margin-top:10px">
+            <span class="ctrl-label">감지 강도</span>
+            <span class="ctrl-value" id="outlineStrVal">1.0</span>
+          </div>
+          <input type="range" class="ctrl-slider blue" id="outlineStr" min="30" max="300" value="100">
+          <!-- Mode -->
+          <div class="ctrl-row" style="margin-top:6px">
+            <span class="ctrl-label">출력 방식</span>
+          </div>
+          <select class="mode-select" id="outlineMode">
+            <option value="overlay">형태 + 외곽선 (Overlay)</option>
+            <option value="outline">외곽선만 (Outline Only)</option>
+            <option value="detail">디테일 중심</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 처리 -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-process">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.3"/><circle cx="5" cy="5" r="1.5" fill="currentColor"/></svg>
+        처리 옵션
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-process">
+        <div class="ctrl-row">
+          <span class="ctrl-label">노이즈 제거</span>
+          <span class="ctrl-value" id="noiseVal">0</span>
+        </div>
+        <input type="range" class="ctrl-slider" id="noise" min="0" max="3" value="0" step="1">
+        <div class="slider-minmax"><span>없음</span><span>강함</span></div>
+        <div class="ctrl-row" style="margin-top:10px">
+          <span class="ctrl-label">단순화</span>
+          <span class="ctrl-value" id="simpVal">0</span>
+        </div>
+        <input type="range" class="ctrl-slider" id="simp" min="0" max="3" value="0" step="1">
+        <div class="slider-minmax"><span>없음</span><span>강함</span></div>
+      </div>
+    </div>
+
+    <!-- 출력 -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-output">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v6M2 5l3 3 3-3M1.5 9h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        DotPad 출력
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-output">
+        <div class="ctrl-row">
+          <span class="ctrl-label">실시간 자동 전송</span>
+          <label class="toggle-wrap"><input type="checkbox" class="toggle-input" id="autoSend" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="pin-display" style="margin-top:10px">
+          <div class="pin-stat">
+            <div class="pin-stat-val" id="pinCount">—</div>
+            <div class="pin-stat-lbl">올라온 핀</div>
+          </div>
+          <div class="pin-divider"></div>
+          <div class="pin-stat">
+            <div class="pin-stat-val" style="color:var(--muted)">2400</div>
+            <div class="pin-stat-lbl">전체 핀</div>
+          </div>
+          <div class="pin-divider"></div>
+          <div class="pin-stat">
+            <div class="pin-stat-val" id="pinPct" style="color:var(--blue)">—</div>
+            <div class="pin-stat-lbl">점유율</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button class="btn sm" style="flex:1" id="btnUp">↑ 전체 올리기</button>
+          <button class="btn sm" style="flex:1" id="btnDn">↓ 전체 내리기</button>
+        </div>
+        <button class="btn sm" style="width:100%;margin-top:6px;justify-content:center" id="btnSend">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M8 3.5l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          DotPad로 전송
+        </button>
+      </div>
+    </div>
+
+    <!-- 설정 프리셋 -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-spresets">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3h8M1 7h8M3 1v8M7 1v8" stroke="currentColor" stroke-width="1.1" opacity=".6"/><rect x="2.5" y="2.5" width="5" height="5" fill="currentColor" opacity=".2"/></svg>
+        설정 프리셋
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-spresets">
+        <div class="sp-grid" id="spGrid"></div>
+      </div>
+    </div>
+
+    <!-- 저장 & 내보내기 -->
+    <div class="p-section">
+      <div class="p-section-hd open" id="hd-save">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1.5" y="1.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3.5 6.5v-4h3v4M3.5 6.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        저장 & 내보내기
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body" id="body-save">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn sm primary" style="justify-content:center" id="btnSavePreset" disabled>⭐ 프리셋으로 저장</button>
+          <button class="btn sm dtm" style="justify-content:center" id="btnDlDtm" disabled>
+            <span class="btn-ext">DTM</span> 파일 저장
+          </button>
+          <button class="btn sm dtms" style="justify-content:center" id="btnDlDtms" disabled>
+            <span class="btn-ext">DTMS</span> 파일 저장
+          </button>
+        </div>
+        <div class="save-form" id="saveForm">
+          <input type="text" id="saveFormName" placeholder="프리셋 이름" maxlength="24"/>
+          <button class="btn sm primary" id="saveFormOk">저장</button>
+          <button class="btn sm ghost" id="saveFormCancel">취소</button>
+        </div>
+        <!-- HEX + Copy -->
+        <div style="margin-top:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+            <span style="font-size:10.5px;color:var(--muted)">HEX 출력</span>
+            <div style="display:flex;gap:5px">
+              <button class="btn sm ghost" id="copyHex">HEX 복사</button>
+              <button class="btn sm ghost" id="copyLine">코드 복사</button>
+            </div>
+          </div>
+          <textarea class="hex-output" id="hexOut" readonly placeholder="변환 완료 시 600자 HEX 표시"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 전송 로그 -->
+    <div class="p-section">
+      <div class="p-section-hd" id="hd-log">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 3h7M1.5 5h5M1.5 7h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        전송 로그
+        <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <div class="p-section-body closed" id="body-log">
+        <div class="log-area" id="logEl"></div>
+        <button class="btn sm ghost" style="width:100%;margin-top:6px;justify-content:center" id="btnClearLog">로그 지우기</button>
+      </div>
+    </div>
+
+  </aside><!-- /panel-right -->
+
+</div><!-- /workspace -->
+
+<!-- ── Bottom Status Bar ──────────────────────────────────────── -->
+<footer class="statusbar">
+  <div class="sb-conn-group">
+    <div>
+      <div class="sb-conn-name" id="sbConnName">DotPad 미연결</div>
+      <div class="sb-conn-sub" id="sbConnSub">Chrome/Edge + HTTPS 필요</div>
     </div>
   </div>
-</div>
-
-<!-- ────────────────────────────────────────────────────────────── -->
-<!--  SMART HINT BAR                                               -->
-<!-- ────────────────────────────────────────────────────────────── -->
-<div class="hint-bar" id="hintBarWrap" style="display:none; margin-top:20px">
-  <div class="hint-inner warn" id="hintInner">
-    <span id="hintEmoji">💡</span>
-    <span id="hintText"></span>
+  <button class="btn sm primary" id="btnConn">연결하기</button>
+  <button class="btn sm danger" id="btnDisc" disabled>연결 해제</button>
+  <span class="sb-send-status" id="sbSendStatus">대기 중</span>
+  <div class="sb-save-group">
+    <span class="sb-flash" id="sbFlash"></span>
+    <button class="btn sm dtm" id="sbDlDtm" disabled><span class="btn-ext">DTM</span></button>
+    <button class="btn sm dtms" id="sbDlDtms" disabled><span class="btn-ext">DTMS</span></button>
   </div>
-</div>
+</footer>
 
-<!-- ────────────────────────────────────────────────────────────── -->
-<!--  PAGE BODY                                                    -->
-<!-- ────────────────────────────────────────────────────────────── -->
-<div class="page-body">
-  <div class="main-grid">
-
-    <!-- LEFT: Source + Convert -->
-    <div class="left-col">
-
-      <!-- Source Card -->
-      <div class="card">
-        <div class="card-header">
-          <h2>소스 이미지</h2>
-          <span class="card-en">Source</span>
-        </div>
-
-        <div class="drop-zone" id="drop">
-          <div class="drop-icon">📂</div>
-          <div class="drop-text">이미지를 여기에 놓으면 바로 변환됩니다</div>
-          <div class="drop-hint">PNG, JPG, SVG 권장 · 검은 부분이 올라온 점이 됩니다</div>
-        </div>
-        <input id="file" type="file" accept="image/*" hidden/>
-
-        <div class="divider-row">
-          <div class="divider-line"></div>
-          <span class="divider-label">프리셋</span>
-          <div class="divider-line"></div>
-        </div>
-
-        <!-- Category tabs -->
-        <div class="cat-tabs" id="catTabs">
-          <button class="cat-tab active" data-cat="all">전체</button>
-          <button class="cat-tab" data-cat="dinosaurs">🦕 공룡</button>
-          <button class="cat-tab" data-cat="fossils">🦴 화석</button>
-          <button class="cat-tab" data-cat="tools">🔧 도구</button>
-          <button class="cat-tab" data-cat="characters">🧑‍🔬 탐험가</button>
-          <button class="cat-tab" data-cat="custom">⭐ 내 프리셋</button>
-        </div>
-
-        <!-- Preset grid -->
-        <div class="preset-grid" id="presetGrid"></div>
-
-        <!-- Custom preset add section (visible only in custom tab) -->
-        <div class="custom-section" id="customSection" style="display:none">
-          <div class="add-preset-card">
-            <button class="add-preset-trigger" id="addTrigger">
-              <span class="add-icon">+</span>
-              <span>이미지를 프리셋으로 저장하기</span>
-            </button>
-            <div class="add-form" id="addForm" style="display:none">
-              <div class="add-drop" id="addDrop">
-                <canvas id="addPreview" width="90" height="60" style="display:none;width:90px;height:60px"></canvas>
-                <div class="add-drop-text" id="addDropText">이미지를 클릭하거나 드래그해서 선택</div>
-              </div>
-              <input id="addFile" type="file" accept="image/*" hidden/>
-              <div class="add-row">
-                <input id="addName" class="add-name-input" type="text" placeholder="프리셋 이름 (예: 나비, 하트…)" maxlength="20"/>
-              </div>
-              <div class="add-th-row">
-                <span>진하기</span>
-                <input id="addTh" type="range" min="0" max="255" value="128" class="slider">
-                <span class="add-th-val" id="addThVal">128</span>
-              </div>
-              <div class="add-row">
-                <button class="btn-save" id="saveCustomBtn">저장</button>
-                <button class="btn-cancel" id="cancelAddBtn">취소</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- RIGHT: Convert Strip + Preview + Accordions -->
-    <div class="right-col">
-
-      <!-- ── Compact Convert Strip ── -->
-      <div class="card convert-strip">
-        <div class="cstrip-head">
-          <span class="cstrip-title">점으로 변환할 진하기</span>
-          <span class="cstrip-badge" id="thv">128</span>
-        </div>
-        <div class="cstrip-row">
-          <span class="slider-end">부드럽게</span>
-          <input id="th" type="range" min="0" max="255" value="128" class="cstrip-range">
-          <span class="slider-end">또렷하게</span>
-        </div>
-        <div class="cstrip-opts">
-          <label class="chk-label">
-            <input id="inv" type="checkbox">
-            <span class="chk-box"></span>
-            밝은 부분을 점으로
-          </label>
-          <label class="chk-label">
-            <input id="fit" type="checkbox" checked>
-            <span class="chk-box"></span>
-            비율 유지
-          </label>
-          <div class="cstrip-name">
-            <label class="field-lbl" for="fid">패턴 이름</label>
-            <input id="fid" type="text" placeholder="skull, tyrannosaurusRex…" value="skull" class="cstrip-input">
-          </div>
-        </div>
-        <div class="cstrip-hint">낮을수록 점이 많아지고, 높을수록 핵심 형태만 남습니다.</div>
-      </div>
-
-      <!-- Preview Card -->
-      <div class="card">
-        <div class="card-header">
-          <h2>미리보기</h2>
-          <div class="view-tabs">
-            <button class="tab-btn active" data-mode="dots">점 보기</button>
-            <button class="tab-btn" data-mode="dotpad">DotPad 느낌</button>
-          </div>
-        </div>
-
-        <div class="preview-grid">
-          <div class="canvas-wrap">
-            <div class="canvas-lbl">원본 60×40</div>
-            <div class="canvas-box light">
-              <canvas id="src" width="60" height="40" style="width:100%;height:auto"></canvas>
-            </div>
-          </div>
-          <div class="canvas-arrow">→</div>
-          <div class="canvas-wrap">
-            <div class="canvas-lbl">촉각 미리보기</div>
-            <div class="canvas-box" id="dotsCont">
-              <canvas id="dots" width="300" height="200" style="width:100%;height:auto"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="status-bar">
-          <div class="stat-item">
-            <span class="stat-lbl">올라온 점</span>
-            <span class="stat-val muted" id="pinCount">—</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-lbl">규격</span>
-            <span class="stat-val">60×40</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-lbl">HEX</span>
-            <span class="stat-val muted" id="hexStatus">대기 중</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-lbl">전송</span>
-            <span class="stat-val muted" id="sendStatus">—</span>
-          </div>
-        </div>
-
-        <!-- Save & Export row -->
-        <div class="save-row">
-          <span class="save-row-label">저장</span>
-          <button class="btn-save-preset" id="btnSavePreset" disabled>
-            ⭐ 프리셋으로 저장
-          </button>
-          <button class="btn-dl dtm" id="btnDlDtm" disabled>
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 1v7M3.5 6l3 3 3-3M2 11h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="dl-ext">DTM</span>
-          </button>
-          <button class="btn-dl dtms" id="btnDlDtms" disabled>
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 1v7M3.5 6l3 3 3-3M2 11h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="dl-ext">DTMS</span>
-          </button>
-          <span class="save-flash" id="saveFlash"></span>
-        </div>
-
-        <!-- Inline preset name form -->
-        <div class="preset-save-form" id="presetSaveForm">
-          <span class="psf-label">프리셋 이름</span>
-          <input class="psf-input" id="psfName" type="text" placeholder="이름을 입력하세요" maxlength="24"/>
-          <button class="psf-ok" id="psfOk">저장</button>
-          <button class="psf-cancel" id="psfCancel">취소</button>
-        </div>
-      </div>
-
-      <!-- Developer Options -->
-      <div class="accordion">
-        <button class="accordion-hd" id="devHd">
-          <span>개발자 옵션</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3 5L7 9L11 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <div class="accordion-body" id="devBody">
-          <div class="dev-row">
-            <button class="btn-outline" id="copyLine">📋 TypeScript 코드 복사</button>
-            <button class="btn-outline" id="copyHex">HEX 복사</button>
-            <span class="copy-ok" id="status"></span>
-          </div>
-          <textarea id="out" readonly placeholder="변환이 완료되면 600자 HEX가 표시됩니다" class="hex-out"></textarea>
-        </div>
-      </div>
-
-      <!-- Transmission Log -->
-      <div class="accordion">
-        <button class="accordion-hd" id="logHd">
-          <span>전송 로그 보기</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3 5L7 9L11 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <div class="accordion-body" id="logBody">
-          <div id="dpLog" class="dp-log">— 로그가 여기에 표시됩니다 —&#10;</div>
-        </div>
-      </div>
-
-    </div><!-- /right -->
-  </div><!-- /main-grid -->
-</div><!-- /page-body -->
+</div><!-- /#app -->
 
 <script type="module">
 import { DotPadSDK, DotPadScanner } from './DotPadSDK-3_0_0.js';
 
 // ── Constants ────────────────────────────────────────────────────
 const DOT_COLS = 60, DOT_ROWS = 40;
-const DOTS_W = 300, DOTS_H = 200;
+const DISP_W = 540, DISP_H = 360;
 const BIT_ORDER = [
   {x:0,y:0,bit:0},{x:0,y:1,bit:1},{x:0,y:2,bit:2},{x:0,y:3,bit:3},
   {x:1,y:0,bit:4},{x:1,y:1,bit:5},{x:1,y:2,bit:6},{x:1,y:3,bit:7},
 ];
+const STORAGE_IMG   = 'dfs_customPresets_v2';
+const STORAGE_RECENT = 'dfs_recentFiles_v1';
 
 const $ = id => document.getElementById(id);
-let img = null, currentHex = '', viewMode = 'dots';
 
-const srcCv  = $('src'),  srcCtx  = srcCv.getContext('2d', {willReadFrequently:true});
-const dotsCv = $('dots'), dotsCtx = dotsCv.getContext('2d');
+// ── State ────────────────────────────────────────────────────────
+let img = null, currentHex = '', viewMode = 'dots';
+let activeCat = 'all', activeImgPresetId = null;
+let zoom = 1.0;
+let gridVisible = false;
+let renderTimer = null, autoSendTimer = null;
+
+// ── Canvas setup ─────────────────────────────────────────────────
+const srcCv   = $('src');
+const srcCtx  = srcCv.getContext('2d', { willReadFrequently: true });
+const dotsCv  = $('dots');
+const dotsCtx = dotsCv.getContext('2d');
+const gridCv  = $('gridCanvas');
+const gridCtx = gridCv.getContext('2d');
 
 // ── DotPad SDK ───────────────────────────────────────────────────
 const sdk = new DotPadSDK();
 let dotDevice = null, connected = false;
 
 function log(msg) {
-  const el = $('dpLog');
+  const el = $('logEl');
   el.textContent += `[${new Date().toLocaleTimeString('ko-KR')}] ${msg}\n`;
   el.scrollTop = el.scrollHeight;
 }
 
-function setStatus(mode, label, sub, deviceName) {
-  const dot   = $('dpDot');
-  const title = $('dpCardTitle');
-  const s     = $('dpCardSub');
-  const chip  = $('dpDeviceChip');
-  dot.className   = 'dp-dot ' + mode;
-  title.textContent = label;
-  if (sub)  s.textContent = sub;
-  if (deviceName) {
-    $('dpDevName').textContent = deviceName;
-    chip.classList.add('show');
-  } else {
-    chip.classList.remove('show');
-  }
+function setDpStatus(mode, name, sub) {
+  $('dpDot').className = 'dp-dot ' + mode;
+  $('dpLabel').textContent = name;
+  $('sbConnName').textContent = name;
+  if (sub) $('sbConnSub').textContent = sub;
 }
 
 function uiConnected(devName) {
   connected = true;
-  setStatus('on', 'DotPad 연결됨', '전송 준비 완료', devName);
+  const name = devName || 'DotPad';
+  setDpStatus('on', name + ' 연결됨', '전송 준비 완료');
+  if (devName) {
+    $('dpDevName').textContent = devName;
+    $('dpChip').classList.add('show');
+  }
   $('btnConn').disabled = true;
   ['btnDisc','btnSend','btnUp','btnDn'].forEach(id => $(id).disabled = false);
-  updateSendStatus('준비됨', 'green');
+  setSendStatus('준비됨', 'green');
 }
 
 function uiDisconnected() {
   dotDevice = null; connected = false;
-  setStatus('off', 'DotPad 미연결', '연결하면 바로 전송할 수 있어요', null);
+  setDpStatus('off', 'DotPad 미연결', 'Chrome/Edge + HTTPS 필요');
+  $('dpChip').classList.remove('show');
   $('btnConn').disabled = false;
   ['btnDisc','btnSend','btnUp','btnDn'].forEach(id => $(id).disabled = true);
-  updateSendStatus('—', 'muted');
+  setSendStatus('미연결', '');
 }
 
 sdk.setCallBack((dev, code, data) => {
@@ -1489,296 +1229,591 @@ sdk.setCallBack((dev, code, data) => {
     uiDisconnected(); log('🔌 연결 해제됨.');
   } else if (code === 'DeviceName' && data) {
     $('dpDevName').textContent = data;
-    $('dpDeviceChip').classList.add('show');
+    $('dpChip').classList.add('show');
     log(`📟 기기명: ${data}`);
   }
 }, (_dev, key) => { log(`🎮 키: ${key}`); });
 
 $('btnConn').onclick = async () => {
   if (!('bluetooth' in navigator) || !window.isSecureContext) {
-    setStatus('err', '지원 안 됨', 'Chrome/Edge + HTTPS 또는 localhost 필요', null);
-    log('❌ Web Bluetooth 불가 — Chrome/Edge + HTTPS(또는 localhost) 필요.'); return;
+    setDpStatus('err', 'Web Bluetooth 지원 안 됨', 'Chrome/Edge + HTTPS 또는 localhost 필요');
+    log('❌ Web Bluetooth 불가 — Chrome/Edge + HTTPS 또는 localhost 필요'); return;
   }
-  setStatus('ing', '연결 중…', '장치를 선택해주세요', null);
+  setDpStatus('ing', '연결 중…', '장치를 선택해주세요');
   $('btnConn').disabled = true;
-  log('🔍 BLE 스캔 중 (DotPad*)…');
+  log('🔍 BLE 스캔 중…');
   try {
     const ble = await new DotPadScanner().startBleScan();
     if (!ble) { uiDisconnected(); log('⚠️ 취소됨.'); return; }
     log(`📡 연결 시도: ${ble.name ?? '(이름 없음)'}`);
     const dev = await sdk.connectBleDevice(ble);
-    if (!dev) { uiDisconnected(); log('❌ SDK connectBleDevice 실패.'); }
+    if (!dev) { uiDisconnected(); log('❌ SDK 연결 실패.'); }
   } catch(e) { uiDisconnected(); log(`❌ ${e.message ?? e}`); }
 };
 
 $('btnDisc').onclick = () => {
-  sdk.disconnect(dotDevice ?? undefined); uiDisconnected(); log('🔌 사용자가 연결 해제.');
+  sdk.disconnect(dotDevice ?? undefined); uiDisconnected(); log('🔌 연결 해제됨.');
 };
 
-function countPins(hex) {
-  let n = 0;
-  for (let i = 0; i < hex.length; i += 2)
-    for (let p = 0, b = parseInt(hex.slice(i,i+2),16); p < 8; p++) if((b>>p)&1) n++;
-  return n;
-}
-
-function updateSendStatus(val, cls) {
-  const el = $('sendStatus');
-  el.textContent = val;
-  el.className = 'stat-val ' + cls;
+function setSendStatus(label, cls) {
+  const el = $('sbSendStatus');
+  el.textContent = label;
+  el.className = 'sb-send-status' + (cls ? ' ' + cls : '');
 }
 
 function sendHex(hex, label) {
   if (!connected || !hex) return;
-  sdk.displayGraphicData(hex, dotDevice ?? undefined);
-  log(label);
-  updateSendStatus('전송 완료', 'green');
-  setTimeout(() => { if (connected) updateSendStatus('준비됨', 'green'); }, 2500);
-}
-
-$('btnSend').onclick = () => sendHex(currentHex, `📤 수동 전송 · ${countPins(currentHex)}개 점 돌출`);
-$('btnUp').onclick   = () => sendHex('FF'.repeat(300), '📤 전체 올림 (FF×300)');
-$('btnDn').onclick   = () => sendHex('00'.repeat(300), '📤 전체 내림 (00×300)');
-
-// ── Canvas rendering ─────────────────────────────────────────────
-function renderGrid(grid) {
-  const cw = DOTS_W / DOT_COLS;
-  const ch = DOTS_H / DOT_ROWS;
-
-  if (viewMode === 'dots') {
-    dotsCtx.fillStyle = '#160f08';
-    dotsCtx.fillRect(0, 0, DOTS_W, DOTS_H);
-    for (let y = 0; y < DOT_ROWS; y++) {
-      for (let x = 0; x < DOT_COLS; x++) {
-        dotsCtx.beginPath();
-        dotsCtx.arc(x*cw + cw/2, y*ch + ch/2, Math.min(cw,ch)*0.42, 0, Math.PI*2);
-        dotsCtx.fillStyle = grid[y][x] ? '#f0e0a0' : '#3a2c18';
-        dotsCtx.fill();
-      }
-    }
-  } else {
-    // DotPad 느낌 — 3D raised pins
-    dotsCtx.fillStyle = '#1A1008';
-    dotsCtx.fillRect(0, 0, DOTS_W, DOTS_H);
-    for (let y = 0; y < DOT_ROWS; y++) {
-      for (let x = 0; x < DOT_COLS; x++) {
-        const cx = x*cw + cw/2;
-        const cy = y*ch + ch/2;
-        const r  = Math.min(cw, ch) * 0.40;
-        if (grid[y][x]) {
-          // Drop shadow
-          dotsCtx.beginPath();
-          dotsCtx.arc(cx + 0.5, cy + 0.7, r * 0.95, 0, Math.PI*2);
-          dotsCtx.fillStyle = 'rgba(0,0,0,0.38)';
-          dotsCtx.fill();
-          // Pin body (radial gradient → 3D sphere)
-          const g = dotsCtx.createRadialGradient(cx - r*.26, cy - r*.3, r*.04, cx, cy, r);
-          g.addColorStop(0,   '#FFFBF2');
-          g.addColorStop(0.3, '#F0D068');
-          g.addColorStop(1,   '#9A7228');
-          dotsCtx.beginPath();
-          dotsCtx.arc(cx, cy, r, 0, Math.PI*2);
-          dotsCtx.fillStyle = g;
-          dotsCtx.fill();
-          // Specular highlight
-          dotsCtx.beginPath();
-          dotsCtx.arc(cx - r*.26, cy - r*.30, r*.20, 0, Math.PI*2);
-          dotsCtx.fillStyle = 'rgba(255,255,255,0.48)';
-          dotsCtx.fill();
-        } else {
-          // Recessed socket
-          dotsCtx.beginPath();
-          dotsCtx.arc(cx, cy, r * .62, 0, Math.PI*2);
-          dotsCtx.fillStyle = '#0F0804';
-          dotsCtx.fill();
-        }
-      }
-    }
+  try {
+    sdk.displayGraphicData(hex, dotDevice ?? undefined);
+    setSendStatus('전송됨', 'green');
+    if (label) log(label);
+    clearTimeout(sendHex._resetTimer);
+    sendHex._resetTimer = setTimeout(() => { if (connected) setSendStatus('준비됨', 'green'); }, 2500);
+  } catch(e) {
+    setSendStatus('전송 실패', 'err');
+    log(`❌ 전송 오류: ${e.message ?? e}`);
   }
 }
 
-// ── Main render pipeline ─────────────────────────────────────────
-function render() {
-  if (!img) return;
-  const th  = +$('th').value;
-  const inv = $('inv').checked;
-  const fit = $('fit').checked;
-  $('thv').textContent = th;
+function scheduleAutoSend() {
+  clearTimeout(autoSendTimer);
+  if (!connected || !$('autoSend').checked || !currentHex) return;
+  autoSendTimer = setTimeout(() => {
+    if (currentHex) sendHex(currentHex, `🔄 자동 전송 · ${countPins(currentHex)}핀`);
+  }, 180);
+}
 
-  // Draw source to 60×40 canvas
+function countPins(hex) {
+  let n = 0;
+  for (let i = 0; i < hex.length; i += 2)
+    for (let p = 0; p < 8; p++) if ((parseInt(hex.slice(i,i+2),16) >> p) & 1) n++;
+  return n;
+}
+
+$('btnSend').onclick = () => sendHex(currentHex, `📤 수동 전송 · ${countPins(currentHex)}핀`);
+$('btnUp').onclick   = () => sendHex('FF'.repeat(300), '📤 전체 올리기');
+$('btnDn').onclick   = () => sendHex('00'.repeat(300), '📤 전체 내리기');
+
+// ── Image Processing ─────────────────────────────────────────────
+function getGrayCell(data, x, y) {
+  const i = (y * DOT_COLS + x) * 4;
+  return 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+}
+
+function buildGrayGrid(data) {
+  const g = new Float32Array(DOT_COLS * DOT_ROWS);
+  for (let y = 0; y < DOT_ROWS; y++)
+    for (let x = 0; x < DOT_COLS; x++)
+      g[y * DOT_COLS + x] = getGrayCell(data, x, y);
+  return g;
+}
+
+function gaussianBlur(gray, passes) {
+  if (passes <= 0) return gray;
+  let arr = new Float32Array(gray);
+  const w = DOT_COLS, h = DOT_ROWS;
+  const k = [0.0625, 0.25, 0.375, 0.25, 0.0625];
+  for (let p = 0; p < passes; p++) {
+    const tmp = new Float32Array(w * h);
+    // Horizontal
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let s = 0;
+      for (let d = -2; d <= 2; d++) s += arr[y*w + Math.max(0,Math.min(w-1,x+d))] * k[d+2];
+      tmp[y*w+x] = s;
+    }
+    // Vertical
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let s = 0;
+      for (let d = -2; d <= 2; d++) s += tmp[Math.max(0,Math.min(h-1,y+d))*w+x] * k[d+2];
+      arr[y*w+x] = s;
+    }
+  }
+  return arr;
+}
+
+function sobelEdges(gray) {
+  const w = DOT_COLS, h = DOT_ROWS;
+  const edges = new Float32Array(w * h);
+  const Kx = [-1,0,1,-2,0,2,-1,0,1];
+  const Ky = [-1,-2,-1,0,0,0,1,2,1];
+  for (let y = 1; y < h-1; y++) for (let x = 1; x < w-1; x++) {
+    let gx = 0, gy = 0;
+    for (let ky = -1; ky <= 1; ky++) for (let kx = -1; kx <= 1; kx++) {
+      const v = gray[(y+ky)*w + (x+kx)];
+      gx += v * Kx[(ky+1)*3 + (kx+1)];
+      gy += v * Ky[(ky+1)*3 + (kx+1)];
+    }
+    edges[y*w+x] = Math.sqrt(gx*gx + gy*gy);
+  }
+  return edges;
+}
+
+function dilate(binary, radius) {
+  const w = DOT_COLS, h = DOT_ROWS;
+  const result = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!binary[y*w+x]) continue;
+    for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+      const ny = Math.max(0,Math.min(h-1,y+dy)), nx = Math.max(0,Math.min(w-1,x+dx));
+      result[ny*w+nx] = 1;
+    }
+  }
+  return result;
+}
+
+function erode(binary, radius) {
+  const w = DOT_COLS, h = DOT_ROWS;
+  const result = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    let ok = true;
+    outer: for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+      const ny = y+dy, nx = x+dx;
+      if (ny < 0||ny >= h||nx < 0||nx >= w||!binary[ny*w+nx]) { ok=false; break outer; }
+    }
+    result[y*w+x] = ok ? 1 : 0;
+  }
+  return result;
+}
+
+// ── Main Render Pipeline ─────────────────────────────────────────
+function scheduleRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(doRender, 30);
+}
+
+function doRender() {
+  if (!img) return;
+
+  const th        = +$('th').value;
+  const inv       = $('inv').checked;
+  const fit       = $('fit').checked;
+  const noisePass = +$('noise').value;
+  const simpPass  = +$('simp').value;
+  const outlineOn = $('outlineOn').checked;
+  const outlineLines = parseInt(document.querySelector('.seg-btn.active[data-lines]')?.dataset.lines || '1');
+  const outlineStr   = +$('outlineStr').value / 100;
+  const outlineMode  = $('outlineMode').value;
+
+  // Draw source image to 60×40 canvas
   srcCtx.fillStyle = '#fff';
   srcCtx.fillRect(0, 0, DOT_COLS, DOT_ROWS);
   let dw = DOT_COLS, dh = DOT_ROWS, dx = 0, dy = 0;
   if (fit) {
-    const s = Math.min(DOT_COLS/img.width, DOT_ROWS/img.height);
-    dw = img.width*s; dh = img.height*s;
-    dx = (DOT_COLS-dw)/2; dy = (DOT_ROWS-dh)/2;
+    const s = Math.min(DOT_COLS / img.width, DOT_ROWS / img.height);
+    dw = img.width * s; dh = img.height * s;
+    dx = (DOT_COLS - dw) / 2; dy = (DOT_ROWS - dh) / 2;
   }
   srcCtx.drawImage(img, dx, dy, dw, dh);
 
-  const data = srcCtx.getImageData(0, 0, DOT_COLS, DOT_ROWS).data;
-  const raised = (cx, cy) => {
-    const i = (cy*DOT_COLS + cx)*4;
-    const lum = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
-    const dark = data[i+3] > 40 && lum < th;
-    return inv ? !dark : dark;
-  };
+  const pxData = srcCtx.getImageData(0, 0, DOT_COLS, DOT_ROWS).data;
 
+  // Build gray grid
+  let gray = buildGrayGrid(pxData);
+
+  // Noise reduction via Gaussian blur
+  if (noisePass > 0) gray = gaussianBlur(gray, noisePass);
+
+  // Threshold → binary
+  let binary = new Uint8Array(DOT_COLS * DOT_ROWS);
+  for (let i = 0; i < binary.length; i++) {
+    const dark = pxData[i*4+3] > 40 && gray[i] < th;
+    binary[i] = (inv ? !dark : dark) ? 1 : 0;
+  }
+
+  // Outline / edge detection
+  if (outlineOn) {
+    const edges = sobelEdges(gray);
+    // Normalize edges: find max
+    let maxEdge = 1;
+    for (let i = 0; i < edges.length; i++) if (edges[i] > maxEdge) maxEdge = edges[i];
+    const edgeThreshold = maxEdge * (1.0 - Math.min(0.95, outlineStr));
+    let edgeBinary = new Uint8Array(DOT_COLS * DOT_ROWS);
+    for (let i = 0; i < edges.length; i++) edgeBinary[i] = edges[i] > edgeThreshold ? 1 : 0;
+    if (outlineLines === 2) edgeBinary = dilate(edgeBinary, 1);
+
+    if (outlineMode === 'overlay') {
+      for (let i = 0; i < binary.length; i++) binary[i] = binary[i] | edgeBinary[i];
+    } else if (outlineMode === 'outline') {
+      binary = edgeBinary;
+    } else if (outlineMode === 'detail') {
+      // Edges take priority; fill only where not already edge
+      for (let i = 0; i < binary.length; i++) binary[i] = edgeBinary[i] ? 1 : binary[i];
+    }
+  }
+
+  // Simplification via morphological closing (dilate then erode)
+  if (simpPass > 0) {
+    const dilated = dilate(binary, simpPass);
+    binary = erode(dilated, simpPass);
+  }
+
+  // Build grid and encode
   let n = 0;
   const grid = [];
   for (let y = 0; y < DOT_ROWS; y++) {
     grid[y] = [];
-    for (let x = 0; x < DOT_COLS; x++) { const r = raised(x,y); grid[y][x] = r; if(r) n++; }
+    for (let x = 0; x < DOT_COLS; x++) {
+      const on = binary[y * DOT_COLS + x] === 1;
+      grid[y][x] = on;
+      if (on) n++;
+    }
   }
 
-  // Encode to HEX (column-major, same as game)
   const bytes = [];
   for (let cy = 0; cy < 10; cy++) for (let cx = 0; cx < 30; cx++) {
     let b = 0;
-    for (const {x,y,bit} of BIT_ORDER) if (grid[cy*4+y]?.[cx*2+x]) b |= 1<<bit;
+    for (const {x, y, bit} of BIT_ORDER)
+      if (grid[cy*4+y]?.[cx*2+x]) b |= 1 << bit;
     bytes.push(b);
   }
   const hex = bytes.map(b => b.toString(16).padStart(2,'0').toUpperCase()).join('');
   currentHex = hex;
 
-  // Update UI
-  $('out').value = hex;
-  updatePinCount(n);
-  updateHexStatus(hex.length === 600);
+  // Update UI elements
+  $('hexOut').value = hex;
+  updatePinDisplay(n);
   updateSaveButtons();
-  renderGrid(grid);
-
-  // Smart hints
   updateHints(n, inv);
-
-  // Auto-send
-  if (connected && $('autoSend').checked && hex.length === 600)
-    sendHex(hex, `🔄 자동 전송 · ${n}개 점 돌출`);
+  renderTactileGrid(grid, viewMode);
+  scheduleAutoSend();
 }
 
-function updatePinCount(n) {
-  const el = $('pinCount');
-  el.textContent = n.toLocaleString();
-  el.className = 'stat-val';
-  if (n > 1800) el.classList.add('warn');
-  else if (n > 0) el.classList.add('green');
+function updatePinDisplay(n) {
+  $('pinCount').textContent = n.toLocaleString();
+  $('pinPct').textContent = Math.round(n / 2400 * 100) + '%';
+  // Also update canvas label
+  const label = document.querySelector('#tactilePane .canvas-pane-label');
+  if (label) label.innerHTML = `촉각 그래픽 미리보기 · <span id="cellCount">${n.toLocaleString()}</span> / 2400 핀`;
 }
 
-function updateHexStatus(ok) {
-  const el = $('hexStatus');
-  if (ok) { el.textContent = '생성 완료'; el.className = 'stat-val green'; }
-  else    { el.textContent = '오류'; el.className = 'stat-val err'; }
+// ── Tactile Grid Renderer ────────────────────────────────────────
+function renderTactileGrid(grid, mode) {
+  $('emptyCanvas').classList.add('hidden');
+  const cw = DISP_W / DOT_COLS;  // 9
+  const ch = DISP_H / DOT_ROWS;  // 9
+
+  if (mode === 'dots' || mode === 'split') {
+    dotsCtx.fillStyle = '#13120E';
+    dotsCtx.fillRect(0, 0, DISP_W, DISP_H);
+    for (let y = 0; y < DOT_ROWS; y++) {
+      for (let x = 0; x < DOT_COLS; x++) {
+        const cx = x * cw + cw / 2;
+        const cy = y * ch + ch / 2;
+        const r  = Math.min(cw, ch) * 0.40;
+        dotsCtx.beginPath();
+        dotsCtx.arc(cx, cy, r, 0, Math.PI * 2);
+        dotsCtx.fillStyle = grid[y][x] ? '#F5E878' : '#2E2A1E';
+        dotsCtx.fill();
+      }
+    }
+  } else if (mode === 'dotpad') {
+    dotsCtx.fillStyle = '#181410';
+    dotsCtx.fillRect(0, 0, DISP_W, DISP_H);
+    for (let y = 0; y < DOT_ROWS; y++) {
+      for (let x = 0; x < DOT_COLS; x++) {
+        const cx = x * cw + cw / 2;
+        const cy = y * ch + ch / 2;
+        const r  = Math.min(cw, ch) * 0.38;
+        if (grid[y][x]) {
+          // Shadow
+          dotsCtx.beginPath();
+          dotsCtx.arc(cx + 0.5, cy + 0.7, r * 0.95, 0, Math.PI * 2);
+          dotsCtx.fillStyle = 'rgba(0,0,0,0.4)';
+          dotsCtx.fill();
+          // Body
+          const g = dotsCtx.createRadialGradient(cx - r*.3, cy - r*.3, r*.05, cx, cy, r);
+          g.addColorStop(0,   '#FFFDF2');
+          g.addColorStop(0.3, '#F0D050');
+          g.addColorStop(1,   '#9A6E20');
+          dotsCtx.beginPath();
+          dotsCtx.arc(cx, cy, r, 0, Math.PI * 2);
+          dotsCtx.fillStyle = g;
+          dotsCtx.fill();
+          // Specular
+          dotsCtx.beginPath();
+          dotsCtx.arc(cx - r*.28, cy - r*.32, r*.18, 0, Math.PI * 2);
+          dotsCtx.fillStyle = 'rgba(255,255,255,0.5)';
+          dotsCtx.fill();
+        } else {
+          dotsCtx.beginPath();
+          dotsCtx.arc(cx, cy, r * .55, 0, Math.PI * 2);
+          dotsCtx.fillStyle = '#0E0C08';
+          dotsCtx.fill();
+        }
+      }
+    }
+  }
+
+  // Grid overlay
+  if (gridVisible) drawGridOverlay();
 }
 
-function updateHints(n, inv) {
-  const wrap = $('hintBarWrap');
-  const inner = $('hintInner');
-  const emoji = $('hintEmoji');
-  const text  = $('hintText');
+function renderFromHexDirect(hex) {
+  if (hex.length !== 600) return;
+  currentHex = hex;
+  $('hexOut').value = hex;
+  const grid = [];
+  for (let y = 0; y < DOT_ROWS; y++) { grid[y] = []; for (let x = 0; x < DOT_COLS; x++) grid[y][x] = false; }
+  for (let cy = 0; cy < 10; cy++) for (let cx = 0; cx < 30; cx++) {
+    const b = parseInt(hex.slice((cy*30+cx)*2, (cy*30+cx)*2+2), 16);
+    for (const {x, y, bit} of BIT_ORDER) if ((b >> bit) & 1) grid[cy*4+y][cx*2+x] = true;
+  }
+  let n = 0;
+  for (let y = 0; y < DOT_ROWS; y++) for (let x = 0; x < DOT_COLS; x++) if (grid[y][x]) n++;
+  updatePinDisplay(n);
+  updateSaveButtons();
+  updateHints(n, false);
+  renderTactileGrid(grid, viewMode);
+  scheduleAutoSend();
+}
 
-  if (n > 1800) {
-    wrap.style.display = 'block';
-    inner.className = 'hint-inner warn';
-    emoji.textContent = '⚠️';
-    text.textContent = '점이 너무 많아요. 진하기 값을 높여보세요.';
-  } else if (n > 0 && n < 60) {
-    wrap.style.display = 'block';
-    inner.className = 'hint-inner warn';
-    emoji.textContent = '💡';
-    text.textContent = inv
-      ? '형태가 흐려요. 반전을 꺼보세요.'
-      : '형태가 흐려요. 진하기 값을 낮춰보세요.';
-  } else if (n >= 60 && n < 150) {
-    wrap.style.display = 'block';
-    inner.className = 'hint-inner info';
-    emoji.textContent = '💡';
-    text.textContent = '선이 얇아요. 원본 이미지를 더 굵게 조정해보세요.';
-  } else {
-    wrap.style.display = 'none';
+function drawGridOverlay() {
+  const cw = DISP_W / DOT_COLS, ch = DISP_H / DOT_ROWS;
+  gridCtx.clearRect(0, 0, DISP_W, DISP_H);
+  gridCtx.strokeStyle = 'rgba(255,149,0,0.18)';
+  gridCtx.lineWidth = 0.5;
+  for (let x = 0; x <= DOT_COLS; x++) {
+    gridCtx.beginPath(); gridCtx.moveTo(x*cw, 0); gridCtx.lineTo(x*cw, DISP_H); gridCtx.stroke();
+  }
+  for (let y = 0; y <= DOT_ROWS; y++) {
+    gridCtx.beginPath(); gridCtx.moveTo(0, y*ch); gridCtx.lineTo(DISP_W, y*ch); gridCtx.stroke();
+  }
+  // Cell borders (2×4 cells)
+  gridCtx.strokeStyle = 'rgba(255,149,0,0.35)';
+  gridCtx.lineWidth = 0.8;
+  for (let x = 0; x <= 30; x++) {
+    gridCtx.beginPath(); gridCtx.moveTo(x*cw*2, 0); gridCtx.lineTo(x*cw*2, DISP_H); gridCtx.stroke();
+  }
+  for (let y = 0; y <= 10; y++) {
+    gridCtx.beginPath(); gridCtx.moveTo(0, y*ch*4); gridCtx.lineTo(DISP_W, y*ch*4); gridCtx.stroke();
   }
 }
 
-// ── File loading ─────────────────────────────────────────────────
-function loadFile(f) {
+// ── File Loading ─────────────────────────────────────────────────
+function loadImageFile(f) {
   if (!f || !f.type.startsWith('image/')) return;
   const url = URL.createObjectURL(f);
   const im  = new Image();
-  im.onload = () => { img = im; render(); URL.revokeObjectURL(url); };
+  im.onload = () => {
+    img = im;
+    $('uploadThumb').src = url;
+    $('drop').classList.add('has-img');
+    $('uploadFileName').textContent = f.name;
+    const m = f.name.match(/([a-zA-Z가-힣]+)/);
+    if (m) $('fid').value = m[1].toLowerCase().replace(/[^a-z0-9]/g, '');
+    clearImgPresetActive();
+    saveToRecent({ name: f.name, url });
+    scheduleRender();
+  };
   im.src = url;
-  const m = f.name.match(/(?:fossil[-_])?([a-zA-Z]+)/);
-  if (m) $('fid').value = m[1].toLowerCase();
-  // Clear dino selection
-  document.querySelectorAll('.dino-btn').forEach(b => b.classList.remove('active'));
-  $('drop').classList.add('has-img');
-  $('drop').querySelector('.drop-text').textContent = f.name;
 }
 
-const drop = $('drop');
-drop.onclick = () => $('file').click();
-$('file').onchange = e => loadFile(e.target.files[0]);
-['dragover','dragenter'].forEach(ev =>
-  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-['dragleave','drop'].forEach(ev =>
-  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
-['th','inv','fit'].forEach(id => $(id).addEventListener('input', render));
-
-// ── Copy ─────────────────────────────────────────────────────────
-function flash(msg) {
-  const s = $('status');
-  s.textContent = msg;
-  setTimeout(() => s.textContent = '', 1600);
+function loadImageUrl(url, name) {
+  const im = new Image();
+  im.crossOrigin = 'anonymous';
+  im.onload = () => {
+    img = im;
+    $('uploadThumb').src = url;
+    $('drop').classList.add('has-img');
+    $('uploadFileName').textContent = name || url.split('/').pop();
+    scheduleRender();
+  };
+  im.onerror = () => log(`⚠️ 이미지 로드 실패: ${url}`);
+  im.src = url;
 }
-$('copyHex').onclick  = () => { if(!currentHex) return; navigator.clipboard.writeText(currentHex); flash('✓ HEX 복사됨'); };
-$('copyLine').onclick = () => {
-  if (!currentHex) return;
-  navigator.clipboard.writeText(`  ${($('fid').value||'fossil').trim()}: '${currentHex}',`);
-  flash('✓ 코드 줄 복사됨');
+
+// ── DTM / DTMS Load ───────────────────────────────────────────────
+$('btnLoadDtm').onclick = () => $('dtmInput').click();
+$('btnLoadDtms').onclick = () => $('dtmsInput').click();
+
+$('dtmInput').onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const hex = ev.target.result.trim().toUpperCase();
+    if (/^[0-9A-F]{600}$/.test(hex)) {
+      img = null;
+      $('fid').value = f.name.replace(/\.dtm$/i,'');
+      $('drop').classList.remove('has-img');
+      renderFromHexDirect(hex);
+      log(`📂 DTM 로드: ${f.name}`);
+    } else {
+      log(`❌ DTM 파일 오류: 600자 HEX가 아닙니다 (${hex.length}자)`);
+    }
+  };
+  reader.readAsText(f);
+  e.target.value = '';
 };
 
-// ── View mode tabs ───────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    viewMode = btn.dataset.mode;
-    if (img) render();
-  });
-});
+$('dtmsInput').onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const json = JSON.parse(ev.target.result);
+      const hex = json.items?.[0]?.graphic?.data;
+      if (hex && /^[0-9A-F]{600}$/i.test(hex)) {
+        img = null;
+        $('fid').value = json.title || f.name.replace(/\.dtms$/i,'');
+        $('drop').classList.remove('has-img');
+        renderFromHexDirect(hex.toUpperCase());
+        log(`📂 DTMS 로드: ${f.name} (${json.title})`);
+      } else {
+        log(`❌ DTMS 파일 오류: graphic.data가 없거나 형식이 맞지 않습니다.`);
+      }
+    } catch(e) { log(`❌ DTMS JSON 파싱 오류: ${e.message}`); }
+  };
+  reader.readAsText(f);
+  e.target.value = '';
+};
 
-// ── Advanced menu toggle ─────────────────────────────────────────
-const btnAdvTrigger = $('btnAdvTrigger');
-const advMenu = $('advMenu');
-btnAdvTrigger.addEventListener('click', e => {
-  e.stopPropagation();
-  const open = advMenu.classList.toggle('open');
-  btnAdvTrigger.classList.toggle('open', open);
-});
-document.addEventListener('click', () => {
-  advMenu.classList.remove('open');
-  btnAdvTrigger.classList.remove('open');
-});
-advMenu.addEventListener('click', e => e.stopPropagation());
-
-// ── Accordions ───────────────────────────────────────────────────
-function initAccordion(hdId, bodyId) {
-  const hd   = $(hdId);
-  const body = $(bodyId);
-  hd.addEventListener('click', () => {
-    const open = body.classList.toggle('open');
-    hd.classList.toggle('open', open);
-    body.style.display = open ? 'block' : 'none';
-  });
-  body.style.display = 'none';
+// ── Save / Export ─────────────────────────────────────────────────
+function getSaveName() {
+  return ($('fid').value || 'tactile').trim().replace(/\s+/g,'_') || 'tactile';
 }
-initAccordion('devHd', 'devBody');
-initAccordion('logHd', 'logBody');
 
-// ── Preset categories ─────────────────────────────────────────────
+function updateSaveButtons() {
+  const ready = currentHex.length === 600;
+  ['btnSavePreset','btnDlDtm','btnDlDtms','sbDlDtm','sbDlDtms'].forEach(id => $(id).disabled = !ready);
+}
+
+function triggerDownload(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function flashMsg(msg) {
+  const el = $('sbFlash');
+  el.textContent = '✓ ' + msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function downloadDtm() {
+  if (!currentHex) return;
+  const name = getSaveName();
+  triggerDownload(currentHex, name + '.dtm', 'text/plain');
+  flashMsg('.dtm 저장 완료');
+  log(`💾 DTM: ${name}.dtm`);
+}
+
+function downloadDtms() {
+  if (!currentHex) return;
+  const name = getSaveName();
+  const json = {
+    title: name, lang: 'korean', lang_option: '1',
+    device: 'dotpad320', audioPath: '',
+    items: [{
+      page: 1, title: name,
+      graphic: { name: '1.dtm', data: currentHex },
+      text: { name: '1.txt', data: '', plain: name },
+      audio: { fileName: '' }
+    }]
+  };
+  triggerDownload(JSON.stringify(json, null, 2), name + '.dtms', 'application/json');
+  flashMsg('.dtms 저장 완료');
+  log(`💾 DTMS: ${name}.dtms`);
+}
+
+$('btnDlDtm').onclick  = downloadDtm;
+$('btnDlDtms').onclick = downloadDtms;
+$('sbDlDtm').onclick   = downloadDtm;
+$('sbDlDtms').onclick  = downloadDtms;
+
+function getImgDataUrl() {
+  if (!img) return null;
+  try {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth || 60; c.height = img.naturalHeight || 40;
+    c.getContext('2d').drawImage(img, 0, 0);
+    return c.toDataURL('image/png');
+  } catch { return null; }
+}
+
+$('btnSavePreset').onclick = () => {
+  const form = $('saveForm');
+  const showing = form.classList.contains('show');
+  form.classList.toggle('show', !showing);
+  if (!showing) { $('saveFormName').value = $('fid').value || ''; $('saveFormName').focus(); }
+};
+
+$('saveFormCancel').onclick = () => $('saveForm').classList.remove('show');
+$('saveFormOk').onclick = doSavePreset;
+$('saveFormName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSavePreset();
+  if (e.key === 'Escape') $('saveForm').classList.remove('show');
+});
+
+function doSavePreset() {
+  const name = $('saveFormName').value.trim();
+  if (!name) { $('saveFormName').focus(); return; }
+  const dataUrl = getImgDataUrl();
+  if (!dataUrl) { log('⚠️ 이미지 소스를 불러올 수 없습니다.'); return; }
+  const preset = {
+    id: 'custom_' + Date.now(),
+    ko: name, sub: '내 프리셋',
+    th: +$('th').value,
+    outlineOn: $('outlineOn').checked,
+    outlineStr: +$('outlineStr').value,
+    outlineMode: $('outlineMode').value,
+    noise: +$('noise').value,
+    simp: +$('simp').value,
+    dataUrl, isCustom: true
+  };
+  const arr = loadCustomPresets();
+  arr.push(preset);
+  saveCustomPresets(arr);
+  $('saveForm').classList.remove('show');
+  flashMsg(`"${name}" 프리셋 저장 완료`);
+  log(`⭐ 프리셋 저장: "${name}"`);
+  if (activeCat === 'custom' || activeCat === 'all') buildPresetList(activeCat);
+}
+
+// ── Copy ─────────────────────────────────────────────────────────
+$('copyHex').onclick = () => {
+  if (!currentHex) return;
+  navigator.clipboard.writeText(currentHex).then(() => flashMsg('HEX 복사됨'));
+};
+$('copyLine').onclick = () => {
+  if (!currentHex) return;
+  navigator.clipboard.writeText(`  ${($('fid').value||'tactile').trim()}: '${currentHex}',`)
+    .then(() => flashMsg('코드 줄 복사됨'));
+};
+
+// ── Recent Files ─────────────────────────────────────────────────
+function loadRecent() { try { return JSON.parse(localStorage.getItem(STORAGE_RECENT) || '[]'); } catch { return []; } }
+function saveToRecent(item) {
+  let arr = loadRecent().filter(r => r.name !== item.name);
+  arr.unshift(item);
+  arr = arr.slice(0, 5);
+  try { localStorage.setItem(STORAGE_RECENT, JSON.stringify(arr)); } catch {}
+  buildRecentList();
+}
+function buildRecentList() {
+  const arr = loadRecent();
+  const el = $('recentList');
+  if (!arr.length) { el.innerHTML = '<div class="recent-empty">최근 파일 없음</div>'; return; }
+  el.innerHTML = arr.map(r => `
+    <div class="recent-item" data-url="${r.url}" data-name="${r.name}">
+      <img class="recent-thumb" src="${r.url}" alt=""/>
+      <span class="recent-name">${r.name}</span>
+    </div>`).join('');
+  el.querySelectorAll('.recent-item').forEach(el => {
+    el.onclick = () => loadImageUrl(el.dataset.url, el.dataset.name);
+  });
+}
+
+// ── Image Preset System ───────────────────────────────────────────
 const PRESET_CATEGORIES = {
   dinosaurs: {
-    label: '공룡', icon: '🦕',
-    items: [
+    label: '🦕 공룡', items: [
       { id:'tyrannosaurusRex',    ko:'티라노사우루스',     sub:'T-Rex',              th:200, url:'./assets/dinosaurs/tyrannosaurus-rex.png' },
       { id:'velociraptor',        ko:'벨로키랍토르',       sub:'Velociraptor',        th:200, url:'./assets/dinosaurs/velociraptor.png' },
       { id:'brachiosaurus',       ko:'브라키오사우루스',   sub:'Brachiosaurus',       th:200, url:'./assets/dinosaurs/brachiosaurus.png' },
@@ -1792,362 +1827,356 @@ const PRESET_CATEGORIES = {
     ]
   },
   fossils: {
-    label: '화석', icon: '🦴',
-    items: [
-      { id:'fossilSkull',        ko:'두개골',         sub:'Skull',          th:200, url:'./assets/icons/fossils/fossil-skull.png' },
-      { id:'fossilAmmonite',     ko:'암모나이트',     sub:'Ammonite',       th:200, url:'./assets/icons/fossils/fossil-ammonite.png' },
-      { id:'fossilFish',         ko:'물고기 화석',    sub:'Fish',           th:200, url:'./assets/icons/fossils/fossil-fish.png' },
-      { id:'fossilFootprint',    ko:'발자국',         sub:'Footprint',      th:200, url:'./assets/icons/fossils/fossil-footprint.png' },
-      { id:'fossilLeaf',         ko:'나뭇잎 화석',    sub:'Leaf',           th:200, url:'./assets/icons/fossils/fossil-leaf.png' },
-      { id:'fossilClaw',         ko:'발톱 화석',      sub:'Claw',           th:200, url:'./assets/icons/fossils/fossil-claw.png' },
-      { id:'fossilTooth',        ko:'이빨 화석',      sub:'Tooth',          th:200, url:'./assets/icons/fossils/fossil-tooth.png' },
-      { id:'fossilRib',          ko:'갈비뼈',         sub:'Rib',            th:200, url:'./assets/icons/fossils/fossil-rib.png' },
-      { id:'fossilVertebra',     ko:'척추뼈',         sub:'Vertebra',       th:200, url:'./assets/icons/fossils/fossil-vertebra.png' },
-      { id:'fossilBone',         ko:'뼈 조각',        sub:'Bone Fragment',  th:200, url:'./assets/icons/fossils/fossil-bone-fragment.png' },
+    label: '🦴 화석', items: [
+      { id:'fossilSkull',        ko:'두개골',         sub:'Skull',            th:200, url:'./assets/icons/fossils/fossil-skull.png' },
+      { id:'fossilAmmonite',     ko:'암모나이트',     sub:'Ammonite',         th:200, url:'./assets/icons/fossils/fossil-ammonite.png' },
+      { id:'fossilFish',         ko:'물고기 화석',    sub:'Fish',             th:200, url:'./assets/icons/fossils/fossil-fish.png' },
+      { id:'fossilFootprint',    ko:'발자국',         sub:'Footprint',        th:200, url:'./assets/icons/fossils/fossil-footprint.png' },
+      { id:'fossilLeaf',         ko:'나뭇잎 화석',    sub:'Leaf',             th:200, url:'./assets/icons/fossils/fossil-leaf.png' },
+      { id:'fossilClaw',         ko:'발톱 화석',      sub:'Claw',             th:200, url:'./assets/icons/fossils/fossil-claw.png' },
+      { id:'fossilTooth',        ko:'이빨 화석',      sub:'Tooth',            th:200, url:'./assets/icons/fossils/fossil-tooth.png' },
+      { id:'fossilRib',          ko:'갈비뼈',         sub:'Rib',              th:200, url:'./assets/icons/fossils/fossil-rib.png' },
+      { id:'fossilVertebra',     ko:'척추뼈',         sub:'Vertebra',         th:200, url:'./assets/icons/fossils/fossil-vertebra.png' },
+      { id:'fossilBone',         ko:'뼈 조각',        sub:'Bone Fragment',    th:200, url:'./assets/icons/fossils/fossil-bone-fragment.png' },
       { id:'fossilSkeleton',     ko:'부분 골격',      sub:'Partial Skeleton', th:200, url:'./assets/icons/fossils/fossil-partial-skeleton.png' },
-      { id:'fossilLegfoot',      ko:'다리뼈',         sub:'Leg & Foot',     th:200, url:'./assets/icons/fossils/fossil-legfoot.png' },
-      { id:'artifactMedallion',  ko:'메달리온',       sub:'Medallion',      th:200, url:'./assets/icons/fossils/artifact-medallion.png' },
-      { id:'artifactPottery',    ko:'도자기',         sub:'Pottery',        th:200, url:'./assets/icons/fossils/artifact-pottery.png' },
+      { id:'fossilLegfoot',      ko:'다리뼈',         sub:'Leg & Foot',       th:200, url:'./assets/icons/fossils/fossil-legfoot.png' },
+      { id:'artifactMedallion',  ko:'메달리온',       sub:'Medallion',        th:200, url:'./assets/icons/fossils/artifact-medallion.png' },
+      { id:'artifactPottery',    ko:'도자기',         sub:'Pottery',          th:200, url:'./assets/icons/fossils/artifact-pottery.png' },
     ]
   },
   tools: {
-    label: '도구', icon: '🔧',
-    items: [
-      { id:'toolBrush',          ko:'붓',             sub:'Brush',          th:180, url:'./assets/icons/tools/icon-brush.png' },
-      { id:'toolHammer',         ko:'망치',           sub:'Hammer',         th:180, url:'./assets/icons/tools/icon-hammer.png' },
-      { id:'toolPickaxe',        ko:'곡괭이',         sub:'Pickaxe',        th:180, url:'./assets/icons/tools/icon-pickaxe.png' },
-      { id:'toolShovel',         ko:'삽',             sub:'Shovel',         th:180, url:'./assets/icons/tools/icon-shovel.png' },
-      { id:'toolProbe',          ko:'탐침',           sub:'Probe',          th:180, url:'./assets/icons/tools/icon-probe.png' },
-      { id:'toolMap',            ko:'지도',           sub:'Map',            th:180, url:'./assets/icons/tools/icon-map.png' },
-      { id:'toolRestorationKit', ko:'복원 키트',      sub:'Restoration Kit',th:180, url:'./assets/icons/tools/icon-restoration-kit.png' },
-      { id:'toolBackpack',       ko:'배낭',           sub:'Backpack',       th:180, url:'./assets/icons/tools/icon-backpack.png' },
-      { id:'toolGearMedal',      ko:'메달',           sub:'Medal',          th:180, url:'./assets/icons/tools/icon-gear-medal.png' },
-      { id:'toolAmmoniteMedal',  ko:'암모나이트 훈장', sub:'Ammonite Medal', th:180, url:'./assets/icons/tools/icon-ammonite-medallion.png' },
+    label: '🔧 도구', items: [
+      { id:'toolBrush',    ko:'붓',     sub:'Brush',   th:180, url:'./assets/icons/tools/icon-brush.png' },
+      { id:'toolHammer',   ko:'망치',   sub:'Hammer',  th:180, url:'./assets/icons/tools/icon-hammer.png' },
+      { id:'toolPickaxe',  ko:'곡괭이', sub:'Pickaxe', th:180, url:'./assets/icons/tools/icon-pickaxe.png' },
+      { id:'toolShovel',   ko:'삽',     sub:'Shovel',  th:180, url:'./assets/icons/tools/icon-shovel.png' },
+      { id:'toolChisel',   ko:'끌',     sub:'Chisel',  th:180, url:'./assets/icons/tools/icon-chisel.png' },
+      { id:'toolTrowel',   ko:'흙손',   sub:'Trowel',  th:180, url:'./assets/icons/tools/icon-trowel.png' },
+      { id:'toolSieve',    ko:'체',     sub:'Sieve',   th:180, url:'./assets/icons/tools/icon-sieve.png' },
+      { id:'toolCompass',  ko:'나침반', sub:'Compass', th:180, url:'./assets/icons/tools/icon-compass.png' },
+      { id:'toolMagnifier',ko:'돋보기', sub:'Magnifier',th:180,url:'./assets/icons/tools/icon-magnifier.png' },
+      { id:'toolMap',      ko:'지도',   sub:'Map',     th:180, url:'./assets/icons/tools/icon-map.png' },
     ]
   },
   characters: {
-    label: '탐험가', icon: '🧑‍🔬',
-    items: [
-      { id:'explorerIdle',    ko:'대기',     sub:'Idle',    th:180, url:'./assets/characters/explorer-idle.png' },
-      { id:'explorerDig',     ko:'발굴 중',  sub:'Digging', th:180, url:'./assets/characters/explorer-dig.png' },
-      { id:'explorerBrush',   ko:'붓질',     sub:'Brush',   th:180, url:'./assets/characters/explorer-brush.png' },
-      { id:'explorerProbe',   ko:'탐침',     sub:'Probe',   th:180, url:'./assets/characters/explorer-probe.png' },
-      { id:'explorerFound',   ko:'발견!',    sub:'Found',   th:180, url:'./assets/characters/explorer-found.png' },
-      { id:'explorerWarning', ko:'경고',     sub:'Warning', th:180, url:'./assets/characters/explorer-warning.png' },
+    label: '🧑‍🔬 탐험가', items: [
+      { id:'explorerIdle',   ko:'대기',   sub:'Idle',   th:180, url:'./assets/characters/explorer-idle.png' },
+      { id:'explorerDig',    ko:'발굴',   sub:'Digging',th:180, url:'./assets/characters/explorer-digging.png' },
+      { id:'explorerWalk',   ko:'걷기',   sub:'Walking',th:180, url:'./assets/characters/explorer-walking.png' },
+      { id:'explorerFound',  ko:'발견',   sub:'Found',  th:180, url:'./assets/characters/explorer-found.png' },
+      { id:'explorerThink',  ko:'관찰',   sub:'Think',  th:180, url:'./assets/characters/explorer-thinking.png' },
+      { id:'explorerJump',   ko:'점프',   sub:'Jump',   th:180, url:'./assets/characters/explorer-jumping.png' },
     ]
-  },
+  }
 };
 
-// ── Custom preset localStorage management ─────────────────────────
-const STORAGE_KEY = 'dotFossilCustomPresets_v1';
-
-function loadCustomPresets() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
-function saveCustomPresetsToStorage(arr) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-}
+function loadCustomPresets() { try { return JSON.parse(localStorage.getItem(STORAGE_IMG) || '[]'); } catch { return []; } }
+function saveCustomPresets(arr) { try { localStorage.setItem(STORAGE_IMG, JSON.stringify(arr)); } catch {} }
 function deleteCustomPreset(id) {
-  const arr = loadCustomPresets().filter(p => p.id !== id);
-  saveCustomPresetsToStorage(arr);
-  buildPresetGrid(activeCat);
+  saveCustomPresets(loadCustomPresets().filter(p => p.id !== id));
+  buildPresetList(activeCat);
 }
 
-// ── Preset grid builder ───────────────────────────────────────────
-let activeCat = 'all';
-let activePresetId = null;
-
-function getAllPresets() {
-  return Object.values(PRESET_CATEGORIES).flatMap(c => c.items);
+function clearImgPresetActive() {
+  document.querySelectorAll('.preset-item').forEach(el => el.classList.remove('active'));
+  activeImgPresetId = null;
 }
 
-function buildPresetGrid(cat) {
-  activeCat = cat;
-  const grid = $('presetGrid');
-  const customSection = $('customSection');
-  grid.innerHTML = '';
-
-  const isCustom = cat === 'custom';
-  customSection.style.display = isCustom ? 'block' : 'none';
-
-  // Collect items to show
+function getAllPresets(cat) {
   let items = [];
-  if (cat === 'all') {
-    items = getAllPresets();
-  } else if (cat === 'custom') {
-    items = loadCustomPresets().map(p => ({ ...p, isCustom: true }));
-  } else {
-    items = PRESET_CATEGORIES[cat]?.items ?? [];
+  if (cat === 'all' || cat === 'custom') {
+    loadCustomPresets().forEach(p => items.push({ ...p, _cat: 'custom' }));
   }
-
-  if (items.length === 0 && !isCustom) {
-    grid.innerHTML = '<span class="empty-state">프리셋이 없습니다</span>';
-    return;
+  if (cat !== 'custom') {
+    Object.entries(PRESET_CATEGORIES).forEach(([key, c]) => {
+      if (cat === 'all' || cat === key) c.items.forEach(p => items.push({ ...p, _cat: key }));
+    });
   }
-  if (items.length === 0 && isCustom) {
-    grid.innerHTML = '<span class="empty-state">저장된 프리셋이 없어요. 아래에서 추가해보세요.</span>';
-  }
+  return items;
+}
 
-  items.forEach(item => {
-    const btn = document.createElement('button');
-    btn.className = 'preset-btn' + (item.id === activePresetId ? ' active' : '');
-    btn.dataset.id = item.id;
-    btn.innerHTML = `${item.ko}<span class="sub">${item.sub ?? ''}</span>`;
-
-    if (item.isCustom) {
-      const del = document.createElement('button');
-      del.className = 'preset-del';
-      del.title = '삭제';
-      del.textContent = '×';
-      del.onclick = e => {
-        e.stopPropagation();
-        if (confirm(`"${item.ko}" 프리셋을 삭제할까요?`)) deleteCustomPreset(item.id);
-      };
-      btn.appendChild(del);
-    }
-
-    btn.onclick = () => loadPreset(item);
-    grid.appendChild(btn);
+function buildCatTabs() {
+  const tabs = $('catTabs');
+  const cats = [
+    { key: 'all', label: '전체' },
+    { key: 'custom', label: '⭐ 내 것' },
+    ...Object.entries(PRESET_CATEGORIES).map(([k, v]) => ({ key: k, label: v.label }))
+  ];
+  tabs.innerHTML = cats.map(c => `<button class="cat-tab${c.key === activeCat ? ' active' : ''}" data-cat="${c.key}">${c.label}</button>`).join('');
+  tabs.querySelectorAll('.cat-tab').forEach(btn => {
+    btn.onclick = () => { activeCat = btn.dataset.cat; buildCatTabs(); buildPresetList(activeCat); };
   });
 }
 
-function loadPreset(p) {
-  // Update active state
-  activePresetId = p.id;
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.preset-btn[data-id="${p.id}"]`)?.classList.add('active');
+function buildPresetList(cat) {
+  const list = $('presetList');
+  const items = getAllPresets(cat);
+  if (!items.length) { list.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0;text-align:center">프리셋 없음</div>'; return; }
+  list.innerHTML = items.map(p => `
+    <div class="preset-item${p.id === activeImgPresetId ? ' active' : ''}" data-id="${p.id}">
+      ${p.dataUrl
+        ? `<img class="preset-thumb" src="${p.dataUrl}" alt="${p.ko}"/>`
+        : `<img class="preset-thumb" src="${p.url}" alt="${p.ko}" crossorigin="anonymous"/>`}
+      <div class="preset-labels">
+        <div class="preset-ko">${p.ko}</div>
+        <div class="preset-sub">${p.sub}</div>
+      </div>
+      ${p.isCustom ? `<button class="preset-del show" data-id="${p.id}" title="삭제">×</button>` : ''}
+    </div>`).join('');
 
-  // Update fields
-  $('fid').value = p.id;
-  $('th').value = p.th ?? 200;
-  $('thv').textContent = p.th ?? 200;
-  $('drop').classList.remove('has-img');
-  $('drop').querySelector('.drop-text').textContent = '이미지를 여기에 놓으면 바로 변환됩니다';
+  list.querySelectorAll('.preset-item').forEach(el => {
+    el.onclick = e => {
+      if (e.target.classList.contains('preset-del')) return;
+      const id = el.dataset.id;
+      const preset = getAllPresets('all').find(p => p.id === id);
+      if (!preset) return;
+      activeImgPresetId = id;
+      clearImgPresetActive();
+      el.classList.add('active');
+      // Apply threshold from preset
+      $('th').value = preset.th;
+      $('thVal').textContent = preset.th;
+      updateQuickBtns(preset.th);
+      // Apply other saved settings if custom
+      if (preset.isCustom) {
+        if (preset.outlineOn !== undefined) { $('outlineOn').checked = preset.outlineOn; toggleOutlineSub(); }
+        if (preset.outlineStr !== undefined) { $('outlineStr').value = preset.outlineStr; updateOutlineStrLabel(); }
+        if (preset.outlineMode !== undefined) $('outlineMode').value = preset.outlineMode;
+        if (preset.noise !== undefined) { $('noise').value = preset.noise; $('noiseVal').textContent = preset.noise; }
+        if (preset.simp !== undefined) { $('simp').value = preset.simp; $('simpVal').textContent = preset.simp; }
+      }
+      $('fid').value = id.replace(/^custom_\d+$/, preset.ko).replace(/[^a-zA-Z0-9가-힣]/g, '');
+      // Load image
+      if (preset.dataUrl) {
+        const im = new Image();
+        im.onload = () => { img = im; $('uploadThumb').src = preset.dataUrl; $('drop').classList.add('has-img'); $('uploadFileName').textContent = preset.ko; scheduleRender(); };
+        im.src = preset.dataUrl;
+      } else if (preset.url) {
+        loadImageUrl(preset.url, preset.ko);
+      }
+    };
+  });
 
-  const src = p.dataUrl ?? p.url;
-  const label = p.ko + (p.sub ? ` (${p.sub})` : '');
-  const im = new Image();
-  im.crossOrigin = 'anonymous';
-  im.onload  = () => { img = im; render(); };
-  im.onerror = () => log(`❌ 이미지 로드 실패: ${p.id}`);
-  im.src = src;
-  log(`📂 프리셋 로드: ${label} — threshold ${p.th ?? 200}`);
+  list.querySelectorAll('.preset-del').forEach(btn => {
+    btn.onclick = e => { e.stopPropagation(); if (confirm(`"${btn.dataset.id}"를 삭제할까요?`)) deleteCustomPreset(btn.dataset.id); };
+  });
 }
 
-// ── Category tab interaction ──────────────────────────────────────
-document.querySelectorAll('.cat-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    buildPresetGrid(tab.dataset.cat);
+// ── Settings Presets ──────────────────────────────────────────────
+const SETTINGS_PRESETS = [
+  { id:'basic',       name:'Basic Tactile',   desc:'기본 이진화',                    th:128, inv:false, outline:false, oStr:100, oLines:1, oMode:'overlay', noise:0, simp:0 },
+  { id:'highCon',     name:'High Contrast',   desc:'고대비, 핵심 형태',              th:200, inv:false, outline:false, oStr:100, oLines:1, oMode:'overlay', noise:1, simp:0 },
+  { id:'outline1',    name:'Outline 1-Line',  desc:'얇은 외곽선 (섬세)',             th:160, inv:false, outline:true,  oStr:120, oLines:1, oMode:'overlay', noise:0, simp:0 },
+  { id:'outline2',    name:'Outline 2-Line',  desc:'두꺼운 외곽선 (촉지 강조)',      th:160, inv:false, outline:true,  oStr:150, oLines:2, oMode:'overlay', noise:0, simp:0 },
+  { id:'lowDetail',   name:'Low Detail',      desc:'단순화, 부드러운 형태',          th:190, inv:false, outline:false, oStr:100, oLines:1, oMode:'overlay', noise:2, simp:2 },
+  { id:'boldShape',   name:'Bold Shape',      desc:'굵고 명확한 형태',               th:150, inv:false, outline:true,  oStr:180, oLines:2, oMode:'overlay', noise:0, simp:1 },
+  { id:'textured',    name:'Textured Object', desc:'디테일 중심, 결감 표현',         th:110, inv:false, outline:true,  oStr:80,  oLines:1, oMode:'detail',  noise:1, simp:0 },
+];
+
+let activeSpId = null;
+
+function buildSpGrid() {
+  const grid = $('spGrid');
+  grid.innerHTML = SETTINGS_PRESETS.map(p => `
+    <div class="sp-item${p.id === activeSpId ? ' active' : ''}" data-id="${p.id}">
+      <div>
+        <div class="sp-name">${p.name}</div>
+        <div class="sp-desc">${p.desc}</div>
+      </div>
+      <span class="sp-badge">Th:${p.th}</span>
+    </div>`).join('');
+  grid.querySelectorAll('.sp-item').forEach(el => {
+    el.onclick = () => {
+      const p = SETTINGS_PRESETS.find(s => s.id === el.dataset.id);
+      if (!p) return;
+      activeSpId = p.id;
+      // Apply settings
+      $('th').value = p.th; $('thVal').textContent = p.th; updateQuickBtns(p.th);
+      $('inv').checked = p.inv;
+      $('outlineOn').checked = p.outline; toggleOutlineSub();
+      $('outlineStr').value = p.oStr; updateOutlineStrLabel();
+      $('outlineMode').value = p.oMode;
+      $('noise').value = p.noise; $('noiseVal').textContent = p.noise;
+      $('simp').value = p.simp; $('simpVal').textContent = p.simp;
+      // Line width
+      document.querySelectorAll('.seg-btn[data-lines]').forEach(b => b.classList.toggle('active', +b.dataset.lines === p.oLines));
+      buildSpGrid();
+      scheduleRender();
+    };
   });
+}
+
+// ── Control Event Wiring ──────────────────────────────────────────
+function updateQuickBtns(val) {
+  document.querySelectorAll('.quick-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.th === +val);
+  });
+}
+
+document.querySelectorAll('.quick-btn').forEach(btn => {
+  btn.onclick = () => {
+    $('th').value = btn.dataset.th;
+    $('thVal').textContent = btn.dataset.th;
+    updateQuickBtns(btn.dataset.th);
+    scheduleRender();
+  };
 });
 
-// ── Custom preset add form ────────────────────────────────────────
-let addImgDataUrl = null;
-let addImgObj = null;
+$('th').addEventListener('input', () => {
+  $('thVal').textContent = $('th').value;
+  updateQuickBtns($('th').value);
+  scheduleRender();
+});
 
-const addTrigger   = $('addTrigger');
-const addFormEl    = $('addForm');
-const addDrop      = $('addDrop');
-const addDropText  = $('addDropText');
-const addFile      = $('addFile');
-const addPreviewCv = $('addPreview');
-const addPreviewCtx= addPreviewCv.getContext('2d', {willReadFrequently:true});
-const addNameInput = $('addName');
-const addThSlider  = $('addTh');
-const addThVal     = $('addThVal');
+function updateOutlineStrLabel() {
+  $('outlineStrVal').textContent = (+$('outlineStr').value / 100).toFixed(1);
+}
 
-addTrigger.onclick = () => {
-  addFormEl.style.display = addFormEl.style.display === 'none' ? 'flex' : 'none';
-};
-$('cancelAddBtn').onclick = () => {
-  addFormEl.style.display = 'none';
-  resetAddForm();
-};
-addThSlider.oninput = () => addThVal.textContent = addThSlider.value;
+$('outlineStr').addEventListener('input', () => {
+  updateOutlineStrLabel();
+  scheduleRender();
+});
 
-addDrop.onclick = () => addFile.click();
-addFile.onchange = e => loadAddFile(e.target.files[0]);
+function toggleOutlineSub() {
+  $('outlineSub').classList.toggle('hidden', !$('outlineOn').checked);
+}
+
+$('outlineOn').addEventListener('change', () => { toggleOutlineSub(); scheduleRender(); });
+$('outlineMode').addEventListener('change', scheduleRender);
+
+document.querySelectorAll('.seg-btn[data-lines]').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.seg-btn[data-lines]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    scheduleRender();
+  };
+});
+
+$('inv').addEventListener('change', scheduleRender);
+$('fit').addEventListener('change', scheduleRender);
+
+$('noise').addEventListener('input', () => {
+  $('noiseVal').textContent = $('noise').value;
+  scheduleRender();
+});
+
+$('simp').addEventListener('input', () => {
+  $('simpVal').textContent = $('simp').value;
+  scheduleRender();
+});
+
+// ── File Drop ────────────────────────────────────────────────────
+const dropEl = $('drop');
+dropEl.onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => loadImageFile(e.target.files[0]);
 ['dragover','dragenter'].forEach(ev =>
-  addDrop.addEventListener(ev, e => { e.preventDefault(); addDrop.classList.add('over'); }));
+  dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.add('over'); }));
 ['dragleave','drop'].forEach(ev =>
-  addDrop.addEventListener(ev, e => { e.preventDefault(); addDrop.classList.remove('over'); }));
-addDrop.addEventListener('drop', e => loadAddFile(e.dataTransfer.files[0]));
+  dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.remove('over'); }));
+dropEl.addEventListener('drop', e => loadImageFile(e.dataTransfer.files[0]));
 
-function loadAddFile(f) {
-  if (!f || !f.type.startsWith('image/')) return;
-  const url = URL.createObjectURL(f);
-  const im = new Image();
-  im.onload = () => {
-    addImgObj = im;
-    // Draw small preview
-    addPreviewCv.style.display = 'block';
-    addPreviewCtx.fillStyle = '#fff';
-    addPreviewCtx.fillRect(0, 0, 90, 60);
-    const s = Math.min(90/im.width, 60/im.height);
-    const dw = im.width*s, dh = im.height*s;
-    addPreviewCtx.drawImage(im, (90-dw)/2, (60-dh)/2, dw, dh);
-    addDropText.textContent = f.name;
-    addDrop.classList.add('has-img');
-    // Read as dataURL for storage
-    const fr = new FileReader();
-    fr.onload = ev => { addImgDataUrl = ev.target.result; };
-    fr.readAsDataURL(f);
-    // Auto-fill name from filename if empty
-    if (!addNameInput.value) {
-      addNameInput.value = f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
-    }
-    URL.revokeObjectURL(url);
-  };
-  im.src = url;
-}
-
-function resetAddForm() {
-  addImgDataUrl = null; addImgObj = null;
-  addPreviewCv.style.display = 'none';
-  addDropText.textContent = '이미지를 클릭하거나 드래그해서 선택';
-  addDrop.classList.remove('has-img','over');
-  addNameInput.value = '';
-  addThSlider.value = '128'; addThVal.textContent = '128';
-  addFile.value = '';
-}
-
-$('saveCustomBtn').onclick = () => {
-  if (!addImgDataUrl) { alert('이미지를 선택해주세요.'); return; }
-  const name = addNameInput.value.trim();
-  if (!name) { addNameInput.focus(); return; }
-
-  const preset = {
-    id: 'custom_' + Date.now(),
-    ko: name,
-    sub: '내 프리셋',
-    th: +addThSlider.value,
-    dataUrl: addImgDataUrl,
-    isCustom: true,
-  };
-  const arr = loadCustomPresets();
-  arr.push(preset);
-  saveCustomPresetsToStorage(arr);
-  log(`⭐ 커스텀 프리셋 저장: "${name}"`);
-  addFormEl.style.display = 'none';
-  resetAddForm();
-  buildPresetGrid('custom');
-};
-
-// ── Save / Export ─────────────────────────────────────────────────
-function updateSaveButtons() {
-  const ready = currentHex.length === 600;
-  ['btnSavePreset','btnDlDtm','btnDlDtms'].forEach(id => $(id).disabled = !ready);
-}
-
-function getSaveName() {
-  return ($('fid').value || 'tactile').trim().replace(/\s+/g, '_') || 'tactile';
-}
-
-function triggerDownload(content, filename, type) {
-  const blob = new Blob([content], { type });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function flashSave(msg) {
-  const el = $('saveFlash');
-  el.textContent = '✓ ' + msg;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2200);
-}
-
-function downloadDtm() {
-  if (!currentHex) return;
-  const name = getSaveName();
-  triggerDownload(currentHex, name + '.dtm', 'text/plain');
-  flashSave('.dtm 저장 완료');
-  log(`💾 DTM 저장: ${name}.dtm`);
-}
-
-function downloadDtms() {
-  if (!currentHex) return;
-  const name = getSaveName();
-  const dtms = {
-    title: name,
-    lang: 'korean',
-    lang_option: '1',
-    device: 'dotpad320',
-    audioPath: '',
-    items: [{
-      page: 1,
-      title: name,
-      graphic: { name: '1.dtm', data: currentHex },
-      text: { name: '1.txt', data: '', plain: name },
-      audio: { fileName: '' }
-    }]
-  };
-  triggerDownload(JSON.stringify(dtms, null, 2), name + '.dtms', 'application/json');
-  flashSave('.dtms 저장 완료');
-  log(`💾 DTMS 저장: ${name}.dtms`);
-}
-
-function getImgDataUrl() {
-  if (!img) return null;
-  try {
-    const c = document.createElement('canvas');
-    c.width = img.naturalWidth || img.width || 300;
-    c.height = img.naturalHeight || img.height || 200;
-    c.getContext('2d').drawImage(img, 0, 0);
-    return c.toDataURL('image/png');
-  } catch { return null; }
-}
-
-$('btnDlDtm').onclick  = downloadDtm;
-$('btnDlDtms').onclick = downloadDtms;
-
-$('btnSavePreset').onclick = () => {
-  const form = $('presetSaveForm');
-  const showing = form.classList.contains('show');
-  form.classList.toggle('show', !showing);
-  if (!showing) {
-    $('psfName').value = $('fid').value || '';
-    $('psfName').focus();
-  }
-};
-
-$('psfCancel').onclick = () => $('presetSaveForm').classList.remove('show');
-
-$('psfOk').onclick = () => {
-  const name = $('psfName').value.trim();
-  if (!name) { $('psfName').focus(); return; }
-  const dataUrl = getImgDataUrl();
-  if (!dataUrl) { alert('이미지 소스를 불러올 수 없습니다.'); return; }
-  const preset = {
-    id: 'custom_' + Date.now(),
-    ko: name,
-    sub: '내 프리셋',
-    th: +$('th').value,
-    dataUrl,
-    isCustom: true
-  };
-  const arr = loadCustomPresets();
-  arr.push(preset);
-  saveCustomPresetsToStorage(arr);
-  $('presetSaveForm').classList.remove('show');
-  flashSave(`"${name}" 프리셋 저장 완료`);
-  log(`⭐ 프리셋 저장: "${name}"`);
-  if (activeCat === 'custom' || activeCat === 'all') buildPresetGrid(activeCat);
-};
-
-$('psfName').addEventListener('keydown', e => {
-  if (e.key === 'Enter') $('psfOk').click();
-  if (e.key === 'Escape') $('psfCancel').click();
+// ── View Mode ─────────────────────────────────────────────────────
+document.querySelectorAll('.view-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    viewMode = btn.dataset.mode;
+    const showSplit = viewMode === 'split';
+    $('origPane').style.display    = showSplit ? 'flex' : 'none';
+    $('splitDivider').style.display = showSplit ? 'block' : 'none';
+    if (img) scheduleRender();
+  });
 });
 
-// ── Initial render ────────────────────────────────────────────────
-buildPresetGrid('all');
+// ── Zoom ─────────────────────────────────────────────────────────
+function setZoom(z) {
+  zoom = Math.max(0.4, Math.min(3.0, z));
+  $('canvasStage').style.transform = `scale(${zoom})`;
+  $('zoomLevel').textContent = Math.round(zoom * 100) + '%';
+}
+
+$('btnZoomIn').onclick  = () => setZoom(zoom + 0.2);
+$('btnZoomOut').onclick = () => setZoom(zoom - 0.2);
+$('btnZoomFit').onclick = () => {
+  const vp = $('viewport');
+  const stageW = $('canvasStage').scrollWidth;
+  const stageH = $('canvasStage').scrollHeight;
+  const z = Math.min(vp.clientWidth / (stageW + 48), vp.clientHeight / (stageH + 48), 1.5);
+  setZoom(Math.floor(z * 10) / 10);
+};
+
+// Scroll to zoom
+$('viewport').addEventListener('wheel', e => {
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    setZoom(zoom - e.deltaY * 0.003);
+  }
+}, { passive: false });
+
+// ── Grid Toggle ───────────────────────────────────────────────────
+$('btnGrid').addEventListener('click', () => {
+  gridVisible = !gridVisible;
+  $('btnGrid').classList.toggle('active', gridVisible);
+  $('gridCanvas').classList.toggle('show', gridVisible);
+  if (gridVisible) drawGridOverlay();
+  else gridCtx.clearRect(0, 0, DISP_W, DISP_H);
+});
+
+// ── Accordion Sections ────────────────────────────────────────────
+function initSection(hdId, bodyId, defaultOpen = true) {
+  const hd   = $(hdId);
+  const body = $(bodyId);
+  if (!defaultOpen) { body.classList.add('closed'); hd.classList.remove('open'); }
+  hd.addEventListener('click', () => {
+    const open = body.classList.toggle('closed');
+    hd.classList.toggle('open', !open);
+  });
+}
+initSection('hd-upload',  'body-upload');
+initSection('hd-recent',  'body-recent');
+initSection('hd-presets', 'body-presets');
+initSection('hd-convert', 'body-convert');
+initSection('hd-outline', 'body-outline');
+initSection('hd-process', 'body-process', false);
+initSection('hd-output',  'body-output');
+initSection('hd-spresets','body-spresets');
+initSection('hd-save',    'body-save');
+initSection('hd-log',     'body-log', false);
+
+// ── Log clear ────────────────────────────────────────────────────
+$('btnClearLog').onclick = () => { $('logEl').textContent = ''; };
+
+// ── Smart Hints ───────────────────────────────────────────────────
+function updateHints(n, inv) {
+  const bar = $('hintBar');
+  if (n > 1800) {
+    bar.className = 'tb-hint-bar warn';
+    $('hintEmoji').textContent = '⚠️';
+    $('hintText').textContent = '올라온 핀이 너무 많습니다. 임계값을 높여보세요.';
+  } else if (n > 0 && n < 60) {
+    bar.className = 'tb-hint-bar warn';
+    $('hintEmoji').textContent = '💡';
+    $('hintText').textContent = inv ? '형태가 희미합니다. 반전을 꺼보세요.' : '형태가 희미합니다. 임계값을 낮춰보세요.';
+  } else if (n >= 60 && n < 150) {
+    bar.className = 'tb-hint-bar info';
+    $('hintEmoji').textContent = '💡';
+    $('hintText').textContent = '선이 얇습니다. 외곽선 2줄 또는 Bold Shape을 시도해보세요.';
+  } else {
+    bar.className = 'tb-hint-bar hidden';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+buildCatTabs();
+buildPresetList('all');
+buildRecentList();
+buildSpGrid();
+toggleOutlineSub();
+updateSaveButtons();
+uiDisconnected();
+
+log('🦴 Dot Fossil Studio 준비 완료.');
+log('이미지를 업로드하거나 프리셋을 선택하세요.');
 </script>
 </body>
 </html>
