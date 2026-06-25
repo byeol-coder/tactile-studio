@@ -513,6 +513,14 @@ select { font-family: inherit; }
 }
 .q-btn:hover { border-color: var(--accent); color: var(--accent); }
 .q-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.q-btn.q-auto { border-color: var(--accent); color: var(--accent); }
+.q-btn.q-auto:hover { background: var(--accent); color: #fff; }
+.clarity-hd { margin-bottom: 8px; }
+.clarity-hd .ctrl-label { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-1); margin-bottom: 2px; }
+.clarity-hd .ctrl-sub { display: block; font-size: 10px; color: var(--muted); line-height: 1.4; }
+.adv-details { margin-top: 4px; }
+.adv-summary { font-size: 10px; color: var(--muted); cursor: pointer; user-select: none; padding: 2px 0; }
+.adv-summary:hover { color: var(--text-2); }
 
 /* Segment */
 .seg { display: flex; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
@@ -865,20 +873,26 @@ select { font-family: inherit; }
       <svg class="chev" width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
     </div>
     <div class="p-body" id="body-proc">
-      <!-- Quick -->
+      <!-- Tactile Clarity -->
+      <div class="clarity-hd">
+        <span class="ctrl-label">Tactile Clarity</span>
+        <span class="ctrl-sub">Dot Pad에서 형태가 얼마나 또렷하게 느껴지는지 조정합니다</span>
+      </div>
       <div class="quick-grid">
-        <button class="q-btn" data-th="80" aria-label="Soft 임계값(80) 적용">Soft</button>
-        <button class="q-btn active" data-th="128" aria-label="Balanced 임계값(128) 적용">Balanced</button>
-        <button class="q-btn" data-th="180" aria-label="Sharp 임계값(180) 적용">Sharp</button>
-        <button class="q-btn" data-th="220" aria-label="High Contrast 임계값(220) 적용">Hi-Con</button>
+        <button class="q-btn" data-th="80" aria-label="단순하게 — 핵심 형태만 남김 (Threshold 80)">단순하게</button>
+        <button class="q-btn active" data-th="128" aria-label="균형 있게 — 형태와 디테일 균형 (Threshold 128)">균형 있게</button>
+        <button class="q-btn" data-th="185" aria-label="또렷하게 — 윤곽과 대비 강조 (Threshold 185)">또렷하게</button>
+        <button class="q-btn q-auto" id="btnAutoBest" aria-label="Auto Best — 이미지 분석 후 최적 임계값 자동 설정">Auto Best</button>
       </div>
-      <!-- Threshold -->
-      <div class="ctrl-row">
-        <label class="ctrl-label" for="th">Threshold</label>
-        <input class="num-in" id="thNum" type="number" min="0" max="255" value="128" aria-label="임계값 직접 입력"/>
-      </div>
-      <input type="range" class="ctrl-slider" id="th" min="0" max="255" value="128" aria-label="임계값 슬라이더"/>
-      <div class="slider-ends"><span>0</span><span>255</span></div>
+      <input type="range" class="ctrl-slider" id="th" min="0" max="255" value="128" aria-label="형태 선명도 슬라이더"/>
+      <div class="slider-ends"><span>Less Detail</span><span>Clear Shape</span></div>
+      <details class="adv-details">
+        <summary class="adv-summary">고급 — 직접 수치 입력</summary>
+        <div class="ctrl-row" style="margin-top:6px">
+          <label class="ctrl-label" for="thNum" style="font-size:10px;color:var(--muted)">Threshold</label>
+          <input class="num-in" id="thNum" type="number" min="0" max="255" value="128" aria-label="임계값 직접 입력"/>
+        </div>
+      </details>
       <!-- Brightness -->
       <div class="ctrl-row" style="margin-top:10px">
         <label class="ctrl-label" for="bright">Brightness</label>
@@ -1640,8 +1654,43 @@ function buildSpList(){
 }
 
 // ── Control Wiring ────────────────────────────────────────────────
-function updateQuickBtns(val){document.querySelectorAll('.q-btn').forEach(b=>b.classList.toggle('active',+b.dataset.th===+val));}
-document.querySelectorAll('.q-btn').forEach(b=>b.onclick=()=>{$('th').value=$('thNum').value=b.dataset.th;updateQuickBtns(b.dataset.th);scheduleRender();});
+function updateQuickBtns(val){document.querySelectorAll('.q-btn[data-th]').forEach(b=>b.classList.toggle('active',+b.dataset.th===+val));}
+document.querySelectorAll('.q-btn[data-th]').forEach(b=>b.onclick=()=>{$('th').value=$('thNum').value=b.dataset.th;updateQuickBtns(b.dataset.th);scheduleRender();});
+
+// Auto Best: Otsu's method on current image
+function autoBestThreshold() {
+  if (!img) { log('이미지를 먼저 불러오세요.'); return; }
+  const fit = $('fit').checked;
+  const brightness = +$('bright').value;
+  const contrast   = +$('contrast').value;
+  srcCtx.fillStyle = '#fff';
+  srcCtx.fillRect(0, 0, DOT_COLS, DOT_ROWS);
+  let dw=DOT_COLS, dh=DOT_ROWS, dx=0, dy=0;
+  if (fit) { const s=Math.min(DOT_COLS/img.width,DOT_ROWS/img.height); dw=img.width*s; dh=img.height*s; dx=(DOT_COLS-dw)/2; dy=(DOT_ROWS-dh)/2; }
+  srcCtx.drawImage(img, dx, dy, dw, dh);
+  let gray = buildGray(srcCtx.getImageData(0,0,DOT_COLS,DOT_ROWS).data);
+  gray = applyBrightness(gray, brightness);
+  gray = applyContrast(gray, contrast);
+  // Otsu's method
+  const hist = new Float64Array(256);
+  for (let i=0; i<gray.length; i++) hist[Math.min(255,Math.max(0,gray[i]|0))]++;
+  const total = gray.length;
+  let sum=0; for (let i=0;i<256;i++) sum+=i*hist[i];
+  let sumB=0, wB=0, maxVar=0, best=128;
+  for (let t=0; t<256; t++) {
+    wB+=hist[t]; if(!wB) continue;
+    const wF=total-wB; if(!wF) break;
+    sumB+=t*hist[t];
+    const mB=sumB/wB, mF=(sum-sumB)/wF;
+    const v=wB*wF*(mB-mF)*(mB-mF);
+    if(v>maxVar){maxVar=v;best=t;}
+  }
+  $('th').value=$('thNum').value=best;
+  updateQuickBtns(best);
+  scheduleRender();
+  log(`Auto Best: Threshold ${best} (Otsu)`);
+}
+$('btnAutoBest').onclick=autoBestThreshold;
 
 $('th').addEventListener('input',()=>{ $('thNum').value=$('th').value; updateQuickBtns($('th').value); scheduleRender(); });
 $('thNum').addEventListener('input',()=>{
@@ -1712,8 +1761,8 @@ $('btnClearLog').onclick=()=>{ $('logEl').textContent=''; };
 // Hints
 function updateHints(n,inv){
   const b=$('hintBanner');
-  if(n>1800){b.className='hint-banner warn';$('hintEmoji').textContent='⚠️';$('hintText').textContent='Too many pins raised. Increase Threshold.';}
-  else if(n>0&&n<60){b.className='hint-banner warn';$('hintEmoji').textContent='💡';$('hintText').textContent=inv?'Shape too faint — try disabling Invert.':'Shape too faint — lower the Threshold.';}
+  if(n>1800){b.className='hint-banner warn';$('hintEmoji').textContent='⚠️';$('hintText').textContent='핀이 너무 많습니다. Tactile Clarity를 오른쪽(Clear Shape)으로 조절하세요.';}
+  else if(n>0&&n<60){b.className='hint-banner warn';$('hintEmoji').textContent='💡';$('hintText').textContent=inv?'형태가 너무 흐립니다 — 반전(Invert)을 꺼보세요.':'형태가 너무 흐립니다 — Tactile Clarity를 왼쪽(Less Detail)으로 조절하거나 Auto Best를 눌러보세요.';}
   else if(n>=60&&n<150){b.className='hint-banner info';$('hintEmoji').textContent='💡';$('hintText').textContent='Lines are thin — try 2-Line Outline or Bold Outline preset.';}
   else b.className='hint-banner';
 }
