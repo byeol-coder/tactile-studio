@@ -12,7 +12,7 @@
     --bg:#F3F4F6; --workspace:#EEF0F3; --surface:#FFFFFF; --panel:#FAFAFB;
     --line:#E5E7EB; --line-strong:#D1D5DB;
     --text:#111827; --text-secondary:#4B5563; --muted:#6B7280; --faint:#9CA3AF;
-    --accent:#FF5A1F; --accent-hover:#E94E12; --accent-soft:#FFF1E8;
+    --accent:#FF6A1F; --accent-hover:#E85A10; --accent-soft:#FFF1E8;
     --success:#16A34A; --warning:#D97706; --danger:#DC2626;
     --mono:'JetBrains Mono',ui-monospace,monospace;
     --body:'Pretendard','Inter','Noto Sans KR',system-ui,sans-serif;
@@ -111,6 +111,8 @@
   #analyzeOv h2{margin:0;font-size:15px;font-weight:700}
   #analyzeOv p{margin:0;color:var(--muted);font-size:12px;font-family:var(--mono)}
   #analyzeOv .row{display:flex;gap:8px;margin-top:4px}
+  .samplechip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:.12s}
+  .samplechip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
   .linkbtn{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:4px}
   .linkbtn:hover{color:var(--accent)}
   /* status bar */
@@ -362,10 +364,16 @@
 
     <!-- 촉각 선명도 (이미지 전용) -->
     <section class="psec ro" id="secClarity">
-      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2.3"/><circle cx="9" cy="16" r="2.3"/></svg>촉각 선명도</h3>
+      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2.3"/><circle cx="9" cy="16" r="2.3"/></svg>촉각 방식</h3>
       <div class="img-only">
+        <div class="seg" id="clarityModeSeg" role="group" aria-label="촉각 방식">
+          <button data-th="80" aria-pressed="false">단순</button>
+          <button data-th="128" aria-pressed="true">균형</button>
+          <button data-th="185" aria-pressed="false">또렷하게</button>
+        </div>
+        <p class="desc faint" style="margin:6px 0 10px;font-size:12px">손가락으로 느끼는 선명함을 선택하세요</p>
         <div class="slab"><span class="t">부드럽게 — 또렷하게</span><span class="v" id="clarityVal">128</span></div>
-        <input type="range" id="clarity" min="20" max="240" value="128" aria-label="촉각 선명도" />
+        <input type="range" id="clarity" min="20" max="240" value="128" aria-label="점 초벌도 슬라이더" />
         <div class="ticks"><span>부드럽게</span><span>균형</span><span>또렷하게</span></div>
         <div class="reco-line"><span>추천값: <b id="recoLabel">균형</b></span><button class="linkbtn" id="recoReset">추천값으로</button></div>
         <div class="fb" id="clarityFb" role="status" aria-live="polite"></div>
@@ -375,13 +383,23 @@
 
     <!-- 외곽선 (이미지 전용) -->
     <section class="psec ro img-only" id="secOutline">
-      <h3><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>외곽선</h3>
+      <h3><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>윤곽선</h3>
       <div class="seg" role="group" aria-label="외곽선 모드">
         <button data-outline="0" aria-pressed="true">없음</button>
         <button data-outline="1" aria-pressed="false">1줄</button>
         <button data-outline="2" aria-pressed="false">2줄</button>
       </div>
       <p class="desc faint" id="outlineDesc" style="margin:8px 0 0;font-size:12px">채움 실루엣을 유지합니다.</p>
+    </section>
+
+    <!-- 출력 크기 -->
+    <section class="psec ro" id="secOutputSize">
+      <h3><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6M3 15h6"/></svg>출력 크기</h3>
+      <div class="seg" role="group" aria-label="출력 크기">
+        <button data-res="60x40" aria-pressed="true">기본 60×40</button>
+        <button data-res="96x64" aria-pressed="false" disabled title="지원 예정">세밀 96×64</button>
+      </div>
+      <p class="desc faint" style="margin:6px 0 0;font-size:12px">DotPad 표준 해상도입니다.</p>
     </section>
 
     <!-- 페이지 (DTM·DTMS 전용, 다중 페이지) -->
@@ -417,8 +435,8 @@
     <section class="psec ro" id="secSave">
       <h3><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>저장 / 내보내기</h3>
       <div class="savebtns">
-        <button class="btn accent" id="outBtn" title="DotPad로 출력" disabled>DotPad로 출력</button>
-        <button class="btn dark" id="dtmsBtn" title="파일로 저장" disabled>DTMS 저장</button>
+        <button class="btn accent" id="outBtn" title="DotPad로 출력" disabled>닷패드로 출력</button>
+        <button class="btn dark" id="dtmsBtn" title="파일로 저장" disabled>.dtms 파일로 저장</button>
         <div class="saverow">
           <button class="btn" id="hexBtn" disabled><svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>HEX 복사</button>
           <button class="btn" id="pngBtn" disabled><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>PNG 저장</button>
@@ -874,7 +892,7 @@ $('replaceImgBtn').onclick=pickImage;
 $('loadTactileBtn2').onclick=pickTactile;
 $('replaceAnalyze').onclick=pickImage;
 $('cancelAnalyze').onclick=()=>{pendingImg=null;loading=false;setAppState(hasImage?'ready':'empty');};
-$('sampleBtn').onclick=()=>guardUnsaved(loadSample);
+document.querySelectorAll('.samplechip').forEach(b=>b.addEventListener('click',()=>guardUnsaved(()=>loadSample(b.dataset.sample))));
 
 // drag & drop (image + dtm/dtms)
 ['dragenter','dragover'].forEach(ev=>$('canvasArea').addEventListener(ev,e=>{e.preventDefault();$('emptyOv').classList.add('drag');}));
@@ -894,7 +912,7 @@ guardModal.addEventListener('keydown',e=>{if(e.key==='Escape')closeGuard();});
 /* ============================================================
    CLARITY SLIDER
    ============================================================ */
-function clarityLabel(t){return t<95?'부드럽게':t>170?'또렷하게':'균형';}
+function clarityLabel(t){return t<95?'단순':t>170?'또렷하게':'균형';}
 function syncSliders(){$('clarity').value=threshold;$('clarityVal').textContent=threshold;$('rawth').value=threshold;$('recoLabel').textContent=clarityLabel(recoThreshold);}
 function setClarityFb(t,kind){const e=$('clarityFb');if(!e)return;e.textContent=t;e.className='fb'+(kind?' '+kind:'');}
 $('clarity').addEventListener('input',e=>{if(fileKind==='tactile')return;threshold=+e.target.value;method='global';$('method').value='global';$('clarityVal').textContent=threshold;$('rawth').value=threshold;rebuild();afterChange();setClarityFb(connected&&liveOn?'DotPad에 반영 중':'미리보기 반영 중',connected&&liveOn?'sending':'');});
@@ -1028,7 +1046,7 @@ async function connect(){try{const sc=new SDKMod.DotPadScanner();const dev=await
 async function tryAuto(){if(!navigator.bluetooth||!navigator.bluetooth.getDevices)return;try{const ds=await navigator.bluetooth.getDevices();const dp=ds.find(d=>(d.name||'').toLowerCase().startsWith('dotpad'));if(!dp)return;setDpState('connecting');dotDevice=await sdk.connectBleDevice(dp);}catch(e){}}
 function onMsg(device,code){const C=SDKMod.DataCodes;if(code===C.Connected){connected=true;liveOn=true;setDpState('connected');say('DotPad 연결됨');forceSend();updateScoreUI();}else if(code===C.Disconnected){connected=false;dotDevice=null;lastSentHex=null;setDpState('disconnected');updateScoreUI();}}
 function onKey(){}
-function initDotPad(){if(!navigator.bluetooth){disableConnect('BLE 미지원','이 브라우저는 Web Bluetooth를 지원하지 않습니다. Chrome 또는 Edge를 사용하세요.');}else if(!window.isSecureContext){disableConnect('HTTPS 필요','HTTPS 환경(또는 localhost)에서 DotPad 연결을 사용할 수 있습니다.');}else if(!SDKMod){disableConnect('SDK 없음','DotPadSDK-3_0_0.js를 같은 폴더에 두고 다시 열어주세요.');}else{sdk=new SDKMod.DotPadSDK();sdk.setCallBack(onMsg,onKey);tryAuto();}}
+function initDotPad(){if(!navigator.bluetooth){disableConnect('BLE 미지원','Chrome 또는 Edge에서 HTTPS 환경으로 열면 DotPad 연결을 사용할 수 있습니다.');}else if(!window.isSecureContext){disableConnect('HTTPS 필요','Chrome 또는 Edge에서 HTTPS 환경으로 열면 DotPad 연결을 사용할 수 있습니다.');}else if(!SDKMod){disableConnect('SDK 없음','DotPadSDK-3_0_0.js를 같은 폴더에 두고 다시 열어주세요.');}else{sdk=new SDKMod.DotPadSDK();sdk.setCallBack(onMsg,onKey);tryAuto();}}
 function disableConnect(label,desc){const hc=$('connectBtn');hc.disabled=true;hc.classList.remove('accent');hc.textContent=label;const lc=$('liveConnectBtn');lc.disabled=true;lc.textContent=label;$('liveDesc').textContent=desc;$('chipText').textContent=label;$('chip').className='chip error';$('sbDot').textContent=label;}
 
 /* ---------- dirty ---------- */
