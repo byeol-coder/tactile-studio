@@ -2411,11 +2411,168 @@ function syncStep2Cards(){
 
 /* ── 초기 탭 설정 ── */
 qa('.mode-pill').forEach((p,i)=> p.dataset.mode = i+1);
-// dtmsBtn3 / outBtn3 포워딩
+
+/* ══════════════════════════════════════════════════════
+   미배선 기능 전체 연결
+══════════════════════════════════════════════════════ */
+
+/* ── autoSimplifyTog: tog 버튼 (id 수정) ── */
+q('#autoSimplifyTog')?.addEventListener('click',function(){
+  const on = this.getAttribute('aria-checked')==='true';
+  this.setAttribute('aria-checked', on?'false':'true');
+  const mc = document.getElementById('minComp');
+  if(mc){ mc.value = on?'1':'3'; mc.dispatchEvent(new Event('input',{bubbles:true})); }
+  if(hasImage&&grayBuf){ rebuild(); afterChange(); syncQuality(); }
+});
+
+/* ── 윤곽선 버튼 (olBtn0/1/2) → secOutline 포워딩 ── */
+qa('.outline-btn[data-ol]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(b.disabled||fileKind==='tactile') return;
+    const legBtn = document.querySelector(`#secOutline .seg button[data-outline="${b.dataset.ol}"]`);
+    if(legBtn&&!legBtn.disabled) legBtn.click();
+    else {
+      // 직접 처리 (legacy 버튼 없을 때)
+      outline = +b.dataset.ol;
+      rebuild(); afterChange(); syncQuality();
+    }
+    syncOutlineBtns();
+  });
+});
+
+/* ── 뷰 pills: vpDotpad (DotPad 탭) ── */
+q('#vpDotpad')?.addEventListener('click',()=>{
+  if(!connected){ toast('먼저 DotPad를 연결하세요'); return; }
+  qa('.vp').forEach(x=>x.classList.toggle('active',x===q('#vpDotpad')));
+  q('#canvasCard').dataset.view='dotpad';
+  forceSend?.();
+});
+
+/* ── 저장/출력 버튼 전체 배선 ── */
+q('#hdrSaveBtn')?.addEventListener('click',()=>document.getElementById('saveTopBtn')?.click());
+q('#hdrOutputBtn')?.addEventListener('click',()=>document.getElementById('outBtn')?.click());
 q('#dtmsBtn3')?.addEventListener('click',()=>document.getElementById('dtmsBtn')?.click());
 q('#outBtn3')?.addEventListener('click',()=>document.getElementById('outBtn')?.click());
-['hdrSaveBtn','dtmsBtn'].forEach(id=>q('#'+id)?.addEventListener('click',()=>document.getElementById('saveTopBtn')?.click()));
-['hdrOutputBtn','outBtn'].forEach(id=>q('#'+id)?.addEventListener('click',()=>{ try{doOutput&&doOutput();}catch(e){} }));
+q('#bsPreviewBtn')?.addEventListener('click',()=>{
+  if(!hasImage){ toast('이미지를 먼저 불러오세요'); return; }
+  // Before/After 뷰 전환
+  const card=q('#canvasCard');
+  const isBefore=(card.dataset.view==='before');
+  card.dataset.view=isBefore?'after':'before';
+  q('#vpBefore')?.classList.toggle('active',!isBefore);
+  q('#vpCurrent')?.classList.toggle('active',isBefore);
+  if(!isBefore&&srcImage) { const bi=q('#beforeImg'); if(bi&&srcImage.src) bi.src=srcImage.src; }
+});
+
+/* ── 하단바 dtmsBtn / outBtn ── */
+q('#dtmsBtn')?.addEventListener('click',()=>document.getElementById('saveTopBtn')?.click());
+q('#outBtn')?.addEventListener('click',()=>document.getElementById('outBtn2')?.click());
+
+/* ── 가드 모달 버튼 ── */
+q('#guardCancel')?.addEventListener('click',()=>{ document.getElementById('guardModal')?.classList.remove('show'); });
+q('#guardProceed')?.addEventListener('click',()=>{ document.querySelector('#guardModal [id="guardProceed"]')?.click?.(); });
+q('#guardSave')?.addEventListener('click',()=>{ document.querySelector('#guardModal [id="guardSave"]')?.click?.(); });
+
+/* ── 취소/교체 ── */
+q('#cancelAnalyze')?.addEventListener('click',()=>{
+  const b=document.getElementById('cancelAnalyze'); if(b) b.click();
+});
+q('#replaceAnalyze')?.addEventListener('click',()=>{ pickImage?.(); });
+
+/* ── 파일 버튼 (레이블이므로 이미 input 연결됨. 중복 방지) ── */
+// emptyImageBtn2, emptyTactileBtn2, replaceImgBtn3, loadTactileBtn3 → label이 직접 처리
+
+/* ── 샘플 버튼 ── */
+q('#sampleBtn')?.addEventListener('click',()=>{ loadSample?.(); });
+
+/* ── 3단계: edgeCleanup, minCluster, brailleSafe ── */
+// edgeCleanup: outline 강도에 매핑
+q('#edgeCleanup')?.addEventListener('change',function(){
+  if(!hasImage) return;
+  const v=this.value;
+  if(v==='off') minComp=1;
+  else if(v==='light') minComp=2;
+  else if(v==='strong') minComp=5;
+  else minComp=3; // auto
+  const mc=document.getElementById('minComp'); if(mc) mc.value=minComp;
+  rebuild(); afterChange(); syncQuality();
+});
+// minCluster → minComp 엔진 변수 직접 반영
+q('#minCluster')?.addEventListener('change',function(){
+  if(!hasImage) return;
+  minComp=+this.value;
+  const mc=document.getElementById('minComp'); if(mc) mc.value=minComp;
+  rebuild(); afterChange(); syncQuality();
+  // data-ctrl minComp도 동기화
+  const dc=document.querySelector('[data-ctrl="minComp"]'); if(dc) dc.value=minComp;
+});
+// brailleSafe: 여백 여부 (polarity 반전과 연동 없이 힌트성)
+q('#brailleSafe')?.addEventListener('change',function(){
+  toast(this.value==='on'?'점자 여백을 유지해요':'점자 여백 없이 변환해요');
+});
+
+/* ── 3단계: data-ctrl 버튼/셀렉트 ── */
+['hexBtn','pngBtn'].forEach(name=>{
+  const ui=document.querySelector(`[data-ctrl="${name}"]`);
+  const eng=document.getElementById(name);
+  if(ui&&eng) ui.addEventListener('click',()=>eng.click());
+});
+// recoReset
+const uiRR=document.querySelector('[data-ctrl="recoReset"]');
+const engRR=document.getElementById('recoReset');
+if(uiRR&&engRR) uiRR.addEventListener('click',()=>engRR.click());
+
+// hexOut 미러
+const engHO=document.getElementById('hexOut');
+const uiHO=document.querySelector('[data-ctrl="hexOut"]');
+if(engHO&&uiHO){
+  uiHO.textContent=engHO.textContent;
+  new MutationObserver(()=>{ uiHO.textContent=engHO.textContent; })
+    .observe(engHO,{childList:true,characterData:true,subtree:true});
+}
+
+// method/rawth/minComp/advSize 미러 (data-ctrl ↔ engine id)
+['method','rawth','minComp','advSize'].forEach(name=>{
+  const ui=document.querySelector(`[data-ctrl="${name}"]`);
+  const eng=document.getElementById(name);
+  if(!ui||!eng) return;
+  ui.value=eng.value;
+  const ev=ui.tagName==='SELECT'?'change':'input';
+  ui.addEventListener(ev,()=>{ eng.value=ui.value; eng.dispatchEvent(new Event(ev,{bubbles:true})); });
+  eng.addEventListener(ev,()=>{ if(ui.value!==eng.value) ui.value=eng.value; });
+});
+
+/* ── 다중 연결행 동기화 (connRow2, connRow3) ── */
+['connRow2','connRow3'].forEach(id=>{
+  const row=q('#'+id);
+  if(!row) return;
+  row.addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect?.(); });
+  row.addEventListener('keydown',e=>{
+    if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){ e.preventDefault(); doConnect?.(); }
+  });
+});
+['liveSwitch2','liveSwitch3'].forEach(id=>{
+  q('#'+id)?.addEventListener('click',()=>{
+    const sw=q('#'+id); if(sw?.disabled) return;
+    document.getElementById('liveToggle')?.click(); syncAllConn();
+  });
+});
+
+/* ── hdrSaveBtn/hdrOutputBtn 이중 배선 방지 (위에서 이미 했으므로 skip) ── */
+
+/* ── 초기화 ── */
+function init(){
+  paintSlider(threshold); fitCanvas(); syncQuality(); syncAllConn(); syncToolBar(); syncResButtons();
+  resetQuality();
+  // 초기 탭 dataset
+  qa('.mode-pill').forEach((p,i)=> p.dataset.mode = i+1);
+  // edgeCleanup 초기값
+  const ec=q('#edgeCleanup'); if(ec) ec.value='auto';
+  const mc=q('#minCluster'); if(mc) mc.value='3';
+}
+if(document.readyState==='complete'||document.readyState==='interactive') setTimeout(init,0);
+else window.addEventListener('DOMContentLoaded',init);
+document.fonts?.ready?.then(fitCanvas);
 
 /* ══════════════════════════════════════════════════════
    모바일 변환 과정 스크롤 + 피드백
@@ -2511,14 +2668,6 @@ function mobileOnReady(){
   if(rp) setTimeout(()=>scrollToEl(rp, 12), 600);
 }
 
-/* ── 초기화 ── */
-function init(){
-  paintSlider(threshold); fitCanvas(); syncQuality(); syncAllConn(); syncToolBar(); syncResButtons();
-  resetQuality();
-}
-if(document.readyState==='complete'||document.readyState==='interactive') setTimeout(init,0);
-else window.addEventListener('DOMContentLoaded',init);
-document.fonts?.ready?.then(fitCanvas);
 })();
 </script>
 </body>
