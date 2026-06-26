@@ -67,6 +67,21 @@
   .mini-bar{background:var(--minibar);border:1px solid var(--line);border-radius:12px;
     box-shadow:0 1px 1px rgba(0,0,0,.04);padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
   .res-badge{background:var(--pill);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--label)}
+  .mini-right{display:flex;align-items:center;gap:8px}
+  /* 불러오기 드롭다운 */
+  .load-wrap{position:relative}
+  .load-btn{display:flex;align-items:center;gap:6px;background:var(--pill);border:1px solid var(--line);
+    border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--label);cursor:pointer}
+  .load-btn svg{width:14px;height:14px;flex:none;color:var(--muted)}
+  .load-btn:hover{border-color:#d2d6dc}
+  .load-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:192px;background:#fff;
+    border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.1);
+    padding:6px;z-index:30;display:none}
+  .load-menu.open{display:block}
+  .load-menu button{display:flex;align-items:center;gap:9px;width:100%;border:none;background:none;
+    color:var(--text);font-size:13px;font-weight:500;padding:9px 10px;border-radius:8px;cursor:pointer;text-align:left}
+  .load-menu button:hover{background:var(--minibar)}
+  .load-menu button svg{width:15px;height:15px;flex:none;color:var(--muted)}
   .ba-toggle{display:flex;align-items:center;gap:8px;background:var(--pill);border:1px solid var(--line);
     border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
   .ba-toggle svg{width:16px;height:16px;color:var(--muted)}
@@ -267,10 +282,28 @@
           <div class="canvas-card" id="canvasCard" data-view="after">
             <div class="mini-bar">
               <span class="res-badge" id="resBadge">60 × 40</span>
-              <button class="ba-toggle" id="baToggle" disabled aria-label="원본과 변환 결과 전환">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
-                BEFORE ↔ AFTER
-              </button>
+              <div class="mini-right">
+                <div class="load-wrap">
+                  <button class="load-btn" id="loadMenuBtn2" aria-haspopup="true" aria-expanded="false" aria-controls="loadMenuDrop">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                    불러오기
+                  </button>
+                  <div class="load-menu" id="loadMenuDrop" role="menu">
+                    <button role="menuitem" id="menuLoadImage">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5L5 19"/></svg>
+                      다른 이미지 불러오기
+                    </button>
+                    <button role="menuitem" id="menuLoadTactile">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.6" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.6" fill="currentColor" stroke="none"/></svg>
+                      DTM·DTMS 불러오기
+                    </button>
+                  </div>
+                </div>
+                <button class="ba-toggle" id="baToggle" disabled aria-label="원본과 변환 결과 전환">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+                  BEFORE ↔ AFTER
+                </button>
+              </div>
             </div>
             <div class="preview" id="canvasArea">
               <div class="bezel">
@@ -386,6 +419,8 @@
     <div class="bottom">
       <p class="privacy">이미지는 이 기기 안에서만 처리되며, 외부로 전송되지 않아요.</p>
       <div class="acts">
+        <button class="pill-btn" id="replaceImgBtn2" hidden>이미지 교체</button>
+        <button class="pill-btn" id="loadTactileBtn3" hidden>DTM·DTMS 불러오기</button>
         <button class="pill-btn" id="dtmsBtn" title="파일로 저장" disabled>.dtms 파일로 저장</button>
         <button class="pill-btn primary" id="outBtn" title="DotPad로 출력" disabled>닷패드로 출력</button>
       </div>
@@ -1370,7 +1405,31 @@ import('./DotPadSDK-3_0_0.js')
   q('#btnAllUp').addEventListener('click',()=>allPins(1));
   q('#btnAllDown').addEventListener('click',()=>allPins(0));
 
-  /* ---------- 탭 (이미지 변환 / 텍스트 생성) ---------- */
+  /* ---------- 불러오기 드롭다운 (미니바) ---------- */
+  (function(){
+    const btn=q('#loadMenuBtn2'), menu=q('#loadMenuDrop');
+    if(!btn||!menu) return;
+    function open(v){ menu.classList.toggle('open',v); btn.setAttribute('aria-expanded',v?'true':'false'); if(v){ menu.querySelector('button').focus(); } }
+    btn.addEventListener('click',e=>{ e.stopPropagation(); open(!menu.classList.contains('open')); });
+    document.addEventListener('click',()=>open(false));
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') open(false); });
+    q('#menuLoadImage').addEventListener('click',()=>{ open(false); guardUnsaved(()=>pickImage()); });
+    q('#menuLoadTactile').addEventListener('click',()=>{ open(false); guardUnsaved(()=>pickTactile()); });
+  })();
+
+  /* ---------- 하단 이미지 교체 / DTM·DTMS 불러오기 ---------- */
+  q('#replaceImgBtn2').addEventListener('click', ()=>guardUnsaved(()=>pickImage()));
+  q('#loadTactileBtn3').addEventListener('click', ()=>guardUnsaved(()=>pickTactile()));
+
+  /* ---------- ready 상태에서 이미지 교체·DTM 불러오기 버튼 노출 ---------- */
+  const _setAppState3=setAppState;
+  setAppState=function(s){
+    _setAppState3(s);
+    const ready=(s==='ready');
+    const r2=q('#replaceImgBtn2'), lt3=q('#loadTactileBtn3');
+    if(r2) r2.hidden=!ready;
+    if(lt3) lt3.hidden=!ready;
+  };
   qa('.tab').forEach(t=>t.addEventListener('click',()=>{
     qa('.tab').forEach(x=>{x.classList.toggle('active',x===t);x.setAttribute('aria-selected',x===t?'true':'false');});
     const tab=t.dataset.tab;
