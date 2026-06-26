@@ -3,483 +3,547 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-<title>Dot Canvas Agent</title>
+<title>촉각 변환 스튜디오 · Dot Canvas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --bg:#F3F4F6; --workspace:#EEF0F3; --surface:#FFFFFF; --panel:#FAFAFB;
-    --line:#E5E7EB; --line-strong:#D1D5DB;
-    --text:#111827; --text-secondary:#4B5563; --muted:#6B7280; --faint:#9CA3AF;
-    --accent:#FF6A1F; --accent-hover:#E85A10; --accent-soft:#FFF1E8;
-    --success:#16A34A; --warning:#D97706; --danger:#DC2626;
-    --mono:'JetBrains Mono',ui-monospace,monospace;
-    --body:'Pretendard','Inter','Noto Sans KR',system-ui,sans-serif;
-    --header:56px; --statusbar:30px; --rail:52px; --panelw:312px;
+    --accent:#FF4F00; --chip-sel:#FF6B35; --ink:#1F1D1A;
+    --text:#111827; --label:#374151; --muted:#6B7280; --text2:#4B5563;
+    --line:#E5E7EB; --card:#FFFFFF; --minibar:#F9FAFB; --pill:#F3F4F6;
+    --brand-soft:#FFF1EB;
+    --good-bg:#D1FAE5; --good-bd:#A7F3D0; --good-tx:#065F46;
+    --mid-bg:#FEF3C7;  --mid-bd:#FDE68A;  --mid-tx:#92400E;
+    --warn-bg:#FEE2E2; --warn-bd:#FECACA; --warn-tx:#991B1B;
+    --font:'Noto Sans KR','Pretendard',system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
-  body{background:var(--workspace);color:var(--text);font-family:var(--body);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  html,body{margin:0}
+  body{background:#DDE1E6;color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;padding:28px 20px;min-height:100vh}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0)}
-  button,input,select,textarea{font-family:inherit}
-  .skip{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:.5rem 1rem;z-index:120}
-  .skip:focus{left:0}
-  svg.ic{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  svg.tic{width:24px;height:24px;display:block}
-  [hidden]{display:none!important}
+  #legacy{display:none!important}
+  button{font-family:inherit}
+  svg{display:block}
 
-  /* ============ HEADER ============ */
-  .header{display:flex;align-items:center;gap:12px;height:var(--header);padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line);position:relative;z-index:40}
-  .brand{display:flex;align-items:center;gap:9px;white-space:nowrap}
-  .brand .mark{width:24px;height:24px;color:var(--accent)}
-  .brand .bt{display:flex;flex-direction:column;line-height:1.1}
-  .brand .bt b{font-size:16px;font-weight:700;letter-spacing:-.01em}
-  .brand .bt small{font-size:11px;font-weight:500;color:var(--faint)}
-  .hsep{width:1px;height:24px;background:var(--line)}
-  .docwrap{display:flex;align-items:center;gap:6px;min-width:0}
-  .fname{border:1px solid transparent;background:none;color:var(--text);font-size:13px;font-weight:500;padding:5px 8px;border-radius:7px;width:130px}
-  .fname:hover{border-color:var(--line)}
-  .fname:focus{outline:none;border-color:var(--accent);background:var(--panel)}
-  .dirty{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;opacity:0;transition:opacity .15s}
-  .dirty.on{opacity:1}
-  .menuwrap{position:relative}
-  .menu{position:absolute;top:calc(100% + 6px);left:0;min-width:210px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px #11182722;padding:6px;z-index:50}
-  .menu button{display:flex;align-items:center;gap:9px;width:100%;border:none;background:none;color:var(--text);font-size:13px;font-weight:500;padding:9px 10px;border-radius:7px;cursor:pointer;text-align:left}
-  .menu button:hover,.menu button:focus-visible{background:var(--panel);outline:none}
-  .menu .ic{width:16px;height:16px;color:var(--muted);flex:none}
-  .menu .mdiv{height:1px;background:var(--line);margin:4px 2px}
-  .header .sp{flex:1}
-  .chip{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--text-secondary);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px;white-space:nowrap}
-  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
-  .chip.connecting .dot{background:var(--warning);animation:pulse 1s infinite}
-  .chip.connected .dot,.chip.sending .dot,.chip.sent .dot{background:var(--success);box-shadow:0 0 7px #16a34a88}
-  .chip.error .dot{background:var(--danger)}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:9px;padding:8px 13px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;transition:.12s}
-  .btn:hover{border-color:var(--line-strong);background:var(--panel)}
-  .btn:active{transform:translateY(.5px)}
-  .btn .ic{width:16px;height:16px}
-  .btn:disabled{opacity:1;color:var(--faint);background:var(--panel);border-color:var(--line);cursor:not-allowed}
-  .btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn.accent:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
-  .btn.accent:disabled{background:var(--panel);color:var(--faint);border-color:var(--line)}
-  .btn.dark{background:#23283A;color:#fff;border-color:#23283A}
-  .btn.dark:hover{filter:brightness(1.12)}
-  .btn.dark:disabled{background:var(--panel);color:var(--faint);border-color:var(--line);filter:none}
-  .btn:focus-visible,.tool:focus-visible,.seg button:focus-visible,.toggle:focus-visible,.chipbtn:focus-visible,.menuwrap>button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .page{display:flex;justify-content:center}
+  /* ============ DIALOG CARD ============ */
+  .dialog{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    box-shadow:0 18px 50px -20px rgba(0,0,0,.18);padding:24px;width:100%;max-width:1000px;
+    display:flex;flex-direction:column;gap:24px;overflow:clip}
 
-  /* ============ WORKSPACE GRID ============ */
-  .work{display:grid;grid-template-columns:var(--rail) minmax(0,1fr) var(--panelw);height:calc(100vh - var(--header) - 1px)}
-  body:not([data-state="ready"]) .work{grid-template-columns:0 minmax(0,1fr) var(--panelw)}
-  .rail{grid-column:1} .stage{grid-column:2} .panel{grid-column:3}
+  /* header */
+  .hd{display:flex;gap:12px;align-items:center}
+  .brandmark{width:32px;height:32px;border-radius:10px;background:var(--brand-soft);
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .brandmark svg{width:18px;height:18px;color:var(--accent)}
+  .titleblock{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .titleblock h1{margin:0;font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+  .titleblock p{margin:0;font-size:13px;line-height:18px;color:var(--muted)}
 
-  .rail{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0}
-  body:not([data-state="ready"]) .rail{display:none}
-  .tool{width:40px;height:40px;border-radius:10px;border:1px solid transparent;background:none;color:var(--text-secondary);cursor:pointer;display:grid;place-items:center;transition:.12s}
-  .tool:hover{background:var(--panel);color:var(--text)}
-  .tool[aria-pressed="true"]{background:var(--accent);color:#fff}
-  .tool:disabled{color:var(--faint);cursor:not-allowed;background:none}
-  .rail .sep{width:24px;height:1px;background:var(--line);margin:6px 0}
+  /* tabs */
+  .tabs{display:flex;gap:24px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+  .tab{background:none;border:none;padding:0 0 8px;cursor:pointer;position:relative;
+    font-size:14px;font-weight:600;color:var(--muted)}
+  .tab.active{font-weight:700;color:var(--text)}
+  .tab::after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:-1px;
+    width:80px;height:3px;border-radius:999px;background:transparent}
+  .tab.active::after{background:var(--accent)}
+  .tab:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
 
-  .stage{background:var(--workspace);display:flex;flex-direction:column;min-width:0;position:relative}
-  .canvas-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;position:relative}
-  .board{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 3px #1118270d}
-  #pad{display:block;border-radius:6px;background:#fff;touch-action:none}
-  #pad:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
-  /* tool context bar (thickness) */
-  .toolbar-ctx{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;box-shadow:0 4px 14px #11182714;z-index:8;font-size:13px}
-  .toolbar-ctx.show{display:flex}
-  .toolbar-ctx .lbl{font-weight:600;color:var(--text)}
-  .toolbar-ctx .lbl .sub{color:var(--muted);font-weight:500;margin-left:2px}
-  .sizegrp{display:flex;gap:4px}
-  .sizegrp button{min-width:42px;height:30px;border:1px solid var(--line);background:var(--surface);border-radius:7px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer}
-  .sizegrp button[aria-checked="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .sizegrp button:hover:not([aria-checked="true"]){background:var(--panel)}
-  /* overlays */
-  .overlay{position:absolute;inset:16px;border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;background:rgba(255,255,255,.62);backdrop-filter:blur(1px)}
+  /* panes */
+  .tabpane{display:none}
+  #studioRoot[data-tab="image"] .pane-image{display:block}
+  #studioRoot[data-tab="text"]  .pane-text {display:block}
+
+  /* ============ MAIN ============ */
+  .main{display:flex;gap:24px;align-items:flex-start}
+  .left{flex:1;min-width:0}
+  .right{width:360px;flex:none;display:flex;flex-direction:column;gap:16px}
+
+  /* canvas card */
+  .canvas-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;
+    display:flex;flex-direction:column;gap:12px}
+  .mini-bar{background:var(--minibar);border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 1px 1px rgba(0,0,0,.04);padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
+  .res-badge{background:var(--pill);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--label)}
+  .ba-toggle{display:flex;align-items:center;gap:8px;background:var(--pill);border:1px solid var(--line);
+    border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
+  .ba-toggle svg{width:16px;height:16px;color:var(--muted)}
+  .ba-toggle:disabled{opacity:.55;cursor:not-allowed}
+  .ba-toggle:not(:disabled):hover{border-color:#d6dae0}
+
+  .preview{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);height:420px;display:flex;align-items:center;justify-content:center;
+    overflow:clip;position:relative}
+  .bezel{background:var(--ink);border-radius:16px;width:min(420px,100%);height:340px;
+    display:flex;align-items:center;justify-content:center;padding:30px}
+  .dotgrid{background:#fff;border-radius:12px;width:100%;height:100%;position:relative;overflow:clip;
+    display:flex;align-items:center;justify-content:center}
+  #pad{display:block;touch-action:none}
+  #canvasCard[data-view="before"] #pad{visibility:hidden}
+  .before-img{display:none;position:absolute;inset:6%;width:88%;height:88%;object-fit:contain}
+  #canvasCard[data-view="before"] .before-img{display:block}
+
+  /* preview overlays */
+  .overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;text-align:center;padding:18px;background:rgba(255,255,255,.92);border-radius:12px}
   body[data-state="empty"] #emptyOv{display:flex}
   body[data-state="analyzing"] #analyzeOv{display:flex}
-  #emptyOv{border:2px dashed var(--line-strong);background:rgba(255,255,255,.55)}
-  #emptyOv.drag{border-color:var(--accent);background:var(--accent-soft)}
-  #emptyOv .ic{width:44px;height:44px;color:var(--accent)}
-  #emptyOv h2{margin:4px 0 0;font-size:17px;font-weight:700}
-  #emptyOv p{margin:0;color:var(--muted);font-size:13px;max-width:38ch}
-  #emptyOv .row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center}
-  .spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  #emptyOv{border:2px dashed #cfd4db}
+  #emptyOv.drag{border-color:var(--accent);background:var(--brand-soft)}
+  #emptyOv .ico{width:38px;height:38px;color:var(--accent)}
+  #emptyOv h2{margin:2px 0 0;font-size:15px;font-weight:700;color:var(--text)}
+  #emptyOv p{margin:0;font-size:12px;color:var(--muted);max-width:34ch}
+  #emptyOv .ov-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  #analyzeOv h2{margin:0;font-size:14px;font-weight:700;color:var(--text)}
+  #analyzeOv p{margin:0;font-size:12px;color:var(--muted)}
+  #analyzeOv .ov-row{display:flex;gap:12px;margin-top:2px}
+  .spinner{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  #analyzeOv h2{margin:0;font-size:15px;font-weight:700}
-  #analyzeOv p{margin:0;color:var(--muted);font-size:12px;font-family:var(--mono)}
-  #analyzeOv .row{display:flex;gap:8px;margin-top:4px}
-  .samplechip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:.12s}
-  .samplechip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-  .linkbtn{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:4px}
-  .linkbtn:hover{color:var(--accent)}
-  /* status bar */
-  .statusbar{height:var(--statusbar);display:flex;align-items:center;gap:9px;padding:0 14px;background:var(--surface);border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow-x:auto}
-  .statusbar .sdiv{color:var(--faint)}
-  .statusbar b{color:var(--text);font-weight:600}
-  .statusbar .perc.good{color:var(--success)} .statusbar .perc.mid{color:var(--warning)} .statusbar .perc.warn{color:var(--danger)}
+  .ov-btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:999px;padding:8px 14px;
+    font-size:13px;font-weight:600;cursor:pointer}
+  .ov-btn:hover{border-color:#d2d6dc}
+  .ov-btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .ov-btn.accent:hover{background:#e84700}
+  .ov-link{background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:2px}
+  .ov-link:hover{color:var(--accent)}
 
-  .panel{background:var(--surface);border-left:1px solid var(--line);overflow-y:auto;overflow-x:hidden}
-  .mobtab{display:none}
-  .psec{padding:14px 16px;border-bottom:1px solid var(--line)}
-  .psec:last-child{border-bottom:none}
-  body:not([data-state="ready"]) .ro{display:none}
-  .img-only{}.tac-only{}
-  body[data-filekind="tactile"] .img-only{display:none}
-  body:not([data-filekind="tactile"]) .tac-only{display:none}
-  .psec h3{margin:0 0 10px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;color:var(--text)}
-  .psec h3 .ic{width:16px;height:16px;color:var(--accent)}
-  .psec .desc{margin:0 0 8px;font-size:13px;color:var(--text-secondary)}
-  .muted{color:var(--muted)} .faint{color:var(--faint)}
-  .note{font-size:12px;color:var(--text-secondary);background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warning);border-radius:6px;padding:8px 10px;line-height:1.45}
+  /* status */
+  .status{display:flex;gap:8px;align-items:center;justify-content:center}
+  #ssStatus{font-size:12px;color:var(--muted)}
+  .ss-badge{border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}
+  .ss-badge.good{background:var(--good-bg);border:1px solid var(--good-bd);color:var(--good-tx)}
+  .ss-badge.mid {background:var(--mid-bg); border:1px solid var(--mid-bd); color:var(--mid-tx)}
+  .ss-badge.warn{background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-tx)}
 
-  .agent-lead{font-size:13px;font-weight:600;color:var(--text);margin:0 0 8px}
-  .reco-card{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-secondary);padding:5px 0}
-  .reco-card .ic{width:15px;height:15px;color:var(--success);flex:none;margin-top:2px}
-  .grade{display:flex;align-items:baseline;justify-content:space-between;margin:2px 0 6px}
-  .grade .g{font-size:14px;font-weight:700}
-  .grade .g.s4,.grade .g.s3{color:var(--success)} .grade .g.s2{color:var(--warning)} .grade .g.s1{color:var(--danger)}
-  .grade .pins{font-family:var(--mono);font-size:12px;color:var(--muted)}
-  .ask{display:flex;gap:6px;margin-top:10px}
-  .ask input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;background:var(--surface);color:var(--text)}
-  .ask input:focus{outline:none;border-color:var(--accent)}
-  .ask .go{border:none;background:var(--accent);color:#fff;border-radius:9px;padding:0 12px;font-weight:700;cursor:pointer}
-  .ask .go:hover{background:var(--accent-hover)}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .chipbtn{border:1px solid var(--line);background:var(--surface);color:var(--text-secondary);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500;cursor:pointer}
-  .chipbtn:hover{border-color:var(--accent);color:var(--accent)}
+  /* ============ CONTROLS (right) ============ */
+  .ctl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;
+    display:flex;flex-direction:column;gap:12px}
+  .ctl-label{margin:0;font-size:12px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--label)}
+  .ctl-hint{margin:0;font-size:12px;line-height:18px;color:var(--muted)}
+  .seg-pills{display:flex;gap:8px}
+  .chip{flex:1;min-width:0;height:36px;border-radius:999px;border:1px solid var(--line);background:#fff;
+    color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .chip:not(:disabled):hover{border-color:#d6dae0}
+  .chip.sel{background:var(--chip-sel);border-color:var(--chip-sel);color:#fff;font-weight:700}
+  .chip.res-dark.sel{background:var(--ink);border-color:var(--ink)}
+  #resSeg .chip{font-size:12px;font-weight:700}
+  #resSeg .chip:not(.sel){color:var(--muted)}
+  .chip:disabled{cursor:not-allowed;opacity:.55}
+  .chip.res-dark:disabled{opacity:1}
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-  .kv{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0}
-  .kv span:first-child{color:var(--muted);flex:none} .kv span:last-child{color:var(--text);font-family:var(--mono);font-size:12px;text-align:right}
-  .inforow{display:flex;gap:8px;margin-top:10px}.inforow .btn{flex:1}
+  /* slider */
+  .slider-wrap{display:flex;flex-direction:column}
+  .slider-top{display:flex;justify-content:flex-end}
+  .slider-top .pct{font-size:12px;font-weight:700;color:var(--label)}
+  #clarity{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;
+    background:#f3f4f6;outline:none;cursor:pointer;margin:4px 0 8px}
+  #clarity::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--ink);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.28);margin-top:-6px}
+  #clarity::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ink);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.28)}
+  #clarity::-moz-range-progress{background:var(--ink);height:4px;border-radius:2px}
+  #clarity:disabled{opacity:.5;cursor:not-allowed}
+  .slider-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .thresh-note{margin:0;font-size:12px;line-height:18px;font-weight:600;color:var(--ink)}
 
-  .slab{display:flex;justify-content:space-between;align-items:baseline}
-  .slab .t{font-size:14px;font-weight:700}
-  .slab .v{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent)}
-  input[type=range]{width:100%;height:24px;accent-color:var(--accent);cursor:pointer;margin:6px 0 2px}
-  input[type=range]:disabled{accent-color:var(--line-strong);cursor:not-allowed}
-  .ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
-  .reco-line{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--muted)}
-  .reco-line b{color:var(--text-secondary);font-weight:600}
-  .fb{font-size:12px;font-weight:500;margin-top:6px;min-height:16px;color:var(--muted)}
-  .fb.sending{color:var(--warning)} .fb.sent{color:var(--success)} .fb.err{color:var(--danger)}
+  /* connection */
+  .conn{display:flex;gap:8px;align-items:center;padding:8px 0;border-radius:8px}
+  .conn.clickable{cursor:pointer}
+  .conn.clickable:hover .conn-text{color:var(--text)}
+  .conn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .conn-dot{width:8px;height:8px;border-radius:50%;flex:none;background:#9CA3AF}
+  .conn-dot.on{background:#16A34A;box-shadow:0 0 7px rgba(22,163,74,.55)}
+  .conn-dot.busy{background:#D97706;animation:pulse 1s infinite}
+  .conn-dot.err{background:#DC2626}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .conn-text{font-size:13px;font-weight:700;color:var(--label)}
 
-  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:2px}
-  .seg button{flex:1;background:var(--surface);border:none;border-right:1px solid var(--line);color:var(--text-secondary);padding:8px 4px;font-size:13px;font-weight:600;cursor:pointer}
-  .seg button:last-child{border-right:none}
-  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
-  .seg button:hover:not([aria-pressed="true"]){background:var(--panel)}
-  .seg button:disabled{color:var(--faint);cursor:not-allowed}
+  /* connection card + live switch */
+  .conn-card{gap:10px}
+  .conn-card .conn{padding:0}
+  .live-row{display:flex;align-items:center;justify-content:space-between}
+  .live-label{font-size:13px;font-weight:600;color:var(--label)}
+  .switch{position:relative;width:42px;height:24px;border-radius:999px;background:#D1D5DB;border:none;
+    cursor:pointer;transition:background .15s;flex:none}
+  .switch[aria-checked="true"]{background:var(--accent)}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+  .switch[aria-checked="true"]::after{left:21px}
+  .switch:disabled{opacity:.45;cursor:not-allowed}
+  .switch:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
-  .quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .qbtn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:9px;padding:10px 6px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
-  .qbtn:hover{border-color:var(--accent);color:var(--accent)}
-  .qbtn .ic{width:15px;height:15px;flex:none}
-  .qbtn:disabled{opacity:1;color:var(--faint);cursor:not-allowed;border-color:var(--line)}
+  /* text-gen placeholder */
+  .text-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    text-align:center;padding:48px 20px;border:1px dashed var(--line);border-radius:16px;background:var(--minibar)}
+  .text-empty .brandmark{width:44px;height:44px;border-radius:14px}
+  .text-empty .brandmark svg{width:24px;height:24px}
+  .text-empty h2{margin:0;font-size:16px;font-weight:700;color:var(--text)}
+  .text-empty p{margin:0;font-size:13px;color:var(--muted);max-width:42ch}
+  .soon-pill{background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:5px 12px;
+    font-size:12px;font-weight:700;color:var(--label)}
 
-  .pagenav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
-  .pagenav button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text)}
-  .pagenav button:disabled{color:var(--faint);cursor:not-allowed}
-  .pagenav .pind{font-family:var(--mono);font-size:13px;color:var(--text-secondary)}
+  /* bottom */
+  .bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:16px 0;border-top:1px solid var(--line)}
+  .privacy{margin:0;font-size:12px;color:var(--text2)}
+  .acts{display:flex;gap:16px;align-items:center}
+  .pill-btn{height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:#fff;
+    color:var(--text);font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.04);
+    display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+  .pill-btn:not(:disabled):hover{border-color:#d2d6dc;background:var(--minibar)}
+  .pill-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;
+    box-shadow:0 8px 9px rgba(255,79,0,.2)}
+  .pill-btn.primary:not(:disabled):hover{background:#e84700}
+  .pill-btn:disabled{cursor:not-allowed;color:#9CA3AF;background:var(--minibar);border-color:var(--line);box-shadow:none}
+  .pill-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-  .liverow{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
-  .liverow span{font-size:13px;font-weight:500}
-  .toggle{position:relative;width:42px;height:24px;border-radius:999px;background:var(--line-strong);border:none;cursor:pointer;transition:background .15s;flex:none}
-  .toggle[aria-checked="true"]{background:var(--accent)}
-  .toggle::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
-  .toggle[aria-checked="true"]::after{left:21px}
-  .toggle:disabled{opacity:.5;cursor:not-allowed}
+  /* community */
+  .community{display:flex;gap:8px;align-items:center;background:none;border:none;cursor:pointer;
+    padding:8px 0 0;font-size:13px;font-weight:600;color:var(--muted);text-decoration:underline}
+  .community svg{width:16px;height:16px}
+  .community:hover{color:var(--accent)}
+  .community:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
 
-  .savebtns{display:flex;flex-direction:column;gap:8px}
-  .saverow{display:flex;gap:8px}.saverow .btn{flex:1}
-  .hint{font-size:12px;color:var(--muted);margin-top:8px}
-
-  details.expert summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary);padding:4px 0;list-style:none;display:flex;align-items:center;gap:6px}
-  details.expert summary::before{content:"▸";color:var(--faint)}
-  details.expert[open] summary::before{content:"▾"}
-  details.expert .ebody{padding-top:8px}
-  .efield{margin-bottom:8px}
-  .efield label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
-  .efield select,.efield input{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:13px;background:var(--surface);color:var(--text)}
-  .readout{font-family:var(--mono);font-size:11px;color:var(--text-secondary);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:84px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin-top:6px}
-
-  /* modal dialog */
-  .modal-bg{position:fixed;inset:0;background:#11182766;display:none;align-items:center;justify-content:center;z-index:140;padding:20px}
-  .modal-bg.show{display:flex}
-  .modal{background:var(--surface);border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 20px 60px #11182733}
-  .modal h2{margin:0 0 8px;font-size:16px;font-weight:700}
-  .modal p{margin:0 0 18px;font-size:13px;color:var(--text-secondary);line-height:1.5}
-  .modal .actions{display:flex;flex-direction:column;gap:8px}
-  .modal .actions .btn{width:100%}
-
-  #toast{position:fixed;left:50%;bottom:46px;transform:translateX(-50%) translateY(16px);background:#23283A;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:.2s;z-index:130}
+  /* toast */
+  #toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(16px);
+    background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;
+    opacity:0;pointer-events:none;transition:.2s;z-index:130}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   #toast.ok{background:#15803D} #toast.err{background:#B91C1C}
 
-  @media(max-width:900px){:root{--panelw:300px}}
-  @media(max-width:820px){
-    .work{grid-template-columns:1fr!important;height:auto;min-height:calc(100vh - var(--header))}
-    .rail,.stage,.panel{grid-column:auto!important}
-    .stage{order:1;min-height:54vh}
-    .rail{order:2;flex-direction:row;justify-content:center;flex-wrap:wrap;border-right:none;border-top:1px solid var(--line);padding:8px;position:sticky;bottom:0;background:var(--surface);z-index:20}
-    .rail .sep{width:1px;height:24px;margin:0 6px}
-    .panel{order:3;position:fixed;left:0;right:0;bottom:0;max-height:78vh;border-left:none;border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -6px 28px #11182722;transform:translateY(calc(100% - 50px));transition:transform .25s;z-index:60}
-    .panel.open{transform:translateY(0)}
-    .mobtab{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border:none;background:var(--surface);font-weight:700;font-size:14px;cursor:pointer;border-radius:16px 16px 0 0;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line)}
-    .header{flex-wrap:wrap;height:auto;padding:8px 12px;gap:8px}
-    .header .hsep{display:none}
-    .fname{width:104px}
+  /* guard modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(17,24,39,.4);display:none;align-items:center;justify-content:center;z-index:140;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:16px;max-width:380px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(17,24,39,.2)}
+  .modal h2{margin:0 0 8px;font-size:16px;font-weight:700}
+  .modal p{margin:0 0 18px;font-size:13px;color:var(--text2)}
+  .modal .actions{display:flex;flex-direction:column;gap:8px}
+  .modal .actions button{width:100%;height:42px;border-radius:999px;border:1px solid var(--line);background:#fff;
+    font-size:14px;font-weight:600;cursor:pointer}
+  .modal .actions .accent{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+
+  /* responsive */
+  @media(max-width:840px){
+    body{padding:14px}
+    .dialog{padding:18px;border-radius:18px;gap:18px}
+    .main{flex-direction:column}
+    .right{width:100%}
+    .preview{height:320px}
+    .bezel{height:280px;padding:22px}
+    .bottom{flex-direction:column;align-items:stretch;gap:12px}
+    .acts{justify-content:stretch}
+    .acts .pill-btn{flex:1}
   }
 </style>
 </head>
 <body data-state="empty">
-<a class="skip" href="#pad">캔버스로 건너뛰기</a>
 
-<!-- ============ HEADER ============ -->
-<header class="header">
-  <div class="brand">
-    <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="2.3" fill="currentColor"/><circle cx="8" cy="16" r="2.3" fill="currentColor"/><circle cx="16" cy="8" r="2.3" fill="currentColor"/><circle cx="16" cy="16" r="2.3" fill="currentColor"/></svg>
-    <span class="bt"><b>Dot Canvas Agent</b><small>by Dot Tactile Studio</small></span>
-  </div>
-  <div class="hsep" aria-hidden="true"></div>
-  <div class="docwrap">
-    <input class="fname" id="fname" value="Untitled" aria-label="문서 이름" />
-    <span class="dirty" id="dirty" title="저장되지 않은 변경" aria-hidden="true"></span>
-  </div>
-  <div class="menuwrap">
-    <button class="btn" id="loadMenuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="loadMenu"><svg class="ic" viewBox="0 0 24 24"><path d="M5 19h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-7l-2-2H5a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1z"/></svg>불러오기</button>
-    <div class="menu" id="loadMenu" role="menu" hidden>
-      <button role="menuitem" id="miImage"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5L5 19"/></svg>다른 이미지 불러오기</button>
-      <button role="menuitem" id="miTactile"><svg class="ic" viewBox="0 0 24 24"><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.6" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.6" fill="currentColor" stroke="none"/></svg>DTM·DTMS 파일 불러오기</button>
-    </div>
-  </div>
-  <div class="sp"></div>
-  <div class="chip" id="chip" role="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="chipText">DotPad 미연결</span></div>
-  <button class="btn" id="saveTopBtn" title="저장" disabled><svg class="ic" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>저장</button>
-  <button class="btn accent" id="connectBtn"><svg class="ic" viewBox="0 0 24 24"><path d="M8 7l8 5-5 4V4l5 4-8 5"/></svg>DotPad 연결</button>
-</header>
+<div class="page">
+  <div class="dialog" id="studioRoot" data-tab="image" role="dialog" aria-label="촉각 변환 스튜디오">
 
-<div class="work">
-  <!-- ============ LEFT TOOLBAR ============ -->
-  <nav class="rail" role="toolbar" aria-label="편집 도구" id="rail">
-    <button class="tool" data-tool="move" aria-pressed="true" title="이동 (M)" aria-label="이동 도구"><svg class="tic" viewBox="8 8 37 37" fill="none"><path d="M26.5 40.5V12.5M30.7 36.3L26.5 40.5L22.3 36.2999M30.7 16.7L26.5 12.5L22.3 16.7001M36.3 30.7L40.4999 26.5L36.3 22.3M40.4999 26.5H12.5001M16.7 30.7L12.5001 26.5L16.7001 22.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button class="tool" data-tool="pen" aria-pressed="false" title="펜 (P)" aria-label="펜 도구"><svg class="tic" viewBox="8 8 37 37" fill="none"><path d="M19.4839 40.4544L37.6613 40.5M23.6151 19.5H15.3387M19.4839 12.5C17.2013 12.5 15.3387 14.362 15.3387 16.63V34.7739C15.3387 35.4039 15.6048 36.356 15.9269 36.9019L17.0752 38.8059C18.3916 41.004 20.5622 41.004 21.8786 38.8059L23.027 36.9019C23.3491 36.356 23.6151 35.4039 23.6151 34.7739V16.63C23.6151 14.362 21.7526 12.5 19.4839 12.5Z" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></button>
-    <button class="tool" data-tool="eraser" aria-pressed="false" title="지우개 (E)" aria-label="지우개 도구"><svg class="tic" viewBox="8 8 37 37" fill="none"><path d="M22.3298 40.5H39.0107M19.7164 22.4525L30.4895 33.3203M14.7122 34.4141L22.5661 26.4771M18.6322 38.3826L26.5 30.4456M13.8642 34.3019L18.7434 39.2239C19.5253 40.0117 20.5852 40.4543 21.6903 40.4543C22.7955 40.4543 23.8554 40.0117 24.6373 39.2239L39.1358 24.598C39.9168 23.8092 40.3554 22.74 40.3554 21.6252C40.3554 20.5104 39.9168 19.4411 39.1358 18.6524L34.2567 13.7303C33.4747 12.9425 32.4148 12.5 31.3097 12.5C30.2046 12.5 29.1446 12.9425 28.3627 13.7303L13.8642 28.3562C13.0833 29.145 12.6446 30.2143 12.6446 31.3291C12.6446 32.4438 13.0833 33.5131 13.8642 34.3019Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <div class="sep" aria-hidden="true"></div>
-    <button class="tool" id="undoBtn" title="실행 취소 (⌘/Ctrl+Z)" aria-label="실행 취소"><svg class="tic" viewBox="8 8 37 37" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M32.2253 23.2753C35.7535 23.2753 38.5453 26.0326 38.5453 29.3416C38.5453 32.6506 35.7535 35.4078 32.2253 35.4078H20.1498C19.472 35.4078 18.9225 35.9573 18.9225 36.6351C18.9225 37.3129 19.472 37.8624 20.1498 37.8624H32.2253C37.0293 37.8624 40.9998 34.0846 40.9998 29.3416C40.9998 24.5985 37.0293 20.8208 32.2253 20.8208H15.6215C14.9437 20.8208 14.3942 21.3703 14.3942 22.0481C14.3942 22.7259 14.9437 23.2753 15.6215 23.2753H32.2253Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M19.9739 17.3744C19.5028 16.887 18.7259 16.8737 18.2385 17.3448L14.3743 21.079C14.135 21.3103 13.9999 21.6288 13.9999 21.9615C13.9999 22.2943 14.135 22.6128 14.3743 22.844L18.2385 26.5783C18.7259 27.0493 19.5028 27.0361 19.9739 26.5487C20.4449 26.0613 20.4316 25.2843 19.9442 24.8133L16.9932 21.9615L19.9442 19.1098C20.4316 18.6388 20.4449 17.8618 19.9739 17.3744Z" fill="currentColor"/></svg></button>
-    <button class="tool" id="redoBtn" title="다시 실행 (⌘/Ctrl+Shift+Z)" aria-label="다시 실행"><svg class="tic" viewBox="8 8 37 37" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M21.6307 23.2753C18.1026 23.2753 15.3108 26.0326 15.3108 29.3416C15.3108 32.6506 18.1026 35.4078 21.6307 35.4078H33.7063C34.3841 35.4078 34.9336 35.9573 34.9336 36.6351C34.9336 37.3129 34.3841 37.8624 33.7063 37.8624H21.6307C16.8268 37.8624 12.8563 34.0846 12.8563 29.3416C12.8563 24.5985 16.8268 20.8208 21.6307 20.8208H38.2346C38.9124 20.8208 39.4619 21.3703 39.4619 22.0481C39.4619 22.7259 38.9124 23.2753 38.2346 23.2753H21.6307Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M33.8822 17.3744C34.3532 16.887 35.1302 16.8737 35.6176 17.3448L39.4818 21.079C39.721 21.3103 39.8562 21.6288 39.8562 21.9615C39.8562 22.2943 39.721 22.6128 39.4818 22.844L35.6176 26.5783C35.1302 27.0493 34.3532 27.0361 33.8822 26.5487C33.4112 26.0613 33.4245 25.2843 33.9119 24.8133L36.8629 21.9615L33.9119 19.1098C33.4245 18.6388 33.4112 17.8618 33.8822 17.3744Z" fill="currentColor"/></svg></button>
-    <button class="tool" id="clearBtn" title="전체 지우기" aria-label="전체 지우기"><svg class="tic" viewBox="8 8 37 37" fill="none"><path d="M18.4243 40.5H19.9973L20.5514 38.927H23.1928L23.7271 40.5H25.3396L22.6982 33.4363H21.1054L18.4243 40.5ZM21.877 35.1775H21.8968L22.7872 37.7695H20.957L21.877 35.1775ZM25.652 40.5H30.648V39.1941H27.2052V33.4363H25.652V40.5ZM31.2196 40.5H36.2156V39.1941H32.7728V33.4363H31.2196V40.5Z" fill="currentColor"/><path d="M22.9086 30.2053H33.4565M21.2561 18.7933L28.0682 25.6653M18.0917 26.3569L23.058 21.3382M20.5705 28.8663L25.5456 23.8475M17.5555 26.286L20.6408 29.3984C21.1352 29.8965 21.8054 30.1763 22.5042 30.1763C23.203 30.1763 23.8733 29.8965 24.3677 29.3984L33.5355 20.15C34.0293 19.6512 34.3068 18.9751 34.3068 18.2701C34.3068 17.5652 34.0293 16.8891 33.5355 16.3903L30.4503 13.278C29.9558 12.7798 29.2857 12.5 28.5869 12.5C27.888 12.5 27.2178 12.7798 26.7234 13.278L17.5555 22.5264C17.0617 23.0252 16.7843 23.7013 16.7843 24.4062C16.7843 25.1111 17.0617 25.7872 17.5555 26.286Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-  </nav>
-
-  <!-- ============ CENTER STAGE ============ -->
-  <main class="stage" id="stage">
-    <div class="canvas-area" id="canvasArea">
-      <!-- tool thickness context bar -->
-      <div class="toolbar-ctx" id="toolCtx" role="group" aria-label="도구 두께">
-        <span class="lbl" id="toolCtxLbl">펜 도구<span class="sub">두께</span></span>
-        <div class="sizegrp" id="sizeGrp" role="radiogroup" aria-label="브러시 두께">
-          <button role="radio" data-size="1" aria-checked="true">1핀</button>
-          <button role="radio" data-size="2" aria-checked="false">2핀</button>
-          <button role="radio" data-size="3" aria-checked="false">3핀</button>
-        </div>
+    <!-- header -->
+    <header class="hd">
+      <div class="brandmark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
       </div>
-      <div class="board">
-        <canvas id="pad" tabindex="0" role="application" aria-label="DotPad 60×40 촉각 미리보기. 펜/지우개 선택 후 방향키로 이동, 스페이스로 핀 토글."></canvas>
-        <div class="overlay" id="emptyOv">
-          <svg class="ic" viewBox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-          <h2>이미지를 올려 시작하세요</h2>
-          <p>이미지를 드래그하거나, 아래에서 이미지 또는 DTM·DTMS 파일을 불러오세요.</p>
-          <div class="row">
-            <button class="btn accent" id="emptyImageBtn"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5L5 19"/></svg>이미지 불러오기</button>
-            <button class="btn" id="emptyTactileBtn">DTM·DTMS 불러오기</button>
+      <div class="titleblock">
+        <h1>촉각 변환 스튜디오</h1>
+        <p>이미지를 올리면, 시각장애인이 손으로 느낄 수 있는 촉각 그래픽으로 변환해 드려요.</p>
+      </div>
+    </header>
+
+    <!-- tabs -->
+    <div class="tabs" role="tablist" aria-label="작업 방식">
+      <button class="tab active" data-tab="image" role="tab" aria-selected="true">이미지 변환</button>
+      <button class="tab" data-tab="text" role="tab" aria-selected="false">텍스트 생성</button>
+    </div>
+
+    <!-- ===== 이미지 변환 ===== -->
+    <div class="tabpane pane-image">
+      <div class="main">
+        <!-- left -->
+        <div class="left">
+          <div class="canvas-card" id="canvasCard" data-view="after">
+            <div class="mini-bar">
+              <span class="res-badge" id="resBadge">60 × 40</span>
+              <button class="ba-toggle" id="baToggle" disabled aria-label="원본과 변환 결과 전환">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+                BEFORE ↔ AFTER
+              </button>
+            </div>
+            <div class="preview" id="canvasArea">
+              <div class="bezel">
+                <div class="dotgrid" id="dotGrid">
+                  <canvas id="pad" tabindex="0" role="application" aria-label="DotPad 60×40 촉각 미리보기. 방향키로 이동, 스페이스로 핀 토글."></canvas>
+                  <img id="beforeImg" class="before-img" alt="원본 이미지 미리보기" />
+                  <div class="overlay" id="emptyOv">
+                    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                    <h2>이미지를 올려 시작하세요</h2>
+                    <p>이미지를 드래그하거나, 아래에서 불러오세요. DTM·DTMS 파일도 끌어다 놓을 수 있어요.</p>
+                    <div class="ov-row">
+                      <button class="ov-btn accent" id="emptyImageBtn">이미지 불러오기</button>
+                      <button class="ov-btn" id="emptyTactileBtn">DTM·DTMS 불러오기</button>
+                    </div>
+                    <button class="ov-link samplechip" id="sampleBtn">또는 샘플로 시작</button>
+                  </div>
+                  <div class="overlay" id="analyzeOv">
+                    <div class="spinner" aria-hidden="true"></div>
+                    <h2>촉각 그래픽으로 변환하고 있어요</h2>
+                    <p id="analyzeName">image.png</p>
+                    <div class="ov-row"><button class="ov-link" id="cancelAnalyze">취소</button><button class="ov-link" id="replaceAnalyze">이미지 교체</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="status">
+              <span id="ssStatus">이미지를 올려 시작하세요</span>
+              <span class="ss-badge good" id="ssBadge" hidden>촉각 인지: 좋음</span>
+            </div>
           </div>
-          <button class="linkbtn" id="sampleBtn">또는 샘플로 시작</button>
         </div>
-        <div class="overlay" id="analyzeOv">
-          <div class="spinner" aria-hidden="true"></div>
-          <h2>촉각그래픽으로 변환하고 있어요</h2>
-          <p id="analyzeName">image.png</p>
-          <div class="row"><button class="linkbtn" id="cancelAnalyze">취소</button><button class="linkbtn" id="replaceAnalyze">이미지 교체</button></div>
+
+        <!-- right -->
+        <div class="right">
+          <section class="ctl">
+            <p class="ctl-label">촉감 방식</p>
+            <div class="seg-pills" id="claritySeg" role="group" aria-label="촉감 방식">
+              <button class="chip" data-th="80" aria-pressed="false">단순</button>
+              <button class="chip sel" data-th="128" aria-pressed="true">균형</button>
+              <button class="chip" data-th="185" aria-pressed="false">또렷</button>
+            </div>
+            <p class="ctl-hint">손가락으로 느끼는 선명함을 선택하세요</p>
+          </section>
+
+          <section class="ctl">
+            <p class="ctl-label">윤곽선</p>
+            <div class="seg-pills" id="outlineSeg" role="group" aria-label="윤곽선">
+              <button class="chip sel" data-outline="0" aria-pressed="true">없음</button>
+              <button class="chip" data-outline="1" aria-pressed="false">1줄</button>
+              <button class="chip" data-outline="2" aria-pressed="false">2줄</button>
+            </div>
+            <p class="ctl-hint">1줄은 섬세하게, 2줄은 더 뚜렷하게 느껴져요</p>
+          </section>
+
+          <section class="ctl">
+            <p class="ctl-label">점 조밀도</p>
+            <p class="ctl-hint">점을 촘촘하게 할수록 더 잘 느껴지지만, 너무 많으면 구분이 어려워요</p>
+            <div class="slider-wrap">
+              <div class="slider-top"><span class="pct" id="ssPct">—</span></div>
+              <input type="range" id="clarity" min="20" max="240" value="128" aria-label="점 조밀도" />
+              <div class="slider-ends"><span>성기게</span><span>촘촘하게</span></div>
+            </div>
+            <p class="thresh-note" id="ssThreshNote">이미지를 올리면 점이 얼마나 활성화되는지 알려드려요</p>
+          </section>
+
+          <section class="ctl">
+            <p class="ctl-label">출력 크기</p>
+            <div class="seg-pills" id="resSeg" role="group" aria-label="출력 크기">
+              <button class="chip res-dark sel" data-res="60x40" aria-pressed="true">기본 60×40</button>
+              <button class="chip res-dark" data-res="96x64" aria-pressed="false">세밀 96×64</button>
+            </div>
+            <p class="ctl-hint">96×64는 더 촘촘하게 표현돼요. 96×64 지원 DotPad에서 출력됩니다.</p>
+          </section>
+
+          <section class="ctl">
+            <p class="ctl-label">편집</p>
+            <div class="seg-pills" id="editSeg" role="group" aria-label="핀 편집">
+              <button class="chip" id="btnInvert" type="button">반전</button>
+              <button class="chip" id="btnAllUp" type="button">전체 올리기</button>
+              <button class="chip" id="btnAllDown" type="button">전체 내리기</button>
+            </div>
+            <p class="ctl-hint">점형을 반전하거나, 모든 핀을 한 번에 올리고 내려요</p>
+          </section>
+
+          <section class="ctl conn-card">
+            <div class="conn" id="connRow" role="button" tabindex="0" aria-label="DotPad 연결">
+              <span class="conn-dot off" id="connDot" aria-hidden="true"></span>
+              <span class="conn-text" id="connText">DotPad 미연결</span>
+            </div>
+            <div class="live-row">
+              <span class="live-label">라이브 반영</span>
+              <button class="switch" id="liveSwitch" role="switch" aria-checked="false" aria-label="라이브 반영" disabled></button>
+            </div>
+            <p class="ctl-hint" id="liveHint">연결하면 조정 결과가 DotPad에 실시간으로 반영돼요</p>
+          </section>
         </div>
       </div>
     </div>
-    <div class="statusbar" id="statusbar" aria-live="off">
-      <span>60×40</span><span class="sdiv">·</span>
-      <span id="sbTool" hidden></span><span class="sdiv" id="sbToolDiv" hidden>·</span>
-      <span>줌 <b id="sbZoom">100%</b></span><span class="sdiv">·</span>
-      <span>활성 핀 <b id="sbPins">0</b>개</span><span class="sdiv">·</span>
-      <span class="perc" id="sbPerc">촉각 인지 —</span><span class="sdiv">·</span>
-      <span id="sbDot">DotPad 미연결</span>
+
+    <!-- ===== 텍스트 생성 (준비 중) ===== -->
+    <div class="tabpane pane-text">
+      <div class="text-empty">
+        <div class="brandmark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2M9 5v14M7 19h4"/><path d="M14 13h6M14 17h6M14 9h6"/></svg>
+        </div>
+        <h2>텍스트로 촉각 그래픽 만들기</h2>
+        <p>설명을 입력하면 촉각 그래픽으로 만들어주는 기능을 준비하고 있어요. 지금은 ‘이미지 변환’ 탭을 사용해 주세요.</p>
+        <span class="soon-pill">준비 중</span>
+      </div>
     </div>
-    <input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg,.webp,.svg,image/*" class="sr-only" aria-hidden="true" />
-    <input type="file" id="tactileFileInput" accept=".dtm,.dtms" class="sr-only" aria-hidden="true" />
-  </main>
 
-  <!-- ============ RIGHT AGENT PANEL ============ -->
-  <aside class="panel" id="panel" aria-label="Canvas Agent 패널">
-    <button class="mobtab" id="mobtab" aria-expanded="false">조정 패널 열기 ▲</button>
+    <!-- bottom -->
+    <div class="bottom">
+      <p class="privacy">이미지는 이 기기 안에서만 처리되며, 외부로 전송되지 않아요.</p>
+      <div class="acts">
+        <button class="pill-btn" id="dtmsBtn" title="파일로 저장" disabled>.dtms 파일로 저장</button>
+        <button class="pill-btn primary" id="outBtn" title="DotPad로 출력" disabled>닷패드로 출력</button>
+      </div>
+    </div>
 
-    <section class="psec" id="secAgent">
-      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/></svg>Canvas Agent</h3>
-      <p class="agent-lead" id="agentLead">이미지를 올리면 DotPad에 가장 잘 느껴지는 형태로 자동 변환해 드려요.</p>
-      <div id="agentReco" class="ro"></div>
-      <div class="ask ro img-only" id="askWrap">
-        <input id="askInput" placeholder="예: 외곽선만 남겨줘" aria-label="Canvas Agent 명령" />
-        <button class="go" id="askGo" aria-label="명령 실행">↵</button>
-      </div>
-      <div class="chips ro img-only" id="askChips">
-        <button class="chipbtn" data-cmd="simpler">더 단순하게</button>
-        <button class="chipbtn" data-cmd="outline">외곽선 강조</button>
-        <button class="chipbtn" data-cmd="denoise">점 정리</button>
-        <button class="chipbtn" data-cmd="invert">핀 반전</button>
-      </div>
-    </section>
-
-    <!-- 파일 정보 -->
-    <section class="psec ro" id="secInfo">
-      <h3 class="img-only"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5L5 19"/></svg>이미지 정보</h3>
-      <h3 class="tac-only"><svg class="ic" viewBox="0 0 24 24"><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.6" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.6" fill="currentColor" stroke="none"/></svg>원본 촉각 데이터</h3>
-      <div id="infoImage" class="img-only">
-        <div class="kv"><span>파일</span><span id="infoFile">—</span></div>
-        <div class="kv"><span>원본 크기</span><span id="infoSize">—</span></div>
-        <div class="kv"><span>적용 해상도</span><span>60×40</span></div>
-        <div class="kv"><span>유형</span><span id="infoType">—</span></div>
-        <div class="kv"><span>추천 변환</span><span id="infoReco">—</span></div>
-      </div>
-      <div id="infoTactile" class="tac-only">
-        <div class="kv"><span>파일</span><span id="tFile">—</span></div>
-        <div class="kv"><span>형식</span><span id="tFormat">—</span></div>
-        <div class="kv"><span>해상도</span><span id="tRes">60×40</span></div>
-        <div class="kv"><span>페이지</span><span id="tPages">1</span></div>
-        <div class="kv"><span>버전</span><span id="tVersion">—</span></div>
-        <div class="kv"><span>가져오기</span><span id="tStatus">완료</span></div>
-      </div>
-      <div class="inforow">
-        <button class="btn" id="replaceImgBtn">이미지 교체</button>
-        <button class="btn" id="loadTactileBtn2">DTM·DTMS 불러오기</button>
-      </div>
-    </section>
-
-    <!-- 촉각 선명도 (이미지 전용) -->
-    <section class="psec ro" id="secClarity">
-      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2.3"/><circle cx="9" cy="16" r="2.3"/></svg>촉각 방식</h3>
-      <div class="img-only">
-        <div class="seg" id="clarityModeSeg" role="group" aria-label="촉각 방식">
-          <button data-th="80" aria-pressed="false">단순</button>
-          <button data-th="128" aria-pressed="true">균형</button>
-          <button data-th="185" aria-pressed="false">또렷하게</button>
-        </div>
-        <p class="desc faint" style="margin:6px 0 10px;font-size:12px">손가락으로 느끼는 선명함을 선택하세요</p>
-        <div class="slab"><span class="t">부드럽게 — 또렷하게</span><span class="v" id="clarityVal">128</span></div>
-        <input type="range" id="clarity" min="20" max="240" value="128" aria-label="점 초벌도 슬라이더" />
-        <div class="ticks"><span>부드럽게</span><span>균형</span><span>또렷하게</span></div>
-        <div class="reco-line"><span>추천값: <b id="recoLabel">균형</b></span><button class="linkbtn" id="recoReset">추천값으로</button></div>
-        <div class="fb" id="clarityFb" role="status" aria-live="polite"></div>
-      </div>
-      <div class="tac-only note">DTM·DTMS는 이미 완성된 촉각 핀 데이터이므로 이미지용 촉각 선명도 조정이 적용되지 않습니다. 펜·지우개로 직접 편집할 수 있어요.</div>
-    </section>
-
-    <!-- 외곽선 (이미지 전용) -->
-    <section class="psec ro img-only" id="secOutline">
-      <h3><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>윤곽선</h3>
-      <div class="seg" role="group" aria-label="외곽선 모드">
-        <button data-outline="0" aria-pressed="true">없음</button>
-        <button data-outline="1" aria-pressed="false">1줄</button>
-        <button data-outline="2" aria-pressed="false">2줄</button>
-      </div>
-      <p class="desc faint" id="outlineDesc" style="margin:8px 0 0;font-size:12px">채움 실루엣을 유지합니다.</p>
-    </section>
-
-    <!-- 출력 크기 -->
-    <section class="psec ro" id="secOutputSize">
-      <h3><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6M3 15h6"/></svg>출력 크기</h3>
-      <div class="seg" role="group" aria-label="출력 크기">
-        <button data-res="60x40" aria-pressed="true">기본 60×40</button>
-        <button data-res="96x64" aria-pressed="false" disabled title="지원 예정">세밀 96×64</button>
-      </div>
-      <p class="desc faint" style="margin:6px 0 0;font-size:12px">DotPad 표준 해상도입니다.</p>
-    </section>
-
-    <!-- 페이지 (DTM·DTMS 전용, 다중 페이지) -->
-    <section class="psec ro tac-only" id="secPages" hidden>
-      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg>페이지</h3>
-      <div class="pagenav">
-        <button id="prevPage" aria-label="이전 페이지">‹ 이전</button>
-        <span class="pind" id="pageInd">1 / 1</span>
-        <button id="nextPage" aria-label="다음 페이지">다음 ›</button>
-      </div>
-    </section>
-
-    <!-- 빠른 조정 -->
-    <section class="psec ro" id="secQuick">
-      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 7"/><path d="M21 4v3h-3"/><path d="M21 12a9 9 0 0 1-15 6.7L3 17"/><path d="M3 20v-3h3"/></svg>빠른 조정</h3>
-      <div class="quick">
-        <button class="qbtn img-only" data-op="auto"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l1.8 4.6L18 9.4l-4.2 1.8L12 16l-1.8-4.8L6 9.4l4.2-1.8z"/></svg>자동 맞춤</button>
-        <button class="qbtn img-only" data-op="denoise"><svg class="ic" viewBox="0 0 24 24"><path d="M14 4l6 6M19 9l-9 9-5 1 1-5z"/></svg>작은 점 정리</button>
-        <button class="qbtn img-only" data-op="outline"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>외곽선 강조</button>
-        <button class="qbtn" data-op="invert"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>올림/내림 반전</button>
-      </div>
-    </section>
-
-    <!-- DotPad 라이브 -->
-    <section class="psec ro" id="secLive">
-      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M8 7l8 5-5 4V4l5 4-8 5"/></svg>DotPad 라이브</h3>
-      <p class="desc" id="liveDesc">연결하면 조정 결과가 실시간으로 반영됩니다.</p>
-      <button class="btn accent" id="liveConnectBtn" style="width:100%"><svg class="ic" viewBox="0 0 24 24"><path d="M8 7l8 5-5 4V4l5 4-8 5"/></svg>DotPad 연결</button>
-      <div class="liverow" id="liveToggleRow" style="display:none"><span>라이브 반영</span><button class="toggle" id="liveToggle" role="switch" aria-checked="false" aria-label="라이브 반영" disabled></button></div>
-    </section>
-
-    <!-- 저장 / 내보내기 -->
-    <section class="psec ro" id="secSave">
-      <h3><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>저장 / 내보내기</h3>
-      <div class="savebtns">
-        <button class="btn accent" id="outBtn" title="DotPad로 출력" disabled>닷패드로 출력</button>
-        <button class="btn dark" id="dtmsBtn" title="파일로 저장" disabled>.dtms 파일로 저장</button>
-        <div class="saverow">
-          <button class="btn" id="hexBtn" disabled><svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>HEX 복사</button>
-          <button class="btn" id="pngBtn" disabled><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>PNG 저장</button>
-        </div>
-      </div>
-      <p class="hint" id="saveHint">변환 결과가 준비되면 저장할 수 있습니다.</p>
-    </section>
-
-    <!-- 전문가 설정 (이미지 전용) -->
-    <section class="psec ro img-only" id="secExpert">
-      <details class="expert">
-        <summary>전문가 설정</summary>
-        <div class="ebody">
-          <div class="efield"><label for="method">변환 방식</label>
-            <select id="method"><option value="global">자동 (전역 임계값)</option><option value="otsu">Otsu</option><option value="sauvola">Sauvola</option><option value="adaptive">Adaptive</option><option value="mean">평균 밝기</option></select></div>
-          <div class="efield"><label for="rawth">세부 임계값 (raw threshold)</label>
-            <input type="number" id="rawth" min="0" max="255" value="128" /></div>
-          <div class="efield"><label for="minComp">최소 컴포넌트 크기 (핀)</label>
-            <input type="number" id="minComp" min="1" max="40" value="3" /></div>
-          <div class="efield"><label for="advSize">고급 브러시 두께(4·5핀)</label>
-            <select id="advSize"><option value="0">사용 안 함</option><option value="1">사용</option></select></div>
-          <div class="readout" id="hexOut">HEX —</div>
-        </div>
-      </details>
-    </section>
-  </aside>
+    <button class="community" id="communityBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+      커뮤니티에 공개
+    </button>
+  </div>
 </div>
 
-<!-- unsaved-changes dialog -->
+<!-- toast / live region -->
+<div id="toast" role="status" aria-live="polite"></div>
+<div class="sr-only" id="live" role="status" aria-live="assertive"></div>
+
+<!-- file inputs (engine) -->
+<input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg,.webp,.svg,image/*" class="sr-only" aria-hidden="true" />
+<input type="file" id="tactileFileInput" accept=".dtm,.dtms" class="sr-only" aria-hidden="true" />
+
+<!-- unsaved-changes guard (functional) -->
 <div class="modal-bg" id="guardModal" role="dialog" aria-modal="true" aria-labelledby="guardTitle" aria-describedby="guardDesc">
   <div class="modal">
     <h2 id="guardTitle">저장되지 않은 변경이 있어요</h2>
     <p id="guardDesc">새 파일을 불러오면 지금 작업한 내용이 사라집니다.</p>
     <div class="actions">
-      <button class="btn accent" id="guardSave">저장 후 불러오기</button>
-      <button class="btn" id="guardProceed">저장하지 않고 불러오기</button>
-      <button class="btn" id="guardCancel">취소</button>
+      <button class="accent" id="guardSave">저장 후 불러오기</button>
+      <button id="guardProceed">저장하지 않고 불러오기</button>
+      <button id="guardCancel">취소</button>
     </div>
   </div>
 </div>
 
-<div id="toast" role="status" aria-live="polite"></div>
-<div class="sr-only" id="live" role="status" aria-live="assertive"></div>
+<!-- =====================================================================
+     LEGACY 마운트: 화면에는 보이지 않지만 보존된 엔진(SDK·펜/지우개·undo·
+     DTM·DTMS·페이지·HEX/PNG·전문가 설정 등)이 참조하는 요소들.
+     Simplified UI는 이 위에서 동작하며, 기능 손실 없이 재배선된다.
+     ===================================================================== -->
+<div id="legacy" aria-hidden="true" hidden>
+  <input class="fname" id="fname" value="Untitled" />
+  <span class="dirty" id="dirty"></span>
+
+  <!-- DotPad 연결 상태(헤더 칩 미러) -->
+  <div class="chip" id="chip"><span class="dot"></span><span id="chipText">DotPad 미연결</span></div>
+  <button id="connectBtn">DotPad 연결</button>
+  <button id="saveTopBtn">저장</button>
+
+  <!-- 불러오기 메뉴 -->
+  <button id="loadMenuBtn" aria-expanded="false" aria-controls="loadMenu">불러오기</button>
+  <div id="loadMenu" role="menu" hidden>
+    <button role="menuitem" id="miImage">다른 이미지 불러오기</button>
+    <button role="menuitem" id="miTactile">DTM·DTMS 파일 불러오기</button>
+  </div>
+
+  <!-- 편집 도구(펜/지우개/undo) -->
+  <nav class="rail" id="rail">
+    <button class="tool" data-tool="move" aria-pressed="true"></button>
+    <button class="tool" data-tool="pen" aria-pressed="false"></button>
+    <button class="tool" data-tool="eraser" aria-pressed="false"></button>
+    <button class="tool" id="undoBtn"></button>
+    <button class="tool" id="redoBtn"></button>
+    <button class="tool" id="clearBtn"></button>
+  </nav>
+  <div class="toolbar-ctx" id="toolCtx"><span class="lbl" id="toolCtxLbl">펜 도구</span>
+    <div class="sizegrp" id="sizeGrp" role="radiogroup">
+      <button role="radio" data-size="1" aria-checked="true">1핀</button>
+      <button role="radio" data-size="2" aria-checked="false">2핀</button>
+      <button role="radio" data-size="3" aria-checked="false">3핀</button>
+    </div>
+  </div>
+
+  <!-- 상태바 미러 -->
+  <span id="sbTool" hidden></span><span id="sbToolDiv" hidden></span>
+  <span id="sbZoom">100%</span><span id="sbPins">0</span>
+  <span class="perc" id="sbPerc">촉각 인지 —</span><span id="sbDot">DotPad 미연결</span>
+
+  <!-- Canvas Agent(추천/명령) -->
+  <p class="agent-lead" id="agentLead"></p>
+  <div id="agentReco"></div>
+  <div class="ask" id="askWrap"><input id="askInput" /><button class="go" id="askGo">↵</button></div>
+  <div class="chips" id="askChips">
+    <button class="chipbtn" data-cmd="simpler">더 단순하게</button>
+    <button class="chipbtn" data-cmd="outline">외곽선 강조</button>
+    <button class="chipbtn" data-cmd="denoise">점 정리</button>
+    <button class="chipbtn" data-cmd="invert">핀 반전</button>
+  </div>
+
+  <!-- 파일 정보 -->
+  <div id="infoImage"><span id="infoFile">—</span><span id="infoSize">—</span><span id="infoType">—</span><span id="infoReco">—</span></div>
+  <div id="infoTactile"><span id="tFile">—</span><span id="tFormat">—</span><span id="tRes">60×40</span><span id="tPages">1</span><span id="tVersion">—</span><span id="tStatus">완료</span></div>
+  <button id="replaceImgBtn">이미지 교체</button>
+  <button id="loadTactileBtn2">DTM·DTMS 불러오기</button>
+
+  <!-- 촉각 방식(구 세그·미연결) + 슬라이더 미러 값 -->
+  <section id="secClarity">
+    <div class="seg" id="clarityModeSeg" role="group">
+      <button data-th="80" aria-pressed="false">단순</button>
+      <button data-th="128" aria-pressed="true">균형</button>
+      <button data-th="185" aria-pressed="false">또렷하게</button>
+    </div>
+    <span class="v" id="clarityVal">128</span>
+    <b id="recoLabel">균형</b>
+    <button class="linkbtn" id="recoReset">추천값으로</button>
+    <div class="fb" id="clarityFb"></div>
+  </section>
+
+  <!-- 윤곽선(엔진 로직 보유: 2줄 폴백 포함) -->
+  <section id="secOutline">
+    <div class="seg" role="group" aria-label="외곽선 모드">
+      <button data-outline="0" aria-pressed="true">없음</button>
+      <button data-outline="1" aria-pressed="false">1줄</button>
+      <button data-outline="2" aria-pressed="false">2줄</button>
+    </div>
+    <p id="outlineDesc">채움 실루엣을 유지합니다.</p>
+  </section>
+
+  <!-- 페이지(DTM·DTMS 다중) -->
+  <section id="secPages" hidden>
+    <button id="prevPage">‹ 이전</button>
+    <span class="pind" id="pageInd">1 / 1</span>
+    <button id="nextPage">다음 ›</button>
+  </section>
+
+  <!-- 빠른 조정 -->
+  <section id="secQuick">
+    <button class="qbtn img-only" data-op="auto">자동 맞춤</button>
+    <button class="qbtn img-only" data-op="denoise">작은 점 정리</button>
+    <button class="qbtn img-only" data-op="outline">외곽선 강조</button>
+    <button class="qbtn" data-op="invert">올림/내림 반전</button>
+  </section>
+
+  <!-- DotPad 라이브 -->
+  <section id="secLive">
+    <p id="liveDesc"></p>
+    <button id="liveConnectBtn">DotPad 연결</button>
+    <div class="liverow" id="liveToggleRow" style="display:none"><span>라이브 반영</span>
+      <button class="toggle" id="liveToggle" role="switch" aria-checked="false" disabled></button></div>
+  </section>
+
+  <!-- 저장/내보내기 미러(HEX/PNG/saveHint) -->
+  <section id="secSave">
+    <button id="hexBtn" disabled>HEX 복사</button>
+    <button id="pngBtn" disabled>PNG 저장</button>
+    <p class="hint" id="saveHint">변환 결과가 준비되면 저장할 수 있습니다.</p>
+  </section>
+
+  <!-- 전문가 설정 -->
+  <section id="secExpert">
+    <select id="method"><option value="global">자동</option><option value="otsu">Otsu</option><option value="sauvola">Sauvola</option><option value="adaptive">Adaptive</option><option value="mean">평균 밝기</option></select>
+    <input type="number" id="rawth" min="0" max="255" value="128" />
+    <input type="number" id="minComp" min="1" max="40" value="3" />
+    <select id="advSize"><option value="0">사용 안 함</option><option value="1">사용</option></select>
+    <div class="readout" id="hexOut">HEX —</div>
+  </section>
+
+  <!-- 모바일 패널 토글 미러 -->
+  <button class="mobtab" id="mobtab" aria-expanded="false">조정 패널 열기 ▲</button>
+</div>
 
 <script type="module">
 /* ============================================================
@@ -498,8 +562,9 @@ function say(m){ live.textContent=''; requestAnimationFrame(()=>live.textContent
 let toastT=null;
 function toast(m,kind){ const t=$('toast'); t.textContent=m; t.className='show'+(kind?' '+kind:''); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2400); }
 
-const GW=60, GH=40, CC=30, CR=10, N=GW*GH;
-const HEXLEN=CC*CR*2;                 // 600
+let GW=60, GH=40, CC=30, CR=10, N=GW*GH;
+let HEXLEN=CC*CR*2;                 // 600 (60×40) / 1536 (96×64)
+function setResolution(w,h){ GW=w; GH=h; CC=(w/2)|0; CR=(h/4)|0; N=GW*GH; HEXLEN=CC*CR*2; }
 
 /* ---------- state ---------- */
 let appState='empty';                 // empty | analyzing | ready
@@ -808,27 +873,30 @@ function loadSample(){const c=document.createElement('canvas');c.width=240;c.hei
    TACTILE LOAD (DTM·DTMS) — 원본 핀 데이터 보존, 임계값 재적용 금지
    ============================================================ */
 function cleanHex(s){return (s||'').replace(/[^0-9A-Fa-f]/g,'').toUpperCase();}
+function resForHexLen(len){ return len===600?[60,40]:len===1536?[96,64]:null; }
 function parseDTM(text){
   const hex=cleanHex(text);
   if(!hex.length)throw {code:'parse',msg:'DTM 파일에서 핀 데이터를 찾지 못했습니다.'};
-  if(hex.length!==HEXLEN){
-    if(hex.length===1536)throw {code:'res',msg:'96×64 해상도 DTM은 현재 버전(60×40)에서 지원하지 않습니다.'};
-    throw {code:'len',msg:`이 DTM 파일을 열 수 없습니다. 핀 데이터 길이가 60×40 규격(${HEXLEN}자)과 일치하지 않습니다(현재 ${hex.length}자).`};
-  }
-  return {format:'DTM',version:'-',pages:[hexToGrid(hex)],names:['1']};
+  const r=resForHexLen(hex.length);
+  if(!r)throw {code:'len',msg:`이 DTM 파일을 열 수 없습니다. 핀 데이터 길이(${hex.length}자)가 60×40(600자) 또는 96×64(1536자) 규격과 일치하지 않습니다.`};
+  setResolution(r[0],r[1]);
+  return {format:'DTM',version:'-',pages:[hexToGrid(hex)],names:['1'],res:r};
 }
 function parseDTMS(text){
   let json;try{json=JSON.parse(text);}catch(e){throw {code:'corrupt',msg:'손상된 DTMS 파일입니다. JSON 구조를 해석할 수 없습니다.'};}
   const items=json.items;
   if(!Array.isArray(items)||!items.length)throw {code:'corrupt',msg:'이 DTMS 파일에 페이지(items) 데이터가 없습니다.'};
+  const first=cleanHex(items[0]&&items[0].graphic&&items[0].graphic.data);
+  const r=resForHexLen(first.length);
+  if(!r)throw {code:'len',msg:`이 DTMS 파일을 열 수 없습니다. 핀 데이터 길이(${first.length}자)가 60×40 또는 96×64 규격과 일치하지 않습니다.`};
+  setResolution(r[0],r[1]);
   const pgs=[],names=[];
   items.forEach((it,i)=>{
     const hx=cleanHex(it&&it.graphic&&it.graphic.data);
-    if(hx.length===1536)throw {code:'res',msg:'96×64 해상도 DTMS는 현재 버전(60×40)에서 지원하지 않습니다.'};
-    if(hx.length!==HEXLEN)throw {code:'len',msg:`이 DTMS 파일을 열 수 없습니다. ${i+1}페이지 핀 데이터 길이가 60×40 규격과 일치하지 않습니다.`};
+    if(hx.length!==HEXLEN)throw {code:'len',msg:`이 DTMS 파일을 열 수 없습니다. ${i+1}페이지 해상도가 다른 페이지와 일치하지 않습니다.`};
     pgs.push(hexToGrid(hx));names.push((it&&it.title)||String(i+1));
   });
-  return {format:'DTMS',version:(json.version||json.lang_option?String(json.version||'1'):'-'),pages:pgs,names,device:json.device,title:json.title};
+  return {format:'DTMS',version:(json.version||json.lang_option?String(json.version||'1'):'-'),pages:pgs,names,device:json.device,title:json.title,res:r};
 }
 function loadTactileFile(f){
   if(!f)return;
@@ -852,11 +920,11 @@ function applyTactile(parsed,filename){
   pages=parsed.pages.map(p=>Uint8Array.from(p));curPage=0;pageUndo=pages.map(()=>[]);pageRedo=pages.map(()=>[]);
   grid=pages[0];
   setFname((parsed.title||filename.replace(/\.[^.]+$/,''))||'Untitled');
-  $('tFile').textContent=filename.slice(0,22);$('tFormat').textContent=parsed.format;$('tRes').textContent='60×40';
+  $('tFile').textContent=filename.slice(0,22);$('tFormat').textContent=parsed.format;$('tRes').textContent=GW+'×'+GH;
   $('tPages').textContent=String(parsed.pages.length);$('tVersion').textContent=parsed.version||'-';$('tStatus').textContent='완료';
   // agent reco for tactile
   $('agentLead').textContent='원본 촉각 데이터를 불러왔어요.';
-  $('agentReco').innerHTML=`<div class="grade"><span class="g s3" id="qGrade">${parsed.format} · 60×40 · ${parsed.pages.length}페이지</span><span class="pins" id="qPins"></span></div><div class="desc muted" id="qReason" style="margin:0 0 6px">원본 핀 데이터를 손상 없이 그대로 불러왔습니다. 펜·지우개로 편집할 수 있어요.</div>`;
+  $('agentReco').innerHTML=`<div class="grade"><span class="g s3" id="qGrade">${parsed.format} · ${GW}×${GH} · ${parsed.pages.length}페이지</span><span class="pins" id="qPins"></span></div><div class="desc muted" id="qReason" style="margin:0 0 6px">원본 핀 데이터를 손상 없이 그대로 불러왔습니다. 펜·지우개로 편집할 수 있어요.</div>`;
   dtmsBtnLabel();updatePageUI();
   loading=false;setAppState('ready');afterChange(false);setDirty(false);forceSend();
   say(`${parsed.format} 불러오기 완료, ${parsed.pages.length}페이지`);toast(`${parsed.format} 파일을 불러왔어요`,'ok');
@@ -1059,7 +1127,273 @@ $('fname').addEventListener('input',()=>setDirty(true));
 $('mobtab').onclick=()=>{const p=$('panel');const open=p.classList.toggle('open');$('mobtab').setAttribute('aria-expanded',open?'true':'false');$('mobtab').textContent=open?'조정 패널 닫기 ▼':'조정 패널 열기 ▲';};
 window.addEventListener('resize',layout);
 setAppState('empty');layout();updateScoreUI();updateUndoButtons();
-import('./DotPadSDK-3_0_0.js').then(m=>{SDKMod=m;}).catch(e=>{console.warn('SDK 미로드 → 시뮬레이터',e);}).finally(initDotPad);
+import('./DotPadSDK-3_0_0.js')
+  .then(m=>{SDKMod=m;})
+  .catch(()=>import('https://byeol-coder.github.io/tactile_agent/DotPadSDK-3_0_0.js').then(m=>{SDKMod=m;}))
+  .catch(e=>{console.warn('SDK 미로드 → 시뮬레이터',e);})
+  .finally(initDotPad);
+
+
+/* ============================================================
+   SIMPLIFIED UI 재배선 (Figma: Tactile Conversion Studio)
+   - 엔진 코드는 위에서 그대로 보존. 여기서는 새 마크업의
+     컨트롤을 기존 엔진 함수/상태에 연결하고, 상태를 화면에 동기화한다.
+   - 함수 바인딩 재할당(monkey-patch)으로 엔진 본문을 건드리지 않는다.
+   ============================================================ */
+(function(){
+  const q=s=>document.querySelector(s);
+  const qa=s=>Array.from(document.querySelectorAll(s));
+
+  /* ---------- 캔버스 핏: #dotGrid 컨테이너 기준 ---------- */
+  function fitCanvas(){
+    const boxEl=document.getElementById('dotGrid');
+    if(!boxEl||!pad) return;
+    const W=boxEl.clientWidth, H=boxEl.clientHeight;
+    if(W<=0||H<=0) return;
+    const cw=Math.floor((W-off*2)/GW), ch=Math.floor((H-off*2)/GH);
+    cell=Math.max(4,Math.min(16,Math.min(cw,ch)));
+    const w=GW*cell+off*2, h=GH*cell+off*2, dpr=window.devicePixelRatio||1;
+    pad.width=w*dpr; pad.height=h*dpr; pad.style.width=w+'px'; pad.style.height=h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const z=document.getElementById('sbZoom'); if(z) z.textContent=Math.round(cell/12*100)+'%';
+    draw();
+  }
+  layout=fitCanvas;                 // 엔진 내부 setTimeout(layout,0) 등도 새 버전 사용
+  window.addEventListener('resize',fitCanvas);
+
+  /* ---------- 상태 → 화면 동기화 ---------- */
+  function gradeClass(g){return g>=3?'good':g===2?'mid':'warn';}
+  function pctFromThreshold(t){return Math.round((t-20)/220*100);}
+  function paintSlider(){const sl=q('#clarity');if(!sl)return;const pct=Math.max(0,Math.min(100,pctFromThreshold(+sl.value)));sl.style.background='linear-gradient(to right,#1f1d1a 0 '+pct+'%,#f3f4f6 '+pct+'% 100%)';}
+
+  function syncStatus(){
+    const statusEl=q('#ssStatus'), badge=q('#ssBadge'), note=q('#ssThreshNote'), pctEl=q('#ssPct');
+    // 컨트롤 활성/비활성·하이라이트는 상태와 무관하게 항상 반영
+    paintSlider(); syncClarityChips(); syncOutlineChips(); syncBeforeAfter(); syncEditControls(); syncResChips();
+    const rb=q('#resBadge'); if(rb) rb.textContent=GW+' × '+GH;
+    const pad2=document.getElementById('pad'); if(pad2) pad2.setAttribute('aria-label','DotPad '+GW+'×'+GH+' 촉각 미리보기. 방향키로 이동, 스페이스로 핀 토글.');
+    const active=(appState==='ready')&&hasImage;
+    if(!active){
+      if(statusEl) statusEl.textContent='이미지를 올려 시작하세요';
+      if(badge) badge.hidden=true;
+      if(note) note.textContent='이미지를 올리면 점이 얼마나 활성화되는지 알려드려요';
+      if(pctEl) pctEl.textContent='—';
+      return;
+    }
+    const pins=countOn(grid);
+    const fill=Math.round(pins/N*100);
+    const sc=tactileQualityScore(grid,{type:imgMeta&&imgMeta.type,outline});
+    const gt=GRADE_TXT[sc.grade];
+    if(statusEl) statusEl.textContent=GW+'×'+GH+' · 점 '+pins+'개 활성화 · '+fill+'% 채움';
+    if(badge){badge.hidden=false; badge.textContent='촉각 인지: '+gt; badge.className='ss-badge '+gradeClass(sc.grade);}
+    if(note) note.textContent='지금 설정으로 점 '+pins+'개가 활성화돼요 · 촉각 인지: '+gt;
+    if(pctEl) pctEl.textContent=pctFromThreshold(threshold)+'%';
+  }
+
+  function syncClarityChips(){
+    const tac=(fileKind==='tactile');
+    qa('#claritySeg .chip').forEach(b=>{
+      const th=+b.dataset.th;
+      let on=false;
+      if(!tac){
+        if(threshold<95) on=(th===80);
+        else if(threshold>170) on=(th===185);
+        else on=(th===128);
+      }
+      b.classList.toggle('sel',on);
+      b.setAttribute('aria-pressed',on?'true':'false');
+      b.disabled=(appState!=='ready')||tac;
+    });
+    const sl=q('#clarity'); if(sl) sl.disabled=(appState!=='ready')||tac;
+  }
+  function syncOutlineChips(){
+    const tac=(fileKind==='tactile');
+    qa('#outlineSeg .chip').forEach(b=>{
+      const v=+b.dataset.outline;
+      b.classList.toggle('sel',v===outline);
+      b.setAttribute('aria-pressed',v===outline?'true':'false');
+      b.disabled=(appState!=='ready')||tac;
+    });
+  }
+  function syncBeforeAfter(){
+    const card=q('#canvasCard'); if(!card) return;
+    const hasSrc=!!srcImage;
+    const tog=q('#baToggle');
+    if(tog) tog.disabled=!hasSrc;
+    if(!hasSrc) card.dataset.view='after';
+    const bi=q('#beforeImg');
+    if(bi){ if(hasSrc && srcImage.src) bi.src=srcImage.src; }
+  }
+  function syncEditControls(){
+    const off=(appState!=='ready')||!hasImage;
+    qa('#editSeg .chip').forEach(b=>{ b.disabled=off; });
+  }
+  function syncResChips(){
+    const tac=(fileKind==='tactile');
+    qa('#resSeg .chip').forEach(x=>{
+      const p=x.dataset.res.split('x'); const w=+p[0], h=+p[1];
+      const on=(w===GW&&h===GH);
+      x.classList.toggle('sel',on); x.setAttribute('aria-pressed',on?'true':'false');
+      x.disabled=tac;   // 불러온 촉각 파일은 해상도 변경 불가
+    });
+  }
+  function switchRes(w,h){
+    if(GW===w&&GH===h) return true;
+    if(fileKind==='tactile'){ toast('불러온 촉각 파일의 해상도는 바꿀 수 없어요'); return false; }
+    setResolution(w,h);
+    if(hasImage&&srcImage){ renderGray(); autoSelect(); }
+    else { grid=new Uint8Array(N); }
+    pages=[grid]; curPage=0; pageUndo=[[]]; pageRedo=[[]];
+    fitCanvas(); afterChange(false);
+    say('출력 크기 '+w+'×'+h);
+    return true;
+  }
+
+  /* ---------- 핀 편집: 반전 / 전체 올리기·내리기 ---------- */
+  function invertPins(){ if(appState!=='ready'||!hasImage) return; applyOp('invert'); }
+  function allPins(v){ if(appState!=='ready'||!hasImage) return; pushUndo(); for(let i=0;i<N;i++) grid[i]=v; pages[curPage]=grid; afterChange(); say(v?'전체 핀 올림':'전체 핀 내림'); toast(v?'전체 핀을 올렸어요':'전체 핀을 내렸어요'); }
+
+  function syncConn(){
+    const dotEl=q('#connDot'), txtEl=q('#connText'), row=q('#connRow');
+    if(!dotEl||!txtEl) return;
+    txtEl.textContent = dpDisabled ? dpDisabledLabel : dpStatusText();
+    let cls='off';
+    if(dpDisabled) cls='err';
+    else if(connected) cls='on';
+    else if(dpState==='connecting') cls='busy';
+    else if(dpState==='error') cls='err';
+    dotEl.className='conn-dot '+cls;
+    if(row){ row.classList.toggle('clickable', !connected && !dpDisabled); }
+    const sw=q('#liveSwitch'), hint=q('#liveHint');
+    if(sw){ sw.disabled=!connected||dpDisabled; sw.setAttribute('aria-checked',(connected&&liveOn&&!dpDisabled)?'true':'false'); }
+    if(hint){ hint.textContent = dpDisabled ? (dpDisabledLabel+' 상태예요')
+        : connected ? (liveOn?'조정 결과가 DotPad에 실시간으로 반영되고 있어요':'라이브 반영이 꺼져 있어요')
+        : '연결하면 조정 결과가 DotPad에 실시간으로 반영돼요'; }
+  }
+
+  /* ---------- 패치(monkey-patch): 엔진 함수 뒤에 동기화 부착 ---------- */
+  const _updateScoreUI=updateScoreUI;
+  updateScoreUI=function(){ _updateScoreUI(); try{syncStatus();}catch(e){} };
+
+  const _setAppState=setAppState;
+  setAppState=function(s){ _setAppState(s); try{ fitCanvas(); syncStatus(); syncConn(); }catch(e){} };
+
+  const _setDpState=setDpState;
+  setDpState=function(s){ _setDpState(s); try{syncConn();}catch(e){} };
+
+  let dpDisabled=false, dpDisabledLabel='';
+  const _disableConnect=disableConnect;
+  disableConnect=function(label,desc){ dpDisabled=true; dpDisabledLabel=label||'연결 불가'; _disableConnect(label,desc); try{
+      const t=q('#connText'); if(t) t.textContent=dpDisabledLabel;
+      const d=q('#connDot'); if(d) d.className='conn-dot err';
+      const r=q('#connRow'); if(r) r.classList.remove('clickable');
+    }catch(e){} };
+
+  /* ---------- 충실 변환: 이미지 형태를 그대로 점형으로 ----------
+     기존 autoSelect는 여러 후보를 비교하다 극성을 반전(배경을 점으로)시켜
+     테두리 링 같은 음각 결과가 나올 수 있었다. 여기서는 전경(형태)을
+     그대로 올림 점으로 만든다:
+       - 투명 PNG: 불투명 영역 = 형태
+       - 그 외: Otsu 임계값으로 이진화하되, 점이 화면의 절반 이상을 덮으면
+         그 영역은 배경이므로 반전해 '형태(소수 영역)'를 점으로 유지
+       - 윤곽선 없음(채움 실루엣), 미세 점(1핀)만 정리 — 형태는 깎지 않음 */
+  autoSelect=function(){
+    imgMeta=Object.assign(imgMeta||{},analyzeImageType());
+    let meth, pol, t=otsu(grayBuf);
+    if(imgMeta.hasAlpha){
+      meth='alpha'; pol=false;
+    }else{
+      meth='global';
+      let m=fillT(grayBuf,t,false), on=0; for(let i=0;i<N;i++) on+=m[i];
+      // 기본: 어두운 형태 → 올림 점(촉각 그래픽 관례). 점이 화면을 거의 다
+      // 덮는 경우(=어두운 배경 이미지)에만 반전해 전경을 점으로 유지.
+      pol=(on>N*0.75);
+    }
+    method=(meth==='alpha')?'alpha':'global';
+    polarity=pol; outline=0; threshold=t;
+    recoThreshold=t; recoOutline=0;
+    rebuild();
+    return {score:100, meth:(meth==='alpha'?'alpha':'global'), pol, ol:0};
+  };
+
+  /* ---------- 촉감 방식 (임계값 프리셋) ---------- */
+  q('#claritySeg').addEventListener('click',e=>{
+    const b=e.target.closest('.chip[data-th]'); if(!b||b.disabled||fileKind==='tactile') return;
+    threshold=+b.dataset.th; method='global';
+    const m=document.getElementById('method'); if(m) m.value='global';
+    const sl=document.getElementById('clarity'); if(sl) sl.value=Math.max(20,Math.min(240,threshold));
+    rebuild(); afterChange();
+    say('촉감 방식: '+b.textContent.trim());
+  });
+
+  /* ---------- 윤곽선: 기존 엔진 로직(폴백 포함) 재사용 ---------- */
+  q('#outlineSeg').addEventListener('click',e=>{
+    const b=e.target.closest('.chip[data-outline]'); if(!b||b.disabled||fileKind==='tactile') return;
+    const hidden=document.querySelector('#secOutline .seg button[data-outline="'+b.dataset.outline+'"]');
+    if(hidden && !hidden.disabled) hidden.click();   // → 엔진 핸들러(2줄 폴백 포함) 실행
+    syncOutlineChips();
+  });
+
+  /* ---------- 점 조밀도 슬라이더: 엔진 input 리스너가 rebuild 담당.
+       여기서는 %·프리셋 칩 하이라이트만 추가 ---------- */
+  q('#clarity').addEventListener('input',()=>{ const p=q('#ssPct'); if(p) p.textContent=pctFromThreshold(+q('#clarity').value)+'%'; paintSlider(); syncClarityChips(); });
+
+  /* ---------- 출력 크기: 60×40 ↔ 96×64 ---------- */
+  q('#resSeg').addEventListener('click',e=>{
+    const b=e.target.closest('.chip[data-res]'); if(!b||b.disabled) return;
+    const p=b.dataset.res.split('x');
+    switchRes(+p[0],+p[1]);
+    syncResChips();
+  });
+
+  /* ---------- BEFORE ↔ AFTER ---------- */
+  q('#baToggle').addEventListener('click',()=>{
+    if(q('#baToggle').disabled) return;
+    const card=q('#canvasCard');
+    card.dataset.view = (card.dataset.view==='before')?'after':'before';
+    say(card.dataset.view==='before'?'원본 이미지 보기':'촉각 변환 결과 보기');
+  });
+
+  /* ---------- 연결: 행 클릭 → 엔진 connect ---------- */
+  q('#connRow').addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect(); });
+  q('#connRow').addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){e.preventDefault();doConnect();} });
+
+  /* ---------- 라이브 반영 토글 → 엔진 liveToggle ---------- */
+  q('#liveSwitch').addEventListener('click',()=>{
+    const sw=q('#liveSwitch'); if(sw.disabled) return;
+    const ht=document.getElementById('liveToggle'); if(ht) ht.click();   // 엔진: liveOn 토글 + 재전송
+    syncConn();
+  });
+
+  /* ---------- 핀 편집 버튼 ---------- */
+  q('#btnInvert').addEventListener('click',invertPins);
+  q('#btnAllUp').addEventListener('click',()=>allPins(1));
+  q('#btnAllDown').addEventListener('click',()=>allPins(0));
+
+  /* ---------- 탭 (이미지 변환 / 텍스트 생성) ---------- */
+  qa('.tab').forEach(t=>t.addEventListener('click',()=>{
+    qa('.tab').forEach(x=>{x.classList.toggle('active',x===t);x.setAttribute('aria-selected',x===t?'true':'false');});
+    const tab=t.dataset.tab;
+    q('#studioRoot').dataset.tab=tab;
+    say(tab==='image'?'이미지 변환 탭':'텍스트 생성 탭');
+  }));
+
+  /* ---------- 커뮤니티에 공개 (준비 중) ---------- */
+  q('#communityBtn').addEventListener('click',()=>{ toast('커뮤니티 공개는 준비 중이에요'); });
+
+  /* ---------- 미리보기 클릭 = 업로드(빈 상태) ---------- */
+  // emptyOv 안의 버튼은 엔진이 이미 배선. 추가로 빈 캔버스 영역 클릭 시 picker.
+  q('#canvasArea').addEventListener('click',e=>{
+    if(appState==='empty' && !e.target.closest('button')) { const b=document.getElementById('emptyImageBtn'); if(b) b.click(); }
+  });
+
+  /* ---------- 초기 동기화 ---------- */
+  function init(){ paintSlider(); fitCanvas(); syncStatus(); syncConn(); }
+  if(document.readyState==='complete'||document.readyState==='interactive') setTimeout(init,0);
+  else window.addEventListener('DOMContentLoaded',init);
+  // 폰트 로드 후 캔버스 크기 보정
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitCanvas);
+})();
 </script>
 </body>
 </html>
