@@ -3,915 +3,595 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"/>
-<title>촉각 그래픽 생성 · Dot Canvas</title>
+<title>Dot Canvas — 촉각그래픽 AI 에디터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
 <style>
-/* ── TOKENS (Figma 추출 그대로) ── */
+/* ══════════════════════════════════════════════════════
+   DESIGN TOKENS
+   Dark editor chrome · Ivory canvas island · Teal AI signature
+══════════════════════════════════════════════════════ */
 :root{
-  --white:#FFFFFF;
-  --bg:#F4F1EB;          /* 워크스페이스 배경 */
-  --surface:#FBFAF7;     /* 패널 내부 카드 */
-  --border:#E5DED3;
-  --border2:#D4CFC8;
-  --ink:#241F1A;         /* 텍스트 강 */
-  --text:#241F1A;
-  --muted:#776F66;
-  --placeholder:#A59A8E;
-  --accent:#F36B2F;      /* 적용/출력 버튼 */
-  --accent-h:#E05A20;
-  --accent-bg:#FFF0E7;   /* 오렌지 pill 배경 */
-  --green:#2E9D69;
-  --green-bg:#EAF7F1;
-  --blue:#3C75D9;
-  --blue-bg:#EDF3FF;
-  --slider-track:#E0E4E8;
-  --slider-active:#6B7280;
-  --font:'Noto Sans KR','Inter',system-ui,-apple-system,sans-serif;
+  /* chrome */
+  --chrome:        #0D0D0D;
+  --panel:         #141414;
+  --panel2:        #1C1C1C;
+  --hover:         #242424;
+  --active:        #2C2C2C;
+  --border:        rgba(255,255,255,.08);
+  --border2:       rgba(255,255,255,.14);
+  /* text */
+  --t-hi:          #F2F0ED;
+  --t-mid:         #9A9590;
+  --t-lo:          #5A5652;
+  /* accent */
+  --orange:        #FF5A1F;
+  --orange-dim:    rgba(255,90,31,.15);
+  --orange-glow:   0 0 24px rgba(255,90,31,.35);
+  /* AI signature */
+  --teal:          #00C2A8;
+  --teal-dim:      rgba(0,194,168,.12);
+  --teal-glow:     0 0 20px rgba(0,194,168,.3);
+  /* canvas */
+  --canvas-bg:     #F0EDE8;
+  --dot-off:       rgba(120,112,104,.18);
+  --dot-on:        #1A1816;
+  /* status */
+  --green:         #22C55E;
+  --green-dim:     rgba(34,197,94,.12);
+  --blue:          #3B82F6;
+  --blue-dim:      rgba(59,130,246,.12);
+  --red:           #EF4444;
+  --font-ui:       'Inter','Noto Sans KR',system-ui,sans-serif;
+  --font-ko:       'Noto Sans KR','Inter',system-ui,sans-serif;
+  --r-s:4px; --r-m:8px; --r-l:12px; --r-xl:16px; --r-2xl:20px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:13px;
-  line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
-button{font-family:inherit;cursor:pointer;border:none;background:none}
-svg{display:block}
+html,body{height:100%;background:var(--chrome);color:var(--t-hi);
+  font-family:var(--font-ui);font-size:13px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+svg{display:block;flex-shrink:0}
+input,select,textarea{font-family:inherit}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 #legacy{display:none!important}
 
-/* ── HEADER ── */
-.app-header{
-  height:68px;background:var(--white);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 24px;gap:0;flex-shrink:0;
-  justify-content:space-between
+/* ══════════════════════════════════════════════════════
+   TITLE BAR (macOS-feel)
+══════════════════════════════════════════════════════ */
+.title-bar{
+  height:44px;background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;
+  user-select:none
 }
-/* brand */
-.brand{display:flex;align-items:center;gap:12px}
-.brand-mark{width:34px;height:34px;background:var(--ink);border-radius:10px;
-  display:grid;place-items:center;flex-shrink:0}
-.brand-mark span{color:#fff;font-size:16px;font-weight:700}
-.brand-title{font-size:18px;font-weight:600;color:var(--ink);line-height:24px;white-space:nowrap}
-.brand-sub{font-size:12px;color:var(--muted);line-height:18px}
-/* mode switch — 2줄 스텝 탭 (Figma: h=56, w=140) */
-.mode-switch{background:var(--surface);border:1px solid var(--border);border-radius:13px;
-  padding:4px 5px;display:flex;gap:4px}
-.mode-pill{width:140px;height:56px;padding:8px 10px;border-radius:13px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  color:var(--muted);transition:.1s;flex-shrink:0}
-.mode-pill-main{font-size:12px;font-weight:700;line-height:16px;white-space:nowrap}
-.mode-pill-sub{font-size:10px;font-weight:500;line-height:12px;white-space:nowrap;opacity:.8}
-.mode-pill.active{background:var(--ink);color:#fff}
-.mode-pill.active .mode-pill-sub{color:rgba(255,255,255,.8)}
-.mode-pill:hover:not(.active){background:var(--border);color:var(--ink)}
-/* status pills */
-.status-pills{display:flex;gap:8px;align-items:center}
-.sp{height:28px;padding:0 10px;border-radius:14px;font-size:12px;font-weight:600;
-  display:flex;align-items:center;gap:6px;white-space:nowrap}
-.sp-res{background:var(--blue-bg);color:var(--blue)}
-.sp-live{background:var(--green-bg);color:var(--green)}
-.sp-live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
-.sp-local{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
-/* header buttons */
-.hdr-btns{display:flex;gap:8px}
-.hdr-btn{height:36px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;
-  background:var(--surface);border:1px solid var(--border);color:var(--ink);white-space:nowrap}
-.hdr-btn:hover{background:var(--bg)}
-.hdr-btn:disabled{opacity:.45;cursor:not-allowed}
-.hdr-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;
-  box-shadow:0 2px 8px rgba(243,107,47,.3)}
-.hdr-btn.primary:hover{background:var(--accent-h)}
+.win-btns{display:flex;gap:6px;align-items:center}
+.wb{width:12px;height:12px;border-radius:50%;flex-shrink:0;cursor:default}
+.wb-red{background:#FF5F57}.wb-yellow{background:#FEBC2E}.wb-green{background:#28C840}
+.title-bar-center{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
+.file-name{font-size:13px;font-weight:500;color:var(--t-mid);display:flex;align-items:center;gap:6px}
+.file-name input{background:none;border:none;color:var(--t-hi);font-size:13px;font-weight:500;
+  width:140px;text-align:center;padding:2px 6px;border-radius:var(--r-s)}
+.file-name input:focus{outline:1px solid var(--border2);background:var(--hover)}
+.dirty-dot{width:7px;height:7px;border-radius:50%;background:var(--orange);
+  display:none;flex-shrink:0}
+body[data-dirty="true"] .dirty-dot{display:block}
+.tb-divider{width:1px;height:20px;background:var(--border)}
+/* AI status chip */
+.ai-chip{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  background:var(--teal-dim);border:1px solid rgba(0,194,168,.2);
+  font-size:11px;font-weight:600;color:var(--teal);white-space:nowrap}
+.ai-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0}
+.ai-chip-dot.pulse{animation:teal-pulse 1.4s ease infinite}
+@keyframes teal-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+/* title bar right */
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-btn{height:28px;padding:0 12px;border-radius:var(--r-m);font-size:12px;font-weight:500;
+  color:var(--t-mid);border:1px solid var(--border);background:var(--panel2);
+  display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .1s}
+.tb-btn:hover{background:var(--hover);color:var(--t-hi);border-color:var(--border2)}
+.tb-btn:disabled{opacity:.3;cursor:not-allowed}
+.tb-btn.primary{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:600;
+  box-shadow:var(--orange-glow)}
+.tb-btn.primary:hover{background:#FF6B35}
+.resolution-badge{font-size:11px;font-weight:700;color:var(--t-lo);
+  padding:3px 8px;border-radius:var(--r-s);border:1px solid var(--border);background:var(--panel2)}
+/* connection */
+.conn-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;
+  font-size:11px;font-weight:600;color:var(--t-lo);border:1px solid var(--border);
+  background:var(--panel2);cursor:pointer;transition:all .1s}
+.conn-chip:hover{border-color:var(--border2);color:var(--t-mid)}
+.conn-chip.on{color:var(--green);border-color:rgba(34,197,94,.3);background:var(--green-dim)}
+.conn-chip .cdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.conn-chip.on .cdot{animation:teal-pulse 2s ease infinite}
 
-/* ── WORKSPACE ── */
-.workspace{flex:1;display:flex;overflow:hidden;padding:20px;gap:16px}
-
-/* ── LEFT PANEL ── */
-.panel-left{
-  width:272px;flex-shrink:0;background:var(--white);border:1px solid var(--border);
-  border-radius:18px;display:flex;flex-direction:column;overflow:hidden
+/* ══════════════════════════════════════════════════════
+   TOOL BAR (vertical left rail, Figma-style)
+══════════════════════════════════════════════════════ */
+.tool-rail{
+  width:48px;background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;
+  flex-shrink:0;overflow:hidden
 }
-.lp-scroll{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:8px}
-.lp-scroll::-webkit-scrollbar{width:3px}
-.lp-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.lp-title{font-size:15px;font-weight:600;color:var(--ink);line-height:22px;margin-bottom:4px}
+.tr-btn{width:36px;height:36px;border-radius:var(--r-m);display:grid;place-items:center;
+  color:var(--t-lo);transition:all .1s;position:relative}
+.tr-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tr-btn:hover{background:var(--hover);color:var(--t-mid)}
+.tr-btn.active{background:var(--orange);color:#fff;box-shadow:var(--orange-glow)}
+.tr-btn:disabled{opacity:.2;cursor:not-allowed}
+/* keyboard shortcut tooltip */
+.tr-btn::after{content:attr(data-key);position:absolute;left:calc(100% + 8px);top:50%;
+  transform:translateY(-50%);background:var(--active);border:1px solid var(--border2);
+  color:var(--t-mid);font-size:10px;font-weight:600;padding:3px 6px;border-radius:var(--r-s);
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .1s;z-index:100}
+.tr-btn:hover::after{opacity:1}
+.tr-sep{width:24px;height:1px;background:var(--border);margin:6px 0;flex-shrink:0}
+.tr-size-grp{display:flex;flex-direction:column;gap:2px;align-items:center}
+.tr-sz{width:28px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;
+  color:var(--t-lo);background:none;border:1px solid transparent;letter-spacing:-.02em}
+.tr-sz:hover{background:var(--hover);color:var(--t-mid)}
+.tr-sz.on{background:var(--active);color:var(--t-hi);border-color:var(--border2)}
 
-/* upload card */
-.upload-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:18px;
-  padding:16px;display:flex;flex-direction:column;gap:8px
-}
-.upload-title{font-size:16px;font-weight:700;color:var(--ink);line-height:22px}
-.upload-desc{font-size:12px;color:var(--muted);line-height:20px}
-.upload-actions{display:flex;gap:8px}
-.upload-btn{height:32px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;
-  color:var(--ink);background:var(--surface);border:1px solid var(--border);white-space:nowrap}
-.upload-btn:hover{background:var(--bg)}
-.upload-btn.replace{color:var(--muted)}
-/* loaded thumb */
-.src-loaded{display:none;border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.src-thumb{width:100%;height:88px;object-fit:contain;background:var(--surface);display:block}
-.src-info{font-size:11px;color:var(--muted);padding:6px 10px}
-.src-act-row{display:flex;gap:6px;padding:0 10px 10px}
-.src-act{height:26px;padding:0 10px;border-radius:8px;font-size:11px;font-weight:600;
-  color:var(--muted);background:var(--surface);border:1px solid var(--border)}
-.src-act:hover{background:var(--bg)}
+/* ══════════════════════════════════════════════════════
+   WORKSPACE
+══════════════════════════════════════════════════════ */
+.workspace{flex:1;display:flex;overflow:hidden}
 
-/* option rows */
-.opt-card{
-  background:var(--surface);border-radius:16px;padding:10px 12px;
-  display:flex;align-items:center;justify-content:space-between;gap:8px
+/* ══════════════════════════════════════════════════════
+   CANVAS AREA (center, Figma-style infinite canvas feel)
+══════════════════════════════════════════════════════ */
+.canvas-area{
+  flex:1;min-width:0;background:var(--chrome);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;position:relative;overflow:hidden
 }
-.opt-texts{display:flex;flex-direction:column;gap:4px}
-.opt-title{font-size:13px;font-weight:600;color:var(--ink);line-height:18px}
-.opt-desc{font-size:11px;color:var(--muted);line-height:16px}
-/* status pills inside panels */
-.pp{display:inline-flex;align-items:center;justify-content:center;
-  height:24px;padding:0 8px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap}
-.pp-on{background:var(--green-bg);color:var(--green)}
-.pp-res{background:var(--blue-bg);color:var(--blue)}
-.pp-cell{background:var(--green-bg);color:var(--green)}
-.pp-acc{background:var(--accent-bg);color:var(--accent)}
+/* dot grid background for the canvas area — subtle */
+.canvas-area::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:24px 24px;pointer-events:none
+}
+/* zoom/position controls bottom-left */
+.canvas-hud{
+  position:absolute;bottom:16px;left:16px;display:flex;align-items:center;gap:8px;z-index:10
+}
+.hud-pill{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;
+  background:var(--panel);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--t-lo)}
+.hud-btn{width:24px;height:24px;border-radius:var(--r-s);display:grid;place-items:center;
+  background:var(--panel2);border:1px solid var(--border);color:var(--t-lo)}
+.hud-btn:hover{background:var(--hover);color:var(--t-mid)}
 
-/* note card */
-.note-card{background:var(--surface);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:6px}
-.note-title{font-size:13px;font-weight:600;color:var(--ink);line-height:18px}
-.note-desc{font-size:11px;color:var(--muted);line-height:16px}
-
-/* adv toggle */
-.adv-toggle{display:flex;align-items:center;justify-content:space-between;
-  background:var(--white);border-radius:10px;padding:8px 12px;height:32px;
-  font-size:11px;font-weight:600;color:var(--placeholder);width:100%}
-.adv-toggle:hover{background:var(--surface)}
-.adv-toggle svg{width:14px;height:14px;transition:transform .15s}
-.adv-toggle.open svg{transform:rotate(180deg)}
-.adv-body{display:none;flex-direction:column;gap:6px}
-.adv-body.show{display:flex}
-.tog{width:36px;height:20px;border-radius:999px;border:none;
-  background:#D1D5DB;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}
-.tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;
-  border-radius:50%;background:#fff;transition:left .15s}
-.tog[aria-checked="true"]{background:var(--green)}
-.tog[aria-checked="true"]::after{left:18px}
-
-/* ── CENTER PANEL ── */
-.panel-center{
-  flex:1;min-width:0;background:var(--white);border:1px solid var(--border);
-  border-radius:18px;display:flex;flex-direction:column;overflow:hidden
+/* The DotPad bezel */
+.bezel{
+  background:#111;border-radius:20px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 32px 64px rgba(0,0,0,.6);
+  padding:20px;display:inline-flex;flex-direction:column;
+  align-items:center;gap:12px;transition:box-shadow .3s
 }
-/* preview header */
-.preview-hdr{
-  padding:20px 20px 0;display:flex;align-items:flex-start;
-  justify-content:space-between;flex-shrink:0
-}
-.preview-title{font-size:16px;font-weight:700;color:var(--ink);line-height:24px}
-.preview-sub{font-size:12px;color:var(--muted);line-height:18px;margin-top:2px}
-.view-pills{display:flex;background:var(--surface);border:1px solid var(--border);
-  border-radius:14px;padding:3px;gap:2px}
-.vp{height:28px;padding:0 12px;border-radius:12px;font-size:12px;font-weight:600;color:var(--muted)}
-.vp.active{background:var(--ink);color:#fff}
-.vp:hover:not(.active){background:var(--border)}
-.vp:disabled{opacity:.4;cursor:not-allowed}
-
-/* toolbar — Figma 그대로: bg=#F3F4F6, border=#E5E7EB, r=12px, icon=40px */
-.toolbar{
-  margin:12px 20px 0;background:#F3F4F6;border:1px solid #E5E7EB;
-  border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0
-}
-.tb-group{display:flex;align-items:center;gap:8px}
-.tb{width:40px;height:40px;border-radius:6px;display:grid;place-items:center;
-  color:#374151;transition:.1s;flex-shrink:0}
-.tb svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;
-  stroke-linecap:round;stroke-linejoin:round}
-.tb:hover{background:#fff;color:#111}
-.tb[aria-pressed="true"]{background:var(--ink);color:#fff}
-.tb:disabled{opacity:.3;cursor:not-allowed}
-.tb-sep{width:1px;height:40px;background:#E5E7EB;flex-shrink:0}
-.tb-sizes{display:flex;gap:4px}
-.tb-sz{height:30px;min-width:34px;padding:0 7px;border-radius:6px;font-size:11px;font-weight:700;
-  color:var(--muted);background:var(--white);border:1px solid var(--border)}
-.tb-sz[aria-checked="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
-.tb-sz:hover:not([aria-checked="true"]){background:#fff}
-.toolbar[data-tool="move"] .tb-sizes,
-.toolbar[data-tool="move"] .tb-sep.size-sep{display:none}
-
-/* canvas stage */
-.canvas-stage{
-  flex:1;padding:16px 20px;display:flex;align-items:center;justify-content:center;
-  overflow:hidden;position:relative
-}
-.dot-bg{
-  background:#EDE8DF;border-radius:14px;width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden
-}
-#dotGrid{display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative}
-#pad{display:block;touch-action:none}
-.before-img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.bezel:focus-within{box-shadow:0 0 0 1px rgba(255,255,255,.1),0 0 0 3px var(--orange),0 32px 64px rgba(0,0,0,.6)}
+.bezel-top{display:flex;align-items:center;gap:8px;width:100%}
+.bezel-brand{font-size:10px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.08em;text-transform:uppercase}
+.bezel-indicator{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);margin-left:auto}
+.bezel-indicator.on{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.6)}
+.dot-canvas-wrap{position:relative;border-radius:10px;overflow:hidden}
+#pad{display:block;touch-action:none;border-radius:10px}
+.before-img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:10px}
 #canvasCard[data-view="before"] #pad{visibility:hidden}
 #canvasCard[data-view="before"] .before-img{display:block}
+
 /* overlays */
-.ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;
-  justify-content:center;gap:10px;text-align:center;padding:24px;
-  background:rgba(237,232,223,.92);border-radius:14px;z-index:5}
+.ov{position:absolute;inset:0;border-radius:10px;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px;
+  background:rgba(17,17,17,.88);backdrop-filter:blur(4px);z-index:10}
 body[data-state="empty"] #emptyOv{display:flex}
 body[data-state="analyzing"] #analyzeOv{display:flex}
-.ov-ico{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.8);
-  display:grid;place-items:center;margin-bottom:2px}
-.ov-ico svg{width:20px;height:20px;color:var(--accent)}
-.ov h2{font-size:14px;font-weight:700;color:var(--ink)}
-.ov p{font-size:12px;color:var(--muted);max-width:30ch;line-height:1.6}
-.ov-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
-.ov-btn{height:32px;padding:0 14px;border-radius:10px;font-size:12px;font-weight:600;
-  color:var(--ink);background:var(--white);border:1px solid var(--border)}
-.ov-btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
-.ov-btn.accent:hover{background:var(--accent-h)}
-.ov-btn:hover:not(.accent){background:var(--surface)}
-.ov-link{background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer}
-.ov-link:hover{color:var(--accent)}
-.spinner{width:28px;height:28px;border:2.5px solid var(--border);
-  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-/* 변환 진행 바 */
-.conv-bar{width:160px;height:4px;background:var(--border);border-radius:2px;margin:4px 0 0;overflow:hidden}
-.conv-bar-fill{height:100%;border-radius:2px;background:var(--accent);width:0%;
-  transition:width .35s cubic-bezier(.4,0,.2,1)}
-/* analyzeOv h2 부드러운 전환 */
-#analyzeOv h2{transition:opacity .2s}
-#analyzeOv p{transition:opacity .2s;font-size:12px;color:var(--muted);min-height:18px}
+
+/* empty state */
+.empty-icon{width:48px;height:48px;border-radius:14px;background:var(--hover);
+  display:grid;place-items:center;margin-bottom:4px}
+.empty-icon svg{width:22px;height:22px;color:var(--t-lo)}
+.ov-title{font-size:15px;font-weight:700;color:var(--t-hi)}
+.ov-sub{font-size:12px;color:var(--t-lo);max-width:28ch;line-height:1.7}
+.ov-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.ov-cta{height:34px;padding:0 16px;border-radius:var(--r-l);font-size:12px;font-weight:600;
+  border:1px solid var(--border2);background:var(--hover);color:var(--t-hi);
+  display:inline-flex;align-items:center;gap:6px}
+.ov-cta:hover{background:var(--active);border-color:rgba(255,255,255,.2)}
+.ov-cta.accent{background:var(--orange);border-color:var(--orange);color:#fff;
+  box-shadow:var(--orange-glow)}
+.ov-cta.accent:hover{background:#FF6B35}
+.ov-link{color:var(--t-lo);font-size:11px;text-decoration:underline;background:none;border:none;cursor:pointer}
+.ov-link:hover{color:var(--t-mid)}
+/* drag hint */
+.drag-hint{position:absolute;bottom:12px;font-size:11px;color:var(--t-lo)}
+
+/* analyzing overlay */
+.analyzing-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.ai-spinner{width:36px;height:36px;position:relative}
+.ai-spinner::before,.ai-spinner::after{content:'';position:absolute;inset:0;border-radius:50%}
+.ai-spinner::before{border:2.5px solid var(--border);border-top-color:var(--teal);
+  animation:spin .8s linear infinite}
+.ai-spinner::after{border:2.5px solid transparent;border-bottom-color:var(--orange);
+  inset:5px;animation:spin .6s linear infinite reverse}
 @keyframes spin{to{transform:rotate(360deg)}}
+.analyzing-title{font-size:14px;font-weight:700;color:var(--t-hi)}
+.analyzing-sub{font-size:11px;color:var(--t-lo);min-height:16px}
+.conv-bar{width:160px;height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
+.conv-bar-fill{height:100%;width:0%;border-radius:2px;
+  background:linear-gradient(90deg,var(--teal),var(--orange));
+  transition:width .4s cubic-bezier(.4,0,.2,1)}
+.cancel-link{font-size:11px;color:var(--t-lo);text-decoration:underline;cursor:pointer;background:none;border:none}
 
-/* ── 단계별 패널 전환 ── */
-.tab-panel{display:none}
-.tab-panel.active{display:flex;flex-direction:column}
-.sec-title{font-size:13px;font-weight:700;color:var(--ink);margin:14px 0 6px}
-.sec-title:first-child{margin-top:0}
-/* 2단계: 윤곽선 세그 */
-.outline-seg{display:flex;gap:6px;margin-top:8px}
-.outline-btn{flex:1;height:34px;border-radius:10px;border:1px solid var(--border);
-  background:var(--white);font-size:12px;font-weight:600;color:var(--muted)}
-.outline-btn.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
-.outline-btn:hover:not(.sel):not(:disabled){background:var(--surface)}
-.outline-btn:disabled{opacity:.4;cursor:not-allowed}
-/* 3단계: 전문가 설정 */
-.exp-row{display:flex;align-items:center;justify-content:space-between;
-  padding:10px 0;border-top:1px solid var(--border);gap:8px}
-.exp-row:first-of-type{border-top:none;padding-top:0}
-.exp-label{font-size:12px;font-weight:600;color:var(--ink)}
-.exp-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.exp-select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:8px;
-  background:var(--surface);font-size:12px;color:var(--text);font-family:inherit}
-.exp-input{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:8px;
-  background:var(--surface);font-size:12px;color:var(--text);width:72px;text-align:right;font-family:inherit}
-.exp-input:focus,.exp-select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
-.save-btns{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.save-btn{height:36px;border-radius:10px;border:1px solid var(--border);background:var(--white);
-  font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:6px}
-.save-btn:hover:not(:disabled){background:var(--surface)}
-.save-btn.acc{background:var(--accent);border-color:var(--accent);color:#fff}
-.save-btn.acc:hover:not(:disabled){background:var(--accent-h)}
-.save-btn:disabled{opacity:.4;cursor:not-allowed}
-.reco-btn{height:28px;padding:0 10px;border-radius:8px;border:1px solid var(--border);
-  background:var(--surface);font-size:11px;font-weight:600;color:var(--muted)}
-.reco-btn:hover{background:var(--bg);color:var(--ink)}
-
-/* quality bar */
-.quality-bar{
-  background:#FBFAF7;padding:4px 12px;display:flex;align-items:center;gap:8px;
-  flex-wrap:wrap;flex-shrink:0;border-radius:6px;margin:0 20px 12px;
+/* view toggle (top right of canvas) */
+.view-toggle{
+  position:absolute;top:16px;right:16px;display:flex;background:var(--panel);
+  border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;z-index:10
 }
-.qt{height:28px;padding:0 10px;border-radius:14px;font-size:12px;font-weight:600;
-  display:inline-flex;align-items:center;white-space:nowrap}
-/* Figma 정확한 pill 색상 */
-.qt-dots{background:#FFFFFF;border:1px solid #E5DED3;color:#241F1A}
-.qt-read-g{background:#EAF7F1;color:#2E9D69}
-.qt-read-m{background:#FFFBEB;color:#92400E}
-.qt-read-b{background:#FEF2F2;color:#991B1B}
-.qt-noise{background:#EAF7F1;color:#2E9D69}    /* Figma: 잡음 적음 = 그린 */
-.qt-noise-h{background:#FFFBEB;color:#92400E}
-.qt-spacing{background:#EDF3FF;color:#3C75D9}   /* Figma: 간격 여유 = 블루 */
-.qt-retouch{background:#FFF0E7;color:#F36B2F}   /* Figma: 수정 가능 = 오렌지 */
+.vtog{height:26px;padding:0 12px;border-radius:999px;font-size:11px;font-weight:600;
+  color:var(--t-lo);transition:all .1s}
+.vtog.active{background:var(--active);color:var(--t-hi)}
+.vtog:hover:not(.active){color:var(--t-mid)}
+.vtog:disabled{opacity:.3;cursor:not-allowed}
 
-/* ── RIGHT PANEL ── */
-.panel-right{
-  width:354px;flex-shrink:0;background:var(--white);border:1px solid var(--border);
-  border-radius:18px;display:flex;flex-direction:column;overflow:hidden
+/* quality bar (bottom of bezel area, floating) */
+.q-bar{
+  position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;align-items:center;z-index:10;
+  background:var(--panel);border:1px solid var(--border);border-radius:999px;
+  padding:5px 14px;box-shadow:0 8px 24px rgba(0,0,0,.4)
 }
-.rp-scroll{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:0}
+.q-tag{font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.q-tag .qd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.q-dots{color:var(--t-mid)}
+.q-dots .qd{background:var(--t-lo)}
+.q-good{color:var(--teal)}.q-good .qd{background:var(--teal)}
+.q-mid{color:#FBBF24}.q-mid .qd{background:#FBBF24}
+.q-bad{color:var(--red)}.q-bad .qd{background:var(--red)}
+.q-orange{color:var(--orange)}.q-orange .qd{background:var(--orange)}
+.q-sep{width:1px;height:12px;background:var(--border)}
+
+/* ══════════════════════════════════════════════════════
+   RIGHT PANEL — AI Assistant
+══════════════════════════════════════════════════════ */
+.right-panel{
+  width:280px;flex-shrink:0;background:var(--panel);
+  border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden
+}
+.rp-header{
+  padding:16px 16px 0;display:flex;align-items:center;justify-content:space-between
+}
+.rp-title{font-size:11px;font-weight:700;color:var(--t-lo);letter-spacing:.06em;text-transform:uppercase}
+.rp-scroll{flex:1;overflow-y:auto;padding:12px 16px 20px;display:flex;flex-direction:column;gap:12px}
 .rp-scroll::-webkit-scrollbar{width:3px}
-.rp-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.rp-section{font-size:15px;font-weight:600;color:var(--ink);line-height:22px}
+.rp-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-/* threshold slider — Figma 그대로 */
-.th-slider-wrap{margin:16px 0 0;position:relative;height:36px}
-.th-track{position:absolute;left:0;right:0;top:14px;height:8px;border-radius:4px;
-  background:var(--slider-track);cursor:pointer}
-.th-active{position:absolute;left:0;top:0;height:8px;border-radius:4px;
-  background:var(--slider-active);pointer-events:none;transition:width .05s}
-.th-thumb{position:absolute;top:-10px;width:28px;height:28px;border-radius:50%;
-  background:var(--white);border:2px solid var(--slider-active);
-  box-shadow:0 2px 6px rgba(0,0,0,.15);transform:translateX(-50%);
-  cursor:grab;transition:transform .05s}
-.th-thumb:active{cursor:grabbing;transform:translateX(-50%) scale(1.1)}
-/* hidden range for a11y */
-#clarity{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer;height:36px}
+/* AI insight card */
+.ai-card{background:var(--teal-dim);border:1px solid rgba(0,194,168,.2);border-radius:var(--r-xl);
+  padding:12px;display:flex;flex-direction:column;gap:6px}
+.ai-card-head{display:flex;align-items:center;gap:7px}
+.ai-card-icon{width:22px;height:22px;border-radius:6px;background:var(--teal-dim);
+  display:grid;place-items:center;flex-shrink:0}
+.ai-card-icon svg{width:12px;height:12px;color:var(--teal)}
+.ai-card-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.04em;text-transform:uppercase}
+.ai-card-text{font-size:12px;color:var(--t-mid);line-height:1.6;font-family:var(--font-ko)}
+/* AI suggestion chips */
+.ai-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.ai-ch{height:26px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:600;
+  color:var(--teal);background:var(--teal-dim);border:1px solid rgba(0,194,168,.2);
+  white-space:nowrap;transition:all .1s}
+.ai-ch:hover{background:rgba(0,194,168,.2);border-color:rgba(0,194,168,.3)}
 
-.th-adj-row{display:flex;gap:8px;margin-top:12px}
-.th-adj{flex:1;height:36px;border-radius:12px;font-size:13px;font-weight:600;
-  background:var(--surface);border:1px solid var(--border);color:var(--ink)}
-.th-adj:hover{background:var(--bg)}
-.th-apply{flex:1;height:36px;border-radius:12px;font-size:13px;font-weight:600;
-  background:var(--accent);border:none;color:#fff}
-.th-apply:hover{background:var(--accent-h)}
-.th-apply:disabled{opacity:.4;cursor:not-allowed}
+/* section title */
+.sec-head{font-size:11px;font-weight:700;color:var(--t-lo);letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:6px}
+
+/* threshold row */
+.th-row{display:flex;align-items:center;gap:10px}
+.th-slider-wrap{flex:1;position:relative;height:24px;display:flex;align-items:center}
+.th-track{width:100%;height:4px;border-radius:2px;background:var(--active);cursor:pointer;position:relative}
+.th-fill{position:absolute;left:0;top:0;height:4px;border-radius:2px;
+  background:linear-gradient(90deg,var(--teal) 0%,var(--orange) 100%);pointer-events:none;transition:width .04s}
+.th-thumb{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;
+  background:var(--t-hi);border:2px solid var(--orange);
+  box-shadow:0 2px 8px rgba(0,0,0,.4);transform:translate(-50%,-50%);cursor:grab}
+.th-thumb:active{cursor:grabbing;transform:translate(-50%,-50%) scale(1.2)}
+#clarity{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.th-val{font-size:13px;font-weight:700;color:var(--t-hi);min-width:30px;text-align:right;font-variant-numeric:tabular-nums}
+/* ±1 / Auto / Apply */
+.th-actions{display:flex;gap:5px;margin-top:6px}
+.th-adj{flex:1;height:28px;border-radius:var(--r-m);font-size:12px;font-weight:600;
+  color:var(--t-mid);background:var(--panel2);border:1px solid var(--border);transition:all .1s}
+.th-adj:hover{background:var(--hover);color:var(--t-hi)}
+.th-apply{flex:2;height:28px;border-radius:var(--r-m);font-size:12px;font-weight:700;
+  background:var(--orange);color:#fff;border:none;transition:all .1s}
+.th-apply:hover{background:#FF6B35}
+.th-apply:disabled{opacity:.3;cursor:not-allowed}
+
+/* property row */
+.prop-row{display:flex;align-items:center;justify-content:space-between;
+  padding:7px 0;border-top:1px solid var(--border)}
+.prop-row:first-of-type{border-top:none;padding-top:0}
+.prop-label{font-size:12px;color:var(--t-mid)}
+.prop-val{font-size:12px;font-weight:600;color:var(--t-hi)}
+.prop-select{background:var(--panel2);border:1px solid var(--border);color:var(--t-hi);
+  border-radius:var(--r-s);padding:3px 6px;font-size:11px;font-family:inherit;cursor:pointer}
+.prop-select:focus{outline:1px solid var(--orange);border-color:var(--orange)}
+
+/* outline seg */
+.seg3{display:flex;background:var(--panel2);border:1px solid var(--border);
+  border-radius:var(--r-m);padding:2px;gap:2px}
+.seg3-btn{flex:1;height:24px;border-radius:6px;font-size:11px;font-weight:600;color:var(--t-lo)}
+.seg3-btn.on{background:var(--active);color:var(--t-hi)}
+.seg3-btn:hover:not(.on){color:var(--t-mid)}
+.seg3-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* toggle row */
+.tog-row{display:flex;align-items:center;justify-content:space-between;
+  padding:7px 0;border-top:1px solid var(--border)}
+.tog-row:first-of-type{border-top:none;padding-top:0}
+.tog-label{font-size:12px;color:var(--t-mid)}
+.tog-sub{font-size:11px;color:var(--t-lo)}
+.tog{width:32px;height:18px;border-radius:999px;background:var(--active);
+  position:relative;cursor:pointer;border:none;transition:background .15s;flex-shrink:0}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;
+  border-radius:50%;background:var(--t-lo);transition:left .15s,background .15s}
+.tog[aria-checked="true"]{background:var(--orange)}
+.tog[aria-checked="true"]::after{left:16px;background:#fff}
 
 /* score card */
-.score-card{border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;margin-top:12px}
-.score-card.good{background:var(--green-bg)}
-.score-card.mid{background:#FFFBEB}
-.score-card.bad{background:#FEF2F2}
-.score-label{font-size:14px;font-weight:600;line-height:20px}
-.score-card.good .score-label{color:var(--green)}
-.score-card.mid .score-label{color:#92400E}
-.score-card.bad .score-label{color:#991B1B}
-.score-title{font-size:13px;font-weight:700;color:var(--ink);line-height:20px}
-.score-desc{font-size:11px;color:var(--muted);line-height:16px}
+.score-card{border-radius:var(--r-l);padding:10px 12px;border:1px solid var(--border);
+  background:var(--panel2);display:flex;flex-direction:column;gap:3px}
+.score-card.teal{background:var(--teal-dim);border-color:rgba(0,194,168,.2)}
+.score-card.amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2)}
+.score-card.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)}
+.sc-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.score-card.teal .sc-label{color:var(--teal)}
+.score-card.amber .sc-label{color:#FBBF24}
+.score-card.red .sc-label{color:var(--red)}
+.sc-title{font-size:13px;font-weight:700;color:var(--t-hi)}
+.sc-desc{font-size:11px;color:var(--t-lo);line-height:1.6}
 
-/* advanced rows */
-.adv-rows{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-.adv-row{background:var(--white);border:1px solid var(--border);border-radius:10px;
-  height:40px;padding:0 12px;display:flex;align-items:center;gap:8px}
-.adv-label{flex:1;font-size:11px;font-weight:600;color:var(--ink);line-height:16px}
-.adv-val{font-size:11px;font-weight:600;color:var(--placeholder);width:80px;text-align:right}
-.adv-arr{font-size:11px;color:var(--placeholder);width:14px;text-align:center}
-.adv-select{border:none;background:none;font-size:11px;font-weight:600;color:var(--placeholder);
-  font-family:inherit;cursor:pointer;width:90px;text-align:right;direction:rtl}
-.adv-select:focus{outline:none}
+/* save / export row */
+.export-btns{display:flex;flex-direction:column;gap:5px}
+.exp-btn{height:32px;border-radius:var(--r-m);font-size:12px;font-weight:600;
+  background:var(--panel2);border:1px solid var(--border);color:var(--t-mid);
+  display:flex;align-items:center;justify-content:center;gap:6px;transition:all .1s}
+.exp-btn:hover:not(:disabled){background:var(--hover);color:var(--t-hi);border-color:var(--border2)}
+.exp-btn:disabled{opacity:.25;cursor:not-allowed}
+.exp-btn.accent{background:var(--orange);border-color:var(--orange);color:#fff;box-shadow:var(--orange-glow)}
+.exp-btn.accent:hover:not(:disabled){background:#FF6B35}
 
-/* connection section */
-.conn-section{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
-.conn-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0}
-.conn-row.clickable:hover .conn-lbl{color:var(--ink)}
-.conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#9CA3AF}
-.conn-dot.on{background:var(--green);box-shadow:0 0 6px rgba(46,157,105,.5)}
-.conn-dot.busy{background:#D97706;animation:pulse 1s infinite}
-.conn-dot.err{background:#E11D48}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.conn-lbl{font-size:13px;font-weight:600;color:var(--muted)}
-.live-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
-.live-lbl{font-size:12px;font-weight:600;color:var(--muted)}
-.live-hint{font-size:11px;color:var(--placeholder);margin-top:2px}
-.sw{width:36px;height:20px;border-radius:999px;border:none;background:#D1D5DB;
-  position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}
-.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;
-  border-radius:50%;background:#fff;transition:left .15s}
-.sw[aria-checked="true"]{background:var(--accent)}
-.sw[aria-checked="true"]::after{left:18px}
-.sw:disabled{opacity:.4;cursor:not-allowed}
+/* DotPad section */
+.dp-section{border-top:1px solid var(--border);padding-top:12px}
+.dp-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0}
+.dp-dot{width:8px;height:8px;border-radius:50%;background:var(--t-lo);flex-shrink:0;transition:all .2s}
+.dp-dot.on{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.5)}
+.dp-dot.busy{background:#FBBF24;animation:teal-pulse 1s infinite}
+.dp-dot.err{background:var(--red)}
+.dp-label{font-size:12px;font-weight:600;color:var(--t-mid)}
+.dp-row:hover .dp-label{color:var(--t-hi)}
+.live-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.live-lbl{font-size:11px;color:var(--t-lo)}
 
-/* quick edit */
-.qedit{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.qe-btn{height:28px;padding:0 10px;border-radius:8px;font-size:11px;font-weight:600;
-  color:var(--muted);background:var(--surface);border:1px solid var(--border)}
-.qe-btn:hover:not(:disabled){background:var(--bg);color:var(--ink)}
-.qe-btn:disabled{opacity:.4;cursor:not-allowed}
+/* collapsible expert section */
+.expert-toggle{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;cursor:pointer;border-top:1px solid var(--border);margin-top:4px}
+.expert-toggle-label{font-size:11px;font-weight:600;color:var(--t-lo);
+  letter-spacing:.04em;text-transform:uppercase}
+.expert-toggle svg{width:12px;height:12px;color:var(--t-lo);transition:transform .15s}
+.expert-toggle.open svg{transform:rotate(180deg)}
+.expert-body{display:none;flex-direction:column;gap:0}
+.expert-body.show{display:flex}
+.exp-input{height:26px;padding:0 8px;background:var(--panel2);border:1px solid var(--border);
+  border-radius:var(--r-s);font-size:11px;color:var(--t-hi);width:72px;text-align:right;font-family:inherit}
+.exp-input:focus{outline:1px solid var(--orange);border-color:var(--orange)}
 
-/* ── BOTTOM BAR ── */
-.bottom-bar{
-  height:64px;background:var(--white);border-top:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0
-}
-.bs-pills{display:flex;gap:8px;align-items:center}
-.bsp{height:28px;padding:0 10px;border-radius:14px;font-size:12px;font-weight:600;
-  display:inline-flex;align-items:center;white-space:nowrap}
-.bsp-local{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
-.bsp-thresh{background:var(--accent-bg);color:var(--accent)}
-.bsp-synced{background:var(--green-bg);color:var(--green)}
-.bsp-retouch{background:var(--accent-bg);color:var(--accent)}
-.bs-note{flex:1;font-size:12px;color:var(--muted);opacity:.7;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 4px}
-.bs-div{width:1px;height:40px;background:#E0E4E8;flex-shrink:0}
-.bs-actions{display:flex;gap:8px;align-items:center}
-.bs-btn{height:36px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;
-  background:var(--surface);border:1px solid var(--border);color:var(--ink);white-space:nowrap}
-.bs-btn:hover{background:var(--bg)}
-.bs-btn:disabled{opacity:.4;cursor:not-allowed}
-.bs-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;
-  box-shadow:0 2px 8px rgba(243,107,47,.3)}
-.bs-btn.primary:hover{background:var(--accent-h)}
-
-/* ── LOAD MENU ── */
-.load-wrap{position:relative}
-.load-btn{display:flex;align-items:center;gap:5px;height:28px;padding:0 10px;
-  border:1px solid var(--border);border-radius:8px;background:var(--surface);
-  font-size:12px;font-weight:600;color:var(--muted)}
-.load-btn svg{width:12px;height:12px;color:var(--muted);flex-shrink:0}
-.load-btn:hover{background:var(--bg)}
-.load-menu{position:absolute;top:calc(100%+5px);right:0;min-width:176px;
-  background:var(--white);border:1px solid var(--border);border-radius:12px;
-  box-shadow:0 8px 24px rgba(0,0,0,.1);padding:5px;z-index:50;display:none}
-.load-menu.open{display:block}
-.load-menu button{display:flex;align-items:center;gap:8px;width:100%;border:none;
-  background:none;color:var(--ink);font-size:12px;font-weight:500;
-  padding:8px 10px;border-radius:8px;cursor:pointer;text-align:left}
-.load-menu button:hover{background:var(--surface)}
-.load-menu button svg{width:13px;height:13px;color:var(--muted);flex-shrink:0}
-
-/* ── UTILS ── */
-#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%) translateY(12px);
-  background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;
-  font-size:12px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:200}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#toast.ok{background:#15803D}#toast.err{background:#E11D48}
-.modal-bg{position:fixed;inset:0;background:rgba(36,31,26,.4);display:none;
-  align-items:center;justify-content:center;z-index:180;padding:20px}
-.modal-bg.show{display:flex}
-.modal{background:var(--white);border-radius:16px;max-width:360px;width:100%;
-  padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
-.modal h2{font-size:15px;font-weight:700;margin-bottom:8px}
-.modal p{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6}
-.modal .ma{display:flex;flex-direction:column;gap:7px}
-.modal .ma button{width:100%;height:38px;border-radius:999px;border:1px solid var(--border);
-  background:var(--white);font-size:13px;font-weight:600;cursor:pointer}
-.modal .ma .acc{background:var(--accent);border-color:var(--accent);color:#fff}
 /* ══════════════════════════════════════════════════════
-   RESPONSIVE — 태블릿·모바일
+   BOTTOM STATUS BAR
 ══════════════════════════════════════════════════════ */
+.status-bar{
+  height:28px;background:var(--panel);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;overflow:hidden
+}
+.sb-item{font-size:11px;font-weight:500;color:var(--t-lo);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.sb-item.accent{color:var(--orange)}
+.sb-item.good{color:var(--teal)}
+.sb-item.err{color:var(--red)}
+.sb-spacer{flex:1}
+.sb-tag{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.04em}
+.sb-tag.orange{background:var(--orange-dim);color:var(--orange)}
+.sb-tag.teal{background:var(--teal-dim);color:var(--teal)}
+.sb-tag.green{background:var(--green-dim);color:var(--green)}
 
-/* 태블릿 landscape (≤1100px): 패널 폭 줄이기 */
-@media(max-width:1100px){
-  .panel-left{width:240px}
-  .panel-right{width:300px}
-  .mode-pill{width:120px}
-  .mode-pill-main{font-size:11px}
-  .mode-pill-sub{font-size:9px}
+/* ══════════════════════════════════════════════════════
+   TOAST / MODAL
+══════════════════════════════════════════════════════ */
+#toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);
+  background:var(--active);border:1px solid var(--border2);color:var(--t-hi);
+  padding:8px 16px;border-radius:var(--r-l);font-size:12px;font-weight:600;
+  opacity:0;pointer-events:none;transition:.2s;z-index:200;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:rgba(0,194,168,.4);color:var(--teal)}
+#toast.err{border-color:rgba(239,68,68,.4);color:var(--red)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);
+  display:none;align-items:center;justify-content:center;z-index:180;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:var(--panel2);border:1px solid var(--border2);border-radius:var(--r-2xl);
+  max-width:340px;width:100%;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal h2{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--t-hi)}
+.modal p{font-size:12px;color:var(--t-lo);margin-bottom:18px;line-height:1.6}
+.modal .ma{display:flex;flex-direction:column;gap:6px}
+.modal .ma button{width:100%;height:36px;border-radius:var(--r-l);border:1px solid var(--border);
+  background:var(--hover);font-size:12px;font-weight:600;color:var(--t-mid);cursor:pointer}
+.modal .ma button:hover{background:var(--active);color:var(--t-hi)}
+.modal .ma .acc{background:var(--orange);border-color:var(--orange);color:#fff}
+.modal .ma .acc:hover{background:#FF6B35}
+
+/* ══════════════════════════════════════════════════════
+   DROP ZONE HIGHLIGHT
+══════════════════════════════════════════════════════ */
+.canvas-area.drag-over::after{
+  content:'이미지를 놓으세요';position:absolute;inset:0;
+  background:rgba(0,194,168,.08);border:2px dashed var(--teal);
+  border-radius:16px;display:grid;place-items:center;
+  font-size:16px;font-weight:700;color:var(--teal);z-index:20;
+  pointer-events:none
 }
 
-/* 태블릿 portrait (≤900px): 우패널 숨기고 하단 드로어로 */
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE — tablet / mobile
+══════════════════════════════════════════════════════ */
 @media(max-width:900px){
-  /* ── 스크롤 근본 해제 ── */
-  html{height:auto;overflow-x:hidden;overflow-y:auto}
-  body{
-    height:auto;min-height:100vh;overflow:visible;
-    display:block          /* flex→block: 자연 문서 흐름 */
-  }
-
-  /* ── 헤더: sticky로 상단 고정 ── */
-  .app-header{
-    position:sticky;top:0;z-index:100;
-    padding:8px 14px;gap:8px;flex-wrap:wrap;
-    height:auto;min-height:56px;
-    border-bottom:1px solid var(--border)
-  }
-  .mode-switch{order:3;width:100%;justify-content:center}
-  .mode-pill{flex:1;height:44px}
-  .status-chips{margin-left:0}
-
-  /* ── 워크스페이스: 자연 흐름 세로 스택 ── */
-  .workspace{
-    display:flex;flex-direction:column;
-    overflow:visible;
-    height:auto;
-    padding:12px;gap:10px
-  }
-
-  /* ── 패널들: 고정 높이 제거, 자연 높이 ── */
-  .panel-left{width:100%;border-radius:14px;overflow:visible;height:auto}
-  .panel-left .lp-scroll{
-    flex-direction:column;padding:12px;
-    overflow:visible;height:auto;max-height:none
-  }
-  .lp-title{width:100%;font-size:14px}
-  .upload-card{width:100%;min-width:unset}
-  .opt-card,.note-card{width:100%;min-width:unset}
-  .adv-toggle{display:flex}
-
-  .panel-center{
-    border-radius:14px;min-height:360px;
-    overflow:visible;height:auto
-  }
-  /* 캔버스 자체는 내부 고정 크기 유지 */
-  .canvas-stage{padding:10px;height:auto;min-height:280px}
-
-  .panel-right{width:100%;border-radius:14px;order:3;overflow:visible;height:auto}
-  .rp-scroll{padding:14px;overflow:visible;height:auto;max-height:none}
-
-  /* ── 하단바: sticky 하단 고정 ── */
-  .bottom-bar{
-    position:sticky;bottom:0;z-index:100;
-    flex-wrap:wrap;height:auto;padding:10px 14px;gap:8px;
-    border-top:1px solid var(--border)
-  }
-  .bs-pills{flex-wrap:wrap}
-  .bs-note{display:none}
-  .bs-div{display:none}
-  .bs-actions{margin-left:0;width:100%;justify-content:flex-end}
+  html,body{height:auto;overflow-x:hidden;overflow-y:auto}
+  body{display:block}
+  .title-bar{position:sticky;top:0;z-index:100;flex-wrap:wrap;height:auto;
+    min-height:44px;padding:8px 12px;gap:8px}
+  .title-bar-center{order:3;width:100%;justify-content:flex-start}
+  .win-btns{display:none}
+  .workspace{display:flex;flex-direction:column;overflow:visible;height:auto}
+  .tool-rail{width:100%;flex-direction:row;height:44px;border-right:none;
+    border-bottom:1px solid var(--border);padding:0 12px;overflow-x:auto;gap:4px}
+  .tr-sep{width:1px;height:24px;margin:0 4px}
+  .tr-size-grp{flex-direction:row}
+  .tr-btn::after{display:none}
+  .canvas-area{min-height:360px}
+  .right-panel{width:100%;border-left:none;border-top:1px solid var(--border)}
+  .q-bar{bottom:12px}
+  .status-bar{display:none}
+  .status-bar{position:sticky;bottom:0;z-index:100;display:flex}
 }
-
-/* 모바일 (≤600px) */
 @media(max-width:600px){
-  html{overflow-x:hidden}
-  .workspace{padding:8px;gap:8px;overflow:visible}
-  .panel-left .lp-scroll{flex-direction:column;padding:12px;overflow:visible}
-  .upload-card,.opt-card,.note-card{min-width:unset;width:100%}
-  .panel-center{min-height:320px;overflow:visible}
-  .canvas-stage{padding:8px;min-height:240px}
-  .preview-hdr{padding:12px 12px 0;flex-direction:column;gap:8px;align-items:flex-start}
-  .toolbar{margin:8px 12px 0;padding:6px 8px;gap:6px;overflow-x:auto;flex-wrap:nowrap}
-  .tb-group{gap:4px}
-  .tb{width:36px;height:36px}
-  .tb svg{width:16px;height:16px}
-  .app-header{padding:8px}
-  .brand-title{font-size:15px}
-  .brand-sub{display:none}
-  .mode-pill{height:40px;padding:6px 4px}
-  .mode-pill-main{font-size:10px}
-  .mode-pill-sub{display:none}
-  .hdr-btn{height:30px;padding:0 10px;font-size:12px}
-  .status-chips{gap:4px}
-  .sp{height:24px;padding:0 7px;font-size:11px}
-  .quality-bar{gap:5px;padding:4px 8px;margin:0 12px 8px}
-  .qt{height:24px;padding:0 7px;font-size:11px}
-  .rp-scroll{padding:12px;overflow:visible}
-  .th-adj-row{gap:5px}
-  .th-adj,.th-apply{height:32px;font-size:12px}
-  .adv-row{padding:0 10px;height:36px}
-  .adv-label{font-size:11px}
-  .qedit{gap:5px}
-  .qe-btn{height:26px;padding:0 8px;font-size:11px}
-  .bottom-bar{padding:8px}
-  .bs-btn{height:32px;padding:0 10px;font-size:12px}
-  .tb-sizes{gap:2px}
-  .tb-sz{height:28px;min-width:30px;font-size:10px}
-}
-
-/* 초소형 (≤380px) */
-@media(max-width:380px){
-  .mode-pill-main{font-size:9px}
-  .brand-title{font-size:13px}
-  .hdr-btn{padding:0 8px;font-size:11px}
-  .status-chips{display:none}
-  .tb{width:32px;height:32px}
-  .tb svg{width:14px;height:14px}
+  .title-bar{padding:6px 10px}
+  .tb-btn{padding:0 8px;font-size:11px}
+  .ai-chip{display:none}
+  .canvas-area{min-height:280px}
+  .right-panel .rp-scroll{padding:10px 12px}
 }
 </style>
 </head>
-<body data-state="empty">
+<body data-state="empty" data-dirty="false">
 
-<!-- ═══ HEADER ═══ -->
-<header class="app-header">
-  <div class="brand">
-    <div class="brand-mark"><span>D</span></div>
-    <div>
-      <div class="brand-title">촉각 그래픽 생성</div>
-      <div class="brand-sub">핵심 생성 모드 · 임계값 조정 우선</div>
+<!-- ═══════════════ TITLE BAR ═══════════════ -->
+<div class="title-bar">
+  <div class="win-btns" aria-hidden="true">
+    <div class="wb wb-red"></div>
+    <div class="wb wb-yellow"></div>
+    <div class="wb wb-green"></div>
+  </div>
+
+  <div class="title-bar-center">
+    <div class="file-name">
+      <input type="text" id="fname" value="Untitled" aria-label="파일 이름" spellcheck="false"/>
+      <span class="dirty-dot" id="dirty" aria-hidden="true"></span>
     </div>
   </div>
 
-  <nav class="mode-switch" role="tablist">
-    <button class="mode-pill active" data-mode="create" role="tab" aria-selected="true">
-      <span class="mode-pill-main">1단계 · 만들기</span>
-      <span class="mode-pill-sub">이미지 불러오기 &amp; 변환</span>
+  <div class="tb-right">
+    <div class="ai-chip" id="aiChip">
+      <span class="ai-chip-dot" id="aiDot"></span>
+      <span id="aiChipText">AI 대기 중</span>
+    </div>
+    <div class="tb-divider"></div>
+    <span class="resolution-badge" id="resChip">60×40</span>
+    <div class="conn-chip" id="connChip" role="button" tabindex="0" aria-label="DotPad 연결">
+      <span class="cdot"></span>
+      <span id="connChipText">미연결</span>
+    </div>
+    <div class="tb-divider"></div>
+    <button class="tb-btn" id="hdrSaveBtn" disabled>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      저장
     </button>
-    <button class="mode-pill" data-mode="refine" role="tab" aria-selected="false">
-      <span class="mode-pill-main">2단계 · 다듬기</span>
-      <span class="mode-pill-sub">점 농도와 디테일 조정</span>
+    <button class="tb-btn primary" id="hdrOutputBtn" disabled>
+      출력
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <button class="mode-pill" data-mode="expert" role="tab" aria-selected="false">
-      <span class="mode-pill-main">3단계 · 전문 설정</span>
-      <span class="mode-pill-sub">고급 옵션 세부 조정</span>
-    </button>
-  </nav>
-
-  <div class="status-pills">
-    <span class="sp sp-res" id="resChip">60×40</span>
-    <span class="sp sp-live" id="liveChip" style="display:none">
-      <span class="sp-live-dot"></span>DotPad Live
-    </span>
-    <span class="sp sp-local">로컬</span>
   </div>
+</div>
 
-  <div class="hdr-btns">
-    <button class="hdr-btn" id="hdrSaveBtn" disabled>저장</button>
-    <button class="hdr-btn primary" id="hdrOutputBtn" disabled>출력</button>
-  </div>
-</header>
-
-<!-- ═══ WORKSPACE ═══ -->
+<!-- ═══════════════ WORKSPACE ═══════════════ -->
 <div class="workspace">
 
-  <!-- LEFT PANEL -->
-  <aside class="panel-left">
-    <div class="lp-scroll">
-
-      <!-- ══ 1단계: 만들기 ══ -->
-      <div class="tab-panel active" id="lp-step1">
-        <p class="lp-title">기본 설정</p>
-
-        <!-- upload zone -->
-        <div class="upload-card" id="uploadCard">
-          <div class="upload-title">소스 업로드</div>
-          <div class="upload-desc">PNG · SVG · PDF 고대비 이미지 권장</div>
-          <div style="display:flex;flex-direction:column;gap:8px;width:100%;margin-top:4px">
-            <label for="imageFileInput" class="upload-btn" id="emptyImageBtn" tabindex="0" role="button" style="width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center">파일 선택</label>
-            <label for="imageFileInput" class="upload-btn replace" id="replaceImgBtn2" tabindex="0" role="button" style="width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center">다른 이미지로 교체</label>
-          </div>
-        </div>
-
-        <!-- loaded thumb -->
-        <div class="src-loaded" id="srcLoaded">
-          <img class="src-thumb" id="srcThumb" alt="소스"/>
-          <div class="src-info" id="srcInfo">—</div>
-          <div class="src-act-row">
-            <label for="imageFileInput" class="src-act" id="replaceImgBtn3" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">교체</label>
-            <label for="tactileFileInput" class="src-act" id="loadTactileBtn3" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">DTM·DTMS</label>
-          </div>
-        </div>
-
-        <!-- auto simplify -->
-        <div class="opt-card">
-          <div class="opt-texts">
-            <span class="opt-title">자동 정리</span>
-            <span class="opt-desc">작은 잡음을 자동으로 없애줘요.</span>
-          </div>
-          <button class="tog" id="autoSimplifyTog" role="switch" aria-checked="true"></button>
-        </div>
-
-        <!-- output size -->
-        <div class="opt-card">
-          <div class="opt-texts">
-            <span class="opt-title">출력 크기</span>
-            <span class="opt-desc">DotPad 크기에 맞게 고정됩니다.</span>
-          </div>
-          <div style="display:flex;gap:4px">
-            <button class="pp pp-res" id="resBtn60" style="cursor:pointer">60×40</button>
-            <button class="pp" id="resBtn96" style="cursor:pointer;background:var(--surface);color:var(--muted);border:1px solid var(--border)">96×64</button>
-          </div>
-        </div>
-
-        <!-- note -->
-        <div class="note-card">
-          <div class="note-title">제목 입력</div>
-          <div class="note-desc">제목을 입력하면 점자로 표시돼요.</div>
-          <span class="pp pp-cell" id="cellPill" style="display:none">— / 40 cells</span>
-        </div>
-
-        <div style="flex:1;min-height:16px"></div>
-        <button class="adv-toggle" id="advToggle" aria-expanded="false">
-          <span>더 많은 설정 보기</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="adv-body" id="advBody">
-          <div class="opt-card" style="margin-top:4px">
-            <div class="opt-texts"><span class="opt-title" style="font-size:12px">극성 반전</span></div>
-            <button class="tog" id="polarityTog" role="switch" aria-checked="false"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ 2단계: 다듬기 ══ -->
-      <div class="tab-panel" id="lp-step2">
-        <p class="lp-title">세부 조정</p>
-
-        <!-- 윤곽선 -->
-        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:8px">
-          <div>
-            <div class="opt-title">윤곽선</div>
-            <div class="opt-desc">촉각 그래픽의 외곽선 방식을 선택하세요</div>
-          </div>
-          <div class="outline-seg" style="width:100%">
-            <button class="outline-btn sel" data-ol="0" id="olBtn0">없음</button>
-            <button class="outline-btn" data-ol="1" id="olBtn1">1줄</button>
-            <button class="outline-btn" data-ol="2" id="olBtn2">2줄</button>
-          </div>
-          <div class="opt-desc" id="olDesc" style="font-size:11px">채움 실루엣을 유지합니다.</div>
-        </div>
-
-        <!-- 빠른 편집 -->
-        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:8px">
-          <div class="opt-title">빠른 편집</div>
-          <div class="qedit" id="editSeg">
-            <button class="qe-btn" id="btnInvert" disabled>핀 반전</button>
-            <button class="qe-btn" id="btnAllUp" disabled>전체 올리기</button>
-            <button class="qe-btn" id="btnAllDown" disabled>전체 내리기</button>
-            <button class="qe-btn" id="btnDenoise" disabled>노이즈 정리</button>
-          </div>
-        </div>
-
-        <!-- DotPad 연결 (2단계에도 표시) -->
-        <div class="conn-section">
-          <div class="conn-row" id="connRow" role="button" tabindex="0">
-            <span class="conn-dot off" id="connDot"></span>
-            <span class="conn-lbl" id="connText">DotPad 미연결</span>
-          </div>
-          <div class="live-row">
-            <div>
-              <div class="live-lbl">라이브 반영</div>
-              <div class="live-hint" id="liveHint">연결 후 활성화됩니다</div>
-            </div>
-            <button class="sw" id="liveSwitch" role="switch" aria-checked="false" disabled></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ 3단계: 전문 설정 ══ -->
-      <div class="tab-panel" id="lp-step3">
-        <p class="lp-title">전문가 설정</p>
-
-        <!-- 변환 방식 -->
-        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:6px">
-          <div class="opt-title">변환 방식</div>
-          <div class="opt-desc">이미지 유형에 따라 최적 방식이 다릅니다</div>
-          <div class="exp-row" style="width:100%;border-top:none;padding-top:0">
-            <span class="exp-label">알고리즘</span>
-            <select class="exp-select" data-ctrl="method">
-              <option value="global">자동 (권장)</option>
-              <option value="otsu">Otsu — 이분 최적화</option>
-              <option value="sauvola">Sauvola — 저대비 이미지</option>
-              <option value="adaptive">Adaptive — 불균일 조명</option>
-              <option value="mean">평균 밝기</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 미세 조정 -->
-        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:0">
-          <div class="opt-title" style="margin-bottom:4px">미세 조정</div>
-          <div class="exp-row" style="width:100%">
-            <div>
-              <div class="exp-label">원시 임계값</div>
-              <div class="exp-sub">0 – 255 직접 입력</div>
-            </div>
-            <input type="number" class="exp-input" data-ctrl="rawth" min="0" max="255" value="128"/>
-          </div>
-          <div class="exp-row" style="width:100%">
-            <div>
-              <div class="exp-label">최소 점 크기</div>
-              <div class="exp-sub">이 픽셀 수 이하 제거</div>
-            </div>
-            <input type="number" class="exp-input" data-ctrl="minComp" min="1" max="40" value="3"/>
-          </div>
-          <div class="exp-row" style="width:100%">
-            <div>
-              <div class="exp-label">고급 브러시</div>
-              <div class="exp-sub">4·5핀 두께 활성화</div>
-            </div>
-            <select class="exp-select" data-ctrl="advSize">
-              <option value="0">끄기</option>
-              <option value="1">켜기</option>
-            </select>
-          </div>
-          <button class="reco-btn" data-ctrl="recoReset">추천값으로 초기화</button>
-        </div>
-
-        <!-- 저장 / 내보내기 -->
-        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:4px">
-          <div class="opt-title">저장 / 내보내기</div>
-          <div class="save-btns" style="width:100%">
-            <button class="save-btn" data-ctrl="hexBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6H3v12h5M16 6h5v12h-5M12 9v6M9 12h6"/></svg>
-              HEX 복사
-            </button>
-            <button class="save-btn" data-ctrl="pngBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-              PNG 저장
-            </button>
-            <button class="save-btn acc" id="dtmsBtn3" disabled>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              .dtms 저장
-            </button>
-          </div>
-        </div>
-      </div>
-
+  <!-- LEFT TOOL RAIL -->
+  <aside class="tool-rail" role="toolbar" aria-label="도구">
+    <!-- 이동 -->
+    <button class="tr-btn active" data-tool="move" aria-pressed="true" title="이동" data-key="V">
+      <svg viewBox="0 0 24 24"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M12 3v18M3 12h18"/></svg>
+    </button>
+    <div class="tr-sep"></div>
+    <!-- 펜 -->
+    <button class="tr-btn" data-tool="pen" aria-pressed="false" title="펜 — 핀 올리기" data-key="P">
+      <svg viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+    </button>
+    <!-- 지우개 -->
+    <button class="tr-btn" data-tool="eraser" aria-pressed="false" title="지우개 — 핀 내리기" data-key="E">
+      <svg viewBox="0 0 24 24"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+    </button>
+    <div class="tr-sep"></div>
+    <!-- 두께 -->
+    <div class="tr-size-grp" id="sizeGrp2" role="radiogroup" aria-label="두께">
+      <button class="tr-sz on" role="radio" data-size="1" aria-checked="true">1핀</button>
+      <button class="tr-sz" role="radio" data-size="2" aria-checked="false">2핀</button>
+      <button class="tr-sz" role="radio" data-size="3" aria-checked="false">3핀</button>
     </div>
+    <div class="tr-sep"></div>
+    <!-- Undo / Redo -->
+    <button class="tr-btn" id="undoBtn2" title="실행 취소 ⌘Z" data-key="⌘Z" disabled>
+      <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M3 13c0-4.97 4.03-9 9-9a9 9 0 0 1 9 9 9 9 0 0 1-9 9 8.99 8.99 0 0 1-7-3.35"/></svg>
+    </button>
+    <button class="tr-btn" id="redoBtn2" title="다시 실행 ⌘⇧Z" data-key="⌘⇧Z" disabled>
+      <svg viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M21 13c0-4.97-4.03-9-9-9a9 9 0 0 0-9 9 9 9 0 0 0 9 9 8.99 8.99 0 0 0 7-3.35"/></svg>
+    </button>
   </aside>
 
-  <!-- CENTER PANEL -->
-  <main class="panel-center" id="canvasCard" data-view="after">
+  <!-- CANVAS AREA -->
+  <main class="canvas-area" id="canvasArea" id="canvasCard" data-view="after">
 
-    <div class="preview-hdr">
-      <div>
-        <div class="preview-title">점 농도 미리보기</div>
-        <div class="preview-sub" id="previewMeta">점을 더 진하게 또는 연하게 조절해 가장 선명한 상태를 찾아보세요.</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="load-wrap">
-          <button class="load-btn" id="loadMenuBtn2" aria-haspopup="true" aria-expanded="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            불러오기
-          </button>
-          <div class="load-menu" id="loadMenuDrop" role="menu">
-            <button role="menuitem" id="menuLoadImage">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5L5 19"/></svg>
-              이미지 불러오기
-            </button>
-            <button role="menuitem" id="menuLoadTactile">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="2" fill="currentColor" stroke="none"/></svg>
-              DTM·DTMS 불러오기
-            </button>
-          </div>
-        </div>
-        <div class="view-pills">
-          <button class="vp" id="vpBefore">이전</button>
-          <button class="vp active" id="vpCurrent">현재</button>
-          <button class="vp" id="vpDotpad" disabled>DotPad</button>
-        </div>
-      </div>
+    <!-- view toggle -->
+    <div class="view-toggle">
+      <button class="vtog" id="vpBefore">원본</button>
+      <button class="vtog active" id="vpCurrent">촉각</button>
+      <button class="vtog" id="vpDotpad" disabled>DotPad</button>
     </div>
 
-    <!-- toolbar — Figma 리터치 툴바 그룹 구조 그대로 -->
-    <div class="toolbar" id="toolBar" data-tool="move" role="toolbar" aria-label="편집 도구">
-      <!-- group-1: 이동/패닝/선택 -->
-      <div class="tb-group">
-        <button class="tb" data-tool="move" aria-pressed="true" title="이동 (M)" aria-label="이동">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M12 3v18M3 12h18"/></svg>
-        </button>
-        <button class="tb" data-tool="hand" aria-pressed="false" title="패닝" aria-label="패닝">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 11V7a2 2 0 0 0-4 0v4M14 11V5a2 2 0 0 0-4 0v6M10 11V4a2 2 0 0 0-4 0v7M6 11v3a6 6 0 0 0 12 0v-3"/></svg>
-        </button>
-        <button class="tb" data-tool="select" aria-pressed="false" title="영역 선택 (S)" aria-label="영역 선택">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 2"/></svg>
-        </button>
+    <!-- bezel -->
+    <div class="bezel" id="bezelWrap">
+      <div class="bezel-top">
+        <span class="bezel-brand">Dot Pad</span>
+        <span class="bezel-indicator" id="bezelIndicator"></span>
       </div>
-      <div class="tb-sep" aria-hidden="true"></div>
-      <!-- group-2: 펜/선/사각형/원 -->
-      <div class="tb-group">
-        <button class="tb" data-tool="pen" aria-pressed="false" title="펜 (P)" aria-label="펜">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-        </button>
-        <button class="tb" data-tool="line" aria-pressed="false" title="선 (L)" aria-label="선">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/></svg>
-        </button>
-        <button class="tb" data-tool="rect" aria-pressed="false" title="사각형 (R)" aria-label="사각형">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
-        </button>
-        <button class="tb" data-tool="circle" aria-pressed="false" title="원 (C)" aria-label="원">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
-        </button>
-      </div>
-      <div class="tb-sep" aria-hidden="true"></div>
-      <!-- group-3: 지우개/채우기 + 브러시 두께 -->
-      <div class="tb-group">
-        <button class="tb" data-tool="eraser" aria-pressed="false" title="지우개 (E)" aria-label="지우개">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
-        </button>
-        <button class="tb" data-tool="fill" aria-pressed="false" title="채우기 (B)" aria-label="채우기">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"/><path d="M15 5l3 3"/><path d="M4 20h16" stroke-width="1" opacity=".4"/></svg>
-        </button>
-      </div>
-      <div class="tb-sep size-sep" aria-hidden="true"></div>
-      <div class="tb-sizes" id="sizeGrp2" role="radiogroup" aria-label="브러시 두께">
-        <button class="tb-sz" role="radio" data-size="1" aria-checked="true">1핀</button>
-        <button class="tb-sz" role="radio" data-size="2" aria-checked="false">2핀</button>
-        <button class="tb-sz" role="radio" data-size="3" aria-checked="false">3핀</button>
-      </div>
-      <div class="tb-sep" aria-hidden="true"></div>
-      <!-- group-4: 점자입력/촉각글자 (준비 중) -->
-      <div class="tb-group">
-        <button class="tb" title="점자 입력 상자" aria-label="점자 입력" disabled>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>
-        </button>
-        <button class="tb" title="촉각 글자" aria-label="촉각 글자" disabled>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 7V5h16v2M9 5v14M7 19h4"/><path d="M14 12h6M14 16h6"/></svg>
-        </button>
-      </div>
-      <div class="tb-sep" aria-hidden="true"></div>
-      <!-- group-5: Undo/Redo -->
-      <div class="tb-group">
-        <button class="tb" id="undoBtn2" title="실행 취소 (Ctrl+Z)" aria-label="실행 취소" disabled>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M3 13c0-4.97 4.03-9 9-9a9 9 0 0 1 9 9 9 9 0 0 1-9 9 8.99 8.99 0 0 1-7-3.35"/></svg>
-        </button>
-        <button class="tb" id="redoBtn2" title="다시 실행 (Ctrl+Shift+Z)" aria-label="다시 실행" disabled>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M21 13c0-4.97-4.03-9-9-9a9 9 0 0 0-9 9 9 9 0 0 0 9 9 8.99 8.99 0 0 0 7-3.35"/></svg>
-        </button>
-      </div>
-    </div>
+      <div class="dot-canvas-wrap">
+        <div id="dotGrid" style="position:relative">
+          <canvas id="pad" tabindex="0" role="application" aria-label="DotPad 촉각 캔버스"></canvas>
+          <img id="beforeImg" class="before-img" alt="원본 이미지"/>
 
-    <!-- canvas -->
-    <div class="canvas-stage" id="canvasArea">
-      <div class="dot-bg" id="dotBg">
-        <div id="dotGrid">
-          <canvas id="pad" tabindex="0" role="application" aria-label="DotPad 촉각 미리보기"></canvas>
-          <img id="beforeImg" class="before-img" alt="원본"/>
-          <!-- overlays -->
+          <!-- empty overlay -->
           <div class="ov" id="emptyOv">
-            <div class="ov-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-            <h2>이미지를 올려 시작하세요</h2>
-            <p>PNG · SVG · PDF · DTM · DTMS를 드래그하거나 선택해주세요</p>
-            <div class="ov-row">
-              <label for="imageFileInput" class="ov-btn accent" id="emptyImageBtn2" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">파일 선택</label>
-              <label for="tactileFileInput" class="ov-btn" id="emptyTactileBtn2" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">DTM·DTMS</label>
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <p class="ov-title">이미지를 올려보세요</p>
+            <p class="ov-sub">AI가 즉시 최적 촉각 그래픽으로 변환해드려요</p>
+            <div class="ov-actions">
+              <label for="imageFileInput" class="ov-cta accent" tabindex="0" role="button">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                파일 선택
+              </label>
+              <label for="tactileFileInput" class="ov-cta" tabindex="0" role="button">DTM·DTMS</label>
             </div>
             <button class="ov-link" id="sampleBtn">또는 샘플로 시작</button>
+            <p class="drag-hint">파일을 이곳에 드래그해도 됩니다</p>
           </div>
+
+          <!-- analyzing overlay -->
           <div class="ov" id="analyzeOv">
-            <div class="spinner" aria-hidden="true"></div>
-            <h2>이미지 분석 중…</h2>
-            <p id="analyzeName">밝기와 경계를 감지하고 있어요</p>
-            <!-- 모바일 변환 진행 바 -->
-            <div class="conv-bar" aria-hidden="true">
-              <div class="conv-bar-fill" id="convBarFill"></div>
-            </div>
-            <div class="ov-row">
-              <button class="ov-link" id="cancelAnalyze">취소</button>
-              <button class="ov-link" id="replaceAnalyze">교체</button>
+            <div class="analyzing-wrap">
+              <div class="ai-spinner"></div>
+              <p class="analyzing-title" id="analyzeTitle">이미지 분석 중</p>
+              <p class="analyzing-sub" id="analyzeName">AI가 최적 변환 방식을 찾고 있어요</p>
+              <div class="conv-bar"><div class="conv-bar-fill" id="convBarFill"></div></div>
+              <button class="cancel-link" id="cancelAnalyze">취소</button>
             </div>
           </div>
         </div>
@@ -919,174 +599,217 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     </div>
 
     <!-- quality bar -->
-    <div class="quality-bar">
-      <span class="qt qt-dots" id="qDotCount">— dots</span>
-      <span class="qt qt-read-g" id="qReadability" style="display:none">읽기 좋음</span>
-      <span class="qt qt-noise" id="qNoise" style="display:none">잡음 적음</span>
-      <span class="qt qt-spacing" id="qSpacing" style="display:none">간격 여유</span>
-      <span class="qt qt-retouch" id="qRetouch" style="display:none">수정 가능</span>
+    <div class="q-bar" id="qBar" style="display:none">
+      <span class="q-tag q-dots"><span class="qd"></span><span id="qDotCount">—</span></span>
+      <span class="q-sep"></span>
+      <span class="q-tag q-good" id="qReadability" style="display:none"><span class="qd"></span><span id="qReadText">읽기 좋음</span></span>
+      <span class="q-tag q-good" id="qNoise" style="display:none"><span class="qd"></span><span id="qNoiseText">잡음 적음</span></span>
+      <span class="q-tag q-good" id="qSpacing" style="display:none"><span class="qd"></span><span id="qSpacingText">간격 여유</span></span>
+    </div>
+
+    <!-- canvas HUD -->
+    <div class="canvas-hud">
+      <div class="hud-pill" id="sbZoomPill">100%</div>
+      <div class="hud-pill" id="sbPinsPill">0 핀</div>
     </div>
   </main>
 
   <!-- RIGHT PANEL -->
-  <aside class="panel-right">
+  <aside class="right-panel">
+    <div class="rp-header">
+      <span class="rp-title">Properties</span>
+    </div>
     <div class="rp-scroll">
 
-      <!-- ══ 1단계: 만들기 — 점 농도 + 품질 ══ -->
-      <div class="tab-panel active" id="rp-step1">
-        <p class="rp-section">점 농도 조절</p>
-        <div class="th-slider-wrap">
-          <div class="th-track" id="thTrack">
-            <div class="th-active" id="thActive" style="width:50%"></div>
-            <div class="th-thumb" id="thThumb" style="left:50%"></div>
+      <!-- AI 인사이트 카드 -->
+      <div class="ai-card" id="aiCard">
+        <div class="ai-card-head">
+          <div class="ai-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12l4-4"/><circle cx="18" cy="6" r="3"/></svg>
           </div>
-          <input type="range" id="clarity" min="20" max="240" value="128" aria-label="점 농도 조절"/>
+          <span class="ai-card-label">AI 분석</span>
         </div>
-        <div class="th-adj-row">
+        <p class="ai-card-text" id="aiCardText">이미지를 업로드하면 AI가 분석 결과를 보여드려요.</p>
+        <div class="ai-chips" id="aiChips" style="display:none"></div>
+      </div>
+
+      <!-- 점 농도 -->
+      <div>
+        <div class="sec-head">점 농도</div>
+        <div class="th-row">
+          <div class="th-slider-wrap">
+            <div class="th-track">
+              <div class="th-fill" id="thFill" style="width:50%"></div>
+              <div class="th-thumb" id="thThumb" style="left:50%"></div>
+            </div>
+            <input type="range" id="clarity" min="20" max="240" value="128" aria-label="점 농도"/>
+          </div>
+          <span class="th-val" id="thValDisplay">50%</span>
+        </div>
+        <div class="th-actions">
           <button class="th-adj" id="thMinus">−1</button>
           <button class="th-adj" id="thAuto">자동</button>
           <button class="th-adj" id="thPlus">+1</button>
           <button class="th-apply" id="thApply" disabled>적용</button>
         </div>
-        <div class="score-card good" id="scoreCard">
-          <div class="score-label" id="scoreLabel">업로드 대기</div>
-          <div class="score-title" id="scoreTitle">이미지를 선택하세요</div>
-          <div class="score-desc" id="scoreDesc">소스를 업로드하면 촉각 인지 분석 결과가 표시됩니다.</div>
+      </div>
+
+      <!-- 품질 카드 -->
+      <div class="score-card" id="scoreCard">
+        <span class="sc-label" id="scoreLabel">대기 중</span>
+        <span class="sc-title" id="scoreTitle">이미지를 올려주세요</span>
+        <span class="sc-desc" id="scoreDesc">AI가 촉각 인지 품질을 분석해드려요.</span>
+      </div>
+
+      <!-- 표현 방식 -->
+      <div>
+        <div class="sec-head">표현 방식</div>
+        <div class="prop-row">
+          <span class="prop-label">윤곽선</span>
+          <div class="seg3">
+            <button class="seg3-btn on" data-ol="0" id="olBtn0">채움</button>
+            <button class="seg3-btn" data-ol="1" id="olBtn1">1선</button>
+            <button class="seg3-btn" data-ol="2" id="olBtn2">2선</button>
+          </div>
         </div>
-        <div class="adv-rows">
-          <div class="adv-row">
-            <span class="adv-label">테두리 다듬기</span>
-            <select class="adv-select" id="edgeCleanup">
-              <option value="auto">자동</option>
-              <option value="light">약하게</option>
-              <option value="strong">강하게</option>
-              <option value="off">끄기</option>
-            </select>
-            <span class="adv-arr">⌄</span>
-          </div>
-          <div class="adv-row">
-            <span class="adv-label">최소 점 크기</span>
-            <select class="adv-select" id="minCluster">
-              <option value="2">2 dots</option>
-              <option value="3" selected>3 dots</option>
-              <option value="4">4 dots</option>
-              <option value="5">5 dots</option>
-            </select>
-            <span class="adv-arr">⌄</span>
-          </div>
-          <div class="adv-row">
-            <span class="adv-label">여백 유지</span>
-            <select class="adv-select" id="brailleSafe">
-              <option value="on" selected>켜짐</option>
-              <option value="off">꺼짐</option>
-            </select>
-            <span class="adv-arr">⌄</span>
+        <div class="prop-row">
+          <span class="prop-label">자동 정리</span>
+          <button class="tog" id="autoSimplifyTog" role="switch" aria-checked="true"></button>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">극성 반전</span>
+          <button class="tog" id="polarityTog" role="switch" aria-checked="false"></button>
+        </div>
+        <div class="prop-row">
+          <span class="prop-label">출력 크기</span>
+          <div class="seg3">
+            <button class="seg3-btn on" id="resBtn60">60×40</button>
+            <button class="seg3-btn" id="resBtn96">96×64</button>
           </div>
         </div>
       </div>
 
-      <!-- ══ 2단계: 다듬기 — 리터치 도구 안내 + 연결 ══ -->
-      <div class="tab-panel" id="rp-step2">
-        <p class="rp-section">리터치 도구</p>
-        <div class="score-card good" id="scoreCard2" style="margin-top:10px">
-          <div class="score-label" style="color:var(--blue)">핀 직접 편집</div>
-          <div class="score-title">위 툴바에서 펜/지우개를 선택하세요</div>
-          <div class="score-desc">드래그로 핀을 올리거나 내릴 수 있어요. Ctrl+Z로 되돌리기.</div>
-        </div>
-        <p class="rp-section" style="margin-top:16px">DotPad 연결</p>
-        <div class="conn-section" style="border-top:none;padding-top:0">
-          <div class="conn-row" id="connRow2" role="button" tabindex="0">
-            <span class="conn-dot off" id="connDot2"></span>
-            <span class="conn-lbl" id="connText2">DotPad 미연결</span>
-          </div>
-          <div class="live-row">
-            <div>
-              <div class="live-lbl">라이브 반영</div>
-              <div class="live-hint" id="liveHint2">연결 후 활성화됩니다</div>
-            </div>
-            <button class="sw" id="liveSwitch2" role="switch" aria-checked="false" disabled></button>
-          </div>
-        </div>
-        <p class="rp-section" style="margin-top:16px">품질 확인</p>
-        <div class="score-card good" id="scoreCard3">
-          <div class="score-label" id="scoreLabel2">업로드 대기</div>
-          <div class="score-title" id="scoreTitle2">이미지를 선택하세요</div>
-          <div class="score-desc" id="scoreDesc2">결과가 표시됩니다.</div>
+      <!-- 빠른 편집 -->
+      <div>
+        <div class="sec-head">빠른 편집</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <button class="exp-btn" id="btnInvert" disabled>핀 반전</button>
+          <button class="exp-btn" id="btnDenoise" disabled>노이즈 정리</button>
+          <button class="exp-btn" id="btnAllUp" disabled>전체 올리기</button>
+          <button class="exp-btn" id="btnAllDown" disabled>전체 내리기</button>
         </div>
       </div>
 
-      <!-- ══ 3단계: 전문 설정 — HEX 출력 미리보기 + 출력 ══ -->
-      <div class="tab-panel" id="rp-step3">
-        <p class="rp-section">출력 미리보기</p>
-        <div class="score-card good" style="margin-top:10px;background:var(--bg)">
-          <div class="score-label" style="color:var(--placeholder);font-size:11px;font-weight:600;font-family:monospace;word-break:break-all;line-height:1.6" data-ctrl="hexOut">HEX —</div>
+      <!-- DotPad -->
+      <div class="dp-section">
+        <div class="sec-head">DotPad</div>
+        <div class="dp-row" id="connRow" role="button" tabindex="0">
+          <span class="dp-dot off" id="connDot"></span>
+          <span class="dp-label" id="connText">연결되지 않음</span>
         </div>
-        <p class="rp-section" style="margin-top:16px">DotPad 출력</p>
-        <div class="conn-section" style="border-top:none;padding-top:0">
-          <div class="conn-row" id="connRow3" role="button" tabindex="0">
-            <span class="conn-dot off" id="connDot3"></span>
-            <span class="conn-lbl" id="connText3">DotPad 미연결</span>
-          </div>
-          <div class="live-row">
-            <div>
-              <div class="live-lbl">라이브 반영</div>
-              <div class="live-hint" id="liveHint3">연결 후 활성화됩니다</div>
-            </div>
-            <button class="sw" id="liveSwitch3" role="switch" aria-checked="false" disabled></button>
-          </div>
+        <div class="live-row">
+          <span class="live-lbl" id="liveHint">연결 후 라이브 반영 가능</span>
+          <button class="tog" id="liveSwitch" role="switch" aria-checked="false" disabled></button>
         </div>
-        <button class="th-apply" id="outBtn3" disabled style="width:100%;margin-top:12px;border-radius:10px;height:40px;font-size:13px">닷패드로 출력</button>
       </div>
 
-    </div>
+      <!-- 저장 / 내보내기 -->
+      <div>
+        <div class="sec-head">저장 / 내보내기</div>
+        <div class="export-btns">
+          <button class="exp-btn accent" id="dtmsBtn" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            .dtms 저장
+          </button>
+          <button class="exp-btn" id="pngBtn" disabled>PNG 내보내기</button>
+          <button class="exp-btn" id="hexBtn" disabled>HEX 복사</button>
+        </div>
+      </div>
+
+      <!-- 고급 설정 (접이식) -->
+      <div>
+        <div class="expert-toggle" id="expertToggle" role="button" tabindex="0" aria-expanded="false">
+          <span class="expert-toggle-label">고급 설정</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="expert-body" id="expertBody">
+          <div class="prop-row" style="border-top:none;padding-top:0">
+            <span class="prop-label">변환 방식</span>
+            <select class="prop-select" id="method">
+              <option value="global">자동</option>
+              <option value="otsu">Otsu</option>
+              <option value="sauvola">Sauvola</option>
+              <option value="adaptive">Adaptive</option>
+              <option value="mean">평균</option>
+            </select>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">원시 임계값</span>
+            <input type="number" class="exp-input" id="rawth" min="0" max="255" value="128"/>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">최소 점 크기</span>
+            <input type="number" class="exp-input" id="minComp" min="1" max="40" value="3"/>
+          </div>
+          <div class="prop-row">
+            <span class="prop-label">고급 브러시</span>
+            <select class="prop-select" id="advSize">
+              <option value="0">끄기</option>
+              <option value="1">켜기</option>
+            </select>
+          </div>
+          <button class="exp-btn" id="recoReset" disabled style="margin-top:6px">추천값으로 초기화</button>
+        </div>
+      </div>
+
+    </div><!-- /rp-scroll -->
   </aside>
 </div><!-- /workspace -->
 
-<!-- ═══ BOTTOM BAR ═══ -->
-<div class="bottom-bar">
-  <div class="bs-pills">
-    <span class="bsp bsp-local">로컬 처리</span>
-    <span class="bsp bsp-thresh" id="bsThresh" style="display:none">점 농도 —%</span>
-    <span class="bsp bsp-synced" id="bsSynced" style="display:none">DotPad 동기화됨</span>
-    <span class="bsp bsp-retouch" id="bsRetouch" style="display:none">기본 리터치</span>
-  </div>
-  <p class="bs-note">파일 불러오기 → 미리보기 → 출력 순서로 진행해요.</p>
-  <div class="bs-div"></div>
-  <div class="bs-actions">
-    <button class="bs-btn" id="dtmsBtn" disabled>.dtms 저장</button>
-    <button class="bs-btn" id="bsPreviewBtn" disabled>미리보기</button>
-    <button class="bs-btn primary" id="outBtn" disabled>출력</button>
-  </div>
+<!-- ═══════════════ STATUS BAR ═══════════════ -->
+<div class="status-bar">
+  <span class="sb-item" id="sbTool" hidden></span>
+  <span class="sb-item" id="sbZoom">100%</span>
+  <span class="sb-item"><span id="sbPins">0</span> 핀</span>
+  <span class="sb-spacer"></span>
+  <span class="sb-tag orange" id="bsThresh" style="display:none">농도 50%</span>
+  <span class="sb-tag teal" id="bsSynced" style="display:none">DotPad 동기화됨</span>
+  <span class="sb-tag green" id="bsRetouch" style="display:none">리터치 완료</span>
+  <span class="sb-item" id="sbPerc" style="margin-left:8px">—</span>
 </div>
 
 <!-- utils -->
 <div id="toast" role="status" aria-live="polite"></div>
 <div class="sr-only" id="live" role="status" aria-live="assertive"></div>
-<input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,image/*" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true"/>
-<input type="file" id="tactileFileInput" accept=".dtm,.dtms" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true"/>
+<input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,image/*"
+  style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true"/>
+<input type="file" id="tactileFileInput" accept=".dtm,.dtms"
+  style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true"/>
+
+<!-- guard modal -->
 <div class="modal-bg" id="guardModal" role="dialog" aria-modal="true">
   <div class="modal">
-    <h2>저장되지 않은 변경이 있어요</h2>
-    <p>새 파일을 불러오면 지금 작업한 내용이 사라집니다.</p>
+    <h2>저장하지 않은 변경이 있어요</h2>
+    <p>새 파일을 불러오면 현재 작업 내용이 사라져요.</p>
     <div class="ma">
-      <button class="acc" id="guardSave">저장 후 불러오기</button>
-      <button id="guardProceed">저장하지 않고 불러오기</button>
+      <button class="acc" id="guardSave">저장하고 불러오기</button>
+      <button id="guardProceed">저장 없이 불러오기</button>
       <button id="guardCancel">취소</button>
     </div>
   </div>
 </div>
 
-<!-- LEGACY (엔진 참조용, 화면 비노출) -->
+<!-- LEGACY (engine references, hidden) -->
 <div id="legacy" hidden aria-hidden="true">
-  <input class="fname" id="fname" value="Untitled"/>
-  <span class="dirty" id="dirty"></span>
-  <div class="chip" id="chip"><span class="dot"></span><span id="chipText">DotPad 미연결</span></div>
-  <button id="connectBtn">DotPad 연결</button>
+  <input class="fname" id="fname2" value="Untitled"/>
+  <span class="dirty" id="dirty2"></span>
+  <div class="chip" id="chip"><span class="dot"></span><span id="chipText">미연결</span></div>
+  <button id="connectBtn">연결</button>
   <button id="saveTopBtn">저장</button>
   <button id="loadMenuBtn" aria-expanded="false" aria-controls="loadMenu">불러오기</button>
   <div id="loadMenu" role="menu" hidden>
-    <button role="menuitem" id="miImage">다른 이미지 불러오기</button>
-    <button role="menuitem" id="miTactile">DTM·DTMS 파일 불러오기</button>
+    <button role="menuitem" id="miImage">이미지</button>
+    <button role="menuitem" id="miTactile">DTM·DTMS</button>
   </div>
   <nav class="rail" id="rail">
     <button class="tool" data-tool="move" aria-pressed="true"></button>
@@ -1096,16 +819,15 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     <button class="tool" id="redoBtn"></button>
     <button class="tool" id="clearBtn"></button>
   </nav>
-  <div id="toolCtx"><span id="toolCtxLbl">펜</span>
+  <div id="toolCtx"><span id="toolCtxLbl"></span>
     <div id="sizeGrp" role="radiogroup">
       <button role="radio" data-size="1" aria-checked="true">1</button>
       <button role="radio" data-size="2" aria-checked="false">2</button>
       <button role="radio" data-size="3" aria-checked="false">3</button>
     </div>
   </div>
-  <span id="sbTool" hidden></span><span id="sbToolDiv" hidden></span>
-  <span id="sbZoom">100%</span><span id="sbPins">0</span>
-  <span id="sbPerc">—</span><span id="sbDot">—</span>
+  <span id="sbToolDiv" hidden></span>
+  <span id="sbDot">—</span>
   <p id="agentLead"></p><div id="agentReco"></div>
   <div id="askWrap"><input id="askInput"/><button id="askGo">↵</button></div>
   <div id="askChips">
@@ -1116,18 +838,20 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
   </div>
   <div id="infoImage"><span id="infoFile">—</span><span id="infoSize">—</span><span id="infoType">—</span><span id="infoReco">—</span></div>
   <div id="infoTactile"><span id="tFile">—</span><span id="tFormat">—</span><span id="tRes">60×40</span><span id="tPages">1</span><span id="tVersion">—</span><span id="tStatus">완료</span></div>
-  <button id="replaceImgBtn">이미지 교체</button>
-  <button id="loadTactileBtn2">DTM·DTMS 불러오기</button>
-  <button id="emptyTactileBtn">DTM·DTMS</button>
+  <button id="emptyImageBtn">이미지</button>
+  <button id="emptyTactileBtn">DTM</button>
+  <button id="replaceImgBtn">교체</button>
+  <button id="loadTactileBtn2">DTM</button>
+  <button id="replaceAnalyze">교체</button>
   <section id="secClarity">
     <div class="seg" id="clarityModeSeg" role="group">
       <button data-th="80" aria-pressed="false">단순</button>
       <button data-th="128" aria-pressed="true">균형</button>
-      <button data-th="185" aria-pressed="false">또렷하게</button>
+      <button data-th="185" aria-pressed="false">또렷</button>
     </div>
     <span class="v" id="clarityVal">128</span>
     <b id="recoLabel">균형</b>
-    <button id="recoReset">추천값으로</button>
+    <button id="recoReset2">추천값</button>
     <div id="clarityFb"></div>
   </section>
   <section id="secOutline">
@@ -1155,15 +879,11 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     </div>
   </section>
   <section id="secSave">
-    <button id="hexBtn" disabled>HEX</button>
-    <button id="pngBtn" disabled>PNG</button>
+    <button id="hexBtn2" disabled>HEX</button>
+    <button id="pngBtn2" disabled>PNG</button>
     <p id="saveHint">준비 중</p>
   </section>
   <section id="secExpert">
-    <select id="method"><option value="global">자동</option><option value="otsu">Otsu</option><option value="sauvola">Sauvola</option><option value="adaptive">Adaptive</option><option value="mean">평균</option></select>
-    <input type="number" id="rawth" min="0" max="255" value="128"/>
-    <input type="number" id="minComp" min="1" max="40" value="3"/>
-    <select id="advSize"><option value="0">끄기</option><option value="1">켜기</option></select>
     <div id="hexOut">—</div>
   </section>
   <button id="mobtab">패널 ▲</button>
@@ -1758,45 +1478,48 @@ window.addEventListener('resize',layout);
 setAppState('empty');layout();updateScoreUI();updateUndoButtons();
 initDotPad();
 
-/* ══════════════════════════════════════════════════════
-   Dot Canvas v4.3 · 3-Column UI 배선
-   임계값 실시간 반영 · 품질 피드백 · 툴바 · DotPad
-══════════════════════════════════════════════════════ */
+/* ============================================================
+   Dot Canvas — Dark Editor UI Addon
+   AI 인사이트 · 슬라이더 · 도구 · 품질 · DotPad · 반응형
+   ============================================================ */
 (function(){
-const q=s=>document.querySelector(s);
-const qa=s=>Array.from(document.querySelectorAll(s));
+const q = s => document.querySelector(s);
+const qa = s => Array.from(document.querySelectorAll(s));
 
-/* ── 캔버스 핏 ── */
+/* ── canvas fit ── */
 function fitCanvas(){
-  const box=document.getElementById('dotGrid'); if(!box||!pad) return;
-  const W=box.clientWidth,H=box.clientHeight; if(W<=0||H<=0) return;
-  const cw=Math.floor((W-off*2)/GW),ch=Math.floor((H-off*2)/GH);
-  cell=Math.max(4,Math.min(16,Math.min(cw,ch)));
-  const w=GW*cell+off*2,h=GH*cell+off*2,dpr=window.devicePixelRatio||1;
-  pad.width=w*dpr; pad.height=h*dpr;
-  pad.style.width=w+'px'; pad.style.height=h+'px';
-  ctx.setTransform(dpr,0,0,dpr,0,0); draw();
+  const box = document.getElementById('dotGrid');
+  if(!box || !pad) return;
+  const W = box.clientWidth || 600, H = box.clientHeight || 400;
+  if(W <= 0 || H <= 0) return;
+  const area = q('.canvas-area');
+  const maxW = (area ? area.clientWidth - 80 : W);
+  const maxH = (area ? area.clientHeight - 80 : H);
+  const cw = Math.floor(maxW / GW);
+  const ch = Math.floor(maxH / GH);
+  cell = Math.max(5, Math.min(18, Math.min(cw, ch)));
+  const w = GW*cell + off*2, h = GH*cell + off*2;
+  const dpr = window.devicePixelRatio || 1;
+  pad.width = w*dpr; pad.height = h*dpr;
+  pad.style.width = w+'px'; pad.style.height = h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  draw();
 }
-layout=fitCanvas;
-window.addEventListener('resize',fitCanvas);
+layout = fitCanvas;
+window.addEventListener('resize', fitCanvas);
 
-/* ── autoSelect 패치: 형태 보존 + 과채움 방지 ── */
-autoSelect=function(){
-  imgMeta=Object.assign(imgMeta||{},analyzeImageType());
-
-  // 1) 투명 PNG: alphaBuf >= 128 이면서 어두운 픽셀만 점으로
-  //    (이전엔 불투명 전체 → 형태와 무관한 픽셀까지 전부 점)
+/* ── autoSelect 패치 ── */
+autoSelect = function(){
+  imgMeta = Object.assign(imgMeta||{}, analyzeImageType());
   if(imgMeta.hasAlpha){
-    // 불투명 영역의 gray 분포로 Otsu 임계값 계산
     const alphaGray=[];
-    for(let i=0;i<N;i++){ if(alphaBuf[i]>=128) alphaGray.push(grayBuf[i]); }
+    for(let i=0;i<N;i++) if(alphaBuf[i]>=128) alphaGray.push(grayBuf[i]);
     let t=128;
     if(alphaGray.length>20){
-      // alphaGray 배열로 otsu 계산
       const h=new Array(256).fill(0);
       alphaGray.forEach(v=>h[v|0]++);
-      const NN=alphaGray.length;
-      let sum=0; for(let i=0;i<256;i++) sum+=i*h[i];
+      const NN=alphaGray.length; let sum=0;
+      for(let i=0;i<256;i++) sum+=i*h[i];
       let sB=0,wB=0,mx=-1; t=128;
       for(let i=0;i<256;i++){
         wB+=h[i]; if(!wB) continue;
@@ -1806,28 +1529,12 @@ autoSelect=function(){
         if(b>mx){mx=b;t=i;}
       }
     }
-    // alpha + gray 이중 조건으로 마스크 생성
     const testGrid=new Uint8Array(N);
-    for(let i=0;i<N;i++){
-      testGrid[i]=(alphaBuf[i]>=128 && grayBuf[i]<=t)?1:0;
-    }
+    for(let i=0;i<N;i++) testGrid[i]=(alphaBuf[i]>=128&&grayBuf[i]<=t)?1:0;
     const on=testGrid.reduce((a,v)=>a+v,0);
-    const density=on/N;
-
-    // 과채움(40% 초과) → 임계값 낮춰 재시도
-    if(density>0.40){
-      const lower=Math.min(t, Math.round(t*0.6));
-      for(let i=0;i<N;i++){
-        testGrid[i]=(alphaBuf[i]>=128 && grayBuf[i]<=lower)?1:0;
-      }
-      threshold=lower;
-    } else {
-      threshold=t;
-    }
-
-    method='alpha_gray'; // 내부 식별용
-    // rebuild 시 alpha_gray 처리
-    const _baseMask=baseMask;
+    if(on/N>0.40){ t=Math.min(t,Math.round(t*0.6)); }
+    threshold=t;
+    const _bm=baseMask;
     baseMask=function(th,meth,pol){
       if(meth==='alpha_gray'||meth==='alpha'){
         const o=new Uint8Array(N);
@@ -1835,839 +1542,475 @@ autoSelect=function(){
         if(pol) for(let i=0;i<N;i++) o[i]^=1;
         return o;
       }
-      return _baseMask(th,meth,pol);
+      return _bm(th,meth,pol);
     };
-    polarity=false; outline=0;
+    method='alpha_gray'; polarity=false; outline=0;
     recoThreshold=threshold; recoOutline=0;
     rebuild();
     return {score:100,meth:'alpha_gray',pol:false,ol:0};
   }
-
-  // 2) 일반 이미지: Otsu + 과채움 가드
-  const t=otsu(grayBuf);
-  let finalT=t, pol=false;
-
-  // 점 비율 체크
+  const t=otsu(grayBuf); let finalT=t, pol=false;
   const testM=fillT(grayBuf,t,false);
   let on=0; for(let i=0;i<N;i++) on+=testM[i];
-  const density=on/N;
-
-  if(density>0.75){
-    // 배경이 어두운 이미지 → 반전
-    pol=true;
-  } else if(density>0.50){
-    // 과채움 → 임계값 낮춤
-    finalT=Math.round(t*0.7);
-  }
-
+  if(on/N>0.75){ pol=true; }
+  else if(on/N>0.50){ finalT=Math.round(t*0.7); }
   method='global'; polarity=pol; outline=0;
-  threshold=finalT;
-  recoThreshold=finalT; recoOutline=0;
+  threshold=finalT; recoThreshold=finalT; recoOutline=0;
   rebuild();
   return {score:100,meth:'global',pol,ol:0};
 };
 
-/* ══════════════════════════════════════════════════════
-   임계값 UI — Figma 슬라이더 (th-track + th-active + th-thumb)
-══════════════════════════════════════════════════════ */
+/* ══ SLIDER ══ */
 function thPct(v){ return Math.max(0,Math.min(100,Math.round((+v-20)/220*100))); }
-
 function paintSlider(v){
-  const pct=thPct(v);
-  const act=q('#thActive'),thumb=q('#thThumb');
-  if(act) act.style.width=pct+'%';
-  if(thumb) thumb.style.left=pct+'%';
-  // bottom bar
-  const bt=q('#bsThresh');
-  if(bt){bt.textContent='점 농도 '+pct+'%'; bt.style.display=hasImage?'flex':'none';}
+  const pct = thPct(v);
+  const fill=q('#thFill'), thumb=q('#thThumb'), disp=q('#thValDisplay');
+  if(fill) fill.style.width = pct+'%';
+  if(thumb) thumb.style.left = pct+'%';
+  if(disp) disp.textContent = pct+'%';
+  const bt=q('#bsThresh'); if(bt){bt.textContent='농도 '+pct+'%'; bt.style.display=hasImage?'':'none';}
 }
 
-/* 슬라이더 input → 즉시 rebuild */
-q('#clarity').addEventListener('input',function(){
-  const v=+this.value;
+q('#clarity').addEventListener('input', function(){
+  const v = +this.value;
   paintSlider(v);
   threshold=v; method='global';
   const rm=document.getElementById('method'); if(rm) rm.value='global';
   const rv=document.getElementById('rawth'); if(rv) rv.value=v;
-  if(hasImage&&grayBuf){ rebuild(); afterChange(false); syncQuality(); }
+  if(hasImage && grayBuf){ rebuild(); afterChange(false); syncQuality(); }
   const ap=q('#thApply'); if(ap) ap.disabled=false;
 });
 
-/* Apply 버튼 → DotPad 전송까지 */
-q('#thApply').addEventListener('click',function(){
+q('#thApply').addEventListener('click', function(){
   if(!hasImage) return;
   rebuild(); afterChange();
   this.disabled=true; syncQuality();
   toast('점 농도 '+thPct(threshold)+'% 적용됨');
 });
-
-/* ±1 */
-q('#thMinus').addEventListener('click',()=>{
+q('#thMinus').addEventListener('click', ()=>{
   const sl=q('#clarity'); sl.value=Math.max(20,+sl.value-1);
   sl.dispatchEvent(new Event('input',{bubbles:true}));
 });
-q('#thPlus').addEventListener('click',()=>{
+q('#thPlus').addEventListener('click', ()=>{
   const sl=q('#clarity'); sl.value=Math.min(240,+sl.value+1);
   sl.dispatchEvent(new Event('input',{bubbles:true}));
 });
-
-/* 자동: Otsu */
-q('#thAuto').addEventListener('click',()=>{
-  if(!grayBuf){ toast('이미지를 먼저 불러오세요'); return; }
+q('#thAuto').addEventListener('click', ()=>{
+  if(!grayBuf){ toast('이미지를 먼저 올려주세요'); return; }
   const t=otsu(grayBuf);
   q('#clarity').value=t; q('#clarity').dispatchEvent(new Event('input',{bubbles:true}));
   toast('자동: '+thPct(t)+'%');
 });
 
-/* ══════════════════════════════════════════════════════
-   품질 피드백
-══════════════════════════════════════════════════════ */
-const GRADE_KO=['','낮음','보통','좋음','매우 좋음'];
-const SCORE_LABELS={
-  4:'읽기 쉬움', 3:'읽기 양호', 2:'읽기 어려움', 1:'인지 불가'
+/* ══ QUALITY ══ */
+const GRADE_TEXT = ['','인지 어려움','보통','좋음','매우 좋음'];
+const SCORE = {
+  4:{label:'읽기 쉬움',title:'혼자서도 읽을 수 있어요',desc:'선이 선명하고 핀 수가 적당해요.',cls:'teal'},
+  3:{label:'읽기 양호',title:'약간의 도움이 있으면 읽을 수 있어요',desc:'일부 영역이 구분하기 어려울 수 있어요.',cls:''},
+  2:{label:'조정 필요',title:'임계값을 조정해보세요',desc:'"자동" 버튼으로 최적값을 찾아보세요.',cls:'amber'},
+  1:{label:'인지 불가',title:'핀이 너무 많거나 너무 적어요',desc:'"자동" 버튼을 눌러보세요.',cls:'red'},
 };
-const SCORE_TITLES={
-  4:'혼자서도 읽을 수 있어요',
-  3:'도움이 있으면 읽을 수 있어요',
-  2:'임계값 조정이 필요해요',
-  1:'점이 너무 많거나 너무 적어요'
+const AI_MSGS = {
+  transparent:  '투명 배경 PNG를 감지했어요. 형태 외곽을 점으로 표현했어요.',
+  lineart:      '선화·아이콘을 감지했어요. 선을 핀으로 직접 변환했어요.',
+  lowcontrast:  '저대비 이미지를 감지했어요. 국소 임계값으로 세부를 살렸어요.',
+  photo:        '사진을 감지했어요. 주요 윤곽선을 추출했어요.',
+  default:      'AI가 이미지를 분석해 최적 변환 방식을 선택했어요.',
 };
-const SCORE_DESCS={
-  4:'선이 선명하고 점 수가 적당해요.',
-  3:'일부 영역이 구분하기 어려울 수 있어요.',
-  2:'임계값을 낮추거나 자동을 눌러보세요.',
-  1:'자동 버튼으로 최적 임계값을 찾아보세요.'
-};
+const AI_CHIPS = ['더 단순하게','선만 남기기','점 정리','핀 반전'];
 
 function syncQuality(){
-  if(!hasImage||appState!=='ready'){ resetQuality(); return; }
-  const pins=countOn(grid), fill=Math.round(pins/N*100);
-  const sc=tactileQualityScore(grid,{type:imgMeta&&imgMeta.type,outline});
-  const g=Math.min(4,Math.max(1,sc.grade));
+  if(!hasImage || appState!=='ready'){ resetQuality(); return; }
+  const pins = countOn(grid);
+  const fill = Math.round(pins/N*100);
+  const sc = tactileQualityScore(grid,{type:imgMeta&&imgMeta.type,outline});
+  const g = Math.min(4,Math.max(1,sc.grade));
+  const info = SCORE[g];
 
-  // dot count
-  const qd=q('#qDotCount'); if(qd) qd.textContent=pins+' dots';
+  // quality bar
+  const qbar = q('#qBar'); if(qbar) qbar.style.display='flex';
+  const qd=q('#qDotCount'); if(qd) qd.textContent=pins+' 핀';
 
-  // readability
   const qr=q('#qReadability');
-  if(qr){
-    const cls=g>=3?'qt-read-g':g===2?'qt-read-m':'qt-read-b';
-    qr.className='qt '+cls;
-    qr.textContent=g>=3?'읽기 좋음':g===2?'읽기 보통':'읽기 어려움';
-    qr.style.display='inline-flex';
-  }
-
-  // noise
+  if(qr){ qr.style.display='flex';
+    qr.className='q-tag '+(g>=3?'q-good':g===2?'q-mid':'q-bad');
+    q('#qReadText').textContent=g>=3?'읽기 좋음':g===2?'읽기 보통':'읽기 어려움'; }
   const qn=q('#qNoise');
-  if(qn){
-    const noisy=fill>50;
-    qn.className='qt '+(noisy?'qt-noise-h':'qt-noise');
-    qn.textContent=noisy?'잡음 많음':'잡음 적음';
-    qn.style.display='inline-flex';
-  }
-
-  // spacing — Figma: blue bg
+  if(qn){ qn.style.display='flex';
+    qn.className='q-tag '+(fill<=40?'q-good':fill<=60?'q-mid':'q-bad');
+    q('#qNoiseText').textContent=fill<=40?'잡음 적음':fill<=60?'잡음 보통':'잡음 많음'; }
   const qs=q('#qSpacing');
-  if(qs){
-    const spacingText=fill<20?'간격 부족':fill>60?'간격 빽빽':'간격 여유';
-    qs.className='qt qt-spacing';
-    qs.textContent=spacingText;
-    qs.style.display='inline-flex';
-  }
-
-  // retouch
-  const qt=q('#qRetouch'); if(qt) qt.style.display='inline-flex';
+  if(qs){ qs.style.display='flex'; q('#qSpacingText').textContent=fill<20?'간격 넓음':fill>55?'간격 빽빽':'간격 여유'; }
 
   // score card
-  const card=q('#scoreCard'),lbl=q('#scoreLabel'),ttl=q('#scoreTitle'),dsc=q('#scoreDesc');
+  const card=q('#scoreCard');
   if(card){
-    card.className='score-card '+(g>=3?'good':g===2?'mid':'bad');
-    if(lbl) lbl.textContent=SCORE_LABELS[g];
-    if(ttl) ttl.textContent=SCORE_TITLES[g];
-    if(dsc) dsc.textContent=SCORE_DESCS[g];
+    card.className='score-card '+(info.cls);
+    q('#scoreLabel').textContent=info.label;
+    q('#scoreTitle').textContent=info.title;
+    q('#scoreDesc').textContent=info.desc;
   }
 
-  // preview meta
-  const pm=q('#previewMeta');
-  if(pm) pm.textContent=GW+'×'+GH+' · '+pins+'핀 활성 · '+fill+'% 채움 · '+GRADE_KO[g];
+  // AI card
+  const aiTxt=q('#aiCardText');
+  if(aiTxt && imgMeta){
+    aiTxt.textContent=(AI_MSGS[imgMeta.type]||AI_MSGS.default)+
+      ` ${GW}×${GH} · ${pins}핀 · ${fill}% 채움`;
+  }
+  const aiChips=q('#aiChips');
+  if(aiChips && aiChips.style.display==='none'){
+    aiChips.style.display='flex';
+    aiChips.innerHTML=AI_CHIPS.map(t=>
+      `<button class="ai-ch" data-cmd="${t}">${t}</button>`).join('');
+    aiChips.querySelectorAll('.ai-ch').forEach(b=>b.addEventListener('click',()=>{
+      const cmd={
+        '더 단순하게':'simpler','선만 남기기':'outline',
+        '점 정리':'denoise','핀 반전':'invert'
+      }[b.dataset.cmd];
+      if(cmd) applyOp(cmd);
+    }));
+  }
 
-  // cell pill
-  const cp=q('#cellPill'); if(cp){cp.style.display='inline-flex';cp.textContent=pins+' / '+(GW*GH)+' cells';}
-
-  // bottom bar
-  const bs=q('#bsSynced'); if(bs) bs.style.display=connected?'inline-flex':'none';
-  const br=q('#bsRetouch'); if(br) br.style.display='inline-flex';
+  // status bar
+  const bt=q('#bsThresh'); if(bt){bt.textContent='농도 '+thPct(threshold)+'%';bt.style.display='';}
+  const bs=q('#bsSynced'); if(bs) bs.style.display=connected?'':'none';
+  const br=q('#bsRetouch'); if(br) br.style.display='';
+  const sp=q('#sbPerc'); if(sp) sp.textContent=GRADE_TEXT[g];
+  const pp=q('#sbPinsPill'); if(pp) pp.textContent=pins+' 핀';
 
   // res chip
   const rc=q('#resChip'); if(rc) rc.textContent=GW+'×'+GH;
 
-  // header + bottom buttons
-  qa('#dtmsBtn,#outBtn,#hdrSaveBtn,#hdrOutputBtn,#bsPreviewBtn').forEach(b=>{ if(b) b.disabled=false; });
-  qa('#btnInvert,#btnAllUp,#btnAllDown,#btnDenoise').forEach(b=>{ if(b) b.disabled=false; });
-  try{ syncOutlineBtns(); syncStep2Cards(); syncStep3Btns(true); }catch(e){}
+  // buttons
+  syncBtns(true);
+  syncOutlineBtns();
 }
 
 function resetQuality(){
-  qa('#qReadability,#qNoise,#qSpacing,#qRetouch').forEach(e=>{ if(e) e.style.display='none'; });
-  const qd=q('#qDotCount'); if(qd) qd.textContent='— dots';
-  const card=q('#scoreCard'); if(card) card.className='score-card good';
-  const lbl=q('#scoreLabel'); if(lbl) lbl.textContent='업로드 대기';
-  const ttl=q('#scoreTitle'); if(ttl) ttl.textContent='이미지를 선택하세요';
-  const dsc=q('#scoreDesc'); if(dsc) dsc.textContent='소스를 업로드하면 촉각 인지 분석 결과가 표시됩니다.';
-  qa('#dtmsBtn,#outBtn,#hdrSaveBtn,#hdrOutputBtn,#bsPreviewBtn').forEach(b=>{ if(b) b.disabled=true; });
-  qa('#btnInvert,#btnAllUp,#btnAllDown,#btnDenoise').forEach(b=>{ if(b) b.disabled=true; });
-  const br=q('#bsRetouch'); if(br) br.style.display='none';
-  const cp=q('#cellPill'); if(cp) cp.style.display='none';
-  try{ syncOutlineBtns(); syncStep2Cards(); syncStep3Btns(false); }catch(e){}
+  const qbar=q('#qBar'); if(qbar) qbar.style.display='none';
+  qa('#qReadability,#qNoise,#qSpacing').forEach(e=>{ if(e) e.style.display='none'; });
+  const qd=q('#qDotCount'); if(qd) qd.textContent='—';
+  const card=q('#scoreCard');
+  if(card){ card.className='score-card';
+    q('#scoreLabel').textContent='대기 중';
+    q('#scoreTitle').textContent='이미지를 올려주세요';
+    q('#scoreDesc').textContent='AI가 촉각 인지 품질을 분석해드려요.'; }
+  const aiTxt=q('#aiCardText');
+  if(aiTxt) aiTxt.textContent='이미지를 업로드하면 AI가 분석 결과를 보여드려요.';
+  const aiChips=q('#aiChips'); if(aiChips) aiChips.style.display='none';
+  const pp=q('#sbPinsPill'); if(pp) pp.textContent='0 핀';
+  syncBtns(false);
 }
 
-/* ══════════════════════════════════════════════════════
-   monkey-patch
-══════════════════════════════════════════════════════ */
-const _updateScoreUI=updateScoreUI;
-updateScoreUI=function(){ _updateScoreUI(); try{syncQuality();paintSlider(threshold);}catch(e){} };
+function syncBtns(ready){
+  qa('#dtmsBtn,#pngBtn,#hexBtn,#hdrSaveBtn,#hdrOutputBtn,#recoReset').forEach(b=>{ if(b) b.disabled=!ready; });
+  qa('#btnInvert,#btnDenoise,#btnAllUp,#btnAllDown').forEach(b=>{ if(b) b.disabled=!ready; });
+  qa('.seg3-btn[data-ol]').forEach(b=>b.disabled=!ready);
+}
 
-const _setAppState=setAppState;
-setAppState=function(s){
+/* ══ MONKEY-PATCH ══ */
+const _updateScoreUI = updateScoreUI;
+updateScoreUI = function(){ _updateScoreUI(); try{ syncQuality(); paintSlider(threshold); }catch(e){} };
+
+const _setAppState = setAppState;
+setAppState = function(s){
   _setAppState(s);
   try{
-    fitCanvas(); paintSlider(threshold); syncQuality(); syncAllConn(); syncToolBar();
+    fitCanvas(); paintSlider(threshold); syncQuality(); syncConn(); syncToolBar();
     const ready=(s==='ready');
-    const analyzing=(s==='analyzing');
-    // upload card / src loaded
-    const uc=q('#uploadCard'), sl=q('#srcLoaded');
-    if(uc){ uc.style.display=ready?'none':'flex'; }
-    if(sl){ sl.style.display=ready?'block':'none'; }
-    const rb=q('#replaceImgBtn2'); if(rb) rb.style.display=ready?'inline-flex':'none';
-    // thumbnail
-    if(ready&&srcImage){
-      const tb=q('#srcThumb'); if(tb&&srcImage.src) tb.src=srcImage.src;
-      const si=q('#srcInfo'); if(si){
-        const w=srcImage.naturalWidth||'?',h=srcImage.naturalHeight||'?';
-        si.textContent=(imgMeta&&imgMeta.label?imgMeta.label+' · ':'')+w+'×'+h;
-      }
+    if(ready && srcImage){
+      const bi=q('#beforeImg'); if(bi&&srcImage.src) bi.src=srcImage.src;
     }
-    // live chip
-    const lc=q('#liveChip'); if(lc) lc.style.display=(ready&&connected)?'inline-flex':'none';
-
-    // ── 모바일 스크롤 + 변환 과정 피드백 ──
-    if(analyzing) mobileStartAnalyzing();
-    if(ready)     mobileOnReady();
+    // AI chip animation
+    const dot=q('#aiDot'), txt=q('#aiChipText');
+    if(s==='analyzing'){ if(dot) dot.classList.add('pulse'); if(txt) txt.textContent='AI 처리 중'; }
+    else{ if(dot) dot.classList.remove('pulse'); if(txt) txt.textContent=ready?'AI 완료':'AI 대기 중'; }
+    // bezel indicator
+    const bi=q('#bezelIndicator'); if(bi) bi.className='bezel-indicator '+(connected&&ready?'on':'');
+    // liveChip in title bar
+    const cc=q('#connChip');
+    if(cc){ cc.className='conn-chip '+(connected?'on':''); }
+    // mobile scroll
+    if(s==='analyzing') mobileStartAnalyzing();
+    if(s==='ready')     mobileOnReady();
   }catch(e){}
 };
 
-const _setDpState=setDpState;
-setDpState=function(s){ _setDpState(s); try{syncAllConn();}catch(e){} };
+const _setDpState = setDpState;
+setDpState = function(s){ _setDpState(s); try{ syncConn(); }catch(e){} };
 
-const _afterChange=afterChange;
-afterChange=function(md){ _afterChange(md); try{syncToolBar();}catch(e){} };
+const _afterChange = afterChange;
+afterChange = function(md){ _afterChange(md); try{ syncToolBar(); }catch(e){} };
 
-let dpDisabled=false,dpDisabledLabel='';
-const _disableConnect=disableConnect;
-disableConnect=function(label,desc){
+let dpDisabled=false, dpDisabledLabel='';
+const _disableConnect = disableConnect;
+disableConnect = function(label,desc){
   dpDisabled=true; dpDisabledLabel=label||'연결 불가'; _disableConnect(label,desc);
   try{
+    const d=q('#connDot'); if(d) d.className='dp-dot err';
     const t=q('#connText'); if(t) t.textContent=dpDisabledLabel;
-    const d=q('#connDot'); if(d) d.className='conn-dot err';
-    const r=q('#connRow'); if(r) r.classList.remove('clickable');
+    const chip=q('#connChip'); if(chip) chip.className='conn-chip';
   }catch(e){}
 };
 
-/* ── 연결 상태 ── */
-function syncConn(){ syncAllConn(); } function _syncConnOLD(){
-  const dot=q('#connDot'),txt=q('#connText'),row=q('#connRow');
-  if(!dot||!txt) return;
-  txt.textContent=dpDisabled?dpDisabledLabel:dpStatusText();
+/* ══ CONNECTION ══ */
+function syncConn(){
+  const dot=q('#connDot'), txt=q('#connText'), chip=q('#connChip'), hint=q('#liveHint');
+  const label = dpDisabled ? dpDisabledLabel : dpStatusText();
   let cls='off';
   if(dpDisabled) cls='err';
   else if(connected) cls='on';
   else if(dpState==='connecting') cls='busy';
   else if(dpState==='error') cls='err';
-  dot.className='conn-dot '+cls;
-  if(row) row.classList.toggle('clickable',!connected&&!dpDisabled);
-  const sw=q('#liveSwitch'),hint=q('#liveHint');
-  if(sw){ sw.disabled=!connected||dpDisabled; sw.setAttribute('aria-checked',(connected&&liveOn&&!dpDisabled)?'true':'false'); }
-  if(hint){ hint.textContent=dpDisabled?dpDisabledLabel
-    :connected?(liveOn?'DotPad에 실시간 반영 중':'라이브 반영이 꺼져 있어요')
-    :'연결 후 활성화됩니다'; }
-  const lc=q('#liveChip'); if(lc) lc.style.display=(connected&&hasImage)?'inline-flex':'none';
-  const bs=q('#bsSynced'); if(bs) bs.style.display=(connected&&hasImage)?'inline-flex':'none';
+  if(dot) dot.className='dp-dot '+cls;
+  if(txt) txt.textContent=label;
+  if(chip){ chip.className='conn-chip '+(connected?'on':'');
+    q('#connChipText').textContent=connected?'연결됨':'미연결'; }
+  const sw=q('#liveSwitch');
+  if(sw){ sw.disabled=!connected||dpDisabled;
+    sw.setAttribute('aria-checked',(connected&&liveOn&&!dpDisabled)?'true':'false'); }
+  if(hint) hint.textContent=dpDisabled?dpDisabledLabel
+    :connected?(liveOn?'실시간으로 반영 중':'라이브 반영 끄기'):'연결 후 라이브 반영 가능';
+  const bi=q('#bezelIndicator'); if(bi) bi.className='bezel-indicator '+(connected&&hasImage?'on':'');
+  const bs=q('#bsSynced'); if(bs) bs.style.display=(connected&&hasImage)?'':'none';
 }
 
-/* ── 툴바 ── */
+/* ══ TOOLBAR ══ */
 function syncToolBar(){
-  const bar=q('#toolBar'); if(!bar) return;
-  qa('#toolBar .tb[data-tool]').forEach(b=>{
-    b.setAttribute('aria-pressed',b.dataset.tool===tool?'true':'false');
+  qa('.tool-rail .tr-btn[data-tool]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tool===tool);
+    b.setAttribute('aria-pressed', b.dataset.tool===tool?'true':'false');
   });
-  bar.dataset.tool=tool;
-  const sz=(tool==='pen'||tool==='eraser')?(toolSettings[tool]&&toolSettings[tool].size)||1:1;
-  qa('#sizeGrp2 .tb-sz').forEach(b=>b.setAttribute('aria-checked',+b.dataset.size===sz?'true':'false'));
-  const u=q('#undoBtn2'),r=q('#redoBtn2');
+  const sz=(tool==='pen'||tool==='eraser')?(toolSettings[tool]?.size)||1:1;
+  qa('#sizeGrp2 .tr-sz').forEach(b=>{
+    b.classList.toggle('on', +b.dataset.size===sz);
+    b.setAttribute('aria-checked', +b.dataset.size===sz?'true':'false');
+  });
+  const u=q('#undoBtn2'), r=q('#redoBtn2');
   if(u) u.disabled=!(appState==='ready'&&(pageUndo[curPage]||[]).length>0);
   if(r) r.disabled=!(appState==='ready'&&(pageRedo[curPage]||[]).length>0);
+  // size grp visibility
+  const sg=q('#sizeGrp2');
+  if(sg) sg.style.display=(tool==='pen'||tool==='eraser')?'':'none';
 }
 
-q('#toolBar').addEventListener('click',e=>{
-  // 도구 버튼
-  const tb=e.target.closest('.tb[data-tool]');
-  if(tb&&!tb.disabled){
-    const t=tb.dataset.tool;
-    // 엔진이 모르는 도구(hand/select/line/rect/circle/fill 등)는 move로 폴백
-    const engineTools=['move','pen','eraser'];
-    if(appState==='ready'&&engineTools.includes(t)){ selectTool(t); }
-    else if(appState==='ready'){ selectTool('move'); } // 준비 중 도구: 시각적 선택만
-    // 시각적 하이라이트
-    qa('#toolBar .tb[data-tool]').forEach(b=>b.setAttribute('aria-pressed',b===tb?'true':'false'));
-    q('#toolBar').dataset.tool=t;
-    syncToolBar();
-    return;
-  }
-  // 두께
-  const sb=e.target.closest('.tb-sz[data-size]');
+q('.tool-rail').addEventListener('click', e=>{
+  const tb=e.target.closest('.tr-btn[data-tool]');
+  if(tb&&!tb.disabled){ selectTool(tb.dataset.tool); syncToolBar(); return; }
+  const sb=e.target.closest('.tr-sz[data-size]');
   if(sb&&appState==='ready'){ setSize(+sb.dataset.size); syncToolBar(); return; }
-  // undo/redo
   if(e.target.closest('#undoBtn2')){ document.getElementById('undoBtn')?.click(); syncToolBar(); return; }
   if(e.target.closest('#redoBtn2')){ document.getElementById('redoBtn')?.click(); syncToolBar(); return; }
 });
 
-/* ── 뷰 pills ── */
-qa('.vp').forEach(p=>p.addEventListener('click',()=>{
+/* ══ VIEW TOGGLE ══ */
+qa('.vtog').forEach(p=>p.addEventListener('click',()=>{
   if(p.disabled) return;
-  // 현재(current) 버튼만 active 토글, 나머지는 그대로
-  const curr=q('#vpCurrent');
-  if(curr) curr.classList.toggle('active', p===curr);
-  const card=q('#canvasCard');
-  if(p===q('#vpBefore')){ card.dataset.view='before'; const bi=q('#beforeImg'); if(bi&&srcImage?.src) bi.src=srcImage.src; }
-  else card.dataset.view='after';
+  if(p.id==='vpDotpad'&&!connected){ toast('먼저 DotPad를 연결하세요'); return; }
+  qa('.vtog').forEach(x=>x.classList.toggle('active',x===p));
+  const card=q('#canvasCard')||q('.canvas-area');
+  const view=p.id==='vpBefore'?'before':p.id==='vpDotpad'?'dotpad':'after';
+  if(card) card.dataset.view=view;
+  if(view==='before'&&srcImage){ const bi=q('#beforeImg'); if(bi&&srcImage.src) bi.src=srcImage.src; }
 }));
 
-/* ── 해상도 전환 ── */
+/* ══ OUTLINE ══ */
+function syncOutlineBtns(){
+  qa('.seg3-btn[data-ol]').forEach(b=>{
+    const on=+b.dataset.ol===outline;
+    b.classList.toggle('on',on);
+  });
+}
+qa('.seg3-btn[data-ol]').forEach(b=>b.addEventListener('click',()=>{
+  if(b.disabled||fileKind==='tactile') return;
+  const legBtn=document.querySelector(`#secOutline .seg button[data-outline="${b.dataset.ol}"]`);
+  if(legBtn&&!legBtn.disabled) legBtn.click();
+  else{ outline=+b.dataset.ol; rebuild(); afterChange(); syncQuality(); }
+  syncOutlineBtns();
+}));
+
+/* ══ RESOLUTION ══ */
 function switchRes(w,h){
   if(GW===w&&GH===h) return;
   if(fileKind==='tactile'){ toast('촉각 파일 해상도는 변경할 수 없어요'); return; }
   setResolution(w,h);
   if(hasImage&&srcImage){ renderGray(); autoSelect(); }
-  else{ grid=new Uint8Array(N); }
+  else grid=new Uint8Array(N);
   pages=[grid]; curPage=0; pageUndo=[[]]; pageRedo=[[]];
   fitCanvas(); afterChange(false); syncQuality();
-  syncResButtons();
-}
-function syncResButtons(){
-  const b60=q('#resBtn60'),b96=q('#resBtn96');
-  const on60=GW===60;
-  if(b60){ b60.className='pp '+(on60?'pp-res':''); b60.style.background=on60?'':'var(--surface)'; b60.style.color=on60?'':'var(--muted)'; b60.style.border=on60?'':'1px solid var(--border)'; }
-  if(b96){ b96.className='pp '+(on60?'':'pp-res'); b96.style.background=!on60?'':'var(--surface)'; b96.style.color=!on60?'':'var(--muted)'; b96.style.border=!on60?'':'1px solid var(--border)'; }
   const rc=q('#resChip'); if(rc) rc.textContent=GW+'×'+GH;
+  q('#resBtn60')?.classList.toggle('on',GW===60);
+  q('#resBtn96')?.classList.toggle('on',GW===96);
 }
-q('#resBtn60').addEventListener('click',()=>switchRes(60,40));
-q('#resBtn96').addEventListener('click',()=>switchRes(96,64));
+q('#resBtn60')?.addEventListener('click',()=>switchRes(60,40));
+q('#resBtn96')?.addEventListener('click',()=>switchRes(96,64));
 
-/* ── Quick edit ── */
-q('#btnInvert').addEventListener('click',()=>{ if(appState==='ready'&&hasImage) applyOp('invert'); });
-q('#btnAllUp').addEventListener('click',()=>{
-  if(appState!=='ready'||!hasImage) return;
-  pushUndo(); for(let i=0;i<N;i++) grid[i]=1; pages[curPage]=grid; afterChange(); syncQuality();
+/* ══ TOGGLES ══ */
+q('#autoSimplifyTog')?.addEventListener('click',function(){
+  const on=this.getAttribute('aria-checked')==='true';
+  this.setAttribute('aria-checked',on?'false':'true');
+  const mc=document.getElementById('minComp');
+  if(mc){ mc.value=on?'1':'3'; mc.dispatchEvent(new Event('input',{bubbles:true})); }
+  if(hasImage&&grayBuf){ rebuild(); afterChange(); syncQuality(); }
 });
-q('#btnAllDown').addEventListener('click',()=>{
-  if(appState!=='ready'||!hasImage) return;
-  pushUndo(); for(let i=0;i<N;i++) grid[i]=0; pages[curPage]=grid; afterChange(); syncQuality();
-});
-q('#btnDenoise').addEventListener('click',()=>{ if(appState==='ready'&&hasImage) applyOp('denoise'); });
-
-/* ── 연결 / 라이브 ── */
-q('#connRow').addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect(); });
-q('#connRow').addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){e.preventDefault();doConnect();} });
-q('#liveSwitch').addEventListener('click',()=>{
-  const sw=q('#liveSwitch'); if(sw.disabled) return;
-  document.getElementById('liveToggle')?.click(); syncAllConn();
-});
-
-/* ── 불러오기 드롭다운 ── */
-(function(){
-  const btn=q('#loadMenuBtn2'),menu=q('#loadMenuDrop');
-  if(!btn||!menu) return;
-  const open=v=>{ menu.classList.toggle('open',v); btn.setAttribute('aria-expanded',v?'true':'false'); if(v) menu.querySelector('button')?.focus(); };
-  btn.addEventListener('click',e=>{ e.stopPropagation(); open(!menu.classList.contains('open')); });
-  document.addEventListener('click',()=>open(false));
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape') open(false); });
-  q('#menuLoadImage').addEventListener('click',()=>{ open(false); guardUnsaved(()=>pickImage()); });
-  q('#menuLoadTactile').addEventListener('click',()=>{ open(false); guardUnsaved(()=>pickTactile()); });
-})();
-
-/* ── 파일 선택 버튼 배선 ──
-   shell의 파일 버튼은 모두 <label for="imageFileInput"> 방식으로
-   input[type=file]을 직접 트리거함 → 모바일 user-gesture 체인 보장.
-   엔진이 #emptyImageBtn.onclick = pickImage를 붙이므로,
-   label 클릭 → input 열기 + onclick → imageInput.click() 이 중복 실행됨.
-   label에서는 엔진의 onclick만 preventDefault해서 이중 열림을 막음.     */
-setTimeout(()=>{
-  ['emptyImageBtn','replaceImgBtn2','replaceImgBtn3'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el && el.tagName==='LABEL' && typeof el.onclick==='function'){
-      const orig=el.onclick.bind(el);
-      el.onclick=e=>{ /* label이 input을 이미 열었으므로 pickImage() 중복 호출 차단 */ };
-    }
-  });
-}, 200);
-
-/* ── 토글들 ── */
-// autoSimplify — pill 토글 (ON=green, OFF=border)
-const _asPill = q('#autoSimplifyPill');
-let _asOn = true;
-if(_asPill){
-  _asPill.addEventListener('click',function(){
-    _asOn = !_asOn;
-    this.textContent = _asOn ? 'ON' : 'OFF';
-    this.className = 'pp ' + (_asOn ? 'pp-on' : '');
-    if(!_asOn){ this.style.background='var(--surface)'; this.style.color='var(--muted)'; this.style.border='1px solid var(--border)'; }
-    else { this.style.background=''; this.style.color=''; this.style.border=''; }
-    const mc=document.getElementById('minComp'); if(mc) mc.value=_asOn?'3':'1';
-    if(hasImage&&grayBuf){ rebuild(); afterChange(); syncQuality(); }
-  });
-}
-q('#polarityTog').addEventListener('click',function(){
+q('#polarityTog')?.addEventListener('click',function(){
   const on=this.getAttribute('aria-checked')==='true';
   this.setAttribute('aria-checked',on?'false':'true');
   polarity=!on;
   if(hasImage&&grayBuf){ rebuild(); afterChange(); syncQuality(); }
 });
-
-/* ── 더 많은 설정 ── */
-q('#advToggle').addEventListener('click',()=>{
-  const show=q('#advBody').classList.toggle('show');
-  q('#advToggle').classList.toggle('open',show);
-  q('#advToggle').setAttribute('aria-expanded',show?'true':'false');
+q('#liveSwitch')?.addEventListener('click',()=>{
+  const sw=q('#liveSwitch'); if(sw?.disabled) return;
+  document.getElementById('liveToggle')?.click(); syncConn();
 });
 
-/* ══════════════════════════════════════════════════════
-   단계 탭 전환 — 좌·우 패널 콘텐츠 + 툴바 그룹 표시 제어
-══════════════════════════════════════════════════════ */
-let currentStep = 1;
-
-function switchStep(n){
-  currentStep = n;
-  // mode-pill active
-  qa('.mode-pill').forEach(p=>{
-    const on = +p.dataset.mode === n;
-    p.classList.toggle('active', on);
-    p.setAttribute('aria-selected', on?'true':'false');
-  });
-  // 좌패널 탭
-  qa('.panel-left .tab-panel').forEach(p=>p.classList.toggle('active', p.id===`lp-step${n}`));
-  // 우패널 탭
-  qa('.panel-right .tab-panel').forEach(p=>p.classList.toggle('active', p.id===`rp-step${n}`));
-  // 툴바: 1단계=기본, 2단계=리터치도구 강조, 3단계=최소
-  const tb = q('#toolBar');
-  if(tb){
-    tb.dataset.step = n;
-    // 3단계에서는 리터치 도구 그룹 숨김 (보기만 하는 단계)
-    qa('#toolBar .tb-group').forEach((g,i)=>{
-      if(n===3) g.style.opacity = i>=1&&i<=2 ? '.35' : '';
-      else g.style.opacity = '';
-    });
-  }
-  say(`${n}단계 패널로 이동`);
-
-  // 모바일: 해당 패널 상단으로 스크롤
-  if(window.innerWidth<=900){
-    setTimeout(()=>{
-      const target = n===1 ? q('.panel-left') : n===2 ? q('#canvasCard') : q('.panel-right');
-      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
-    }, 80);
-  }
-}
-
-qa('.mode-pill').forEach(p=>{
-  p.addEventListener('click',()=>switchStep(+p.dataset.mode));
+/* ══ QUICK EDIT ══ */
+q('#btnInvert')?.addEventListener('click',()=>{ if(hasImage) applyOp('invert'); });
+q('#btnDenoise')?.addEventListener('click',()=>{ if(hasImage) applyOp('denoise'); });
+q('#btnAllUp')?.addEventListener('click',()=>{
+  if(!hasImage) return; pushUndo();
+  for(let i=0;i<N;i++) grid[i]=1; pages[curPage]=grid; afterChange(); syncQuality();
+});
+q('#btnAllDown')?.addEventListener('click',()=>{
+  if(!hasImage) return; pushUndo();
+  for(let i=0;i<N;i++) grid[i]=0; pages[curPage]=grid; afterChange(); syncQuality();
 });
 
-/* ── 2단계: 윤곽선 버튼 ── */
-function syncOutlineBtns(){
-  qa('.outline-btn[data-ol]').forEach(b=>{
-    const on = +b.dataset.ol === outline;
-    b.classList.toggle('sel', on);
-    b.disabled = (appState!=='ready')||(fileKind==='tactile');
-  });
-  const desc = q('#olDesc');
-  if(desc) desc.textContent = outline===0?'채움 실루엣을 유지합니다.':outline===1?'실제 외곽 경계를 1핀 두께로 그립니다.':'1줄 외곽선을 1핀 더 확장합니다.';
-}
-qa('.outline-btn[data-ol]').forEach(b=>b.addEventListener('click',()=>{
-  if(b.disabled) return;
-  // 엔진 legacy secOutline 버튼 클릭으로 포워딩 (엔진 로직 그대로 사용)
-  const legacyBtn = document.querySelector(`#secOutline .seg button[data-outline="${b.dataset.ol}"]`);
-  if(legacyBtn&&!legacyBtn.disabled) legacyBtn.click();
-  syncOutlineBtns();
-}));
-
-/* ── 3단계: data-ctrl 요소 ↔ 엔진 ID 양방향 미러 ──
-   엔진이 바인딩하는 진짜 ID는 legacy 블록에만 존재.
-   3단계 패널의 data-ctrl 요소는 값 변경 시 엔진 요소를 트리거하고,
-   엔진이 값을 바꿀 때도 3단계 UI가 동기화되도록 MutationObserver 사용. */
-function ctrlEl(name){ return document.querySelector(`[data-ctrl="${name}"]`); }
-function engEl(id){ return document.getElementById(id); }
-
-// select/input: 3단계 UI → 엔진으로 값 전달
-['method','rawth','minComp','advSize'].forEach(name=>{
-  const ui=ctrlEl(name), eng=engEl(name);
-  if(!ui||!eng) return;
-  // 초기값 동기화
-  ui.value = eng.value;
-  // 3단계 UI 변경 → 엔진 요소에 값 복사 후 change/input 이벤트 발생
-  const evName = ui.tagName==='SELECT'?'change':'input';
-  ui.addEventListener(evName, ()=>{
-    eng.value = ui.value;
-    eng.dispatchEvent(new Event(evName, {bubbles:true}));
-  });
-  // 엔진 요소 변경 → 3단계 UI에 반영
-  eng.addEventListener(evName, ()=>{ if(ui.value!==eng.value) ui.value=eng.value; });
-});
-
-// recoReset 버튼
-const uiRecoReset = ctrlEl('recoReset');
-const engRecoReset = engEl('recoReset');
-if(uiRecoReset && engRecoReset){
-  uiRecoReset.addEventListener('click', ()=>engRecoReset.click());
-}
-
-// hexBtn, pngBtn 버튼
-['hexBtn','pngBtn'].forEach(name=>{
-  const ui=ctrlEl(name), eng=engEl(name);
-  if(ui&&eng){ ui.addEventListener('click',()=>eng.click()); }
-});
-
-// hexOut 텍스트 미러: MutationObserver로 엔진 #hexOut 변경 시 data-ctrl도 업데이트
-const engHexOut = engEl('hexOut');
-const uiHexOut = ctrlEl('hexOut');
-if(engHexOut && uiHexOut){
-  uiHexOut.textContent = engHexOut.textContent;
-  new MutationObserver(()=>{ uiHexOut.textContent = engHexOut.textContent; })
-    .observe(engHexOut, {childList:true, characterData:true, subtree:true});
-}
-
-/* ── 3단계 버튼 disabled 상태 동기화 ── */
-function syncStep3Btns(ready){
-  // data-ctrl 버튼들
-  ['hexBtn','pngBtn'].forEach(name=>{
-    const ui=ctrlEl(name); if(ui) ui.disabled=!ready;
-  });
-  const rr=ctrlEl('recoReset');
-  if(rr) rr.disabled=!ready||fileKind==='tactile';
-  // dtmsBtn3, outBtn3
-  const b3=q('#dtmsBtn3'), ob=q('#outBtn3');
-  if(b3) b3.disabled=!ready;
-  if(ob) ob.disabled=!ready;
-}
-// connRow2, connRow3 클릭 → doConnect
-['connRow2','connRow3'].forEach(id=>{
-  q('#'+id)?.addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect(); });
-  q('#'+id)?.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){e.preventDefault();doConnect();} });
-});
-// liveSwitch2, liveSwitch3 → liveToggle 포워딩
-['liveSwitch2','liveSwitch3'].forEach(id=>{
-  q('#'+id)?.addEventListener('click',()=>{
-    const sw=q('#'+id); if(sw?.disabled) return;
-    document.getElementById('liveToggle')?.click();
-    syncAllConn();
-  });
-});
-
-/* ── 연결 상태 다중 동기화 ── */
-function syncAllConn(){
-  const txt = dpDisabled ? dpDisabledLabel : dpStatusText();
-  let cls='off';
-  if(dpDisabled) cls='err';
-  else if(connected) cls='on';
-  else if(dpState==='connecting') cls='busy';
-  else if(dpState==='error') cls='err';
-
-  [['connDot','connText','connRow','liveSwitch','liveHint'],
-   ['connDot2','connText2','connRow2','liveSwitch2','liveHint2'],
-   ['connDot3','connText3','connRow3','liveSwitch3','liveHint3']].forEach(([dotId,txtId,rowId,swId,hintId])=>{
-    const dot=q('#'+dotId), text=q('#'+txtId), row=q('#'+rowId), sw=q('#'+swId), hint=q('#'+hintId);
-    if(dot) dot.className='conn-dot '+cls;
-    if(text) text.textContent=txt;
-    if(row) row.classList.toggle('clickable',!connected&&!dpDisabled);
-    if(sw){ sw.disabled=!connected||dpDisabled; sw.setAttribute('aria-checked',(connected&&liveOn&&!dpDisabled)?'true':'false'); }
-    if(hint){ hint.textContent = dpDisabled?dpDisabledLabel
-        :connected?(liveOn?'DotPad에 실시간 반영 중':'라이브 반영이 꺼져 있어요')
-        :'연결 후 활성화됩니다'; }
-  });
-
-  const lc=q('#liveChip'); if(lc) lc.style.display=(connected&&hasImage)?'inline-flex':'none';
-  const bs=q('#bsSynced'); if(bs) bs.style.display=(connected&&hasImage)?'inline-flex':'none';
-}
-
-/* ── 2·3단계 품질 카드 동기화 ── */
-function syncStep2Cards(){
-  const g2 = q('#scoreLabel2'), t2 = q('#scoreTitle2'), d2 = q('#scoreDesc2');
-  const g  = q('#scoreLabel'),  t  = q('#scoreTitle'),  d  = q('#scoreDesc');
-  if(g2&&g) g2.textContent=g.textContent;
-  if(t2&&t) t2.textContent=t.textContent;
-  if(d2&&d) d2.textContent=d.textContent;
-  const sc2=q('#scoreCard3'), sc=q('#scoreCard');
-  if(sc2&&sc) sc2.className=sc.className;
-}
-
-/* ── 초기 탭 설정 ── */
-qa('.mode-pill').forEach((p,i)=> p.dataset.mode = i+1);
-
-/* ══════════════════════════════════════════════════════
-   미배선 기능 전체 연결
-══════════════════════════════════════════════════════ */
-
-/* ── autoSimplifyTog: tog 버튼 (id 수정) ── */
-q('#autoSimplifyTog')?.addEventListener('click',function(){
-  const on = this.getAttribute('aria-checked')==='true';
-  this.setAttribute('aria-checked', on?'false':'true');
-  const mc = document.getElementById('minComp');
-  if(mc){ mc.value = on?'1':'3'; mc.dispatchEvent(new Event('input',{bubbles:true})); }
-  if(hasImage&&grayBuf){ rebuild(); afterChange(); syncQuality(); }
-});
-
-/* ── 윤곽선 버튼 (olBtn0/1/2) → secOutline 포워딩 ── */
-qa('.outline-btn[data-ol]').forEach(b=>{
-  b.addEventListener('click',()=>{
-    if(b.disabled||fileKind==='tactile') return;
-    const legBtn = document.querySelector(`#secOutline .seg button[data-outline="${b.dataset.ol}"]`);
-    if(legBtn&&!legBtn.disabled) legBtn.click();
-    else {
-      // 직접 처리 (legacy 버튼 없을 때)
-      outline = +b.dataset.ol;
-      rebuild(); afterChange(); syncQuality();
-    }
-    syncOutlineBtns();
-  });
-});
-
-/* ── 뷰 pills: vpDotpad (DotPad 탭) ── */
-q('#vpDotpad')?.addEventListener('click',()=>{
-  if(!connected){ toast('먼저 DotPad를 연결하세요'); return; }
-  qa('.vp').forEach(x=>x.classList.toggle('active',x===q('#vpDotpad')));
-  q('#canvasCard').dataset.view='dotpad';
-  forceSend?.();
-});
-
-/* ── 저장/출력 버튼 전체 배선 ── */
+/* ══ SAVE / EXPORT ══ */
 q('#hdrSaveBtn')?.addEventListener('click',()=>document.getElementById('saveTopBtn')?.click());
-q('#hdrOutputBtn')?.addEventListener('click',()=>document.getElementById('outBtn')?.click());
-q('#dtmsBtn3')?.addEventListener('click',()=>document.getElementById('dtmsBtn')?.click());
-q('#outBtn3')?.addEventListener('click',()=>document.getElementById('outBtn')?.click());
-q('#bsPreviewBtn')?.addEventListener('click',()=>{
-  if(!hasImage){ toast('이미지를 먼저 불러오세요'); return; }
-  // Before/After 뷰 전환
-  const card=q('#canvasCard');
-  const isBefore=(card.dataset.view==='before');
-  card.dataset.view=isBefore?'after':'before';
-  q('#vpBefore')?.classList.toggle('active',!isBefore);
-  q('#vpCurrent')?.classList.toggle('active',isBefore);
-  if(!isBefore&&srcImage) { const bi=q('#beforeImg'); if(bi&&srcImage.src) bi.src=srcImage.src; }
-});
-
-/* ── 하단바 dtmsBtn / outBtn ── */
 q('#dtmsBtn')?.addEventListener('click',()=>document.getElementById('saveTopBtn')?.click());
-q('#outBtn')?.addEventListener('click',()=>document.getElementById('outBtn2')?.click());
-
-/* ── 가드 모달 버튼 ── */
-q('#guardCancel')?.addEventListener('click',()=>{ document.getElementById('guardModal')?.classList.remove('show'); });
-q('#guardProceed')?.addEventListener('click',()=>{ document.querySelector('#guardModal [id="guardProceed"]')?.click?.(); });
-q('#guardSave')?.addEventListener('click',()=>{ document.querySelector('#guardModal [id="guardSave"]')?.click?.(); });
-
-/* ── 취소/교체 ── */
-q('#cancelAnalyze')?.addEventListener('click',()=>{
-  const b=document.getElementById('cancelAnalyze'); if(b) b.click();
-});
-q('#replaceAnalyze')?.addEventListener('click',()=>{ pickImage?.(); });
-
-/* ── 파일 버튼 (레이블이므로 이미 input 연결됨. 중복 방지) ── */
-// emptyImageBtn2, emptyTactileBtn2, replaceImgBtn3, loadTactileBtn3 → label이 직접 처리
-
-/* ── 샘플 버튼 ── */
-q('#sampleBtn')?.addEventListener('click',()=>{ loadSample?.(); });
-
-/* ── 3단계: edgeCleanup, minCluster, brailleSafe ── */
-// edgeCleanup: outline 강도에 매핑
-q('#edgeCleanup')?.addEventListener('change',function(){
-  if(!hasImage) return;
-  const v=this.value;
-  if(v==='off') minComp=1;
-  else if(v==='light') minComp=2;
-  else if(v==='strong') minComp=5;
-  else minComp=3; // auto
-  const mc=document.getElementById('minComp'); if(mc) mc.value=minComp;
-  rebuild(); afterChange(); syncQuality();
-});
-// minCluster → minComp 엔진 변수 직접 반영
-q('#minCluster')?.addEventListener('change',function(){
-  if(!hasImage) return;
-  minComp=+this.value;
-  const mc=document.getElementById('minComp'); if(mc) mc.value=minComp;
-  rebuild(); afterChange(); syncQuality();
-  // data-ctrl minComp도 동기화
-  const dc=document.querySelector('[data-ctrl="minComp"]'); if(dc) dc.value=minComp;
-});
-// brailleSafe: 여백 여부 (polarity 반전과 연동 없이 힌트성)
-q('#brailleSafe')?.addEventListener('change',function(){
-  toast(this.value==='on'?'점자 여백을 유지해요':'점자 여백 없이 변환해요');
+q('#hdrOutputBtn')?.addEventListener('click',()=>document.getElementById('outBtn')?.click());
+q('#pngBtn')?.addEventListener('click',()=>document.getElementById('pngBtn2')?.click());
+q('#hexBtn')?.addEventListener('click',()=>{
+  const ho=document.getElementById('hexOut');
+  const hex=(ho?.textContent||'').replace('HEX ','').trim();
+  if(hex&&hex!=='—'){ navigator.clipboard?.writeText(hex).then(()=>toast('HEX 복사됨','ok')).catch(()=>toast('복사 실패','err')); }
+  else document.getElementById('hexBtn2')?.click();
 });
 
-/* ── 3단계: data-ctrl 버튼/셀렉트 ── */
-['hexBtn','pngBtn'].forEach(name=>{
-  const ui=document.querySelector(`[data-ctrl="${name}"]`);
-  const eng=document.getElementById(name);
-  if(ui&&eng) ui.addEventListener('click',()=>eng.click());
+/* ══ CONNECTION ══ */
+q('#connRow')?.addEventListener('click',()=>{ if(!dpDisabled&&!connected) doConnect?.(); });
+q('#connRow')?.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){ e.preventDefault(); doConnect?.(); }
 });
-// recoReset
-const uiRR=document.querySelector('[data-ctrl="recoReset"]');
-const engRR=document.getElementById('recoReset');
-if(uiRR&&engRR) uiRR.addEventListener('click',()=>engRR.click());
+q('#connChip')?.addEventListener('click',()=>{ if(!dpDisabled&&!connected) doConnect?.(); });
+q('#connChip')?.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){ e.preventDefault(); doConnect?.(); }
+});
 
-// hexOut 미러
-const engHO=document.getElementById('hexOut');
-const uiHO=document.querySelector('[data-ctrl="hexOut"]');
-if(engHO&&uiHO){
-  uiHO.textContent=engHO.textContent;
-  new MutationObserver(()=>{ uiHO.textContent=engHO.textContent; })
-    .observe(engHO,{childList:true,characterData:true,subtree:true});
+/* ══ EXPERT TOGGLE ══ */
+q('#expertToggle')?.addEventListener('click',()=>{
+  const body=q('#expertBody');
+  const open=body?.classList.toggle('show');
+  q('#expertToggle')?.classList.toggle('open',open);
+  q('#expertToggle')?.setAttribute('aria-expanded',open?'true':'false');
+});
+q('#expertToggle')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); q('#expertToggle').click(); }
+});
+q('#recoReset')?.addEventListener('click',()=>document.getElementById('recoReset2')?.click());
+
+/* ══ FILE LABEL PATCH (engine onclick → label 충돌 방지) ══ */
+setTimeout(()=>{
+  ['emptyImageBtn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&typeof el.onclick==='function') el.onclick=e=>e.preventDefault();
+  });
+},200);
+
+/* ══ LOAD MENU (불러오기 - 드롭다운 없이 직접 파일 input) ══ */
+// label for= 방식으로 이미 연결됨
+// 드래그앤드롭
+const ca=q('.canvas-area');
+if(ca){
+  ['dragenter','dragover'].forEach(ev=>ca.addEventListener(ev,e=>{
+    e.preventDefault(); ca.classList.add('drag-over');
+  }));
+  ['dragleave','drop'].forEach(ev=>ca.addEventListener(ev,e=>{
+    e.preventDefault(); ca.classList.remove('drag-over');
+  }));
+  ca.addEventListener('drop',e=>{
+    const f=e.dataTransfer?.files[0]; if(!f) return;
+    if(/\.(dtm|dtms)$/i.test(f.name)) guardUnsaved?.(()=>loadTactileFile?.(f));
+    else guardUnsaved?.(()=>loadImageFile?.(f));
+  });
 }
 
-// method/rawth/minComp/advSize 미러 (data-ctrl ↔ engine id)
-['method','rawth','minComp','advSize'].forEach(name=>{
-  const ui=document.querySelector(`[data-ctrl="${name}"]`);
-  const eng=document.getElementById(name);
-  if(!ui||!eng) return;
-  ui.value=eng.value;
-  const ev=ui.tagName==='SELECT'?'change':'input';
-  ui.addEventListener(ev,()=>{ eng.value=ui.value; eng.dispatchEvent(new Event(ev,{bubbles:true})); });
-  eng.addEventListener(ev,()=>{ if(ui.value!==eng.value) ui.value=eng.value; });
+/* ══ SAMPLE ══ */
+q('#sampleBtn')?.addEventListener('click',()=>loadSample?.());
+
+/* ══ GUARD MODAL ══ */
+q('#guardCancel')?.addEventListener('click',()=>{ const m=q('#guardModal'); if(m) m.classList.remove('show'); });
+q('#guardProceed')?.addEventListener('click',()=>{
+  const m=q('#guardModal'); if(m) m.classList.remove('show');
+  const a=typeof guardAction!=='undefined'?guardAction:null; if(a) a();
+});
+q('#guardSave')?.addEventListener('click',()=>{
+  document.getElementById('saveTopBtn')?.click();
+  const m=q('#guardModal'); if(m) m.classList.remove('show');
+  const a=typeof guardAction!=='undefined'?guardAction:null; if(a) a();
 });
 
-/* ── 다중 연결행 동기화 (connRow2, connRow3) ── */
-['connRow2','connRow3'].forEach(id=>{
-  const row=q('#'+id);
-  if(!row) return;
-  row.addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect?.(); });
-  row.addEventListener('keydown',e=>{
-    if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){ e.preventDefault(); doConnect?.(); }
+/* ══ CANCEL ANALYZE ══ */
+q('#cancelAnalyze')?.addEventListener('click',()=>{
+  if(typeof pendingImg!=='undefined') pendingImg=null;
+  if(typeof loading!=='undefined') loading=false;
+  setAppState(hasImage?'ready':'empty');
+});
+
+/* ══ MOBILE SCROLL + PROGRESS ══ */
+let _timers=[];
+function isMobile(){ return window.innerWidth<=900; }
+function scrollToEl(el,offset=12){
+  if(!el) return;
+  window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset,behavior:'smooth'});
+}
+function mobileStartAnalyzing(){
+  if(!isMobile()) return;
+  scrollToEl(q('.canvas-area'),8);
+  _timers.forEach(clearTimeout); _timers=[];
+  const fill=q('#convBarFill');
+  if(fill){ fill.style.transition='none'; fill.style.width='0%';
+    setTimeout(()=>fill.style.transition='width .4s cubic-bezier(.4,0,.2,1)',20); }
+  const steps=[
+    {t:0,   pct:'15%', title:'이미지 분석 중',    sub:'AI가 이미지 유형을 파악하고 있어요'},
+    {t:200, pct:'45%', title:'핀 배열 계산 중',   sub:'최적 변환 방식을 선택하고 있어요'},
+    {t:380, pct:'75%', title:'품질 최적화 중',    sub:'촉각 인지 점수를 계산하고 있어요'},
+    {t:540, pct:'92%', title:'마무리 중',          sub:'거의 다 됐어요'},
+  ];
+  steps.forEach(({t,pct,title,sub})=>{
+    _timers.push(setTimeout(()=>{
+      if(appState!=='analyzing') return;
+      if(fill) fill.style.width=pct;
+      const tt=q('#analyzeTitle'), sb=q('#analyzeName');
+      if(tt){ tt.style.opacity='0'; setTimeout(()=>{tt.textContent=title;tt.style.opacity='1';},80); }
+      if(sb){ sb.style.opacity='0'; setTimeout(()=>{sb.textContent=sub;sb.style.opacity='1';},100); }
+    },t));
   });
-});
-['liveSwitch2','liveSwitch3'].forEach(id=>{
-  q('#'+id)?.addEventListener('click',()=>{
-    const sw=q('#'+id); if(sw?.disabled) return;
-    document.getElementById('liveToggle')?.click(); syncAllConn();
-  });
-});
+}
+function mobileOnReady(){
+  _timers.forEach(clearTimeout); _timers=[];
+  const fill=q('#convBarFill'); if(fill){ fill.style.width='100%'; setTimeout(()=>{fill.style.transition='none';fill.style.width='0%';},600); }
+  if(!isMobile()) return;
+  setTimeout(()=>scrollToEl(q('.right-panel'),8),300);
+  // bezel fade-in
+  const bezel=q('.bezel');
+  if(bezel){ bezel.style.opacity='0'; setTimeout(()=>{ bezel.style.transition='opacity .25s'; bezel.style.opacity='1'; setTimeout(()=>bezel.style.transition='',300); },100); }
+}
 
-/* ── hdrSaveBtn/hdrOutputBtn 이중 배선 방지 (위에서 이미 했으므로 skip) ── */
-
-/* ── 초기화 ── */
+/* ══ INIT ══ */
 function init(){
-  paintSlider(threshold); fitCanvas(); syncQuality(); syncAllConn(); syncToolBar(); syncResButtons();
+  paintSlider(threshold);
+  fitCanvas(); syncQuality(); syncConn(); syncToolBar();
   resetQuality();
-  // 초기 탭 dataset
-  qa('.mode-pill').forEach((p,i)=> p.dataset.mode = i+1);
-  // edgeCleanup 초기값
-  const ec=q('#edgeCleanup'); if(ec) ec.value='auto';
-  const mc=q('#minCluster'); if(mc) mc.value='3';
+  // size grp initial state
+  const sg=q('#sizeGrp2'); if(sg) sg.style.display='none';
+  // res buttons initial
+  q('#resBtn60')?.classList.add('on');
 }
 if(document.readyState==='complete'||document.readyState==='interactive') setTimeout(init,0);
 else window.addEventListener('DOMContentLoaded',init);
 document.fonts?.ready?.then(fitCanvas);
-
-/* ══════════════════════════════════════════════════════
-   모바일 변환 과정 스크롤 + 피드백
-   - 모바일(≤900px)에서만 작동: 데스크톱은 3열이라 모두 보임
-   - analyzing 진입: 중앙 패널로 스크롤 + 단계 메시지 시퀀스
-   - ready 진입: 품질바까지 스크롤 + 결과 플래시
-══════════════════════════════════════════════════════ */
-const STEPS=[
-  {t:0,   msg:'이미지 분석 중…',       sub:'밝기와 경계를 감지하고 있어요'},
-  {t:200, msg:'점 배열 계산 중…',      sub:'최적 임계값으로 변환하고 있어요'},
-  {t:420, msg:'품질 최적화 중…',       sub:'촉각 인지 점수를 확인하고 있어요'},
-  {t:560, msg:'완성 직전…',            sub:'잠깐만 기다려 주세요'},
-];
-let _stepTimers=[];
-
-function isMobile(){ return window.innerWidth<=900; }
-
-function scrollToEl(el,offset=16){
-  if(!el) return;
-  const y=el.getBoundingClientRect().top+window.scrollY-offset;
-  window.scrollTo({top:y,behavior:'smooth'});
-}
-
-function mobileStartAnalyzing(){
-  if(!isMobile()) return;
-  // 중앙 패널 상단으로 스크롤
-  const center=document.getElementById('canvasCard');
-  if(center) setTimeout(()=>scrollToEl(center, 12), 80);
-
-  // 진행 바 초기화
-  const fill=document.getElementById('convBarFill');
-  if(fill){ fill.style.transition='none'; fill.style.width='0%';
-    setTimeout(()=>{ fill.style.transition='width .35s cubic-bezier(.4,0,.2,1)'; },20); }
-
-  // 단계 메시지 + 진행 바 시퀀스
-  _stepTimers.forEach(clearTimeout); _stepTimers=[];
-  const nameEl=document.getElementById('analyzeName');
-  const titleEl=document.querySelector('#analyzeOv h2');
-  const BAR_STEPS=[
-    {t:0,   pct:'15%', msg:'이미지 분석 중…',    sub:'밝기와 경계를 감지하고 있어요'},
-    {t:180, pct:'45%', msg:'점 배열 계산 중…',   sub:'최적 임계값으로 변환하고 있어요'},
-    {t:360, pct:'75%', msg:'품질 최적화 중…',    sub:'촉각 인지 점수를 확인하고 있어요'},
-    {t:520, pct:'92%', msg:'완성 직전…',          sub:'잠깐만 기다려 주세요'},
-  ];
-  BAR_STEPS.forEach(({t,pct,msg,sub})=>{
-    _stepTimers.push(setTimeout(()=>{
-      if(appState!=='analyzing') return;
-      if(fill) fill.style.width=pct;
-      // 텍스트 페이드
-      if(titleEl){ titleEl.style.opacity='0'; setTimeout(()=>{ titleEl.textContent=msg; titleEl.style.opacity='1'; },100); }
-      if(nameEl){  nameEl.style.opacity='0';  setTimeout(()=>{ nameEl.textContent=sub;  nameEl.style.opacity='1';  },120); }
-    }, t));
-  });
-}
-
-function mobileOnReady(){
-  _stepTimers.forEach(clearTimeout); _stepTimers=[];
-
-  // 진행 바 100% 완료
-  const fill=document.getElementById('convBarFill');
-  if(fill){ fill.style.width='100%'; setTimeout(()=>{ fill.style.transition='none'; fill.style.width='0%'; },700); }
-
-  if(!isMobile()) return;
-
-  // 1) 품질바가 보이는 위치로 스크롤
-  const qbar=document.querySelector('.quality-bar');
-  setTimeout(()=>{ if(qbar) scrollToEl(qbar, 60); }, 120);
-
-  // 2) 캔버스 플래시 효과 (변환 결과 '나타남' 연출)
-  const dotBg=document.getElementById('dotBg');
-  if(dotBg){
-    dotBg.style.transition='opacity .15s';
-    dotBg.style.opacity='0';
-    setTimeout(()=>{ dotBg.style.opacity='1'; },150);
-    setTimeout(()=>{ dotBg.style.transition=''; },400);
-  }
-
-  // 3) 품질 태그 순차 등장 (stagger)
-  const tags=document.querySelectorAll('.qt');
-  tags.forEach((t,i)=>{
-    t.style.opacity='0';
-    t.style.transform='translateY(6px)';
-    t.style.transition='none';
-    setTimeout(()=>{
-      t.style.transition='opacity .22s ease, transform .22s ease';
-      t.style.opacity='';
-      t.style.transform='';
-    }, 180 + i*60);
-  });
-
-  // 4) 우패널(점 농도 조절)로 자동 스크롤
-  const rp=document.querySelector('.panel-right');
-  if(rp) setTimeout(()=>scrollToEl(rp, 12), 600);
-}
-
 })();
 </script>
 </body>
