@@ -1,1 +1,2453 @@
-<!DOCTYPE html><html lang="en-US"><head><title>Just a moment...</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="content-security-policy" content="default-src &#39;none&#39;; script-src &#39;nonce-l3AnOFnwziMkioo8PMGHIn&#39; &#39;unsafe-eval&#39; https://challenges.cloudflare.com; script-src-attr &#39;none&#39;; style-src &#39;unsafe-inline&#39;; img-src &#39;self&#39; https://challenges.cloudflare.com; connect-src &#39;self&#39; https://challenges.cloudflare.com; frame-src &#39;self&#39; https://challenges.cloudflare.com blob:; child-src &#39;self&#39; https://challenges.cloudflare.com blob:; worker-src blob:; form-action http: https:; base-uri &#39;self&#39;"><style>*{box-sizing:border-box;margin:0;padding:0}html{line-height:1.15;-webkit-text-size-adjust:100%;color:#313131;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"}body{display:flex;flex-direction:column;height:100vh;min-height:100vh}.main-content{margin:8rem auto;padding-left:1.5rem;max-width:60rem}@media (width <= 720px){.main-content{margin-top:4rem}}#challenge-error-text{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSI+PHBhdGggZmlsbD0iI0IyMEYwMyIgZD0iTTE2IDNhMTMgMTMgMCAxIDAgMTMgMTNBMTMuMDE1IDEzLjAxNSAwIDAgMCAxNiAzbTAgMjRhMTEgMTEgMCAxIDEgMTEtMTEgMTEuMDEgMTEuMDEgMCAwIDEtMTEgMTEiLz48cGF0aCBmaWxsPSIjQjIwRjAzIiBkPSJNMTcuMDM4IDE4LjYxNUgxNC44N0wxNC41NjMgOS41aDIuNzgzem0tMS4wODQgMS40MjdxLjY2IDAgMS4wNTcuMzg4LjQwNy4zODkuNDA3Ljk5NCAwIC41OTYtLjQwNy45ODQtLjM5Ny4zOS0xLjA1Ny4zODktLjY1IDAtMS4wNTYtLjM4OS0uMzk4LS4zODktLjM5OC0uOTg0IDAtLjU5Ny4zOTgtLjk4NS40MDYtLjM5NyAxLjA1Ni0uMzk3Ii8+PC9zdmc+");background-repeat:no-repeat;background-size:contain;padding-left:34px}</style><meta http-equiv="refresh" content="360"></head><body><div class="main-wrapper" role="main"><div class="main-content"><noscript><div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div></noscript></div></div><script nonce="l3AnOFnwziMkioo8PMGHIn">(function(){window._cf_chl_opt = {cFPWv: 'b',cH: '9O026F91DL_5wOTLDVrYJ9Wy1ZS0xyDdjiSlnOoppiA-1782515688-1.2.1.1-2FSyrxG9eUZD7jSCJq1CxlMcL07AKJncocVXmU8rNbgFjQRDaPN676DvIf_g1M7f',cITimeS: '1782515688',cN: 'l3AnOFnwziMkioo8PMGHIn',cRay: 'a11fe90ed89cce57',cTplB: '0',cTplC:0,cTplO:0,cTplV:5,cType: 'managed',cUPMDTk:"/outputs/index.html?__cf_chl_tk=nzC2u9DcrD.3kwwdT3wPBH.ssvEOFimqhnaxSbGZNCI-1782515688-1.0.1.1-7Zix_5m8ZewrRuI_64JuP7xUHfovB3QVmppO3alwLXA",cvId: '3',cZone: 'claude.ai',fa:"/outputs/index.html?__cf_chl_f_tk=nzC2u9DcrD.3kwwdT3wPBH.ssvEOFimqhnaxSbGZNCI-1782515688-1.0.1.1-7Zix_5m8ZewrRuI_64JuP7xUHfovB3QVmppO3alwLXA",md: '0GZghH8qlli0rB3FE2uVmR9A31IREUjx_GHprDDW.KA-1782515688-1.2.1.1-oMMecsRLrdXgTRfwAX3Id6szgospzLmjkJlN.NkgGM4bu1Cgfknob9wTDZmcMNpvNtjLp1QO9uoDeER1exkJxEaPQ0uzap9YDTHtWBS8aGr7js6KlakZOQn6xd8.SaJv16llU_d9RTmx1_g4g9cctIhbPw4kiRKB2by5o9sT7t2zqTDqKTxCMjgpfcKwQXrn2ip_updznoZLYryk2Fq5MuPuEpxVVhWFyuV_FGV6m6OSRVnFADvDySlhIW1ZRy0R3D65Ul3EJrUGAfhlCeEzJq0oq4bz556yJC2LW6ONG1KZiKZLDDj2vyghLDWBDSb2JUJFRWtCEReeKOw0_eRYnAVO1SC7SGNse0qtjdHveyiJmg.xiMLRcIC.axarZ5KdO1YbZ.Lh34fjAy0QU0AHeRqgYowIZSudox8Mql.xlHYSyHGm5kbkoAIECk.JiQMifrF5HI7RYu8sSlG70v1c9CAIoUeSEOKOI1KY5.c4xkGUO1lua83U8.HRZJ53SNzvG_kc9qCkBJGurpXskDayE13G2odZ0saZ1NfLKZElhE2llLlgvMZxKIqvVIAA.FET6hV.sjAC9CjAwMm1cm7NuVof_G3cvwM86ZHR.QSRvKJ_h682O16obnIGLckf76NQL5e05UP.C91lQAxYI58_TqjoIESoObBYr4p9Lb7wxwBl_t50ty06AUAscvtoELad7BZ0O4rr9T04oFkAsE2pD9NCyCgqSkxiGGSNvxhxC4zFdnVqc4aEwyj5MLrvobR2F76hCeB_TBDSZH9YTq4J29pqpQx22vlLtxeAUfa3EH1HwK3KSlZGnZBxwYwaiEsyCRBdd9bY6VubtJAhJenNhM9eLKTiA7y6lEFWvzEANko9_nHjSFNSN2KyYqwEKSTxVD0gx8QQRDgItMWRIyiCgBq308SScvfgqgSEtx3LswcEyfyeQlNupMsT80D.HiXo.uPC7YqlkGabR07ZVk95Hx_ipqK.aXbaOUpojwyj3VFMZKzugw0m54O3tULFCz5mNEb5XMidN0V.xOdC7nvToZhOMn3XIDKlvKiW.v56YvNSjJMUPkfBvAPptukbyPda',mdrd: 'HrJ0agVUX0_lZSMVPOboh7GNKHYT5HFmmSy_MysMYoE-1782515688-1.2.1.1-Kw57Bpz6.Ce.DziEjeED_IylzHSqT7n.TuS4_Uu10K0OofSsusduE0yCXVTjoo3kw5RnxjTYMtQFPgSwZdgeOYWbPKBUvnLfHHdk5KnguutmpJkjXATfwYc4SjZMyN.IDK1uIAOIq1emSd3ST.pj71k65t78mERynB_MxR6cS71hjYhm9B.hqbfhDhcBJByAnqK.ijURBpPvYVtgbrUUAQ',};var a = document.createElement('script');a.nonce = 'l3AnOFnwziMkioo8PMGHIn';a.src = '/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a11fe90ed89cce57';window._cf_chl_opt.cOgUHash = location.hash === '' && location.href.indexOf('#') !== -1 ? '#' : location.hash;window._cf_chl_opt.cOgUQuery = location.search === '' && location.href.slice(0, location.href.length - window._cf_chl_opt.cOgUHash.length).indexOf('?') !== -1 ? '?' : location.search;if (window.history && window.history.replaceState) {var ogU = location.pathname + window._cf_chl_opt.cOgUQuery + window._cf_chl_opt.cOgUHash;history.replaceState(null, null,"/outputs/index.html?__cf_chl_rt_tk=nzC2u9DcrD.3kwwdT3wPBH.ssvEOFimqhnaxSbGZNCI-1782515688-1.0.1.1-7Zix_5m8ZewrRuI_64JuP7xUHfovB3QVmppO3alwLXA"+ window._cf_chl_opt.cOgUHash);a.onload = function() {history.replaceState(null, null, ogU);}}document.getElementsByTagName('head')[0].appendChild(a);}());</script></body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"/>
+<title>촉각 그래픽 생성 · Dot Canvas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS (Figma 추출 그대로) ── */
+:root{
+  --white:#FFFFFF;
+  --bg:#F4F1EB;          /* 워크스페이스 배경 */
+  --surface:#FBFAF7;     /* 패널 내부 카드 */
+  --border:#E5DED3;
+  --border2:#D4CFC8;
+  --ink:#241F1A;         /* 텍스트 강 */
+  --text:#241F1A;
+  --muted:#776F66;
+  --placeholder:#A59A8E;
+  --accent:#F36B2F;      /* 적용/출력 버튼 */
+  --accent-h:#E05A20;
+  --accent-bg:#FFF0E7;   /* 오렌지 pill 배경 */
+  --green:#2E9D69;
+  --green-bg:#EAF7F1;
+  --blue:#3C75D9;
+  --blue-bg:#EDF3FF;
+  --slider-track:#E0E4E8;
+  --slider-active:#6B7280;
+  --font:'Noto Sans KR','Inter',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:13px;
+  line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+svg{display:block}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+#legacy{display:none!important}
+
+/* ── HEADER ── */
+.app-header{
+  height:68px;background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 24px;gap:0;flex-shrink:0;
+  justify-content:space-between
+}
+/* brand */
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:34px;height:34px;background:var(--ink);border-radius:10px;
+  display:grid;place-items:center;flex-shrink:0}
+.brand-mark span{color:#fff;font-size:16px;font-weight:700}
+.brand-title{font-size:18px;font-weight:600;color:var(--ink);line-height:24px;white-space:nowrap}
+.brand-sub{font-size:12px;color:var(--muted);line-height:18px}
+/* mode switch — 2줄 스텝 탭 (Figma: h=56, w=140) */
+.mode-switch{background:var(--surface);border:1px solid var(--border);border-radius:13px;
+  padding:4px 5px;display:flex;gap:4px}
+.mode-pill{width:140px;height:56px;padding:8px 10px;border-radius:13px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:var(--muted);transition:.1s;flex-shrink:0}
+.mode-pill-main{font-size:12px;font-weight:700;line-height:16px;white-space:nowrap}
+.mode-pill-sub{font-size:10px;font-weight:500;line-height:12px;white-space:nowrap;opacity:.8}
+.mode-pill.active{background:var(--ink);color:#fff}
+.mode-pill.active .mode-pill-sub{color:rgba(255,255,255,.8)}
+.mode-pill:hover:not(.active){background:var(--border);color:var(--ink)}
+/* status pills */
+.status-pills{display:flex;gap:8px;align-items:center}
+.sp{height:28px;padding:0 10px;border-radius:14px;font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sp-res{background:var(--blue-bg);color:var(--blue)}
+.sp-live{background:var(--green-bg);color:var(--green)}
+.sp-live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.sp-local{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+/* header buttons */
+.hdr-btns{display:flex;gap:8px}
+.hdr-btn{height:36px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;
+  background:var(--surface);border:1px solid var(--border);color:var(--ink);white-space:nowrap}
+.hdr-btn:hover{background:var(--bg)}
+.hdr-btn:disabled{opacity:.45;cursor:not-allowed}
+.hdr-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;
+  box-shadow:0 2px 8px rgba(243,107,47,.3)}
+.hdr-btn.primary:hover{background:var(--accent-h)}
+
+/* ── WORKSPACE ── */
+.workspace{flex:1;display:flex;overflow:hidden;padding:20px;gap:16px}
+
+/* ── LEFT PANEL ── */
+.panel-left{
+  width:272px;flex-shrink:0;background:var(--white);border:1px solid var(--border);
+  border-radius:18px;display:flex;flex-direction:column;overflow:hidden
+}
+.lp-scroll{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:8px}
+.lp-scroll::-webkit-scrollbar{width:3px}
+.lp-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.lp-title{font-size:15px;font-weight:600;color:var(--ink);line-height:22px;margin-bottom:4px}
+
+/* upload card */
+.upload-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:16px;display:flex;flex-direction:column;gap:8px
+}
+.upload-title{font-size:16px;font-weight:700;color:var(--ink);line-height:22px}
+.upload-desc{font-size:12px;color:var(--muted);line-height:20px}
+.upload-actions{display:flex;gap:8px}
+.upload-btn{height:32px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;
+  color:var(--ink);background:var(--surface);border:1px solid var(--border);white-space:nowrap}
+.upload-btn:hover{background:var(--bg)}
+.upload-btn.replace{color:var(--muted)}
+/* loaded thumb */
+.src-loaded{display:none;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.src-thumb{width:100%;height:88px;object-fit:contain;background:var(--surface);display:block}
+.src-info{font-size:11px;color:var(--muted);padding:6px 10px}
+.src-act-row{display:flex;gap:6px;padding:0 10px 10px}
+.src-act{height:26px;padding:0 10px;border-radius:8px;font-size:11px;font-weight:600;
+  color:var(--muted);background:var(--surface);border:1px solid var(--border)}
+.src-act:hover{background:var(--bg)}
+
+/* option rows */
+.opt-card{
+  background:var(--surface);border-radius:16px;padding:10px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px
+}
+.opt-texts{display:flex;flex-direction:column;gap:4px}
+.opt-title{font-size:13px;font-weight:600;color:var(--ink);line-height:18px}
+.opt-desc{font-size:11px;color:var(--muted);line-height:16px}
+/* status pills inside panels */
+.pp{display:inline-flex;align-items:center;justify-content:center;
+  height:24px;padding:0 8px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap}
+.pp-on{background:var(--green-bg);color:var(--green)}
+.pp-res{background:var(--blue-bg);color:var(--blue)}
+.pp-cell{background:var(--green-bg);color:var(--green)}
+.pp-acc{background:var(--accent-bg);color:var(--accent)}
+
+/* note card */
+.note-card{background:var(--surface);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.note-title{font-size:13px;font-weight:600;color:var(--ink);line-height:18px}
+.note-desc{font-size:11px;color:var(--muted);line-height:16px}
+
+/* adv toggle */
+.adv-toggle{display:flex;align-items:center;justify-content:space-between;
+  background:var(--white);border-radius:10px;padding:8px 12px;height:32px;
+  font-size:11px;font-weight:600;color:var(--placeholder);width:100%}
+.adv-toggle:hover{background:var(--surface)}
+.adv-toggle svg{width:14px;height:14px;transition:transform .15s}
+.adv-toggle.open svg{transform:rotate(180deg)}
+.adv-body{display:none;flex-direction:column;gap:6px}
+.adv-body.show{display:flex}
+.tog{width:36px;height:20px;border-radius:999px;border:none;
+  background:#D1D5DB;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}
+.tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:#fff;transition:left .15s}
+.tog[aria-checked="true"]{background:var(--green)}
+.tog[aria-checked="true"]::after{left:18px}
+
+/* ── CENTER PANEL ── */
+.panel-center{
+  flex:1;min-width:0;background:var(--white);border:1px solid var(--border);
+  border-radius:18px;display:flex;flex-direction:column;overflow:hidden
+}
+/* preview header */
+.preview-hdr{
+  padding:20px 20px 0;display:flex;align-items:flex-start;
+  justify-content:space-between;flex-shrink:0
+}
+.preview-title{font-size:16px;font-weight:700;color:var(--ink);line-height:24px}
+.preview-sub{font-size:12px;color:var(--muted);line-height:18px;margin-top:2px}
+.view-pills{display:flex;background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:3px;gap:2px}
+.vp{height:28px;padding:0 12px;border-radius:12px;font-size:12px;font-weight:600;color:var(--muted)}
+.vp.active{background:var(--ink);color:#fff}
+.vp:hover:not(.active){background:var(--border)}
+.vp:disabled{opacity:.4;cursor:not-allowed}
+
+/* toolbar — Figma 그대로: bg=#F3F4F6, border=#E5E7EB, r=12px, icon=40px */
+.toolbar{
+  margin:12px 20px 0;background:#F3F4F6;border:1px solid #E5E7EB;
+  border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0
+}
+.tb-group{display:flex;align-items:center;gap:8px}
+.tb{width:40px;height:40px;border-radius:6px;display:grid;place-items:center;
+  color:#374151;transition:.1s;flex-shrink:0}
+.tb svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.tb:hover{background:#fff;color:#111}
+.tb[aria-pressed="true"]{background:var(--ink);color:#fff}
+.tb:disabled{opacity:.3;cursor:not-allowed}
+.tb-sep{width:1px;height:40px;background:#E5E7EB;flex-shrink:0}
+.tb-sizes{display:flex;gap:4px}
+.tb-sz{height:30px;min-width:34px;padding:0 7px;border-radius:6px;font-size:11px;font-weight:700;
+  color:var(--muted);background:var(--white);border:1px solid var(--border)}
+.tb-sz[aria-checked="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tb-sz:hover:not([aria-checked="true"]){background:#fff}
+.toolbar[data-tool="move"] .tb-sizes,
+.toolbar[data-tool="move"] .tb-sep.size-sep{display:none}
+
+/* canvas stage */
+.canvas-stage{
+  flex:1;padding:16px 20px;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative
+}
+.dot-bg{
+  background:#EDE8DF;border-radius:14px;width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden
+}
+#dotGrid{display:flex;align-items:center;justify-content:center;width:100%;height:100%;position:relative}
+#pad{display:block;touch-action:none}
+.before-img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#canvasCard[data-view="before"] #pad{visibility:hidden}
+#canvasCard[data-view="before"] .before-img{display:block}
+/* overlays */
+.ov{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;
+  justify-content:center;gap:10px;text-align:center;padding:24px;
+  background:rgba(237,232,223,.92);border-radius:14px;z-index:5}
+body[data-state="empty"] #emptyOv{display:flex}
+body[data-state="analyzing"] #analyzeOv{display:flex}
+.ov-ico{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.8);
+  display:grid;place-items:center;margin-bottom:2px}
+.ov-ico svg{width:20px;height:20px;color:var(--accent)}
+.ov h2{font-size:14px;font-weight:700;color:var(--ink)}
+.ov p{font-size:12px;color:var(--muted);max-width:30ch;line-height:1.6}
+.ov-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.ov-btn{height:32px;padding:0 14px;border-radius:10px;font-size:12px;font-weight:600;
+  color:var(--ink);background:var(--white);border:1px solid var(--border)}
+.ov-btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+.ov-btn.accent:hover{background:var(--accent-h)}
+.ov-btn:hover:not(.accent){background:var(--surface)}
+.ov-link{background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;cursor:pointer}
+.ov-link:hover{color:var(--accent)}
+.spinner{width:28px;height:28px;border:2.5px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+/* 변환 진행 바 */
+.conv-bar{width:160px;height:4px;background:var(--border);border-radius:2px;margin:4px 0 0;overflow:hidden}
+.conv-bar-fill{height:100%;border-radius:2px;background:var(--accent);width:0%;
+  transition:width .35s cubic-bezier(.4,0,.2,1)}
+/* analyzeOv h2 부드러운 전환 */
+#analyzeOv h2{transition:opacity .2s}
+#analyzeOv p{transition:opacity .2s;font-size:12px;color:var(--muted);min-height:18px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── 단계별 패널 전환 ── */
+.tab-panel{display:none}
+.tab-panel.active{display:flex;flex-direction:column}
+.sec-title{font-size:13px;font-weight:700;color:var(--ink);margin:14px 0 6px}
+.sec-title:first-child{margin-top:0}
+/* 2단계: 윤곽선 세그 */
+.outline-seg{display:flex;gap:6px;margin-top:8px}
+.outline-btn{flex:1;height:34px;border-radius:10px;border:1px solid var(--border);
+  background:var(--white);font-size:12px;font-weight:600;color:var(--muted)}
+.outline-btn.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+.outline-btn:hover:not(.sel):not(:disabled){background:var(--surface)}
+.outline-btn:disabled{opacity:.4;cursor:not-allowed}
+/* 3단계: 전문가 설정 */
+.exp-row{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-top:1px solid var(--border);gap:8px}
+.exp-row:first-of-type{border-top:none;padding-top:0}
+.exp-label{font-size:12px;font-weight:600;color:var(--ink)}
+.exp-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.exp-select{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);font-size:12px;color:var(--text);font-family:inherit}
+.exp-input{height:30px;padding:0 8px;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);font-size:12px;color:var(--text);width:72px;text-align:right;font-family:inherit}
+.exp-input:focus,.exp-select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.save-btns{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.save-btn{height:36px;border-radius:10px;border:1px solid var(--border);background:var(--white);
+  font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:6px}
+.save-btn:hover:not(:disabled){background:var(--surface)}
+.save-btn.acc{background:var(--accent);border-color:var(--accent);color:#fff}
+.save-btn.acc:hover:not(:disabled){background:var(--accent-h)}
+.save-btn:disabled{opacity:.4;cursor:not-allowed}
+.reco-btn{height:28px;padding:0 10px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);font-size:11px;font-weight:600;color:var(--muted)}
+.reco-btn:hover{background:var(--bg);color:var(--ink)}
+
+/* quality bar */
+.quality-bar{
+  background:#FBFAF7;padding:4px 12px;display:flex;align-items:center;gap:8px;
+  flex-wrap:wrap;flex-shrink:0;border-radius:6px;margin:0 20px 12px;
+}
+.qt{height:28px;padding:0 10px;border-radius:14px;font-size:12px;font-weight:600;
+  display:inline-flex;align-items:center;white-space:nowrap}
+/* Figma 정확한 pill 색상 */
+.qt-dots{background:#FFFFFF;border:1px solid #E5DED3;color:#241F1A}
+.qt-read-g{background:#EAF7F1;color:#2E9D69}
+.qt-read-m{background:#FFFBEB;color:#92400E}
+.qt-read-b{background:#FEF2F2;color:#991B1B}
+.qt-noise{background:#EAF7F1;color:#2E9D69}    /* Figma: 잡음 적음 = 그린 */
+.qt-noise-h{background:#FFFBEB;color:#92400E}
+.qt-spacing{background:#EDF3FF;color:#3C75D9}   /* Figma: 간격 여유 = 블루 */
+.qt-retouch{background:#FFF0E7;color:#F36B2F}   /* Figma: 수정 가능 = 오렌지 */
+
+/* ── RIGHT PANEL ── */
+.panel-right{
+  width:354px;flex-shrink:0;background:var(--white);border:1px solid var(--border);
+  border-radius:18px;display:flex;flex-direction:column;overflow:hidden
+}
+.rp-scroll{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:0}
+.rp-scroll::-webkit-scrollbar{width:3px}
+.rp-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.rp-section{font-size:15px;font-weight:600;color:var(--ink);line-height:22px}
+
+/* threshold slider — Figma 그대로 */
+.th-slider-wrap{margin:16px 0 0;position:relative;height:36px}
+.th-track{position:absolute;left:0;right:0;top:14px;height:8px;border-radius:4px;
+  background:var(--slider-track);cursor:pointer}
+.th-active{position:absolute;left:0;top:0;height:8px;border-radius:4px;
+  background:var(--slider-active);pointer-events:none;transition:width .05s}
+.th-thumb{position:absolute;top:-10px;width:28px;height:28px;border-radius:50%;
+  background:var(--white);border:2px solid var(--slider-active);
+  box-shadow:0 2px 6px rgba(0,0,0,.15);transform:translateX(-50%);
+  cursor:grab;transition:transform .05s}
+.th-thumb:active{cursor:grabbing;transform:translateX(-50%) scale(1.1)}
+/* hidden range for a11y */
+#clarity{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer;height:36px}
+
+.th-adj-row{display:flex;gap:8px;margin-top:12px}
+.th-adj{flex:1;height:36px;border-radius:12px;font-size:13px;font-weight:600;
+  background:var(--surface);border:1px solid var(--border);color:var(--ink)}
+.th-adj:hover{background:var(--bg)}
+.th-apply{flex:1;height:36px;border-radius:12px;font-size:13px;font-weight:600;
+  background:var(--accent);border:none;color:#fff}
+.th-apply:hover{background:var(--accent-h)}
+.th-apply:disabled{opacity:.4;cursor:not-allowed}
+
+/* score card */
+.score-card{border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;margin-top:12px}
+.score-card.good{background:var(--green-bg)}
+.score-card.mid{background:#FFFBEB}
+.score-card.bad{background:#FEF2F2}
+.score-label{font-size:14px;font-weight:600;line-height:20px}
+.score-card.good .score-label{color:var(--green)}
+.score-card.mid .score-label{color:#92400E}
+.score-card.bad .score-label{color:#991B1B}
+.score-title{font-size:13px;font-weight:700;color:var(--ink);line-height:20px}
+.score-desc{font-size:11px;color:var(--muted);line-height:16px}
+
+/* advanced rows */
+.adv-rows{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.adv-row{background:var(--white);border:1px solid var(--border);border-radius:10px;
+  height:40px;padding:0 12px;display:flex;align-items:center;gap:8px}
+.adv-label{flex:1;font-size:11px;font-weight:600;color:var(--ink);line-height:16px}
+.adv-val{font-size:11px;font-weight:600;color:var(--placeholder);width:80px;text-align:right}
+.adv-arr{font-size:11px;color:var(--placeholder);width:14px;text-align:center}
+.adv-select{border:none;background:none;font-size:11px;font-weight:600;color:var(--placeholder);
+  font-family:inherit;cursor:pointer;width:90px;text-align:right;direction:rtl}
+.adv-select:focus{outline:none}
+
+/* connection section */
+.conn-section{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+.conn-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0}
+.conn-row.clickable:hover .conn-lbl{color:var(--ink)}
+.conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#9CA3AF}
+.conn-dot.on{background:var(--green);box-shadow:0 0 6px rgba(46,157,105,.5)}
+.conn-dot.busy{background:#D97706;animation:pulse 1s infinite}
+.conn-dot.err{background:#E11D48}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.conn-lbl{font-size:13px;font-weight:600;color:var(--muted)}
+.live-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.live-lbl{font-size:12px;font-weight:600;color:var(--muted)}
+.live-hint{font-size:11px;color:var(--placeholder);margin-top:2px}
+.sw{width:36px;height:20px;border-radius:999px;border:none;background:#D1D5DB;
+  position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:#fff;transition:left .15s}
+.sw[aria-checked="true"]{background:var(--accent)}
+.sw[aria-checked="true"]::after{left:18px}
+.sw:disabled{opacity:.4;cursor:not-allowed}
+
+/* quick edit */
+.qedit{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.qe-btn{height:28px;padding:0 10px;border-radius:8px;font-size:11px;font-weight:600;
+  color:var(--muted);background:var(--surface);border:1px solid var(--border)}
+.qe-btn:hover:not(:disabled){background:var(--bg);color:var(--ink)}
+.qe-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{
+  height:64px;background:var(--white);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0
+}
+.bs-pills{display:flex;gap:8px;align-items:center}
+.bsp{height:28px;padding:0 10px;border-radius:14px;font-size:12px;font-weight:600;
+  display:inline-flex;align-items:center;white-space:nowrap}
+.bsp-local{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.bsp-thresh{background:var(--accent-bg);color:var(--accent)}
+.bsp-synced{background:var(--green-bg);color:var(--green)}
+.bsp-retouch{background:var(--accent-bg);color:var(--accent)}
+.bs-note{flex:1;font-size:12px;color:var(--muted);opacity:.7;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 4px}
+.bs-div{width:1px;height:40px;background:#E0E4E8;flex-shrink:0}
+.bs-actions{display:flex;gap:8px;align-items:center}
+.bs-btn{height:36px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;
+  background:var(--surface);border:1px solid var(--border);color:var(--ink);white-space:nowrap}
+.bs-btn:hover{background:var(--bg)}
+.bs-btn:disabled{opacity:.4;cursor:not-allowed}
+.bs-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;
+  box-shadow:0 2px 8px rgba(243,107,47,.3)}
+.bs-btn.primary:hover{background:var(--accent-h)}
+
+/* ── LOAD MENU ── */
+.load-wrap{position:relative}
+.load-btn{display:flex;align-items:center;gap:5px;height:28px;padding:0 10px;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface);
+  font-size:12px;font-weight:600;color:var(--muted)}
+.load-btn svg{width:12px;height:12px;color:var(--muted);flex-shrink:0}
+.load-btn:hover{background:var(--bg)}
+.load-menu{position:absolute;top:calc(100%+5px);right:0;min-width:176px;
+  background:var(--white);border:1px solid var(--border);border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.1);padding:5px;z-index:50;display:none}
+.load-menu.open{display:block}
+.load-menu button{display:flex;align-items:center;gap:8px;width:100%;border:none;
+  background:none;color:var(--ink);font-size:12px;font-weight:500;
+  padding:8px 10px;border-radius:8px;cursor:pointer;text-align:left}
+.load-menu button:hover{background:var(--surface)}
+.load-menu button svg{width:13px;height:13px;color:var(--muted);flex-shrink:0}
+
+/* ── UTILS ── */
+#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%) translateY(12px);
+  background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;
+  font-size:12px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:200}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:#15803D}#toast.err{background:#E11D48}
+.modal-bg{position:fixed;inset:0;background:rgba(36,31,26,.4);display:none;
+  align-items:center;justify-content:center;z-index:180;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:var(--white);border-radius:16px;max-width:360px;width:100%;
+  padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.18)}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:8px}
+.modal p{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.modal .ma{display:flex;flex-direction:column;gap:7px}
+.modal .ma button{width:100%;height:38px;border-radius:999px;border:1px solid var(--border);
+  background:var(--white);font-size:13px;font-weight:600;cursor:pointer}
+.modal .ma .acc{background:var(--accent);border-color:var(--accent);color:#fff}
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE — 태블릿·모바일
+══════════════════════════════════════════════════════ */
+
+/* 태블릿 landscape (≤1100px): 패널 폭 줄이기 */
+@media(max-width:1100px){
+  .panel-left{width:240px}
+  .panel-right{width:300px}
+  .mode-pill{width:120px}
+  .mode-pill-main{font-size:11px}
+  .mode-pill-sub{font-size:9px}
+}
+
+/* 태블릿 portrait (≤900px): 우패널 숨기고 하단 드로어로 */
+@media(max-width:900px){
+  /* ── 스크롤 근본 해제 ── */
+  html{height:auto;overflow-x:hidden;overflow-y:auto}
+  body{
+    height:auto;min-height:100vh;overflow:visible;
+    display:block          /* flex→block: 자연 문서 흐름 */
+  }
+
+  /* ── 헤더: sticky로 상단 고정 ── */
+  .app-header{
+    position:sticky;top:0;z-index:100;
+    padding:8px 14px;gap:8px;flex-wrap:wrap;
+    height:auto;min-height:56px;
+    border-bottom:1px solid var(--border)
+  }
+  .mode-switch{order:3;width:100%;justify-content:center}
+  .mode-pill{flex:1;height:44px}
+  .status-chips{margin-left:0}
+
+  /* ── 워크스페이스: 자연 흐름 세로 스택 ── */
+  .workspace{
+    display:flex;flex-direction:column;
+    overflow:visible;
+    height:auto;
+    padding:12px;gap:10px
+  }
+
+  /* ── 패널들: 고정 높이 제거, 자연 높이 ── */
+  .panel-left{width:100%;border-radius:14px;overflow:visible;height:auto}
+  .panel-left .lp-scroll{
+    flex-direction:column;padding:12px;
+    overflow:visible;height:auto;max-height:none
+  }
+  .lp-title{width:100%;font-size:14px}
+  .upload-card{width:100%;min-width:unset}
+  .opt-card,.note-card{width:100%;min-width:unset}
+  .adv-toggle{display:flex}
+
+  .panel-center{
+    border-radius:14px;min-height:360px;
+    overflow:visible;height:auto
+  }
+  /* 캔버스 자체는 내부 고정 크기 유지 */
+  .canvas-stage{padding:10px;height:auto;min-height:280px}
+
+  .panel-right{width:100%;border-radius:14px;order:3;overflow:visible;height:auto}
+  .rp-scroll{padding:14px;overflow:visible;height:auto;max-height:none}
+
+  /* ── 하단바: sticky 하단 고정 ── */
+  .bottom-bar{
+    position:sticky;bottom:0;z-index:100;
+    flex-wrap:wrap;height:auto;padding:10px 14px;gap:8px;
+    border-top:1px solid var(--border)
+  }
+  .bs-pills{flex-wrap:wrap}
+  .bs-note{display:none}
+  .bs-div{display:none}
+  .bs-actions{margin-left:0;width:100%;justify-content:flex-end}
+}
+
+/* 모바일 (≤600px) */
+@media(max-width:600px){
+  html{overflow-x:hidden}
+  .workspace{padding:8px;gap:8px;overflow:visible}
+  .panel-left .lp-scroll{flex-direction:column;padding:12px;overflow:visible}
+  .upload-card,.opt-card,.note-card{min-width:unset;width:100%}
+  .panel-center{min-height:320px;overflow:visible}
+  .canvas-stage{padding:8px;min-height:240px}
+  .preview-hdr{padding:12px 12px 0;flex-direction:column;gap:8px;align-items:flex-start}
+  .toolbar{margin:8px 12px 0;padding:6px 8px;gap:6px;overflow-x:auto;flex-wrap:nowrap}
+  .tb-group{gap:4px}
+  .tb{width:36px;height:36px}
+  .tb svg{width:16px;height:16px}
+  .app-header{padding:8px}
+  .brand-title{font-size:15px}
+  .brand-sub{display:none}
+  .mode-pill{height:40px;padding:6px 4px}
+  .mode-pill-main{font-size:10px}
+  .mode-pill-sub{display:none}
+  .hdr-btn{height:30px;padding:0 10px;font-size:12px}
+  .status-chips{gap:4px}
+  .sp{height:24px;padding:0 7px;font-size:11px}
+  .quality-bar{gap:5px;padding:4px 8px;margin:0 12px 8px}
+  .qt{height:24px;padding:0 7px;font-size:11px}
+  .rp-scroll{padding:12px;overflow:visible}
+  .th-adj-row{gap:5px}
+  .th-adj,.th-apply{height:32px;font-size:12px}
+  .adv-row{padding:0 10px;height:36px}
+  .adv-label{font-size:11px}
+  .qedit{gap:5px}
+  .qe-btn{height:26px;padding:0 8px;font-size:11px}
+  .bottom-bar{padding:8px}
+  .bs-btn{height:32px;padding:0 10px;font-size:12px}
+  .tb-sizes{gap:2px}
+  .tb-sz{height:28px;min-width:30px;font-size:10px}
+}
+
+/* 초소형 (≤380px) */
+@media(max-width:380px){
+  .mode-pill-main{font-size:9px}
+  .brand-title{font-size:13px}
+  .hdr-btn{padding:0 8px;font-size:11px}
+  .status-chips{display:none}
+  .tb{width:32px;height:32px}
+  .tb svg{width:14px;height:14px}
+}
+</style>
+</head>
+<body data-state="empty">
+
+<!-- ═══ HEADER ═══ -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-mark"><span>D</span></div>
+    <div>
+      <div class="brand-title">촉각 그래픽 생성</div>
+      <div class="brand-sub">핵심 생성 모드 · 임계값 조정 우선</div>
+    </div>
+  </div>
+
+  <nav class="mode-switch" role="tablist">
+    <button class="mode-pill active" data-mode="create" role="tab" aria-selected="true">
+      <span class="mode-pill-main">1단계 · 만들기</span>
+      <span class="mode-pill-sub">이미지 불러오기 &amp; 변환</span>
+    </button>
+    <button class="mode-pill" data-mode="refine" role="tab" aria-selected="false">
+      <span class="mode-pill-main">2단계 · 다듬기</span>
+      <span class="mode-pill-sub">점 농도와 디테일 조정</span>
+    </button>
+    <button class="mode-pill" data-mode="expert" role="tab" aria-selected="false">
+      <span class="mode-pill-main">3단계 · 전문 설정</span>
+      <span class="mode-pill-sub">고급 옵션 세부 조정</span>
+    </button>
+  </nav>
+
+  <div class="status-pills">
+    <span class="sp sp-res" id="resChip">60×40</span>
+    <span class="sp sp-live" id="liveChip" style="display:none">
+      <span class="sp-live-dot"></span>DotPad Live
+    </span>
+    <span class="sp sp-local">로컬</span>
+  </div>
+
+  <div class="hdr-btns">
+    <button class="hdr-btn" id="hdrSaveBtn" disabled>저장</button>
+    <button class="hdr-btn primary" id="hdrOutputBtn" disabled>출력</button>
+  </div>
+</header>
+
+<!-- ═══ WORKSPACE ═══ -->
+<div class="workspace">
+
+  <!-- LEFT PANEL -->
+  <aside class="panel-left">
+    <div class="lp-scroll">
+
+      <!-- ══ 1단계: 만들기 ══ -->
+      <div class="tab-panel active" id="lp-step1">
+        <p class="lp-title">기본 설정</p>
+
+        <!-- upload zone -->
+        <div class="upload-card" id="uploadCard">
+          <div class="upload-title">소스 업로드</div>
+          <div class="upload-desc">PNG · SVG · PDF 고대비 이미지 권장</div>
+          <div style="display:flex;flex-direction:column;gap:8px;width:100%;margin-top:4px">
+            <label for="imageFileInput" class="upload-btn" id="emptyImageBtn" tabindex="0" role="button" style="width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center">파일 선택</label>
+            <label for="imageFileInput" class="upload-btn replace" id="replaceImgBtn2" tabindex="0" role="button" style="width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center">다른 이미지로 교체</label>
+          </div>
+        </div>
+
+        <!-- loaded thumb -->
+        <div class="src-loaded" id="srcLoaded">
+          <img class="src-thumb" id="srcThumb" alt="소스"/>
+          <div class="src-info" id="srcInfo">—</div>
+          <div class="src-act-row">
+            <label for="imageFileInput" class="src-act" id="replaceImgBtn3" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">교체</label>
+            <label for="tactileFileInput" class="src-act" id="loadTactileBtn3" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">DTM·DTMS</label>
+          </div>
+        </div>
+
+        <!-- auto simplify -->
+        <div class="opt-card">
+          <div class="opt-texts">
+            <span class="opt-title">자동 정리</span>
+            <span class="opt-desc">작은 잡음을 자동으로 없애줘요.</span>
+          </div>
+          <button class="tog" id="autoSimplifyTog" role="switch" aria-checked="true"></button>
+        </div>
+
+        <!-- output size -->
+        <div class="opt-card">
+          <div class="opt-texts">
+            <span class="opt-title">출력 크기</span>
+            <span class="opt-desc">DotPad 크기에 맞게 고정됩니다.</span>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="pp pp-res" id="resBtn60" style="cursor:pointer">60×40</button>
+            <button class="pp" id="resBtn96" style="cursor:pointer;background:var(--surface);color:var(--muted);border:1px solid var(--border)">96×64</button>
+          </div>
+        </div>
+
+        <!-- note -->
+        <div class="note-card">
+          <div class="note-title">제목 입력</div>
+          <div class="note-desc">제목을 입력하면 점자로 표시돼요.</div>
+          <span class="pp pp-cell" id="cellPill" style="display:none">— / 40 cells</span>
+        </div>
+
+        <div style="flex:1;min-height:16px"></div>
+        <button class="adv-toggle" id="advToggle" aria-expanded="false">
+          <span>더 많은 설정 보기</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="adv-body" id="advBody">
+          <div class="opt-card" style="margin-top:4px">
+            <div class="opt-texts"><span class="opt-title" style="font-size:12px">극성 반전</span></div>
+            <button class="tog" id="polarityTog" role="switch" aria-checked="false"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 2단계: 다듬기 ══ -->
+      <div class="tab-panel" id="lp-step2">
+        <p class="lp-title">세부 조정</p>
+
+        <!-- 윤곽선 -->
+        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div>
+            <div class="opt-title">윤곽선</div>
+            <div class="opt-desc">촉각 그래픽의 외곽선 방식을 선택하세요</div>
+          </div>
+          <div class="outline-seg" style="width:100%">
+            <button class="outline-btn sel" data-ol="0" id="olBtn0">없음</button>
+            <button class="outline-btn" data-ol="1" id="olBtn1">1줄</button>
+            <button class="outline-btn" data-ol="2" id="olBtn2">2줄</button>
+          </div>
+          <div class="opt-desc" id="olDesc" style="font-size:11px">채움 실루엣을 유지합니다.</div>
+        </div>
+
+        <!-- 빠른 편집 -->
+        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div class="opt-title">빠른 편집</div>
+          <div class="qedit" id="editSeg">
+            <button class="qe-btn" id="btnInvert" disabled>핀 반전</button>
+            <button class="qe-btn" id="btnAllUp" disabled>전체 올리기</button>
+            <button class="qe-btn" id="btnAllDown" disabled>전체 내리기</button>
+            <button class="qe-btn" id="btnDenoise" disabled>노이즈 정리</button>
+          </div>
+        </div>
+
+        <!-- DotPad 연결 (2단계에도 표시) -->
+        <div class="conn-section">
+          <div class="conn-row" id="connRow" role="button" tabindex="0">
+            <span class="conn-dot off" id="connDot"></span>
+            <span class="conn-lbl" id="connText">DotPad 미연결</span>
+          </div>
+          <div class="live-row">
+            <div>
+              <div class="live-lbl">라이브 반영</div>
+              <div class="live-hint" id="liveHint">연결 후 활성화됩니다</div>
+            </div>
+            <button class="sw" id="liveSwitch" role="switch" aria-checked="false" disabled></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 3단계: 전문 설정 ══ -->
+      <div class="tab-panel" id="lp-step3">
+        <p class="lp-title">전문가 설정</p>
+
+        <!-- 변환 방식 -->
+        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div class="opt-title">변환 방식</div>
+          <div class="opt-desc">이미지 유형에 따라 최적 방식이 다릅니다</div>
+          <div class="exp-row" style="width:100%;border-top:none;padding-top:0">
+            <span class="exp-label">알고리즘</span>
+            <select class="exp-select" data-ctrl="method">
+              <option value="global">자동 (권장)</option>
+              <option value="otsu">Otsu — 이분 최적화</option>
+              <option value="sauvola">Sauvola — 저대비 이미지</option>
+              <option value="adaptive">Adaptive — 불균일 조명</option>
+              <option value="mean">평균 밝기</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 미세 조정 -->
+        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:0">
+          <div class="opt-title" style="margin-bottom:4px">미세 조정</div>
+          <div class="exp-row" style="width:100%">
+            <div>
+              <div class="exp-label">원시 임계값</div>
+              <div class="exp-sub">0 – 255 직접 입력</div>
+            </div>
+            <input type="number" class="exp-input" data-ctrl="rawth" min="0" max="255" value="128"/>
+          </div>
+          <div class="exp-row" style="width:100%">
+            <div>
+              <div class="exp-label">최소 점 크기</div>
+              <div class="exp-sub">이 픽셀 수 이하 제거</div>
+            </div>
+            <input type="number" class="exp-input" data-ctrl="minComp" min="1" max="40" value="3"/>
+          </div>
+          <div class="exp-row" style="width:100%">
+            <div>
+              <div class="exp-label">고급 브러시</div>
+              <div class="exp-sub">4·5핀 두께 활성화</div>
+            </div>
+            <select class="exp-select" data-ctrl="advSize">
+              <option value="0">끄기</option>
+              <option value="1">켜기</option>
+            </select>
+          </div>
+          <button class="reco-btn" data-ctrl="recoReset">추천값으로 초기화</button>
+        </div>
+
+        <!-- 저장 / 내보내기 -->
+        <div class="opt-card" style="flex-direction:column;align-items:flex-start;gap:4px">
+          <div class="opt-title">저장 / 내보내기</div>
+          <div class="save-btns" style="width:100%">
+            <button class="save-btn" data-ctrl="hexBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6H3v12h5M16 6h5v12h-5M12 9v6M9 12h6"/></svg>
+              HEX 복사
+            </button>
+            <button class="save-btn" data-ctrl="pngBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              PNG 저장
+            </button>
+            <button class="save-btn acc" id="dtmsBtn3" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              .dtms 저장
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- CENTER PANEL -->
+  <main class="panel-center" id="canvasCard" data-view="after">
+
+    <div class="preview-hdr">
+      <div>
+        <div class="preview-title">점 농도 미리보기</div>
+        <div class="preview-sub" id="previewMeta">점을 더 진하게 또는 연하게 조절해 가장 선명한 상태를 찾아보세요.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="load-wrap">
+          <button class="load-btn" id="loadMenuBtn2" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            불러오기
+          </button>
+          <div class="load-menu" id="loadMenuDrop" role="menu">
+            <button role="menuitem" id="menuLoadImage">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5L5 19"/></svg>
+              이미지 불러오기
+            </button>
+            <button role="menuitem" id="menuLoadTactile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="2" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="2" fill="currentColor" stroke="none"/></svg>
+              DTM·DTMS 불러오기
+            </button>
+          </div>
+        </div>
+        <div class="view-pills">
+          <button class="vp" id="vpBefore">이전</button>
+          <button class="vp active" id="vpCurrent">현재</button>
+          <button class="vp" id="vpDotpad" disabled>DotPad</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- toolbar — Figma 리터치 툴바 그룹 구조 그대로 -->
+    <div class="toolbar" id="toolBar" data-tool="move" role="toolbar" aria-label="편집 도구">
+      <!-- group-1: 이동/패닝/선택 -->
+      <div class="tb-group">
+        <button class="tb" data-tool="move" aria-pressed="true" title="이동 (M)" aria-label="이동">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M12 3v18M3 12h18"/></svg>
+        </button>
+        <button class="tb" data-tool="hand" aria-pressed="false" title="패닝" aria-label="패닝">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 11V7a2 2 0 0 0-4 0v4M14 11V5a2 2 0 0 0-4 0v6M10 11V4a2 2 0 0 0-4 0v7M6 11v3a6 6 0 0 0 12 0v-3"/></svg>
+        </button>
+        <button class="tb" data-tool="select" aria-pressed="false" title="영역 선택 (S)" aria-label="영역 선택">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 2"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep" aria-hidden="true"></div>
+      <!-- group-2: 펜/선/사각형/원 -->
+      <div class="tb-group">
+        <button class="tb" data-tool="pen" aria-pressed="false" title="펜 (P)" aria-label="펜">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+        </button>
+        <button class="tb" data-tool="line" aria-pressed="false" title="선 (L)" aria-label="선">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+        </button>
+        <button class="tb" data-tool="rect" aria-pressed="false" title="사각형 (R)" aria-label="사각형">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
+        </button>
+        <button class="tb" data-tool="circle" aria-pressed="false" title="원 (C)" aria-label="원">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep" aria-hidden="true"></div>
+      <!-- group-3: 지우개/채우기 + 브러시 두께 -->
+      <div class="tb-group">
+        <button class="tb" data-tool="eraser" aria-pressed="false" title="지우개 (E)" aria-label="지우개">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+        </button>
+        <button class="tb" data-tool="fill" aria-pressed="false" title="채우기 (B)" aria-label="채우기">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"/><path d="M15 5l3 3"/><path d="M4 20h16" stroke-width="1" opacity=".4"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep size-sep" aria-hidden="true"></div>
+      <div class="tb-sizes" id="sizeGrp2" role="radiogroup" aria-label="브러시 두께">
+        <button class="tb-sz" role="radio" data-size="1" aria-checked="true">1핀</button>
+        <button class="tb-sz" role="radio" data-size="2" aria-checked="false">2핀</button>
+        <button class="tb-sz" role="radio" data-size="3" aria-checked="false">3핀</button>
+      </div>
+      <div class="tb-sep" aria-hidden="true"></div>
+      <!-- group-4: 점자입력/촉각글자 (준비 중) -->
+      <div class="tb-group">
+        <button class="tb" title="점자 입력 상자" aria-label="점자 입력" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button class="tb" title="촉각 글자" aria-label="촉각 글자" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 7V5h16v2M9 5v14M7 19h4"/><path d="M14 12h6M14 16h6"/></svg>
+        </button>
+      </div>
+      <div class="tb-sep" aria-hidden="true"></div>
+      <!-- group-5: Undo/Redo -->
+      <div class="tb-group">
+        <button class="tb" id="undoBtn2" title="실행 취소 (Ctrl+Z)" aria-label="실행 취소" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M3 13c0-4.97 4.03-9 9-9a9 9 0 0 1 9 9 9 9 0 0 1-9 9 8.99 8.99 0 0 1-7-3.35"/></svg>
+        </button>
+        <button class="tb" id="redoBtn2" title="다시 실행 (Ctrl+Shift+Z)" aria-label="다시 실행" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M21 13c0-4.97-4.03-9-9-9a9 9 0 0 0-9 9 9 9 0 0 0 9 9 8.99 8.99 0 0 0 7-3.35"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- canvas -->
+    <div class="canvas-stage" id="canvasArea">
+      <div class="dot-bg" id="dotBg">
+        <div id="dotGrid">
+          <canvas id="pad" tabindex="0" role="application" aria-label="DotPad 촉각 미리보기"></canvas>
+          <img id="beforeImg" class="before-img" alt="원본"/>
+          <!-- overlays -->
+          <div class="ov" id="emptyOv">
+            <div class="ov-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <h2>이미지를 올려 시작하세요</h2>
+            <p>PNG · SVG · PDF · DTM · DTMS를 드래그하거나 선택해주세요</p>
+            <div class="ov-row">
+              <label for="imageFileInput" class="ov-btn accent" id="emptyImageBtn2" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">파일 선택</label>
+              <label for="tactileFileInput" class="ov-btn" id="emptyTactileBtn2" tabindex="0" role="button" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center">DTM·DTMS</label>
+            </div>
+            <button class="ov-link" id="sampleBtn">또는 샘플로 시작</button>
+          </div>
+          <div class="ov" id="analyzeOv">
+            <div class="spinner" aria-hidden="true"></div>
+            <h2>이미지 분석 중…</h2>
+            <p id="analyzeName">밝기와 경계를 감지하고 있어요</p>
+            <!-- 모바일 변환 진행 바 -->
+            <div class="conv-bar" aria-hidden="true">
+              <div class="conv-bar-fill" id="convBarFill"></div>
+            </div>
+            <div class="ov-row">
+              <button class="ov-link" id="cancelAnalyze">취소</button>
+              <button class="ov-link" id="replaceAnalyze">교체</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- quality bar -->
+    <div class="quality-bar">
+      <span class="qt qt-dots" id="qDotCount">— dots</span>
+      <span class="qt qt-read-g" id="qReadability" style="display:none">읽기 좋음</span>
+      <span class="qt qt-noise" id="qNoise" style="display:none">잡음 적음</span>
+      <span class="qt qt-spacing" id="qSpacing" style="display:none">간격 여유</span>
+      <span class="qt qt-retouch" id="qRetouch" style="display:none">수정 가능</span>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="panel-right">
+    <div class="rp-scroll">
+
+      <!-- ══ 1단계: 만들기 — 점 농도 + 품질 ══ -->
+      <div class="tab-panel active" id="rp-step1">
+        <p class="rp-section">점 농도 조절</p>
+        <div class="th-slider-wrap">
+          <div class="th-track" id="thTrack">
+            <div class="th-active" id="thActive" style="width:50%"></div>
+            <div class="th-thumb" id="thThumb" style="left:50%"></div>
+          </div>
+          <input type="range" id="clarity" min="20" max="240" value="128" aria-label="점 농도 조절"/>
+        </div>
+        <div class="th-adj-row">
+          <button class="th-adj" id="thMinus">−1</button>
+          <button class="th-adj" id="thAuto">자동</button>
+          <button class="th-adj" id="thPlus">+1</button>
+          <button class="th-apply" id="thApply" disabled>적용</button>
+        </div>
+        <div class="score-card good" id="scoreCard">
+          <div class="score-label" id="scoreLabel">업로드 대기</div>
+          <div class="score-title" id="scoreTitle">이미지를 선택하세요</div>
+          <div class="score-desc" id="scoreDesc">소스를 업로드하면 촉각 인지 분석 결과가 표시됩니다.</div>
+        </div>
+        <div class="adv-rows">
+          <div class="adv-row">
+            <span class="adv-label">테두리 다듬기</span>
+            <select class="adv-select" id="edgeCleanup">
+              <option value="auto">자동</option>
+              <option value="light">약하게</option>
+              <option value="strong">강하게</option>
+              <option value="off">끄기</option>
+            </select>
+            <span class="adv-arr">⌄</span>
+          </div>
+          <div class="adv-row">
+            <span class="adv-label">최소 점 크기</span>
+            <select class="adv-select" id="minCluster">
+              <option value="2">2 dots</option>
+              <option value="3" selected>3 dots</option>
+              <option value="4">4 dots</option>
+              <option value="5">5 dots</option>
+            </select>
+            <span class="adv-arr">⌄</span>
+          </div>
+          <div class="adv-row">
+            <span class="adv-label">여백 유지</span>
+            <select class="adv-select" id="brailleSafe">
+              <option value="on" selected>켜짐</option>
+              <option value="off">꺼짐</option>
+            </select>
+            <span class="adv-arr">⌄</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 2단계: 다듬기 — 리터치 도구 안내 + 연결 ══ -->
+      <div class="tab-panel" id="rp-step2">
+        <p class="rp-section">리터치 도구</p>
+        <div class="score-card good" id="scoreCard2" style="margin-top:10px">
+          <div class="score-label" style="color:var(--blue)">핀 직접 편집</div>
+          <div class="score-title">위 툴바에서 펜/지우개를 선택하세요</div>
+          <div class="score-desc">드래그로 핀을 올리거나 내릴 수 있어요. Ctrl+Z로 되돌리기.</div>
+        </div>
+        <p class="rp-section" style="margin-top:16px">DotPad 연결</p>
+        <div class="conn-section" style="border-top:none;padding-top:0">
+          <div class="conn-row" id="connRow2" role="button" tabindex="0">
+            <span class="conn-dot off" id="connDot2"></span>
+            <span class="conn-lbl" id="connText2">DotPad 미연결</span>
+          </div>
+          <div class="live-row">
+            <div>
+              <div class="live-lbl">라이브 반영</div>
+              <div class="live-hint" id="liveHint2">연결 후 활성화됩니다</div>
+            </div>
+            <button class="sw" id="liveSwitch2" role="switch" aria-checked="false" disabled></button>
+          </div>
+        </div>
+        <p class="rp-section" style="margin-top:16px">품질 확인</p>
+        <div class="score-card good" id="scoreCard3">
+          <div class="score-label" id="scoreLabel2">업로드 대기</div>
+          <div class="score-title" id="scoreTitle2">이미지를 선택하세요</div>
+          <div class="score-desc" id="scoreDesc2">결과가 표시됩니다.</div>
+        </div>
+      </div>
+
+      <!-- ══ 3단계: 전문 설정 — HEX 출력 미리보기 + 출력 ══ -->
+      <div class="tab-panel" id="rp-step3">
+        <p class="rp-section">출력 미리보기</p>
+        <div class="score-card good" style="margin-top:10px;background:var(--bg)">
+          <div class="score-label" style="color:var(--placeholder);font-size:11px;font-weight:600;font-family:monospace;word-break:break-all;line-height:1.6" data-ctrl="hexOut">HEX —</div>
+        </div>
+        <p class="rp-section" style="margin-top:16px">DotPad 출력</p>
+        <div class="conn-section" style="border-top:none;padding-top:0">
+          <div class="conn-row" id="connRow3" role="button" tabindex="0">
+            <span class="conn-dot off" id="connDot3"></span>
+            <span class="conn-lbl" id="connText3">DotPad 미연결</span>
+          </div>
+          <div class="live-row">
+            <div>
+              <div class="live-lbl">라이브 반영</div>
+              <div class="live-hint" id="liveHint3">연결 후 활성화됩니다</div>
+            </div>
+            <button class="sw" id="liveSwitch3" role="switch" aria-checked="false" disabled></button>
+          </div>
+        </div>
+        <button class="th-apply" id="outBtn3" disabled style="width:100%;margin-top:12px;border-radius:10px;height:40px;font-size:13px">닷패드로 출력</button>
+      </div>
+
+    </div>
+  </aside>
+</div><!-- /workspace -->
+
+<!-- ═══ BOTTOM BAR ═══ -->
+<div class="bottom-bar">
+  <div class="bs-pills">
+    <span class="bsp bsp-local">로컬 처리</span>
+    <span class="bsp bsp-thresh" id="bsThresh" style="display:none">점 농도 —%</span>
+    <span class="bsp bsp-synced" id="bsSynced" style="display:none">DotPad 동기화됨</span>
+    <span class="bsp bsp-retouch" id="bsRetouch" style="display:none">기본 리터치</span>
+  </div>
+  <p class="bs-note">파일 불러오기 → 미리보기 → 출력 순서로 진행해요.</p>
+  <div class="bs-div"></div>
+  <div class="bs-actions">
+    <button class="bs-btn" id="dtmsBtn" disabled>.dtms 저장</button>
+    <button class="bs-btn" id="bsPreviewBtn" disabled>미리보기</button>
+    <button class="bs-btn primary" id="outBtn" disabled>출력</button>
+  </div>
+</div>
+
+<!-- utils -->
+<div id="toast" role="status" aria-live="polite"></div>
+<div class="sr-only" id="live" role="status" aria-live="assertive"></div>
+<input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,image/*" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true"/>
+<input type="file" id="tactileFileInput" accept=".dtm,.dtms" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true"/>
+<div class="modal-bg" id="guardModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h2>저장되지 않은 변경이 있어요</h2>
+    <p>새 파일을 불러오면 지금 작업한 내용이 사라집니다.</p>
+    <div class="ma">
+      <button class="acc" id="guardSave">저장 후 불러오기</button>
+      <button id="guardProceed">저장하지 않고 불러오기</button>
+      <button id="guardCancel">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEGACY (엔진 참조용, 화면 비노출) -->
+<div id="legacy" hidden aria-hidden="true">
+  <input class="fname" id="fname" value="Untitled"/>
+  <span class="dirty" id="dirty"></span>
+  <div class="chip" id="chip"><span class="dot"></span><span id="chipText">DotPad 미연결</span></div>
+  <button id="connectBtn">DotPad 연결</button>
+  <button id="saveTopBtn">저장</button>
+  <button id="loadMenuBtn" aria-expanded="false" aria-controls="loadMenu">불러오기</button>
+  <div id="loadMenu" role="menu" hidden>
+    <button role="menuitem" id="miImage">다른 이미지 불러오기</button>
+    <button role="menuitem" id="miTactile">DTM·DTMS 파일 불러오기</button>
+  </div>
+  <nav class="rail" id="rail">
+    <button class="tool" data-tool="move" aria-pressed="true"></button>
+    <button class="tool" data-tool="pen" aria-pressed="false"></button>
+    <button class="tool" data-tool="eraser" aria-pressed="false"></button>
+    <button class="tool" id="undoBtn"></button>
+    <button class="tool" id="redoBtn"></button>
+    <button class="tool" id="clearBtn"></button>
+  </nav>
+  <div id="toolCtx"><span id="toolCtxLbl">펜</span>
+    <div id="sizeGrp" role="radiogroup">
+      <button role="radio" data-size="1" aria-checked="true">1</button>
+      <button role="radio" data-size="2" aria-checked="false">2</button>
+      <button role="radio" data-size="3" aria-checked="false">3</button>
+    </div>
+  </div>
+  <span id="sbTool" hidden></span><span id="sbToolDiv" hidden></span>
+  <span id="sbZoom">100%</span><span id="sbPins">0</span>
+  <span id="sbPerc">—</span><span id="sbDot">—</span>
+  <p id="agentLead"></p><div id="agentReco"></div>
+  <div id="askWrap"><input id="askInput"/><button id="askGo">↵</button></div>
+  <div id="askChips">
+    <button class="chipbtn" data-cmd="simpler">더 단순하게</button>
+    <button class="chipbtn" data-cmd="outline">외곽선 강조</button>
+    <button class="chipbtn" data-cmd="denoise">점 정리</button>
+    <button class="chipbtn" data-cmd="invert">핀 반전</button>
+  </div>
+  <div id="infoImage"><span id="infoFile">—</span><span id="infoSize">—</span><span id="infoType">—</span><span id="infoReco">—</span></div>
+  <div id="infoTactile"><span id="tFile">—</span><span id="tFormat">—</span><span id="tRes">60×40</span><span id="tPages">1</span><span id="tVersion">—</span><span id="tStatus">완료</span></div>
+  <button id="replaceImgBtn">이미지 교체</button>
+  <button id="loadTactileBtn2">DTM·DTMS 불러오기</button>
+  <button id="emptyTactileBtn">DTM·DTMS</button>
+  <section id="secClarity">
+    <div class="seg" id="clarityModeSeg" role="group">
+      <button data-th="80" aria-pressed="false">단순</button>
+      <button data-th="128" aria-pressed="true">균형</button>
+      <button data-th="185" aria-pressed="false">또렷하게</button>
+    </div>
+    <span class="v" id="clarityVal">128</span>
+    <b id="recoLabel">균형</b>
+    <button id="recoReset">추천값으로</button>
+    <div id="clarityFb"></div>
+  </section>
+  <section id="secOutline">
+    <div class="seg" role="group">
+      <button data-outline="0" aria-pressed="true">없음</button>
+      <button data-outline="1" aria-pressed="false">1줄</button>
+      <button data-outline="2" aria-pressed="false">2줄</button>
+    </div>
+    <p id="outlineDesc">채움.</p>
+  </section>
+  <section id="secPages" hidden>
+    <button id="prevPage">‹</button><span id="pageInd">1/1</span><button id="nextPage">›</button>
+  </section>
+  <section id="secQuick">
+    <button class="qbtn img-only" data-op="auto">자동</button>
+    <button class="qbtn img-only" data-op="denoise">노이즈</button>
+    <button class="qbtn img-only" data-op="outline">외곽선</button>
+    <button class="qbtn" data-op="invert">반전</button>
+  </section>
+  <section id="secLive">
+    <p id="liveDesc"></p>
+    <button id="liveConnectBtn">연결</button>
+    <div id="liveToggleRow" style="display:none">
+      <button class="toggle" id="liveToggle" role="switch" aria-checked="false" disabled></button>
+    </div>
+  </section>
+  <section id="secSave">
+    <button id="hexBtn" disabled>HEX</button>
+    <button id="pngBtn" disabled>PNG</button>
+    <p id="saveHint">준비 중</p>
+  </section>
+  <section id="secExpert">
+    <select id="method"><option value="global">자동</option><option value="otsu">Otsu</option><option value="sauvola">Sauvola</option><option value="adaptive">Adaptive</option><option value="mean">평균</option></select>
+    <input type="number" id="rawth" min="0" max="255" value="128"/>
+    <input type="number" id="minComp" min="1" max="40" value="3"/>
+    <select id="advSize"><option value="0">끄기</option><option value="1">켜기</option></select>
+    <div id="hexOut">—</div>
+  </section>
+  <button id="mobtab">패널 ▲</button>
+</div>
+
+<script type="module">
+const Command={requestDisplayLine:"0200",responseDisplayLine:"0201",notificateDisplayComplete:"0202",requestDisplayPartial:"0220",responseDisplayPartial:"0221",notificateDisplayPartial:"0222"},DataCodes=Object.freeze({Connected:"Connected",ConnectedFail:"ConnectedFail",Disconnected:"Disconnected",BoardInfo:"BoardInfo",BleMacAddress:"BleMacAddress",DeviceName:"DeviceName",DeviceFWVersion:"DeviceFWVersion",DeviceHWVersion:"DeviceHWVersion",ResponseDisplayLineAck:"ResponseDisplayLineAck",ResponseDisplayLineNonAck:"ResponseDisplayLineNonAck",ResponseDisplayLineComplete:"ResponseDisplayLineComplete",CommandError:"CommandError",CommandNone:"CommandNone"}),KeyCodes=Object.freeze({KeyFunction1:"KeyFunction1",KeyFunction2:"KeyFunction2",KeyFunction3:"KeyFunction3",KeyFunction4:"KeyFunction4",KeyFunction12:"KeyFunction12",KeyFunction13:"KeyFunction13",KeyFunction14:"KeyFunction14",KeyFunction23:"KeyFunction23",KeyFunction24:"KeyFunction24",KeyFunction34:"KeyFunction34",KeyElse:"KeyElse",PanningAll:"PanningAll",PanningLeft:"PanningLeft",PanningRight:"PanningRight",LPF1:"LPF1",RPF4:"RPF4"}),DeviceInfo=Object.freeze({DeviceName:"DeviceName",FirmwareVersion:"FirmwareVersion",HardwareVersion:"HardwareVersion"}),DisplayMode={GraphicMode:"GraphicMode",TextMode:"TextMode"},DeviceCellType=Object.freeze({D2:{name:"D2",models:["KM2-300A","KM2-20","DotPad320A","DPK12A","DotPad832A","DMI32A"]},D3:{name:"D3",models:["KM3-12A","KM3-08A","KM3-20A","KM3-40A","DPK12B","DotPad320C","DotPad320X","DotPad768A","DotPad300A"]},NONE:{name:"NONE",models:[]},fromDeviceName(e){return e=e??"",this.D2.models.some((t=>e.toLowerCase().includes(t.toLowerCase())))?this.D2:this.D3.models.some((t=>e.toLowerCase().includes(t.toLowerCase())))?this.D3:this.NONE}});class DotReceiver{#e=null;#t="";#s=null;#i=null;#n=null;#a=null;#r=null;#o=0;#h=!0;#c=0;#l=!0;#d=200;#u=null;#f=!1;#D=!0;constructor(e,t){this.#s=e,this.#i=t,this.#n={PERKINS_KEY:/aa55000900031200.*/,FUNCTION_KEY:/aa55000900033200.*/},this.#a={RSP_BOARD_INFO:/aa55001100011100.*/,RSP_FW_VER:/aa55000d00000100.*/,RSP_HW_VERSION:/aa55000600001100.*/,RSP_DEV_NAME:/aa55(....)00010100.*/},this.#r={ACK:{[Command.responseDisplayLine]:e=>this.#s(DataCodes.ResponseDisplayLineAck,e),[Command.responseDisplayPartial]:e=>this.#s(DataCodes.ResponseDisplayLineAck,e)},NOTI:{[Command.notificateDisplayComplete]:()=>this.#s(DataCodes.ResponseDisplayLineComplete,""),[Command.notificateDisplayPartial]:()=>this.#s(DataCodes.ResponseDisplayLineComplete,"")}}}async startUsbReadLoop(e){this.#e=e.readable.getReader();try{for(;;){const{value:e,done:t}=await this.#e.read();if(t)break;this.receiveHexPacket=Array.from(new Uint8Array(e.buffer)).map((e=>e.toString(16).padStart(2,"0"))).join(""),this.#m(this.receiveHexPacket)}}catch(e){console.error("read loop error",e)}finally{this.#e.releaseLock(),this.#e=null}}async stopReadLoop(){if(this.#e)try{await this.#e.cancel(),this.#e=null}catch(e){}}startBleNotification(e){this.receiveHexPacket=Array.from(new Uint8Array(e.target.value.buffer)).map((e=>e.toString(16).padStart(2,"0"))).join(""),this.#m(this.receiveHexPacket)}#m(e){this.#t.length>4&&!this.#t.startsWith("aa55")&&(this.#t=""),this.#t.length+e.length<18?(this.#t=`${this.#t}${e}`,e=""):(e=`${this.#t}${e}`,this.#t="");const t=this.#C(e);for(let e of t){this.#L(this.#n,e)?this.#p(this.#n,e):this.#L(this.#a,e)&&this.#y(this.#a,e);for(const[t,s]of Object.entries(this.#r.ACK)){const i=new RegExp(`aa550006(..)${t}(..)00.*`),n=e.match(i);if(n)return void s.call(this,n)}for(const[t,s]of Object.entries(this.#r.NOTI)){const i=new RegExp(`aa550006(..)${t}(..)00.*`);if(e.match(i))return void s.call(this)}}}#L(e,t){return Object.values(e).some((e=>t.match(e)))}#C(e){let t=[],s=0;for(;s<e.length;){if(e.length-s<18){this.#t=e.substring(s);break}const i=s+4,n=i+4,a=e.substring(i,n),r=parseInt(a,16);if(isNaN(r)){this.#t=e.substring(s);break}const o=s+8+2*r,h=e.substring(s,o);if(h.length!==2*r+8){this.#t=e.substring(s);break}t.push(h),s=o}return t}#y(e,t){const s=Object.keys(e).find((s=>t.match(e[s])));if(s){const e=16,i=t.substring(e,t.length-2),n=this.#I(i);switch(s){case"RSP_BOARD_INFO":this.#s(DataCodes.BoardInfo,i);break;case"RSP_FW_VER":this.#s(DataCodes.DeviceFWVersion,n);break;case"RSP_HW_VERSION":this.#s(DataCodes.DeviceHWVersion,i);break;case"RSP_DEV_NAME":this.#s(DataCodes.DeviceName,n)}}}#p(e,t){const s=Object.keys(e).find((s=>t.match(e[s])));if(s){if("PERKINS_KEY"===s){const e=parseInt(t.substr(19,1),16);this.#h=0===e,this.#o<e&&(this.#o=e)}else if("FUNCTION_KEY"===s){const e=parseInt(t.substr(16,1),16);this.#l=0===e,this.#c<e&&(this.#c=e)}this.#l&&this.#h&&(this.#D=!0),this.#D&&(this.#h&&this.#l?(null!==this.#u&&(clearTimeout(this.#u),this.#u=null),this.#f||this.#g(),this.#o=0,this.#c=0,this.#f=!1,this.#D=!0):null===this.#u&&(this.#f=!1,this.#u=setTimeout((()=>{this.#f||(this.#g(),this.#f=!0,this.#D=!1),this.#u=null}),this.#d)))}}#g(){let e=KeyCodes.KeyElse,t="";if(6===this.#o)0===this.#c&&(e=KeyCodes.PanningAll),t="AP + "+this.#c;else if(4===this.#o)8===this.#c?e=KeyCodes.LPF1:0===this.#c&&(e=KeyCodes.PanningLeft),t="LP + "+this.#c;else if(2===this.#o)1===this.#c?e=KeyCodes.RPF4:0===this.#c&&(e=KeyCodes.PanningRight),t="RP + "+this.#c;else if(0===this.#o){switch(this.#c){case 12:e=KeyCodes.KeyFunction12;break;case 10:e=KeyCodes.KeyFunction13;break;case 9:e=KeyCodes.KeyFunction14;break;case 8:e=KeyCodes.KeyFunction1;break;case 6:e=KeyCodes.KeyFunction23;break;case 5:e=KeyCodes.KeyFunction24;break;case 4:e=KeyCodes.KeyFunction2;break;case 3:e=KeyCodes.KeyFunction34;break;case 2:e=KeyCodes.KeyFunction3;break;case 1:e=KeyCodes.KeyFunction4}t=""+this.#c}this.#i(e,t)}#I(e){let t="";for(let s=0;s<e.length;s+=2){const i=e.substr(s,2),n=parseInt(i,16);t+=String.fromCharCode(n)}return t}}const SendMode={BASIC:"BASIC",REFRESH:"REFRESH"};class DotPadLine{#P=SendMode.BASIC;get sendMode(){return this.#P}constructor(e,t,s){this.lineId=e,this.startCellIndex=0,this.sendData="",this.seqNum="00",this.lineData="00".repeat(s),this.requestReady=!1,this.requestTime=t,this.receiveAck=!0,this.numberCellColumns=s,this.refreshLiveData="",this.refreshLiveStartCellIndex=0}getSendData(){return this.sendData}getLineId(){return this.lineId}getRequestReady(){return this.requestReady}getReceiveAck(){return this.receiveAck}setReceiveAck(e){this.receiveAck=e}setRequestReady(e){this.requestReady=e}getRequestTime(){return this.requestTime}getStartCellIndex(){return this.startCellIndex}getSeqNum(){return this.seqNum}refresh(e="ALL_DISPLAY"){this.requestReady||(this.requestReady=!0,this.receiveAck=!0,this.#P=SendMode.REFRESH,"LIVE_DISPLAY"==e?(this.sendData=this.refreshLiveData,this.startCellIndex=this.refreshLiveStartCellIndex):(this.sendData=this.lineData,this.startCellIndex=0))}initRefreshLiveData(e,t){this.refreshLiveData=t,this.refreshLiveStartCellIndex=e}setRefreshLiveData(e,t){const s=this.getMergeCellData(this.refreshLiveData,this.refreshLiveStartCellIndex,t,e);this.refreshLiveData=s.sendData,this.refreshLiveStartCellIndex=s.startCellIndex}setSendStatus(){this.requestReady=!1,this.receiveAck=!1}setCommand(e,t,s){if(this.#P=SendMode.BASIC,this.seqNum=e,!this.requestReady&&this.receiveAck)this.startCellIndex=t,this.sendData=s;else{const e=this.getMergeCellData(this.sendData,this.startCellIndex,s,t);this.sendData=e.sendData,this.startCellIndex=e.startCellIndex}this.requestReady=!0,this.receiveAck=!0,this.setLineData()}getMergeCellData(e,t,s,i){var n="",a=0;if(""==e)return{sendData:s,startCellIndex:i};if(t>=i){const r=t-i;if(2*r<s.length){const t="00".repeat(r)+e;n=s.length>=t.length?s:s+t.substring(s.length)}else{n=s+this.lineData.substring(2*i+s.length,2*t)+e}a=i}else{a=t;const r=i-t;if(2*r<e.length){const t=e.substring(0,2*r)+s;n=t.length>=e.length?t:t+e.substring(t.length)}else{n=this.lineData.substring(2*t,2*i)+s}}return{sendData:n,startCellIndex:a}}setLineData(){let e=this.lineData.substring(0,2*this.startCellIndex)+this.sendData;this.lineData=e+this.lineData.substring(e.length);const t=2*this.numberCellColumns-this.lineData.length;t>0&&(this.lineData+="00".repeat(t))}getLineData(){return this.lineData}clearLineData(){this.lineData="00".repeat(this.numberCellColumns),this.sendData=this.lineData,this.requestReady=!0,this.receiveAck=!0,this.startCellIndex=0}}const BufferMode=Object.freeze({ALL_LINE:"ALL_LINE",SINGLE_LINE:"SINGLE_LINE",ALL_PARTIAL:"ALL_PARTIAL",SINGLE_PARTIAL:"SINGLE_PARTIAL",models:["DotPad320C","DotPad320X","DotPad300A"],fromDeviceName(e){const t=e.toLowerCase();return this.models.some((e=>t.includes(e.toLowerCase())))?this.ALL_PARTIAL:this.SINGLE_LINE}}),DotPadSendMakeModel={getSendData(e,t,s){var i="";switch(e){case BufferMode.ALL_LINE:i=this.makeTotalLineData(t);break;case BufferMode.SINGLE_LINE:i=this.makeSingleLineData(s);break;case BufferMode.ALL_PARTIAL:i=this.makeTotalPartialData(t);break;case BufferMode.SINGLE_PARTIAL:i=this.makeSinglePartialData(s)}return i},makeSingleLineData(e){let t=e.getSendData(),s=this.decimalToHex(e.getStartCellIndex())+t;return this.makePacket(s,e.getLineId(),e.getSeqNum(),Command.requestDisplayLine)},makeTotalLineData(e){var t="";for(let s=1;s<e.length;s++)t+=e[s].getLineData();let s=this.decimalToHex(0)+t;return this.makePacket(s,1,e[1].getSeqNum(),Command.requestDisplayLine)},makeSinglePartialData(e){let t=e.getSendData(),s=e.getStartCellIndex(),i=s+t.length/2,n=this.decimalToHex(s)+this.decimalToHex(i);return"80"==e.getSeqNum()?n+=this.brailleToGraphic(t):n+=t,this.makePacket(n,e.getLineId(),"00",Command.requestDisplayPartial)},makeTotalPartialData(e){let t=-1,s=-1,i=999,n=-1;for(let a=1;a<e.length;a++){const r=e[a];if(r.getRequestReady()){const e=r.getStartCellIndex(),o=e+r.getSendData().length/2;t<0&&(t=a),i>e&&(i=e),n<o&&(n=o),s=a}}let a="";if(t>-1){for(let r=t;r<=s;r++){a+=e[r].getLineData().slice(2*i,2*n)}let r=this.decimalToHex(i)+this.decimalToHex(n);return"80"==e[t].getSeqNum()?r+=this.brailleToGraphic(a):r+=a,this.makePacket(r,t,"00",Command.requestDisplayPartial)}return null},makePacket(e,t,s,i){const n=e.length/2;let a="AA55"+this.decimalToHex(5+n,4)+this.decimalToHex(t,2)+i+s+e;return a+=this.checksum(this.hexToBytes(a.substring(8))),this.hexStringToArrayBuffer(a)},hexStringToArrayBuffer(e){(e=e.replace(/^0x/,"")).length%2!=0&&console.warn("WARNING: expecting an even number of characters in the hexString");let t=e.match(/[G-Z\s]/i);t&&console.warn("WARNING: found non-hex characters",t);let s=e.match(/[\dA-F]{2}/gi);if(null!=s){let e=s.map((function(e){return parseInt(e,16)}));return new Uint8Array(e).buffer}return null},checksum(e){let t=165;for(let s=0;s<e.length;s++)t^=e[s];return("0"+(255&t).toString(16)).slice(-2)},decimalToHex:(e,t=2)=>Number(e).toString(16).padStart(t,"0"),hexToBytes(e){const t=[];for(let s=0;s<e.length;s+=2)t.push(parseInt(e.substr(s,2),16));return t},brailleToGraphic(e){const t=this.hexToBinary(e),s=[];for(let e=0;e<t.length;e+=8)s.push(t.substring(e,e+8));const i=s.map((e=>{const t=e.padEnd(8,"0"),s=t.substring(0,1),i=t.substring(1,2);return s+t.substring(2,5)+i+t.substring(5)}));return this.binaryToHex(i.join(""))},hexToBinary(e){let t="";for(let s=0;s<e.length;s++){t+=parseInt(e[s],16).toString(2).padStart(4,"0")}return t},binaryToHex(e){let t="";for(let s=0;s<e.length;s+=4){const i=e.substring(s,s+4);t+=parseInt(i,2).toString(16).toUpperCase()}return t}},RefreshType={TYPE_A:"TYPE_A",TYPE_B:"TYPE_B",TYPE_C:"TYPE_C"},RefreshMode={NONE:"NONE",ALL_DISPLAY:"ALL_DISPLAY",GRAPHIC_DISPLAY:"GRAPHIC_DISPLAY",TEXT_DISPLAY:"TEXT_DISPLAY",LIVE_DISPLAY:"LIVE_DISPLAY"};class DotPadSendModule{constructor(e){this.dotPadLineList=[],this.dotCommandSendReady=!0,this.sendTime=new Date,this.sendCnt=0,this.dotPadLine=null,this.restart=!1,this.currentIndex=0,this.isFunctionRunning=!1,this.dotPad=e,this.baseDisplayComplete=!0,this.refreshType=RefreshType.TYPE_C,this.refreshCount=0,this.refreshItem=null,this.refreshLine=[],this.refreshMode=RefreshMode.NONE,this.bufferMode=BufferMode.SINGLE_LINE,this.isAutoRefresh=!1}clearDotPadLine(){this.dotPadLineList=[]}resetAllLineData(){for(const e of this.dotPadLineList)e.clearLineData()}addDotPadLine(e,t){const s=new DotPadLine(this.dotPadLineList.length,e,t);this.dotPad.cellType==DeviceCellType.D3&&s.setCommand("00",0,"00".repeat(t)),this.dotPadLineList.push(s)}#R(e,t,s,i,n=!0){n?(this.refreshCount=0,this.currentIndex=0):this.currentIndex=0,this.refreshMode!==RefreshMode.LIVE_DISPLAY||this.refreshLine.includes(e)?this.dotPadLineList[e].setRefreshLiveData(s,i):(this.refreshLine.push(e),this.dotPadLineList[e].initRefreshLiveData(s,i)),this.dotPadLineList[e].setCommand(t,s,i)}setDotPadLineCommand(e,t,s,i,n=!0){const a=this.dotPadLineList[e].getLineData(),r=a.substring(0,2*s)+i,o=this.compareString(r,a);if(null!==o){const[s,i]=o,a=r.slice(s,i+1);return this.#R(e,t,parseInt(s/2),a,n),!0}return!1}setDotCommandSendReady(e){this.dotCommandSendReady=e}async refresh(){for(let e=0;e<this.dotPadLineList.length;e++)this.dotPadLineList[e].refresh();await this.sendCommand()}checkBaseDisplay(){return this.isFunctionRunning&&this.currentIndex>=this.dotPadLineList.length-1||this.refreshCount>0||!this.isFunctionRunning}getIsFunctionRunning(){return this.isFunctionRunning}setDisplayComplete(){this.checkBaseDisplay()&&(this.baseDisplayComplete=!0)}getDisplayComplete(){return this.setDisplayComplete(),this.baseDisplayComplete}setBufferMode(e){this.bufferMode=e}getBufferMode(){return this.bufferMode}async sendCommand(e=!1){if(this.isFunctionRunning)this.restart=!0;else{this.isFunctionRunning=!0,this.currentIndex=0,e||(this.refreshCount=0);const t=this.dotPad.cellType,s=async()=>{if(this.currentIndex<this.dotPadLineList.length){if(this.restart){null!=this.refreshItem&&(clearTimeout(this.refreshItem),this.refreshItem=null);for(const e of this.dotPadLineList)e.sendMode==SendMode.REFRESH&&(e.setRequestReady(!1),e.setReceiveAck(!0));this.currentIndex=0,this.restart=!1,this.dotCommandSendReady=!0,this.refreshCount=0}else{if(this.currentIndex>0&&(this.bufferMode===BufferMode.ALL_LINE||this.bufferMode===BufferMode.ALL_PARTIAL)){let e=this.dotPadLineList.filter((e=>e.getRequestReady()));this.currentIndex=e.length>0?e[0].getLineId():this.currentIndex}if(this.dotPadLine=this.dotPadLineList[this.currentIndex],this.dotPadLine.getRequestReady()&&this.dotCommandSendReady){if(0===this.currentIndex||this.bufferMode===BufferMode.SINGLE_LINE||this.bufferMode===BufferMode.SINGLE_PARTIAL?this.dotPadLine.setSendStatus():this.dotPadLine.setReceiveAck(!1),this.currentIndex>=1&&0===this.refreshCount){let e=DotPadSendMakeModel.getSendData(this.bufferMode,this.dotPadLineList,this.dotPadLine);if(this.bufferMode===BufferMode.ALL_LINE||this.bufferMode===BufferMode.ALL_PARTIAL)for(let e=this.currentIndex;e<this.dotPadLineList.length;e++)this.dotPadLineList[e].setRequestReady(!1);await this.dotPad.sendCommand(e)}else{let e=DotPadSendMakeModel.makeSingleLineData(this.dotPadLine);await this.dotPad.sendCommand(e)}this.dotCommandSendReady=!1,0===this.refreshCount&&(this.baseDisplayComplete=!1),this.sendTime=new Date,this.sendCnt=0}else if(this.dotPadLine.getReceiveAck())this.dotCommandSendReady?this.currentIndex>=1&&0===this.refreshCount&&(this.bufferMode===BufferMode.ALL_LINE||this.bufferMode===BufferMode.ALL_PARTIAL)?(this.currentIndex=this.dotPadLineList.length,this.dotPadLine=null):this.currentIndex+=1:this.dotCommandSendReady=!0;else{if(new Date-this.sendTime>(()=>{const e=this.dotPadLine?.getRequestTime?.()??500;return this.currentIndex>=1&&0===this.refreshCount&&(this.bufferMode===BufferMode.ALL_LINE||this.bufferMode===BufferMode.ALL_PARTIAL)?"D3"===t?e*this.dotPadLineList.length:600:e})())if(this.sendCnt<3){if(this.currentIndex>=1&&0===this.refreshCount){if(this.bufferMode===BufferMode.ALL_LINE||this.bufferMode===BufferMode.ALL_PARTIAL)for(let e=this.currentIndex;e<this.dotPadLineList.length;e++)this.dotPadLineList[e].setRequestReady(!0);let e=DotPadSendMakeModel.getSendData(this.bufferMode,this.dotPadLineList,this.dotPadLine);if(await this.dotPad.sendCommand(e),this.bufferMode===BufferMode.ALL_LINE||this.bufferMode===BufferMode.ALL_PARTIAL)for(let e=this.currentIndex;e<this.dotPadLineList.length;e++)this.dotPadLineList[e].setRequestReady(!1)}else{let e=DotPadSendMakeModel.makeSingleLineData(this.dotPadLine);await this.dotPad.sendCommand(e)}this.sendTime=new Date,this.sendCnt+=1}else this.dotPadLine.setReceiveAck(!0),this.dotCommandSendReady=!0,this.baseDisplayComplete=!0}}"D2"===t&&this.refreshCommand(),setTimeout(s,1)}else this.isFunctionRunning=!1,this.baseDisplayComplete=!0};try{await s()}catch(e){console.log("sendCommand Error: ",e)}}}setDotPadLineReceiveAck(e,t){if(e>0&&(this.bufferMode===BufferMode.ALL_LINE||this.bufferMode===BufferMode.ALL_PARTIAL))for(let e=1;e<this.dotPadLineList.length;e++)this.dotPadLineList[e].setReceiveAck(t);else{const s=this.dotPadLineList[e];s&&s.setReceiveAck(t)}}setRefreshType(e){this.refreshType=e}refreshCommand(){if(this.dotPadLineList.length===this.currentIndex)switch(this.refreshType){case RefreshType.TYPE_A:this.refreshCommandFuncA();break;case RefreshType.TYPE_B:this.refreshCommandFuncB();break;case RefreshType.TYPE_C:this.refreshCommandFuncC()}}refreshCommandFuncA(){if(this.refreshCount<3){this.currentIndex=0;for(const e of this.dotPadLineList)e.refresh();this.refreshCount+=1}}refreshCommandFuncB(){if(this.refreshCount<3){this.currentIndex=0;for(let e=0;e<=3;e++)this.dotPadLineList[e].refresh()}else if(this.refreshCount<6){this.currentIndex=1;for(let e=4;e<=10;e++)this.dotPadLineList[e].refresh()}else this.refreshMode=RefreshMode.NONE;this.refreshCount+=1}refreshCommandFuncC(){if(null==this.refreshItem)switch(this.refreshMode){case RefreshMode.ALL_DISPLAY:this.refreshCommandFuncB();break;case RefreshMode.GRAPHIC_DISPLAY:this.graphicRefresh();break;case RefreshMode.TEXT_DISPLAY:this.textRefresh();break;case RefreshMode.LIVE_DISPLAY:this.liveRefresh()}}graphicRefresh(){this.refreshItem=()=>{if(this.refreshCount<3){this.currentIndex=1;for(let e=1;e<=3;e++)this.dotPadLineList[e].refresh()}else if(this.refreshCount<6){this.currentIndex=4;for(let e=4;e<this.dotPadLineList.length;e++)this.dotPadLineList[e].refresh()}else this.refreshMode=RefreshMode.NONE;this.refreshItem=null,this.refreshCount+=1,this.sendCommand(!0)},setTimeout(this.refreshItem,500)}textRefresh(){this.refreshCount<3?(this.refreshItem=()=>{this.currentIndex=0,this.dotPadLineList[0].refresh(),this.refreshItem=null,this.refreshCount+=1,this.sendCommand(!0)},setTimeout(this.refreshItem,1500)):this.refreshMode=RefreshMode.NONE}liveRefresh(){this.refreshCount<3?(this.refreshItem=()=>{this.currentIndex=0;for(const e of this.refreshLine)this.dotPadLineList[e].refresh(RefreshMode.LIVE_DISPLAY);this.refreshItem=null,this.refreshCount+=1,this.sendCommand(!0)},setTimeout(this.refreshItem,1500)):(this.refreshLine=[],this.refreshMode=RefreshMode.NONE)}setRefreshMode(e){clearTimeout(this.refreshItem),this.refreshItem=null,this.refreshMode!==RefreshMode.LIVE_DISPLAY&&e===RefreshMode.LIVE_DISPLAY&&(this.refreshLine=[]),this.refreshMode===RefreshMode.NONE?(this.refreshMode=e,this.refreshLine=[]):this.refreshMode!==RefreshMode.ALL_DISPLAY&&this.refreshMode!==e&&(this.refreshMode===RefreshMode.GRAPHIC_DISPLAY?e===RefreshMode.TEXT_DISPLAY&&(this.refreshMode=RefreshMode.ALL_DISPLAY):this.refreshMode===RefreshMode.TEXT_DISPLAY?e!==RefreshMode.TEXT_DISPLAY&&(this.refreshMode=RefreshMode.ALL_DISPLAY):this.refreshMode===RefreshMode.LIVE_DISPLAY&&(e===RefreshMode.TEXT_DISPLAY?this.refreshMode=RefreshMode.ALL_DISPLAY:e===RefreshMode.GRAPHIC_DISPLAY&&(this.refreshMode=RefreshMode.GRAPHIC_DISPLAY)))}compareString(e,t){let s=-1,i=-1,n=e.length;e.length>t.length&&(n=t.length);for(let a=0;a<n-1;a+=2){e.substring(a,a+2)!==t.substring(a,a+2)&&(-1===s&&(s=a),i=a+1)}return-1!==s?[s,i]:null}}const ConnectType={NONE:"",BLE:"BLE",USB:"USB"};class DotDevice{#s=null;#i=null;#M=null;#k=null;#v=ConnectType.NONE;#b=null;get connectDevice(){return this.#b}#S=null;#A=!1;get isConnect(){return this.#A}#T=20;#B="";#E="";get cellType(){return this.#E}#w=!1;#x=!1;#N=10;get numberCellRows(){return this.#N}#K=30;get numberCellColumns(){return this.#K}#_=1;#F=20;get numberBrailleCellColumns(){return this.#F}#H=600;#Y=600;#q=!1;#O=10;#G=3e3;constructor(e,t){this.#s=e,this.#i=t,this.DOTPAD_SERVICE="49535343-fe7d-4ae5-8fa9-9fafd205e455",this.DOTPAD_NOTIFY_CHARACTERISTIC="49535343-1e4d-4bd9-ba61-23c647249616",this.DOTPAD_WRITE_CHARACTERISTIC="49535343-8841-43f4-a8d4-ecbe34729bb3",this.#M=new DotReceiver(this.#V.bind(this),this.#U.bind(this)),this.#k=new DotPadSendModule(this)}async connectBleDevice(e){try{await e.gatt.connect();return this.#b=e,await this.#W(),this.#v=ConnectType.BLE,await this.#j(),await this.requestDeviceInfo(DeviceInfo.DeviceName),!0}catch(e){console.error(`BLE Device Connect failed: ${e.message}`)}return!1}async#W(){const e=await this.#b.gatt.getPrimaryService(this.DOTPAD_SERVICE),t=await this.#$(e,this.DOTPAD_NOTIFY_CHARACTERISTIC,"notify");t.startNotifications().then((()=>t.addEventListener("characteristicvaluechanged",(async e=>{this.#M.startBleNotification(e)})))),this.#b.addEventListener("gattserverdisconnected",(e=>{this.#V(DataCodes.Disconnected,"")}),{once:!0}),this.#S=await this.#$(e,this.DOTPAD_WRITE_CHARACTERISTIC,"write")}async#$(e,t,s){const i=e=>"write"===s?e.properties.write||e.properties.writeWithoutResponse:e.properties[s];try{const n=await e.getCharacteristic(t);if(i(n))return n;console.warn(`Characteristic ${t} does not have '${s}' property. Searching from list.`)}catch{console.warn(`Characteristic ${t} not found. Searching from list.`)}const n=(await e.getCharacteristics()).find(i);if(!n)throw new Error(`No characteristic with '${s}' property found in service.`);return n}async connectUsbDevice(e){try{return await e.open({baudRate:115200,dataBits:8}),this.#M.startUsbReadLoop(e),this.#b=e,this.#S=e.writable.getWriter(),this.#v=ConnectType.USB,await this.requestDeviceInfo(DeviceInfo.DeviceName),!0}catch(e){console.error(`USB Device Connect failed: ${e.message}`)}return!1}async disconnect(){if(!this.#A)return Promise.reject("Device is not connected.");this.#A=!1,this.#v===ConnectType.BLE?this.#b.gatt.disconnect():this.#v===ConnectType.USB&&(await this.#M.stopReadLoop(),await this.#S.close(),this.#b.close()),this.#b=null,this.#S=null,this.#s(this,DataCodes.Disconnected,"")}async sendCommand(e){if(this.#A)try{if(this.#v===ConnectType.BLE){let t=0;for(;t<e.byteLength;){let s=Math.min(this.#T,e.byteLength-t),i=e.slice(t,t+s);try{await this.#S.writeValue(i)}catch(e){return}t+=s}return!0}if(this.#v===ConnectType.USB)return await this.#S.write(e),!0}catch(e){"NetworkError"===e.name&&19===e.code&&this.connected?(this.#A=!1,await this.disconnect()):this.#b?this.#v==ConnectType.BLE?await this.connectBleDevice(this.#b):this.#v==ConnectType.USB&&await this.connectUsbDevice(this.#b):(console.log(e.code,e.name,e.message),console.error(e))}}displayGraphicData(e,t=1,s=0,i=DisplayMode.GraphicMode){if(!this.#w)return;const n=i===DisplayMode.GraphicMode?"00":"80",a=this.#K,r=s,o=s+e.length/2;for(let i=t;i<=this.#N;i++){const h=i-1;if(h<0)continue;const c=h*a,l=c+a,d=Math.max(c,r),u=Math.min(l,o);if(d>=u||l<r)continue;const f=2*(d-r),D=2*(u-d),m=e.substring(f,f+D),C=t===i?s:0;this.#k.setDotPadLineCommand(i,n,C,m)}this.#k.setRefreshMode(RefreshMode.GRAPHIC_DISPLAY),this.#k.sendCommand(!0)}displayTextData(e,t=0,s=DisplayMode.TextMode){if(!this.#x)return;const i=s===DisplayMode.GraphicMode?"00":"80";this.#k.setDotPadLineCommand(0,i,t,e),this.#k.setRefreshMode(RefreshMode.TEXT_DISPLAY),this.#k.sendCommand(!0)}displayLineData(e,t=0,s,i){if(!this.#x&&0==e)return;if(!this.#w&&e>0)return;const n=i===DisplayMode.GraphicMode?"00":"80";this.#k.setDotPadLineCommand(e,n,t,s),this.#k.setRefreshMode(RefreshMode.LIVE_DISPLAY),this.#k.sendCommand(!0)}async#j(){let e=20,t=!0,s=10;for(;t;){let i=new Uint8Array(e).fill(171);try{if(await this.#S.writeValue(i),e+=s,e>150)break}catch(i){10==s?(e-=9,s=1):t=!1}}this.#T=e-1>=148?148:e-1}async requestDeviceInfo(e){let t;switch(e){case DeviceInfo.DeviceName:t=DotPadSendMakeModel.makePacket("","00","00","0100");break;case DeviceInfo.FirmwareVersion:t=DotPadSendMakeModel.makePacket("","00","00","0000");break;case DeviceInfo.HardwareVersion:t=DotPadSendMakeModel.makePacket("","00","00","0010");break;default:return void console.warn("Unknown deviceInfo:",e)}this.#v===ConnectType.BLE?await this.#S.writeValue(t):this.#v===ConnectType.USB&&await this.#S.write(t)}async#X(){const e=DotPadSendMakeModel.makePacket("","00","00","0110");this.#v===ConnectType.BLE?await this.#S.writeValue(e):this.#v===ConnectType.USB&&await this.#S.write(e)}async#z(e){if(this.#B=e,this.#s(this,DataCodes.DeviceName,e),this.#B.includes("KM2-300A"))this.#Z(0,0,20,15);else if(this.#B.includes("KM2-20"))this.#Z(1,20,0,0);else{if(!this.#B.includes("KM3-20A"))return void await this.#X();this.#Z(1,20,0,0)}this.#J(),this.#Z(),this.#V(DataCodes.Connected,"")}#Q(e){const t=e.substring(0,2);let s=parseInt(t.substring(0,1),16);s>=8?(s-=8,this.#w=!0):this.#w=!1,s>=4?(s-=4,this.#x=!0):this.#x=!1,parseInt(e.substring(2,4),16),parseInt(e.substring(4,6),16),parseInt(e.substring(6,8),16);const i=parseInt(e.substring(8,10),16);this.#_=i;const n=parseInt(e.substring(10,12),16);this.#F=n,parseInt(e.substring(12,14),16);const a=parseInt(e.substring(14,16),16),r=parseInt(e.substring(16,18),16);this.#N=r;const o=parseInt(e.substring(18,20),16);this.#K=o,parseInt(e.substring(20,22),16);const h=parseInt(e.substring(22,24),16);if(0!==h&&0!==r){let e=3*Math.floor(100*h/r);e<300&&(e=300),this.#H=e}if(0!==a&&0!==i){let e=3*Math.floor(100*a/i);e<300&&(e=300),this.#Y=e}this.#J(),this.#Z(),this.#V(DataCodes.Connected,"")}#J(){this.#E=DeviceCellType.fromDeviceName(this.#B).name,this.#k.setBufferMode(BufferMode.fromDeviceName(this.#B))}#Z(e=this.#_,t=this.#F,s=this.#N,i=this.#K){if(this.#k.clearDotPadLine(),this.#x=e>0,this.#w=s>0,this.#x)for(let s=0;s<e;s++)this.#k.addDotPadLine(this.#Y,t);else this.#k.addDotPadLine(0,0);if(this.#w)for(let e=0;e<s;e++)this.#k.addDotPadLine(this.#H,i);"D3"===this.#E&&this.#k.resetAllLineData()}#V(e,t){switch(e){case DataCodes.Connected:this.#A=!0,this.#s(this,DataCodes.Connected,"");break;case DataCodes.Disconnected:this.#ee();break;case DataCodes.DeviceName:this.#z(t);break;case DataCodes.BoardInfo:this.#Q(t);break;case DataCodes.ResponseDisplayLineAck:this.#k.setDotPadLineReceiveAck(parseInt(t[1],16),!0);break;case DataCodes.ResponseDisplayLineComplete:this.#k.setDotCommandSendReady(!0);break;default:this.#s(this,e,t)}}#U(e,t){this.#i(this,e,t)}async#ee(){if(this.#A&&this.#v===ConnectType.BLE)if(this.#b){if(!this.#q){this.#q=!0;try{for(let e=1;e<=this.#O;e++){console.log(`Reconnect try #${e}`);try{return await this.#te(this.#G),await this.#W(),void console.log("Reconnect success")}catch(t){if(console.error("Reconnect failed:",t),e===this.#O)return console.log("Reconnect attempts exceeded. Force disconnect."),void this.disconnect()}}}finally{this.#q=!1}}}else this.disconnect()}async#te(e){if(!this.#b)throw new Error("Device is null");const t=this.#b.gatt.connect();let s=null;try{const i=new Promise(((t,i)=>{s=setTimeout((()=>{i(new Error("BLE connect timeout"))}),e)}));return await Promise.race([t,i])}finally{null!==s&&clearTimeout(s)}}}class DotPadScanner{constructor(){this.DOTPAD_PREFIX="DotPad",this.DOTPAD_SERVICE="49535343-fe7d-4ae5-8fa9-9fafd205e455"}async startBleScan(){const e={filters:[{namePrefix:this.DOTPAD_PREFIX}],optionalServices:[this.DOTPAD_SERVICE]};try{return await navigator.bluetooth.requestDevice(e)}catch(e){if("NotFoundError"===e.name)return;console.error(e)}}async startUsbScan(){const e=[{usbVendorId:1027,usbProductId:24592},{usbVendorId:1027,usbProductId:24597}];try{return await navigator.serial.requestPort({filters:e})}catch(e){if("NotFoundError"===e.name)return;console.error(e)}}}class DotPadSDK{#se=[];messageCallBack=null;keyCallBack=null;getConnectedDevices(){return[...this.#se]}async connectBleDevice(e){for(const t of this.#se)if(t.connectDevice==e)return null;const t=new DotDevice(this.#ie.bind(this),this.#U.bind(this));return await t.connectBleDevice(e)?(this.#se.push(t),t):null}async connectUsbDevice(e){for(const t of this.#se)if(t.connectDevice==e)return null;const t=new DotDevice(this.#ie.bind(this),this.#U.bind(this));return await t.connectUsbDevice(e)?(this.#se.push(t),t):null}disconnect(e=null){if(null==e){for(const e of this.#se)e.disconnect();this.#se=[]}else e.disconnect(),this.#se=this.#se.filter((t=>t!==e))}requestDeviceInfo(e,t){e.requestDeviceInfo(t)}displayGraphicData(e,t=null,s=DisplayMode.GraphicMode){if(null==t)for(const t of this.#se)t.displayGraphicData(e,1,0,s);else t.displayGraphicData(e,1,0,s)}displayTextData(e,t=null,s=DisplayMode.TextMode){if(null==t)for(const t of this.#se)t.displayTextData(e,0,s);else t.displayTextData(e,0,s)}displayLineData(e,t,s,i,n=null){if(null==n)for(const n of this.#se)n.displayLineData(e,t,s,i);else n.displayLineData(e,t,s,i)}displayAllUp(e=null){if(null==e)for(const e of this.#se)e.displayTextData("FF".repeat(e.numberBrailleCellColumns)),e.displayGraphicData("FF".repeat(e.numberCellColumns*e.numberCellRows));else e.displayTextData("FF".repeat(e.numberBrailleCellColumns)),e.displayGraphicData("FF".repeat(e.numberCellColumns*e.numberCellRows))}displayAllDown(e=null){if(null==e)for(const e of this.#se)e.displayTextData("00".repeat(e.numberBrailleCellColumns)),e.displayGraphicData("00".repeat(e.numberCellColumns*e.numberCellRows));else e.displayTextData("00".repeat(e.numberBrailleCellColumns)),e.displayGraphicData("00".repeat(e.numberCellColumns*e.numberCellRows))}setCallBack(e,t){this.messageCallBack=e,this.keyCallBack=t}#ie(e,t,s){t==DataCodes.Disconnected&&(this.#se=this.#se.filter((t=>t!==e))),this.messageCallBack&&this.messageCallBack(e,t,s)}#U(e,t,s){this.keyCallBack&&this.keyCallBack(e,t,s)}}export{DataCodes,DeviceInfo,DisplayMode,DotDevice,DotPadSDK,DotPadScanner,KeyCodes};
+// SDK 인라인 완료 — SDKMod 네임스페이스 구성
+
+/* ============================================================
+   Dot Canvas Agent — 촉각그래픽 제작 도구
+   - 60×40핀 = 10행×30열 셀, 셀당 2×4핀 column-major (bit0-3 왼쪽열, bit4-7 오른쪽열)
+     → tactile_agent / Dot Fossil / index.html 과 동일 HEX 포맷 (보존). DTM·DTMS 동일 매핑 재사용.
+   - 이미지: 다중후보 threshold→polarity→노이즈제거/주요컴포넌트→외곽선(없음/1줄/2줄)→품질평가→HEX
+   - DTM·DTMS: 원본 핀 데이터를 손상 없이 그대로 로드(임계값 재적용 금지). 다중 페이지 지원.
+   - 펜/지우개: 핀 단위 두께(1~3핀, 고급 4·5핀), Bresenham 보간, 드래그=1 undo, 호버 브러시 미리보기.
+   - SDK 비차단 로드. 미연결 시 시뮬레이터만. 전송: 100ms debounce + 동일 HEX 중복방지 + last-wins.
+   ============================================================ */
+let SDKMod=null;
+// SDK 인라인 완료 — let 선언 직후 할당 (TDZ 방지)
+SDKMod = { DotPadSDK, DotPadScanner, DataCodes, DisplayMode, DeviceInfo, KeyCodes };
+const $=s=>document.getElementById(s);
+const live=$('live');
+function say(m){ live.textContent=''; requestAnimationFrame(()=>live.textContent=m); }
+let toastT=null;
+function toast(m,kind){ const t=$('toast'); t.textContent=m; t.className='show'+(kind?' '+kind:''); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2400); }
+
+let GW=60, GH=40, CC=30, CR=10, N=GW*GH;
+let HEXLEN=CC*CR*2;                 // 600 (60×40) / 1536 (96×64)
+function setResolution(w,h){ GW=w; GH=h; CC=(w/2)|0; CR=(h/4)|0; N=GW*GH; HEXLEN=CC*CR*2; }
+
+/* ---------- state ---------- */
+let appState='empty';                 // empty | analyzing | ready
+let dpState='disconnected';
+let fileKind=null;                    // 'image' | 'tactile'
+let tool='move';
+let grid=new Uint8Array(N);
+let srcImage=null, grayBuf=null, alphaBuf=null, imgMeta=null;
+let threshold=128, polarity=false, method='global', outline=0, minComp=3;
+let recoThreshold=128, recoOutline=0;
+let liveOn=true, connected=false, sdk=null, dotDevice=null;
+let hasImage=false, dirty=false, loading=false;
+let pendingImg=null, pendingName='';
+// tactile / pages
+let pages=[], pageUndo=[], pageRedo=[], curPage=0, tactileMeta=null;
+// brush
+let toolSettings={pen:{size:1},eraser:{size:2}};
+let advSizes=false;
+let hoverBrush=null;
+
+/* ============================================================
+   CANVAS RENDER
+   ============================================================ */
+const pad=$('pad'), ctx=pad.getContext('2d');
+let cell=12, off=6, cursor={x:0,y:0};
+function layout(){
+  const wide=window.innerWidth>820;
+  const railW=(appState==='ready')?52:0;
+  const panelW=window.innerWidth>900?312:300;
+  const availW=(wide?window.innerWidth-railW-panelW:window.innerWidth)-72;
+  const availH=window.innerHeight-56-30-72;
+  const cw=Math.floor((availW-off*2)/GW), ch=Math.floor((availH-off*2)/GH);
+  cell=Math.max(6,Math.min(16,Math.min(cw,ch)));
+  const w=GW*cell+off*2,h=GH*cell+off*2,dpr=window.devicePixelRatio||1;
+  pad.width=w*dpr;pad.height=h*dpr;pad.style.width=w+'px';pad.style.height=h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  $('sbZoom').textContent=Math.round(cell/12*100)+'%';
+  draw();
+}
+function draw(){
+  const w=GW*cell+off*2,h=GH*cell+off*2;ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#EFF1F4';ctx.lineWidth=1;
+  for(let x=0;x<=GW;x++){const px=off+x*cell+.5;ctx.beginPath();ctx.moveTo(px,off);ctx.lineTo(px,h-off);ctx.stroke();}
+  for(let y=0;y<=GH;y++){const py=off+y*cell+.5;ctx.beginPath();ctx.moveTo(off,py);ctx.lineTo(w-off,py);ctx.stroke();}
+  ctx.strokeStyle='#E5E8EE';
+  for(let x=0;x<=GW;x+=2){const px=off+x*cell+.5;ctx.beginPath();ctx.moveTo(px,off);ctx.lineTo(px,h-off);ctx.stroke();}
+  for(let y=0;y<=GH;y+=4){const py=off+y*cell+.5;ctx.beginPath();ctx.moveTo(off,py);ctx.lineTo(w-off,py);ctx.stroke();}
+  ctx.strokeStyle='#EFE0D6';ctx.lineWidth=1.2;
+  const ax=off+(GW/2)*cell+.5,ay=off+(GH/2)*cell+.5;
+  ctx.beginPath();ctx.moveTo(ax,off);ctx.lineTo(ax,h-off);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(off,ay);ctx.lineTo(w-off,ay);ctx.stroke();
+  const rOn=cell*0.36,rOff=cell*0.12;
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){
+    const on=grid[y*GW+x];const cx=off+x*cell+cell/2,cy=off+y*cell+cell/2;
+    if(on){ctx.fillStyle='#23283A';ctx.beginPath();ctx.arc(cx,cy,rOn,0,7);ctx.fill();}
+    else{ctx.fillStyle='#D7DBE3';ctx.beginPath();ctx.arc(cx,cy,rOff,0,7);ctx.fill();}
+  }
+  // hover brush preview
+  if(hoverBrush){
+    ctx.fillStyle=hoverBrush.kind==='eraser'?'rgba(220,38,38,.22)':'rgba(255,90,31,.26)';
+    ctx.strokeStyle=hoverBrush.kind==='eraser'?'rgba(220,38,38,.55)':'rgba(255,90,31,.6)';ctx.lineWidth=1.4;
+    for(const [x,y] of hoverBrush.cells){ if(x<0||y<0||x>=GW||y>=GH)continue; ctx.fillRect(off+x*cell+1,off+y*cell+1,cell-2,cell-2); }
+  }
+  if(tool!=='move'&&hasImage&&!hoverBrush){ctx.strokeStyle='#FF5A1F';ctx.lineWidth=2;ctx.strokeRect(off+cursor.x*cell+1,off+cursor.y*cell+1,cell-2,cell-2);}
+}
+
+/* ============================================================
+   ENCODER (column-major) + DTMS  — 보존 + 역함수
+   ============================================================ */
+const dotBit=(lx,ly)=>lx*4+ly;
+function gridToHex(g){g=g||grid;let hex='';for(let cr=0;cr<CR;cr++)for(let cc=0;cc<CC;cc++){let b=0;for(let lx=0;lx<2;lx++)for(let ly=0;ly<4;ly++){const x=cc*2+lx,y=cr*4+ly;if(g[y*GW+x])b|=(1<<dotBit(lx,ly));}hex+=b.toString(16).padStart(2,'0').toUpperCase();}return hex;}
+function hexToGrid(hex){const g=new Uint8Array(N);let idx=0;for(let cr=0;cr<CR;cr++)for(let cc=0;cc<CC;cc++){const b=parseInt(hex.substr(idx*2,2),16)||0;idx++;for(let lx=0;lx<2;lx++)for(let ly=0;ly<4;ly++){if((b>>dotBit(lx,ly))&1){const x=cc*2+lx,y=cr*4+ly;g[y*GW+x]=1;}}}return g;}
+function dtmsJSONFromPages(){const n=(($('fname').value)||'Untitled').trim();
+  const items=pages.map((g,i)=>({page:i+1,title:n+(pages.length>1?(' '+(i+1)):''),graphic:{name:(i+1)+'.dtm',data:gridToHex(g)},text:{name:(i+1)+'.txt',data:'',plain:n},audio:{fileName:''}}));
+  return JSON.stringify({title:n,lang:'korean',lang_option:'1',device:'dotpad320',audioPath:'',items},null,2);}
+
+/* ============================================================
+   IMAGE → GRAY + ALPHA
+   ============================================================ */
+function renderGray(){
+  if(!srcImage){grayBuf=null;alphaBuf=null;return;}
+  const oc=document.createElement('canvas');oc.width=GW;oc.height=GH;const o=oc.getContext('2d');
+  const pad2=2, availW=GW-pad2*2, availH=GH-pad2*2;
+  const s=Math.min(availW/srcImage.width,availH/srcImage.height),dw=srcImage.width*s,dh=srcImage.height*s;
+  o.clearRect(0,0,GW,GH);o.drawImage(srcImage,(GW-dw)/2,(GH-dh)/2,dw,dh);
+  const d=o.getImageData(0,0,GW,GH).data;
+  grayBuf=new Uint8ClampedArray(N);alphaBuf=new Uint8ClampedArray(N);
+  for(let i=0;i<N;i++){const a=d[i*4+3];alphaBuf[i]=a;const af=a/255;grayBuf[i]=(0.299*d[i*4]+0.587*d[i*4+1]+0.114*d[i*4+2])*af+255*(1-af);}
+}
+function analyzeImageType(){
+  let hasAlpha=false,white=0,dark=0,edges=0;const hist=new Array(256).fill(0);
+  for(let i=0;i<N;i++){if(alphaBuf[i]<250)hasAlpha=true;const v=grayBuf[i]|0;hist[v]++;if(v>225)white++;if(v<55)dark++;}
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;if(x+1<GW&&Math.abs(grayBuf[i]-grayBuf[i+1])>40)edges++;if(y+1<GH&&Math.abs(grayBuf[i]-grayBuf[i+GW])>40)edges++;}
+  let acc=0,p5=0,p95=255;for(let v=0;v<256;v++){acc+=hist[v];if(!p5&&acc>=N*0.05)p5=v;if(acc>=N*0.95){p95=v;break;}}
+  const whiteR=white/N,darkR=dark/N,edgeR=edges/(2*N),spread=p95-p5;let type='photo';
+  if(hasAlpha)type='transparent';else if(whiteR>0.5&&darkR<0.4&&edgeR<0.22)type='lineart';else if(spread<70)type='lowcontrast';
+  return {hasAlpha,whiteR,darkR,edgeR,spread,type,label:({transparent:'투명 PNG',lineart:'선화·아이콘',lowcontrast:'저대비',photo:'사진'})[type]};
+}
+
+/* ============================================================
+   THRESHOLD METHODS  — 보존 + mean
+   ============================================================ */
+function otsu(g){const h=new Array(256).fill(0);for(const v of g)h[v|0]++;const NN=g.length;let sum=0;for(let i=0;i<256;i++)sum+=i*h[i];let sB=0,wB=0,mx=-1,t=128;for(let i=0;i<256;i++){wB+=h[i];if(!wB)continue;const wF=NN-wB;if(!wF)break;sB+=i*h[i];const mB=sB/wB,mF=(sum-sB)/wF,b=wB*wF*(mB-mF)*(mB-mF);if(b>mx){mx=b;t=i;}}return t;}
+function meanT(g){let s=0;for(const v of g)s+=v;return s/g.length;}
+function fillT(g,t,pol){const o=new Uint8Array(N);for(let i=0;i<N;i++){let on=g[i]<=t?1:0;if(pol)on^=1;o[i]=on;}return o;}
+function integral(g){const W=GW+1,I=new Float64Array(W*(GH+1)),I2=new Float64Array(W*(GH+1));for(let y=1;y<=GH;y++)for(let x=1;x<=GW;x++){const v=g[(y-1)*GW+(x-1)];I[y*W+x]=v+I[(y-1)*W+x]+I[y*W+x-1]-I[(y-1)*W+x-1];I2[y*W+x]=v*v+I2[(y-1)*W+x]+I2[y*W+x-1]-I2[(y-1)*W+x-1];}return{I,I2,W};}
+function box(II,x0,y0,x1,y1){const{I,I2,W}=II;const s=I[y1*W+x1]-I[y0*W+x1]-I[y1*W+x0]+I[y0*W+x0];const s2=I2[y1*W+x1]-I2[y0*W+x1]-I2[y1*W+x0]+I2[y0*W+x0];const n=(x1-x0)*(y1-y0),m=s/n,v=Math.max(0,s2/n-m*m);return{m,sd:Math.sqrt(v)};}
+function adaptiveFill(g,win,C,pol){const II=integral(g),o=new Uint8Array(N),r=win>>1;for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const x0=Math.max(0,x-r),y0=Math.max(0,y-r),x1=Math.min(GW,x+r+1),y1=Math.min(GH,y+r+1);const{m}=box(II,x0,y0,x1,y1);let on=g[y*GW+x]<=(m-C)?1:0;if(pol)on^=1;o[y*GW+x]=on;}return o;}
+function sauvolaFill(g,win,k,pol){const II=integral(g),o=new Uint8Array(N),r=win>>1,R=128;for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const x0=Math.max(0,x-r),y0=Math.max(0,y-r),x1=Math.min(GW,x+r+1),y1=Math.min(GH,y+r+1);const{m,sd}=box(II,x0,y0,x1,y1);const T=m*(1+k*((sd/R)-1));let on=g[y*GW+x]<=T?1:0;if(pol)on^=1;o[y*GW+x]=on;}return o;}
+function alphaMask(pol){const o=new Uint8Array(N);for(let i=0;i<N;i++){let on=alphaBuf[i]>=128?1:0;if(pol)on^=1;o[i]=on;}return o;}
+
+/* ============================================================
+   MORPHOLOGY + COMPONENTS + OUTLINE
+   ============================================================ */
+function nb(g,x,y,diag){let n=0;const d=diag?[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]:[[1,0],[-1,0],[0,1],[0,-1]];for(const[a,b]of d){const nx=x+a,ny=y+b;if(nx>=0&&ny>=0&&nx<GW&&ny<GH&&g[ny*GW+nx])n++;}return n;}
+function dilate4(g){const o=new Uint8Array(N);for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)o[y*GW+x]=(g[y*GW+x]||nb(g,x,y,false)>0)?1:0;return o;}
+function erode4(g){const o=new Uint8Array(N);for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;o[i]=(g[i]&&nb(g,x,y,false)===4)?1:0;}return o;}
+function denoiseG(g){const o=new Uint8Array(N);for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)o[y*GW+x]=(g[y*GW+x]&&nb(g,x,y,true)>=2)?1:0;return o;}
+function components(g,diag){const lab=new Int16Array(N).fill(-1);const sizes=[];let id=0;const st=[];const dirs=diag?[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]:[[1,0],[-1,0],[0,1],[0,-1]];
+  for(let i=0;i<N;i++){if(g[i]&&lab[i]<0){let cnt=0;st.length=0;st.push(i);lab[i]=id;while(st.length){const p=st.pop();cnt++;const px=p%GW,py=(p/GW)|0;for(const[a,b]of dirs){const nx=px+a,ny=py+b;if(nx>=0&&ny>=0&&nx<GW&&ny<GH){const q=ny*GW+nx;if(g[q]&&lab[q]<0){lab[q]=id;st.push(q);}}}}sizes.push(cnt);id++;}}
+  return{lab,sizes,count:id};}
+function removeSmall(g,minSize){const{lab,sizes}=components(g,true);const o=new Uint8Array(N);for(let i=0;i<N;i++)if(g[i]&&sizes[lab[i]]>=minSize)o[i]=1;return o;}
+function cleanup(m,opts){opts=opts||{};return removeSmall(m,opts.minComp||minComp);}
+function boundary(m){const o=new Uint8Array(N);for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;if(!m[i])continue;let edge=false;const d=[[1,0],[-1,0],[0,1],[0,-1]];for(const[a,b]of d){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=GW||ny>=GH||!m[ny*GW+nx]){edge=true;break;}}if(edge)o[i]=1;}return o;}
+function outline1(m){return removeSmall(boundary(m),2);}
+function outline2(m){const o1=boundary(m);const inner=boundary(erode4(m));let o2=new Uint8Array(N);for(let i=0;i<N;i++)o2[i]=(o1[i]||inner[i])?1:0;let c1=0,c2=0;for(let i=0;i<N;i++){c1+=o1[i];c2+=o2[i];}if(c2<c1*1.25)return{grid:o1,fellback:true};return{grid:removeSmall(o2,2),fellback:false};}
+function applyOutline(m,mode){if(mode===1)return outline1(m);if(mode===2)return outline2(m).grid;return m;}
+
+function baseMask(t,meth,pol){
+  if(!grayBuf)return new Uint8Array(N);
+  if(meth==='alpha'&&imgMeta&&imgMeta.hasAlpha)return alphaMask(pol);
+  if(meth==='otsu')return fillT(grayBuf,otsu(grayBuf),pol);
+  if(meth==='mean')return fillT(grayBuf,meanT(grayBuf),pol);
+  if(meth==='sauvola')return sauvolaFill(grayBuf,15,0.2,pol);
+  if(meth==='adaptive')return adaptiveFill(grayBuf,9,8,pol);
+  return fillT(grayBuf,t,pol);
+}
+function rebuild(){ if(!grayBuf)return; let m=cleanup(baseMask(threshold,method,polarity)); grid=applyOutline(m,outline); pages[curPage]=grid; }
+
+/* ============================================================
+   TACTILE QUALITY SCORE
+   ============================================================ */
+function metricsOf(g){
+  let on=0,iso=0,ends=0;for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;if(!g[i])continue;on++;const k=nb(g,x,y,true);if(k<1)iso++;else if(k===1)ends++;}
+  const{sizes,count}=components(g,true);const major=sizes.length?Math.max(...sizes):0;
+  let sx=0,sy=0;for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(g[y*GW+x]){sx+=x;sy+=y;}
+  const cx=on?sx/on:GW/2,cy=on?sy/on:GH/2;const centerOff=Math.hypot((cx-(GW-1)/2)/(GW/2),(cy-(GH-1)/2)/(GH/2));
+  return{on,iso,ends,count,major,density:on/N,majorFrac:on?major/on:0,centerOff};
+}
+function tactileQualityScore(g,bias){bias=bias||{};const m=metricsOf(g);if(m.on<8)return{score:8,grade:1,m};let s=100;const dn=m.density;
+  if(dn<0.05)s-=45;else if(dn<0.08)s-=18;else if(dn>0.5)s-=40;else if(dn>0.42)s-=16;
+  s-=Math.min(30,(m.iso/m.on)*120);s-=Math.min(18,(m.ends/m.on)*55);s-=Math.min(22,Math.max(0,m.count-3)*3);
+  s+=Math.min(8,(m.majorFrac-0.5)*16);s-=Math.min(10,m.centerOff*10);
+  if(bias.type==='lineart'&&bias.outline===0)s+=4;if(bias.type==='photo'&&bias.outline===1)s+=3;
+  s=Math.max(0,Math.min(100,s));let grade=1;if(s>=84)grade=4;else if(s>=68)grade=3;else if(s>=48)grade=2;return{score:s,grade,m};}
+const GRADE_TXT=['','낮음','보통','좋음','매우 좋음'];
+function gradeReason(g,m){if(g>=3){if(m.iso/Math.max(1,m.on)<0.08&&m.count<=4)return '외곽선이 연결되어 있고 작은 점이 적습니다.';return '형태가 또렷하고 손끝으로 구분하기 좋습니다.';}
+  if(m.density<0.06)return '핀이 너무 적어요. 촉각 선명도를 높여보세요.';if(m.density>0.45)return '너무 빽빽해요. 외곽선 1줄을 사용해 보세요.';if(m.iso/Math.max(1,m.on)>0.18)return '작은 점이 많아요. 작은 점 정리를 추천해요.';return '형태를 더 단순하게 다듬으면 좋아요.';}
+
+/* ============================================================
+   AUTO-SELECT (다중 후보 → 품질 비교)
+   ============================================================ */
+function autoSelect(){
+  imgMeta=Object.assign(imgMeta||{},analyzeImageType());
+  const methods=['otsu','sauvola','adaptive','mean'];if(imgMeta.hasAlpha)methods.unshift('alpha');
+  let best=null;
+  for(const meth of methods)for(const pol of [false,true]){
+    let m=baseMask(128,meth,pol);let raw=0;for(let i=0;i<N;i++)raw+=m[i];if(raw/N>0.62)continue;
+    m=cleanup(m,{minComp:imgMeta.type==='photo'?4:3});
+    for(const ol of [0,1]){const gg=applyOutline(m,ol);const q=tactileQualityScore(gg,{type:imgMeta.type,outline:ol});
+      let bonus=0;if(imgMeta.type==='transparent'&&meth==='alpha')bonus+=6;if(imgMeta.type==='lineart'&&meth==='otsu'&&ol===0)bonus+=4;if(imgMeta.type==='lowcontrast'&&(meth==='sauvola'||meth==='adaptive'))bonus+=5;if(imgMeta.type==='photo'&&ol===1)bonus+=3;
+      const score=q.score+bonus;if(!best||score>best.score)best={score,meth,pol,ol};}
+  }
+  if(!best){const t=otsu(grayBuf);best={score:50,meth:'global',pol:false,ol:0};}
+  method=(best.meth==='alpha')?'alpha':best.meth;polarity=best.pol;outline=best.ol;
+  threshold=(best.meth==='mean')?Math.round(meanT(grayBuf)):otsu(grayBuf);
+  recoThreshold=threshold;recoOutline=outline;rebuild();return best;
+}
+
+/* ============================================================
+   AFTER CHANGE
+   ============================================================ */
+function afterChange(markDirty){if(markDirty!==false)setDirty(true);draw();updateScoreUI();updateHex();scheduleSend();}
+function countOn(g){g=g||grid;let n=0;for(let i=0;i<g.length;i++)n+=g[i];return n;}
+function updateHex(){$('hexOut').textContent='HEX '+gridToHex();}
+function updateScoreUI(){
+  const q=tactileQualityScore(grid,{type:imgMeta&&imgMeta.type,outline});const on=q.m.on;
+  if(appState==='ready'){const gEl=$('qGrade'),pEl=$('qPins'),rEl=$('qReason');
+    if(gEl){gEl.textContent='촉각 인지 예상: '+GRADE_TXT[q.grade];gEl.className='g s'+q.grade;}
+    if(pEl)pEl.textContent='활성 핀 '+on+'개';if(rEl)rEl.textContent=gradeReason(q.grade,q.m);}
+  $('sbPins').textContent=on;const sp=$('sbPerc');
+  if(!hasImage&&fileKind!=='tactile'){sp.textContent='촉각 인지 —';sp.className='perc';}
+  else{sp.textContent='촉각 인지 '+GRADE_TXT[q.grade];sp.className='perc '+(q.grade>=3?'good':q.grade===2?'mid':'warn');}
+  $('sbDot').textContent=dpStatusText();
+  updateToolStatus();
+}
+function updateToolStatus(){
+  const el=$('sbTool'),dv=$('sbToolDiv');
+  if(appState==='ready'&&(tool==='pen'||tool==='eraser')){el.hidden=false;dv.hidden=false;el.textContent=(tool==='pen'?'펜 ':'지우개 ')+toolSettings[tool].size+'핀';}
+  else{el.hidden=true;dv.hidden=true;}
+}
+
+/* ============================================================
+   DOTPAD LIVE (debounce + 중복방지 + last-wins)
+   ============================================================ */
+let sendT=null,lastSentHex=null,sendBusy=false;
+function scheduleSend(){if(loading||!liveOn||!connected||!sdk||!dotDevice)return;clearTimeout(sendT);sendT=setTimeout(doSend,100);}
+async function doSend(){const hex=gridToHex();if(hex===lastSentHex)return;if(sendBusy){clearTimeout(sendT);sendT=setTimeout(doSend,40);return;}
+  sendBusy=true;setDpState('sending');
+  try{sdk.displayGraphicData(hex,dotDevice,SDKMod.DisplayMode.GraphicMode);lastSentHex=hex;setDpState('sent');setClarityFb('반영 완료','sent');clearTimeout(window.__rv);window.__rv=setTimeout(()=>{if(connected)setDpState('connected');},900);}
+  catch(e){setDpState('error');setClarityFb('전송 실패','err');toast('DotPad 전송 실패','err');}
+  finally{sendBusy=false;}
+}
+function forceSend(){if(!liveOn||!connected)return;lastSentHex=null;scheduleSend();}
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+function setAppState(s){appState=s;document.body.dataset.state=s;const ready=(s==='ready');
+  document.querySelectorAll('.rail .tool').forEach(b=>b.disabled=!ready);
+  ['clarity','recoReset','outBtn','dtmsBtn','hexBtn','pngBtn','saveTopBtn'].forEach(id=>{const e=$(id);if(e)e.disabled=!ready;});
+  document.querySelectorAll('.qbtn').forEach(b=>b.disabled=!ready);
+  refreshModeGating();
+  $('saveHint').style.display=ready?'none':'block';
+  if(!ready)$('saveHint').textContent=s==='analyzing'?'변환 중입니다…':'이미지 또는 DTM·DTMS 파일을 불러오세요.';
+  if(!ready){$('toolCtx').classList.remove('show');}
+  setTimeout(layout,0);updateToolStatus();
+}
+
+/* ============================================================
+   DOTPAD STATE
+   ============================================================ */
+function dpStatusText(){return({disconnected:'DotPad 미연결',connecting:'DotPad 연결 중…',connected:liveOn?'실시간 반영 중':'DotPad 연결됨',sending:'DotPad에 반영 중…',sent:'반영 완료',error:'전송 실패'})[dpState];}
+function setDpState(s){dpState=s;const chip=$('chip');chip.className='chip '+(s==='connecting'?'connecting':(s==='connected'||s==='sending'||s==='sent')?s:s==='error'?'error':'');
+  $('chipText').textContent=dpStatusText();$('sbDot').textContent=dpStatusText();
+  const tog=$('liveToggle'),row=$('liveToggleRow'),cbtn=$('liveConnectBtn'),desc=$('liveDesc');
+  if(s==='disconnected'||s==='error'){connected=false;row.style.display='none';cbtn.style.display='';cbtn.textContent=(s==='error'?'다시 시도':'DotPad 연결');cbtn.disabled=false;tog.disabled=true;tog.setAttribute('aria-checked','false');desc.textContent=s==='error'?'전송에 실패했습니다. 다시 시도해 주세요.':'연결하면 조정 결과가 실시간으로 반영됩니다.';}
+  else if(s==='connecting'){cbtn.style.display='';cbtn.textContent='연결 중…';cbtn.disabled=true;row.style.display='none';desc.textContent='DotPad를 찾고 있습니다…';}
+  else{connected=true;cbtn.style.display='none';cbtn.disabled=false;row.style.display='flex';tog.disabled=false;tog.setAttribute('aria-checked',liveOn?'true':'false');desc.textContent=liveOn?'변경 사항을 실시간으로 보내고 있습니다.':'라이브 반영이 꺼져 있습니다.';}
+  const hc=$('connectBtn');
+  if(connected){hc.classList.remove('accent');hc.innerHTML='<svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>연결됨';}
+  else if(s==='connecting'){hc.textContent='연결 중…';}
+  else{hc.classList.add('accent');hc.innerHTML='<svg class="ic" viewBox="0 0 24 24"><path d="M8 7l8 5-5 4V4l5 4-8 5"/></svg>DotPad 연결';}
+}
+
+/* ============================================================
+   STATE RESET (새 파일 로드 시)
+   ============================================================ */
+function resetForNewFile(){
+  clearTimeout(sendT);sendT=null;lastSentHex=null;sendBusy=false;hoverBrush=null;
+  srcImage=null;grayBuf=null;alphaBuf=null;imgMeta=null;tactileMeta=null;pendingImg=null;
+  grid=new Uint8Array(N);pages=[];pageUndo=[];pageRedo=[];curPage=0;
+  threshold=128;polarity=false;method='global';outline=0;recoThreshold=128;recoOutline=0;
+  cursor={x:0,y:0};setClarityFb('','');
+  // 유지: connected, liveOn, sdk, dotDevice, dpState
+}
+function curUndo(){return pageUndo[curPage]||(pageUndo[curPage]=[]);}
+function curRedo(){return pageRedo[curPage]||(pageRedo[curPage]=[]);}
+
+/* ============================================================
+   FILE MODE GATING
+   ============================================================ */
+function refreshModeGating(){
+  document.body.dataset.filekind=fileKind||'';
+  const ready=(appState==='ready');
+  const isTac=fileKind==='tactile';
+  $('clarity').disabled=!ready||isTac;
+  $('recoReset').disabled=!ready||isTac;
+  document.querySelectorAll('#secOutline .seg button').forEach(b=>b.disabled=!ready||isTac);
+  document.querySelectorAll('.qbtn').forEach(b=>{const imgOnly=b.classList.contains('img-only');b.disabled=!ready||(isTac&&imgOnly);});
+  // pages section visibility
+  $('secPages').hidden=!(isTac&&pages.length>1);
+}
+
+/* ============================================================
+   IMAGE LOAD  (empty → analyzing → ready)
+   ============================================================ */
+function setFname(n){$('fname').value=n;}
+function startAnalyze(img,name){loading=true;pendingImg=img;pendingName=name||'이미지';$('analyzeName').textContent=pendingName;setAppState('analyzing');say('이미지를 분석하고 있어요');
+  setTimeout(()=>{if(appState==='analyzing'&&pendingImg===img)finishAnalyze(img,name);},600);}
+function finishAnalyze(img,name){
+  fileKind='image';srcImage=img;hasImage=true;renderGray();
+  const best=autoSelect();pages=[grid];curPage=0;pageUndo=[[]];pageRedo=[[]];
+  $('infoFile').textContent=(name||'이미지').slice(0,22);$('infoSize').textContent=img.naturalWidth+'×'+img.naturalHeight;$('infoType').textContent=imgMeta.label;
+  $('infoReco').textContent=({alpha:'알파',otsu:'Otsu',sauvola:'Sauvola',adaptive:'Adaptive',mean:'평균',global:'자동'})[best.meth]+' · '+(outline?outline+'줄':'채움');
+  $('method').value=(method==='alpha')?'global':method;syncSliders();syncOutlineSeg();updateOutlineDesc();buildAgentReco();
+  loading=false;setAppState('ready');rebuild();afterChange(false);setDirty(false);forceSend();
+  say('추천 결과가 준비됐어요');toast('촉각그래픽으로 자동 변환했어요','ok');
+}
+function buildAgentReco(){const reasons=[];
+  if(imgMeta.type==='transparent')reasons.push('투명 배경의 알파 경계를 기준으로 형태를 잡았어요');else if(imgMeta.type==='lineart')reasons.push('선의 연결성을 유지했어요');else if(imgMeta.type==='photo')reasons.push('배경을 정리하고 핵심 실루엣을 살렸어요');else if(imgMeta.type==='lowcontrast')reasons.push('국소 대비를 높여 형태를 또렷하게 했어요');
+  reasons.push('작은 점과 노이즈를 정리했어요');reasons.push(outline?('외곽선을 '+outline+'줄로 정리했어요'):'채움 실루엣을 중앙에 맞췄어요');
+  $('agentReco').innerHTML=`<div class="grade"><span class="g" id="qGrade">촉각 인지 예상</span><span class="pins" id="qPins"></span></div><div class="desc muted" id="qReason" style="margin:0 0 6px"></div>`+reasons.map(t=>`<div class="reco-card"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>${t}</div>`).join('');
+  $('agentLead').textContent='추천 결과가 준비됐어요.';}
+
+function loadImageFile(f){
+  if(!f)return;
+  if(f.size>20*1024*1024){toast('이미지 파일이 너무 큽니다(20MB 초과).','err');return;}
+  if(!/^image\//.test(f.type)&&!/\.(png|jpe?g|webp|svg)$/i.test(f.name)){toast('지원하지 않는 이미지 형식입니다. PNG·JPG·WEBP·SVG만 가능해요.','err');return;}
+  resetForNewFile();const nm=f.name.replace(/\.[^.]+$/,'')||'Untitled';setFname(nm);
+  const img=new Image();img.onload=()=>startAnalyze(img,f.name);img.onerror=()=>{toast('이미지를 열 수 없어요. 파일이 손상되었을 수 있습니다.','err');setAppState(hasImage?'ready':'empty');loading=false;};img.src=URL.createObjectURL(f);
+}
+function loadSample(){const c=document.createElement('canvas');c.width=240;c.height=160;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,240,160);g.strokeStyle='#000';g.lineWidth=12;g.lineJoin='round';g.beginPath();g.moveTo(60,150);g.lineTo(60,80);g.lineTo(120,35);g.lineTo(180,80);g.lineTo(180,150);g.closePath();g.stroke();g.strokeRect(105,108,30,42);const img=new Image();img.onload=()=>{resetForNewFile();setFname('샘플');startAnalyze(img,'샘플 이미지');};img.src=c.toDataURL();}
+
+/* ============================================================
+   TACTILE LOAD (DTM·DTMS) — 원본 핀 데이터 보존, 임계값 재적용 금지
+   ============================================================ */
+function cleanHex(s){return (s||'').replace(/[^0-9A-Fa-f]/g,'').toUpperCase();}
+function resForHexLen(len){ return len===600?[60,40]:len===1536?[96,64]:null; }
+function parseDTM(text){
+  const hex=cleanHex(text);
+  if(!hex.length)throw {code:'parse',msg:'DTM 파일에서 핀 데이터를 찾지 못했습니다.'};
+  const r=resForHexLen(hex.length);
+  if(!r)throw {code:'len',msg:`이 DTM 파일을 열 수 없습니다. 핀 데이터 길이(${hex.length}자)가 60×40(600자) 또는 96×64(1536자) 규격과 일치하지 않습니다.`};
+  setResolution(r[0],r[1]);
+  return {format:'DTM',version:'-',pages:[hexToGrid(hex)],names:['1'],res:r};
+}
+function parseDTMS(text){
+  let json;try{json=JSON.parse(text);}catch(e){throw {code:'corrupt',msg:'손상된 DTMS 파일입니다. JSON 구조를 해석할 수 없습니다.'};}
+  const items=json.items;
+  if(!Array.isArray(items)||!items.length)throw {code:'corrupt',msg:'이 DTMS 파일에 페이지(items) 데이터가 없습니다.'};
+  const first=cleanHex(items[0]&&items[0].graphic&&items[0].graphic.data);
+  const r=resForHexLen(first.length);
+  if(!r)throw {code:'len',msg:`이 DTMS 파일을 열 수 없습니다. 핀 데이터 길이(${first.length}자)가 60×40 또는 96×64 규격과 일치하지 않습니다.`};
+  setResolution(r[0],r[1]);
+  const pgs=[],names=[];
+  items.forEach((it,i)=>{
+    const hx=cleanHex(it&&it.graphic&&it.graphic.data);
+    if(hx.length!==HEXLEN)throw {code:'len',msg:`이 DTMS 파일을 열 수 없습니다. ${i+1}페이지 해상도가 다른 페이지와 일치하지 않습니다.`};
+    pgs.push(hexToGrid(hx));names.push((it&&it.title)||String(i+1));
+  });
+  return {format:'DTMS',version:(json.version||json.lang_option?String(json.version||'1'):'-'),pages:pgs,names,device:json.device,title:json.title,res:r};
+}
+function loadTactileFile(f){
+  if(!f)return;
+  if(f.size>8*1024*1024){toast('파일이 너무 큽니다(8MB 초과).','err');return;}
+  const isDtms=/\.dtms$/i.test(f.name)||/json/i.test(f.type);
+  const isDtm=/\.dtm$/i.test(f.name);
+  if(!isDtms&&!isDtm){toast('지원하지 않는 파일 형식입니다. DTM·DTMS만 가능해요.','err');return;}
+  const rd=new FileReader();
+  rd.onerror=()=>toast('파일을 읽지 못했습니다.','err');
+  rd.onload=ev=>{try{
+      const parsed=isDtms?parseDTMS(ev.target.result):parseDTM(ev.target.result);
+      applyTactile(parsed,f.name);
+    }catch(err){const msg=(err&&err.msg)||'파일을 해석하지 못했습니다.';toast(msg,'err');say(msg);
+      // 기존 작업/연결 유지: 상태 변경 없음
+    }};
+  rd.readAsText(f);
+}
+function applyTactile(parsed,filename){
+  loading=true;resetForNewFile();
+  fileKind='tactile';hasImage=true;tactileMeta=parsed;
+  pages=parsed.pages.map(p=>Uint8Array.from(p));curPage=0;pageUndo=pages.map(()=>[]);pageRedo=pages.map(()=>[]);
+  grid=pages[0];
+  setFname((parsed.title||filename.replace(/\.[^.]+$/,''))||'Untitled');
+  $('tFile').textContent=filename.slice(0,22);$('tFormat').textContent=parsed.format;$('tRes').textContent=GW+'×'+GH;
+  $('tPages').textContent=String(parsed.pages.length);$('tVersion').textContent=parsed.version||'-';$('tStatus').textContent='완료';
+  // agent reco for tactile
+  $('agentLead').textContent='원본 촉각 데이터를 불러왔어요.';
+  $('agentReco').innerHTML=`<div class="grade"><span class="g s3" id="qGrade">${parsed.format} · ${GW}×${GH} · ${parsed.pages.length}페이지</span><span class="pins" id="qPins"></span></div><div class="desc muted" id="qReason" style="margin:0 0 6px">원본 핀 데이터를 손상 없이 그대로 불러왔습니다. 펜·지우개로 편집할 수 있어요.</div>`;
+  dtmsBtnLabel();updatePageUI();
+  loading=false;setAppState('ready');afterChange(false);setDirty(false);forceSend();
+  say(`${parsed.format} 불러오기 완료, ${parsed.pages.length}페이지`);toast(`${parsed.format} 파일을 불러왔어요`,'ok');
+}
+function dtmsBtnLabel(){const b=$('dtmsBtn');if(fileKind==='tactile'&&tactileMeta&&tactileMeta.format==='DTM'&&pages.length===1){b.textContent='DTM 저장';b.title='DTM 파일로 저장';}else{b.textContent='DTMS 저장';b.title='DTMS 파일로 저장';}}
+
+/* ---------- page navigation ---------- */
+function updatePageUI(){const multi=fileKind==='tactile'&&pages.length>1;$('secPages').hidden=!multi;$('pageInd').textContent=(curPage+1)+' / '+pages.length;$('prevPage').disabled=curPage<=0;$('nextPage').disabled=curPage>=pages.length-1;}
+function gotoPage(p){if(p<0||p>=pages.length)return;curPage=p;grid=pages[curPage];updatePageUI();draw();updateScoreUI();updateHex();forceSend();say('페이지 '+(curPage+1));}
+$('prevPage').onclick=()=>gotoPage(curPage-1);
+$('nextPage').onclick=()=>gotoPage(curPage+1);
+
+/* ============================================================
+   FILE INPUTS + MENU + GUARD
+   ============================================================ */
+const imageInput=$('imageFileInput'),tactileInput=$('tactileFileInput');
+function pickImage(){imageInput.value='';imageInput.click();}
+function pickTactile(){tactileInput.value='';tactileInput.click();}
+imageInput.addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)guardUnsaved(()=>loadImageFile(f));});
+tactileInput.addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)guardUnsaved(()=>loadTactileFile(f));});
+
+// header load menu
+const loadMenu=$('loadMenu'),loadMenuBtn=$('loadMenuBtn');
+function toggleMenu(open){const o=open===undefined?loadMenu.hidden:open;loadMenu.hidden=!o;loadMenuBtn.setAttribute('aria-expanded',o?'true':'false');if(o)loadMenu.querySelector('button').focus();}
+loadMenuBtn.onclick=()=>toggleMenu();
+document.addEventListener('click',e=>{if(!e.target.closest('.menuwrap'))toggleMenu(false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleMenu(false);});
+$('miImage').onclick=()=>{toggleMenu(false);pickImage();};
+$('miTactile').onclick=()=>{toggleMenu(false);pickTactile();};
+$('emptyImageBtn').onclick=pickImage;
+$('emptyTactileBtn').onclick=pickTactile;
+$('replaceImgBtn').onclick=pickImage;
+$('loadTactileBtn2').onclick=pickTactile;
+$('replaceAnalyze').onclick=pickImage;
+$('cancelAnalyze').onclick=()=>{pendingImg=null;loading=false;setAppState(hasImage?'ready':'empty');};
+document.querySelectorAll('.samplechip').forEach(b=>b.addEventListener('click',()=>guardUnsaved(()=>loadSample(b.dataset.sample))));
+
+// drag & drop (image + dtm/dtms)
+['dragenter','dragover'].forEach(ev=>$('canvasArea').addEventListener(ev,e=>{e.preventDefault();$('emptyOv').classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>$('canvasArea').addEventListener(ev,e=>{e.preventDefault();$('emptyOv').classList.remove('drag');}));
+$('canvasArea').addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(!f)return;if(/\.(dtm|dtms)$/i.test(f.name))guardUnsaved(()=>loadTactileFile(f));else guardUnsaved(()=>loadImageFile(f));});
+
+// unsaved-changes guard (accessible modal)
+let guardAction=null;const guardModal=$('guardModal');
+function guardUnsaved(proceed){if(!dirty||!hasImage){proceed();return;}guardAction=proceed;guardModal.classList.add('show');$('guardSave').focus();}
+function closeGuard(){guardModal.classList.remove('show');guardAction=null;}
+$('guardCancel').onclick=closeGuard;
+$('guardProceed').onclick=()=>{const a=guardAction;closeGuard();if(a)a();};
+$('guardSave').onclick=()=>{doSave();const a=guardAction;closeGuard();if(a)a();};
+guardModal.addEventListener('click',e=>{if(e.target===guardModal)closeGuard();});
+guardModal.addEventListener('keydown',e=>{if(e.key==='Escape')closeGuard();});
+
+/* ============================================================
+   CLARITY SLIDER
+   ============================================================ */
+function clarityLabel(t){return t<95?'단순':t>170?'또렷하게':'균형';}
+function syncSliders(){$('clarity').value=threshold;$('clarityVal').textContent=threshold;$('rawth').value=threshold;$('recoLabel').textContent=clarityLabel(recoThreshold);}
+function setClarityFb(t,kind){const e=$('clarityFb');if(!e)return;e.textContent=t;e.className='fb'+(kind?' '+kind:'');}
+$('clarity').addEventListener('input',e=>{if(fileKind==='tactile')return;threshold=+e.target.value;method='global';$('method').value='global';$('clarityVal').textContent=threshold;$('rawth').value=threshold;rebuild();afterChange();setClarityFb(connected&&liveOn?'DotPad에 반영 중':'미리보기 반영 중',connected&&liveOn?'sending':'');});
+$('recoReset').onclick=()=>{if(fileKind==='tactile')return;threshold=recoThreshold;method='global';$('method').value='global';outline=recoOutline;syncSliders();syncOutlineSeg();updateOutlineDesc();rebuild();afterChange();toast('추천값으로 되돌렸어요');};
+
+/* ============================================================
+   OUTLINE SEGMENTED
+   ============================================================ */
+function syncOutlineSeg(){document.querySelectorAll('#secOutline .seg button').forEach(b=>b.setAttribute('aria-pressed',(+b.dataset.outline===outline)?'true':'false'));}
+function updateOutlineDesc(){$('outlineDesc').textContent=outline===0?'채움 실루엣을 유지합니다.':outline===1?'실제 외곽 경계를 1핀 두께로, 끊긴 선과 노이즈를 정리합니다.':'1줄 외곽선을 통제된 방향으로 1핀 확장합니다.';}
+document.querySelector('#secOutline .seg').addEventListener('click',e=>{const b=e.target.closest('button[data-outline]');if(!b||b.disabled||fileKind==='tactile')return;const want=+b.dataset.outline;
+  if(want===2){const m=cleanup(baseMask(threshold,method,polarity));if(outline2(m).fellback){toast('이 이미지는 2줄이 뭉개져 1줄을 추천해요');outline=1;}else outline=2;}else outline=want;
+  syncOutlineSeg();updateOutlineDesc();rebuild();afterChange();say('외곽선 '+(outline?outline+'줄':'없음'));});
+
+/* ============================================================
+   QUICK ADJUST + AGENT COMMANDS
+   ============================================================ */
+function pushUndo(){curUndo().push(grid.slice());if(curUndo().length>60)curUndo().shift();curRedo().length=0;updateUndoButtons();}
+function applyOp(op){
+  if(!hasImage)return;
+  if(fileKind==='tactile'&&op!=='invert'){toast('이 기능은 이미지 변환 결과에만 적용돼요');return;}
+  pushUndo();
+  if(op==='auto'){autoSelect();syncSliders();syncOutlineSeg();updateOutlineDesc();toast('자동으로 맞췄어요');}
+  else if(op==='denoise'){grid=removeSmall(denoiseG(grid),Math.max(minComp,3));pages[curPage]=grid;toast('작은 점을 정리했어요');}
+  else if(op==='outline'){outline=Math.min(2,outline+1);if(outline===2){const m=cleanup(baseMask(threshold,method,polarity));if(outline2(m).fellback)outline=1;}syncOutlineSeg();updateOutlineDesc();rebuild();toast('외곽선을 강조했어요');}
+  else if(op==='invert'){if(fileKind==='tactile'){for(let i=0;i<N;i++)grid[i]=grid[i]?0:1;pages[curPage]=grid;}else{polarity=!polarity;rebuild();}toast('올림/내림을 반전했어요');}
+  else if(op==='simpler'){grid=removeSmall(denoiseG(grid),Math.max(minComp+1,4));pages[curPage]=grid;toast('더 단순하게 정리했어요');}
+  afterChange();
+}
+document.querySelectorAll('.qbtn').forEach(b=>b.addEventListener('click',()=>{if(!b.disabled)applyOp(b.dataset.op);}));
+document.querySelectorAll('.chipbtn').forEach(b=>b.addEventListener('click',()=>applyOp(b.dataset.cmd)));
+function routeCommand(t){t=t.toLowerCase();if(/외곽|outline|선만|테두리/.test(t))return 'outline';if(/단순|간단|simpl/.test(t))return 'simpler';if(/점|노이즈|정리|denoise|깨끗/.test(t))return 'denoise';if(/반전|invert|뒤집|올림|내림/.test(t))return 'invert';if(/자동|추천|auto|맞춰|맞춤/.test(t))return 'auto';return null;}
+$('askGo').onclick=()=>{const v=$('askInput').value.trim();if(!v)return;const op=routeCommand(v);if(op)applyOp(op);else toast('이해하지 못했어요. 칩으로 시도해 보세요');$('askInput').value='';};
+$('askInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('askGo').click();});
+
+/* ============================================================
+   TOOLS / THICKNESS / BRUSH / POINTER  (Pointer Events)
+   ============================================================ */
+function curSize(){return toolSettings[tool]?toolSettings[tool].size:1;}
+function brushCells(gx,gy,size,fx,fy){const out=[];if(size<=1){out.push([gx,gy]);return out;}
+  if(size===2){const bx=(fx<0.5?gx-1:gx),by=(fy<0.5?gy-1:gy);for(let dx=0;dx<2;dx++)for(let dy=0;dy<2;dy++)out.push([bx+dx,by+dy]);return out;}
+  const r=Math.floor(size/2);for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(size>3&&(dx*dx+dy*dy>r*r+0.5))continue;out.push([gx+dx,gy+dy]);}return out;}
+function bres(x0,y0,x1,y1){const pts=[];let dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,err=dx-dy;for(;;){pts.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*err;if(e2>-dy){err-=dy;x0+=sx;}if(e2<dx){err+=dx;y0+=sy;}}return pts;}
+function setPin(x,y,v){if(x>=0&&y>=0&&x<GW&&y<GH)grid[y*GW+x]=v?1:0;}
+function strokeApply(x0,y0,x1,y1,val,fx,fy){const line=bres(x0,y0,x1,y1);for(let i=0;i<line.length;i++){const last=(i===line.length-1);const cells=brushCells(line[i][0],line[i][1],curSize(),last?fx:0.5,last?fy:0.5);for(const[cx,cy]of cells)setPin(cx,cy,val);}}
+function selectTool(t){tool=t;document.querySelectorAll('.tool[data-tool]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tool===t?'true':'false'));
+  const ctx2=$('toolCtx');
+  if(t==='pen'||t==='eraser'){ctx2.classList.add('show');$('toolCtxLbl').innerHTML=(t==='pen'?'펜 도구':'지우개 도구')+'<span class="sub">두께</span>';syncSizeGrp();$('sizeGrp').setAttribute('aria-label',(t==='pen'?'펜':'지우개')+' 두께');}
+  else ctx2.classList.remove('show');
+  hoverBrush=null;draw();updateToolStatus();
+  say(({move:'이동 도구',pen:'펜 도구, 현재 두께 '+curSize()+'핀',eraser:'지우개 도구, 현재 두께 '+curSize()+'핀'})[t]);}
+function syncSizeGrp(){const sz=curSize();document.querySelectorAll('#sizeGrp button').forEach(b=>b.setAttribute('aria-checked',(+b.dataset.size===sz)?'true':'false'));}
+function setSize(n){if(tool!=='pen'&&tool!=='eraser')return;const max=advSizes?5:3;n=Math.max(1,Math.min(max,n));toolSettings[tool].size=n;syncSizeGrp();updateToolStatus();hoverBrush=null;draw();say((tool==='pen'?'펜':'지우개')+' 두께 '+n+'핀');}
+$('rail').addEventListener('click',e=>{const b=e.target.closest('.tool[data-tool]');if(b&&!b.disabled)selectTool(b.dataset.tool);});
+$('sizeGrp').addEventListener('click',e=>{const b=e.target.closest('button[data-size]');if(b)setSize(+b.dataset.size);});
+$('sizeGrp').addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){e.preventDefault();setSize(curSize()+1);}else if(e.key==='ArrowLeft'||e.key==='ArrowDown'){e.preventDefault();setSize(curSize()-1);}});
+
+function updateUndoButtons(){$('undoBtn').disabled=appState!=='ready'||!curUndo().length;$('redoBtn').disabled=appState!=='ready'||!curRedo().length;}
+$('undoBtn').onclick=()=>{if(!curUndo().length)return;curRedo().push(grid.slice());grid=curUndo().pop();pages[curPage]=grid;updateUndoButtons();afterChange();say('실행 취소');};
+$('redoBtn').onclick=()=>{if(!curRedo().length)return;curUndo().push(grid.slice());grid=curRedo().pop();pages[curPage]=grid;updateUndoButtons();afterChange();say('다시 실행');};
+$('clearBtn').onclick=()=>{pushUndo();grid=new Uint8Array(N);pages[curPage]=grid;afterChange();say('전체 지우기');};
+
+function cellAt(ev){const r=pad.getBoundingClientRect();const lx=(ev.clientX-r.left-off)/cell,ly=(ev.clientY-r.top-off)/cell;return{x:Math.max(0,Math.min(GW-1,Math.floor(lx))),y:Math.max(0,Math.min(GH-1,Math.floor(ly))),fx:lx-Math.floor(lx),fy:ly-Math.floor(ly)};}
+let drawing=false,pv=1,lastC=null,strokeChanged=false;
+pad.addEventListener('pointerdown',ev=>{if(tool==='move'||!hasImage||appState!=='ready')return;ev.preventDefault();pad.setPointerCapture(ev.pointerId);
+  const c=cellAt(ev);cursor=c;drawing=true;strokeChanged=false;hoverBrush=null;
+  curUndo().push(grid.slice());if(curUndo().length>60)curUndo().shift();curRedo().length=0;
+  pv=tool==='pen'?1:0;strokeApply(c.x,c.y,c.x,c.y,pv,c.fx,c.fy);lastC=c;strokeChanged=true;draw();updateScoreUI();updateHex();scheduleSend();});
+pad.addEventListener('pointermove',ev=>{const c=cellAt(ev);
+  if(drawing){cursor=c;strokeApply(lastC.x,lastC.y,c.x,c.y,pv,c.fx,c.fy);lastC=c;strokeChanged=true;draw();updateScoreUI();updateHex();scheduleSend();}
+  else if((tool==='pen'||tool==='eraser')&&hasImage&&appState==='ready'){hoverBrush={cells:brushCells(c.x,c.y,curSize(),c.fx,c.fy),kind:tool};draw();}});
+function endStroke(){if(!drawing)return;drawing=false;lastC=null;if(strokeChanged){setDirty(true);updateUndoButtons();forceSend();}else{curUndo().pop();}}
+pad.addEventListener('pointerup',endStroke);
+pad.addEventListener('pointercancel',()=>{if(drawing){drawing=false;lastC=null;if(strokeChanged){updateUndoButtons();}else curUndo().pop();}});
+pad.addEventListener('pointerleave',()=>{if(!drawing&&hoverBrush){hoverBrush=null;draw();}});
+pad.addEventListener('keydown',ev=>{const k=ev.key;const mv=(dx,dy)=>{cursor.x=Math.max(0,Math.min(GW-1,cursor.x+dx));cursor.y=Math.max(0,Math.min(GH-1,cursor.y+dy));draw();say(`${cursor.x}, ${cursor.y} · ${grid[cursor.y*GW+cursor.x]?'올림':'내림'}`);};
+  if(k==='ArrowRight'){ev.preventDefault();mv(1,0)}else if(k==='ArrowLeft'){ev.preventDefault();mv(-1,0)}else if(k==='ArrowDown'){ev.preventDefault();mv(0,1)}else if(k==='ArrowUp'){ev.preventDefault();mv(0,-1)}
+  else if(k===' '||k==='Enter'){ev.preventDefault();curUndo().push(grid.slice());curRedo().length=0;const v=grid[cursor.y*GW+cursor.x]?0:1;setPin(cursor.x,cursor.y,v);pages[curPage]=grid;updateUndoButtons();afterChange();}});
+
+/* ============================================================
+   GLOBAL SHORTCUTS
+   ============================================================ */
+document.addEventListener('keydown',ev=>{
+  const tag=(document.activeElement&&document.activeElement.tagName)||'';
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  if(appState!=='ready')return;
+  const k=ev.key.toLowerCase();
+  if((ev.ctrlKey||ev.metaKey)&&k==='z'){ev.preventDefault();(ev.shiftKey?$('redoBtn'):$('undoBtn')).click();return;}
+  if((ev.ctrlKey||ev.metaKey)&&k==='y'){ev.preventDefault();$('redoBtn').click();return;}
+  if(ev.ctrlKey||ev.metaKey||ev.altKey)return;
+  if(k==='p'){selectTool('pen');}
+  else if(k==='e'){selectTool('eraser');}
+  else if(k==='m'){selectTool('move');}
+  else if((tool==='pen'||tool==='eraser')&&'12345'.includes(k)){setSize(+k);}
+  else if(k===']'&&(tool==='pen'||tool==='eraser')){setSize(curSize()+1);}
+  else if(k==='['&&(tool==='pen'||tool==='eraser')){setSize(curSize()-1);}
+});
+
+/* ============================================================
+   EXPERT
+   ============================================================ */
+$('method').addEventListener('change',e=>{if(fileKind==='tactile')return;method=e.target.value;rebuild();afterChange();say('변환 방식 변경');});
+$('rawth').addEventListener('input',e=>{if(fileKind==='tactile')return;threshold=Math.max(0,Math.min(255,+e.target.value||0));$('clarity').value=Math.max(20,Math.min(240,threshold));$('clarityVal').textContent=threshold;if(method==='global')rebuild();afterChange();});
+$('minComp').addEventListener('input',e=>{if(fileKind==='tactile')return;minComp=Math.max(1,Math.min(40,+e.target.value||3));rebuild();afterChange();});
+$('advSize').addEventListener('change',e=>{advSizes=e.target.value==='1';
+  const grp=$('sizeGrp');grp.querySelectorAll('button[data-size="4"],button[data-size="5"]').forEach(b=>b.remove());
+  if(advSizes){[4,5].forEach(n=>{const b=document.createElement('button');b.setAttribute('role','radio');b.setAttribute('aria-checked','false');b.dataset.size=n;b.textContent=n+'핀';grp.appendChild(b);});}
+  syncSizeGrp();toast(advSizes?'고급 두께(4·5핀) 사용':'고급 두께 해제');});
+
+/* ============================================================
+   SAVE / EXPORT
+   ============================================================ */
+function dl(content,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function saveName(){return (($('fname').value)||'Untitled').trim();}
+function doSave(){if(!hasImage)return;
+  if(fileKind==='tactile'&&tactileMeta&&tactileMeta.format==='DTM'&&pages.length===1){dl(gridToHex(),saveName()+'.dtm','text/plain');toast('DTM으로 저장했어요','ok');}
+  else{dl(dtmsJSONFromPages(),saveName()+'.dtms','application/json');toast('DTMS로 저장했어요','ok');}
+  setDirty(false);}
+$('dtmsBtn').onclick=$('saveTopBtn').onclick=doSave;
+$('hexBtn').onclick=async()=>{try{await navigator.clipboard.writeText(gridToHex());toast('HEX를 복사했어요','ok');}catch(e){toast('복사 실패 — 전문가 설정에서 확인하세요','err');}};
+$('pngBtn').onclick=()=>{const sc=8,c=document.createElement('canvas');c.width=GW*sc;c.height=GH*sc;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.fillStyle='#23283A';for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(grid[y*GW+x]){g.beginPath();g.arc(x*sc+sc/2,y*sc+sc/2,sc*0.4,0,7);g.fill();}c.toBlob(b=>{dl(b,saveName()+'.png','image/png');toast('PNG로 저장했어요','ok');});};
+$('outBtn').onclick=()=>{if(!connected){toast('먼저 DotPad를 연결하세요');return;}lastSentHex=null;doSend();toast('DotPad로 보냈어요','ok');};
+
+/* ============================================================
+   LIVE TOGGLE + CONNECT
+   ============================================================ */
+$('liveToggle').onclick=()=>{if($('liveToggle').disabled)return;liveOn=!liveOn;$('liveToggle').setAttribute('aria-checked',liveOn?'true':'false');setDpState(connected?'connected':'disconnected');updateScoreUI();if(liveOn&&connected)forceSend();say('라이브 반영 '+(liveOn?'켬':'끔'));};
+function doConnect(){if(connected||!sdk)return;connect();}
+$('connectBtn').onclick=doConnect;$('liveConnectBtn').onclick=doConnect;
+async function connect(){try{const sc=new SDKMod.DotPadScanner();const dev=await sc.startBleScan();if(!dev)return;setDpState('connecting');dotDevice=await sdk.connectBleDevice(dev);if(!dotDevice)setDpState('error');}catch(e){setDpState('error');}}
+async function tryAuto(){if(!navigator.bluetooth||!navigator.bluetooth.getDevices)return;try{const ds=await navigator.bluetooth.getDevices();const dp=ds.find(d=>(d.name||'').toLowerCase().startsWith('dotpad'));if(!dp)return;setDpState('connecting');dotDevice=await sdk.connectBleDevice(dp);}catch(e){}}
+function onMsg(device,code){const C=SDKMod.DataCodes;if(code===C.Connected){connected=true;liveOn=true;setDpState('connected');say('DotPad 연결됨');forceSend();updateScoreUI();}else if(code===C.Disconnected){connected=false;dotDevice=null;lastSentHex=null;setDpState('disconnected');updateScoreUI();}}
+function onKey(){}
+function initDotPad(){if(!navigator.bluetooth){disableConnect('BLE 미지원','Chrome 또는 Edge에서 HTTPS 환경으로 열면 DotPad 연결을 사용할 수 있습니다.');}else if(!window.isSecureContext){disableConnect('HTTPS 필요','Chrome 또는 Edge에서 HTTPS 환경으로 열면 DotPad 연결을 사용할 수 있습니다.');}else if(!SDKMod){disableConnect('SDK 없음','DotPadSDK-3_0_0.js를 같은 폴더에 두고 다시 열어주세요.');}else{sdk=new SDKMod.DotPadSDK();sdk.setCallBack(onMsg,onKey);tryAuto();}}
+function disableConnect(label,desc){const hc=$('connectBtn');hc.disabled=true;hc.classList.remove('accent');hc.textContent=label;const lc=$('liveConnectBtn');lc.disabled=true;lc.textContent=label;$('liveDesc').textContent=desc;$('chipText').textContent=label;$('chip').className='chip error';$('sbDot').textContent=label;}
+
+/* ---------- dirty ---------- */
+function setDirty(v){dirty=v;$('dirty').classList.toggle('on',v);}
+$('fname').addEventListener('input',()=>setDirty(true));
+
+/* ============================================================
+   MOBILE + INIT
+   ============================================================ */
+$('mobtab').onclick=()=>{const p=$('panel');const open=p.classList.toggle('open');$('mobtab').setAttribute('aria-expanded',open?'true':'false');$('mobtab').textContent=open?'조정 패널 닫기 ▼':'조정 패널 열기 ▲';};
+window.addEventListener('resize',layout);
+setAppState('empty');layout();updateScoreUI();updateUndoButtons();
+initDotPad();
+
+/* ══════════════════════════════════════════════════════
+   Dot Canvas v4.3 · 3-Column UI 배선
+   임계값 실시간 반영 · 품질 피드백 · 툴바 · DotPad
+══════════════════════════════════════════════════════ */
+(function(){
+const q=s=>document.querySelector(s);
+const qa=s=>Array.from(document.querySelectorAll(s));
+
+/* ── 캔버스 핏 ── */
+function fitCanvas(){
+  const box=document.getElementById('dotGrid'); if(!box||!pad) return;
+  const W=box.clientWidth,H=box.clientHeight; if(W<=0||H<=0) return;
+  const cw=Math.floor((W-off*2)/GW),ch=Math.floor((H-off*2)/GH);
+  cell=Math.max(4,Math.min(16,Math.min(cw,ch)));
+  const w=GW*cell+off*2,h=GH*cell+off*2,dpr=window.devicePixelRatio||1;
+  pad.width=w*dpr; pad.height=h*dpr;
+  pad.style.width=w+'px'; pad.style.height=h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0); draw();
+}
+layout=fitCanvas;
+window.addEventListener('resize',fitCanvas);
+
+/* ── autoSelect 패치: 어두운 형태→점 ── */
+autoSelect=function(){
+  imgMeta=Object.assign(imgMeta||{},analyzeImageType());
+  const t=otsu(grayBuf); let pol=false;
+  if(!imgMeta.hasAlpha){
+    const m=fillT(grayBuf,t,false); let on=0; for(let i=0;i<N;i++) on+=m[i];
+    pol=(on>N*0.75);
+  }
+  method=imgMeta.hasAlpha?'alpha':'global';
+  polarity=pol; outline=0; threshold=t;
+  recoThreshold=t; recoOutline=0;
+  rebuild();
+  return {score:100,meth:method,pol,ol:0};
+};
+
+/* ══════════════════════════════════════════════════════
+   임계값 UI — Figma 슬라이더 (th-track + th-active + th-thumb)
+══════════════════════════════════════════════════════ */
+function thPct(v){ return Math.max(0,Math.min(100,Math.round((+v-20)/220*100))); }
+
+function paintSlider(v){
+  const pct=thPct(v);
+  const act=q('#thActive'),thumb=q('#thThumb');
+  if(act) act.style.width=pct+'%';
+  if(thumb) thumb.style.left=pct+'%';
+  // bottom bar
+  const bt=q('#bsThresh');
+  if(bt){bt.textContent='점 농도 '+pct+'%'; bt.style.display=hasImage?'flex':'none';}
+}
+
+/* 슬라이더 input → 즉시 rebuild */
+q('#clarity').addEventListener('input',function(){
+  const v=+this.value;
+  paintSlider(v);
+  threshold=v; method='global';
+  const rm=document.getElementById('method'); if(rm) rm.value='global';
+  const rv=document.getElementById('rawth'); if(rv) rv.value=v;
+  if(hasImage&&grayBuf){ rebuild(); afterChange(false); syncQuality(); }
+  const ap=q('#thApply'); if(ap) ap.disabled=false;
+});
+
+/* Apply 버튼 → DotPad 전송까지 */
+q('#thApply').addEventListener('click',function(){
+  if(!hasImage) return;
+  rebuild(); afterChange();
+  this.disabled=true; syncQuality();
+  toast('점 농도 '+thPct(threshold)+'% 적용됨');
+});
+
+/* ±1 */
+q('#thMinus').addEventListener('click',()=>{
+  const sl=q('#clarity'); sl.value=Math.max(20,+sl.value-1);
+  sl.dispatchEvent(new Event('input',{bubbles:true}));
+});
+q('#thPlus').addEventListener('click',()=>{
+  const sl=q('#clarity'); sl.value=Math.min(240,+sl.value+1);
+  sl.dispatchEvent(new Event('input',{bubbles:true}));
+});
+
+/* 자동: Otsu */
+q('#thAuto').addEventListener('click',()=>{
+  if(!grayBuf){ toast('이미지를 먼저 불러오세요'); return; }
+  const t=otsu(grayBuf);
+  q('#clarity').value=t; q('#clarity').dispatchEvent(new Event('input',{bubbles:true}));
+  toast('자동: '+thPct(t)+'%');
+});
+
+/* ══════════════════════════════════════════════════════
+   품질 피드백
+══════════════════════════════════════════════════════ */
+const GRADE_KO=['','낮음','보통','좋음','매우 좋음'];
+const SCORE_LABELS={
+  4:'읽기 쉬움', 3:'읽기 양호', 2:'읽기 어려움', 1:'인지 불가'
+};
+const SCORE_TITLES={
+  4:'혼자서도 읽을 수 있어요',
+  3:'도움이 있으면 읽을 수 있어요',
+  2:'임계값 조정이 필요해요',
+  1:'점이 너무 많거나 너무 적어요'
+};
+const SCORE_DESCS={
+  4:'선이 선명하고 점 수가 적당해요.',
+  3:'일부 영역이 구분하기 어려울 수 있어요.',
+  2:'임계값을 낮추거나 자동을 눌러보세요.',
+  1:'자동 버튼으로 최적 임계값을 찾아보세요.'
+};
+
+function syncQuality(){
+  if(!hasImage||appState!=='ready'){ resetQuality(); return; }
+  const pins=countOn(grid), fill=Math.round(pins/N*100);
+  const sc=tactileQualityScore(grid,{type:imgMeta&&imgMeta.type,outline});
+  const g=Math.min(4,Math.max(1,sc.grade));
+
+  // dot count
+  const qd=q('#qDotCount'); if(qd) qd.textContent=pins+' dots';
+
+  // readability
+  const qr=q('#qReadability');
+  if(qr){
+    const cls=g>=3?'qt-read-g':g===2?'qt-read-m':'qt-read-b';
+    qr.className='qt '+cls;
+    qr.textContent=g>=3?'읽기 좋음':g===2?'읽기 보통':'읽기 어려움';
+    qr.style.display='inline-flex';
+  }
+
+  // noise
+  const qn=q('#qNoise');
+  if(qn){
+    const noisy=fill>50;
+    qn.className='qt '+(noisy?'qt-noise-h':'qt-noise');
+    qn.textContent=noisy?'잡음 많음':'잡음 적음';
+    qn.style.display='inline-flex';
+  }
+
+  // spacing — Figma: blue bg
+  const qs=q('#qSpacing');
+  if(qs){
+    const spacingText=fill<20?'간격 부족':fill>60?'간격 빽빽':'간격 여유';
+    qs.className='qt qt-spacing';
+    qs.textContent=spacingText;
+    qs.style.display='inline-flex';
+  }
+
+  // retouch
+  const qt=q('#qRetouch'); if(qt) qt.style.display='inline-flex';
+
+  // score card
+  const card=q('#scoreCard'),lbl=q('#scoreLabel'),ttl=q('#scoreTitle'),dsc=q('#scoreDesc');
+  if(card){
+    card.className='score-card '+(g>=3?'good':g===2?'mid':'bad');
+    if(lbl) lbl.textContent=SCORE_LABELS[g];
+    if(ttl) ttl.textContent=SCORE_TITLES[g];
+    if(dsc) dsc.textContent=SCORE_DESCS[g];
+  }
+
+  // preview meta
+  const pm=q('#previewMeta');
+  if(pm) pm.textContent=GW+'×'+GH+' · '+pins+'핀 활성 · '+fill+'% 채움 · '+GRADE_KO[g];
+
+  // cell pill
+  const cp=q('#cellPill'); if(cp){cp.style.display='inline-flex';cp.textContent=pins+' / '+(GW*GH)+' cells';}
+
+  // bottom bar
+  const bs=q('#bsSynced'); if(bs) bs.style.display=connected?'inline-flex':'none';
+  const br=q('#bsRetouch'); if(br) br.style.display='inline-flex';
+
+  // res chip
+  const rc=q('#resChip'); if(rc) rc.textContent=GW+'×'+GH;
+
+  // header + bottom buttons
+  qa('#dtmsBtn,#outBtn,#hdrSaveBtn,#hdrOutputBtn,#bsPreviewBtn').forEach(b=>{ if(b) b.disabled=false; });
+  qa('#btnInvert,#btnAllUp,#btnAllDown,#btnDenoise').forEach(b=>{ if(b) b.disabled=false; });
+  try{ syncOutlineBtns(); syncStep2Cards(); syncStep3Btns(true); }catch(e){}
+}
+
+function resetQuality(){
+  qa('#qReadability,#qNoise,#qSpacing,#qRetouch').forEach(e=>{ if(e) e.style.display='none'; });
+  const qd=q('#qDotCount'); if(qd) qd.textContent='— dots';
+  const card=q('#scoreCard'); if(card) card.className='score-card good';
+  const lbl=q('#scoreLabel'); if(lbl) lbl.textContent='업로드 대기';
+  const ttl=q('#scoreTitle'); if(ttl) ttl.textContent='이미지를 선택하세요';
+  const dsc=q('#scoreDesc'); if(dsc) dsc.textContent='소스를 업로드하면 촉각 인지 분석 결과가 표시됩니다.';
+  qa('#dtmsBtn,#outBtn,#hdrSaveBtn,#hdrOutputBtn,#bsPreviewBtn').forEach(b=>{ if(b) b.disabled=true; });
+  qa('#btnInvert,#btnAllUp,#btnAllDown,#btnDenoise').forEach(b=>{ if(b) b.disabled=true; });
+  const br=q('#bsRetouch'); if(br) br.style.display='none';
+  const cp=q('#cellPill'); if(cp) cp.style.display='none';
+  try{ syncOutlineBtns(); syncStep2Cards(); syncStep3Btns(false); }catch(e){}
+}
+
+/* ══════════════════════════════════════════════════════
+   monkey-patch
+══════════════════════════════════════════════════════ */
+const _updateScoreUI=updateScoreUI;
+updateScoreUI=function(){ _updateScoreUI(); try{syncQuality();paintSlider(threshold);}catch(e){} };
+
+const _setAppState=setAppState;
+setAppState=function(s){
+  _setAppState(s);
+  try{
+    fitCanvas(); paintSlider(threshold); syncQuality(); syncAllConn(); syncToolBar();
+    const ready=(s==='ready');
+    const analyzing=(s==='analyzing');
+    // upload card / src loaded
+    const uc=q('#uploadCard'), sl=q('#srcLoaded');
+    if(uc){ uc.style.display=ready?'none':'flex'; }
+    if(sl){ sl.style.display=ready?'block':'none'; }
+    const rb=q('#replaceImgBtn2'); if(rb) rb.style.display=ready?'inline-flex':'none';
+    // thumbnail
+    if(ready&&srcImage){
+      const tb=q('#srcThumb'); if(tb&&srcImage.src) tb.src=srcImage.src;
+      const si=q('#srcInfo'); if(si){
+        const w=srcImage.naturalWidth||'?',h=srcImage.naturalHeight||'?';
+        si.textContent=(imgMeta&&imgMeta.label?imgMeta.label+' · ':'')+w+'×'+h;
+      }
+    }
+    // live chip
+    const lc=q('#liveChip'); if(lc) lc.style.display=(ready&&connected)?'inline-flex':'none';
+
+    // ── 모바일 스크롤 + 변환 과정 피드백 ──
+    if(analyzing) mobileStartAnalyzing();
+    if(ready)     mobileOnReady();
+  }catch(e){}
+};
+
+const _setDpState=setDpState;
+setDpState=function(s){ _setDpState(s); try{syncAllConn();}catch(e){} };
+
+const _afterChange=afterChange;
+afterChange=function(md){ _afterChange(md); try{syncToolBar();}catch(e){} };
+
+let dpDisabled=false,dpDisabledLabel='';
+const _disableConnect=disableConnect;
+disableConnect=function(label,desc){
+  dpDisabled=true; dpDisabledLabel=label||'연결 불가'; _disableConnect(label,desc);
+  try{
+    const t=q('#connText'); if(t) t.textContent=dpDisabledLabel;
+    const d=q('#connDot'); if(d) d.className='conn-dot err';
+    const r=q('#connRow'); if(r) r.classList.remove('clickable');
+  }catch(e){}
+};
+
+/* ── 연결 상태 ── */
+function syncConn(){ syncAllConn(); } function _syncConnOLD(){
+  const dot=q('#connDot'),txt=q('#connText'),row=q('#connRow');
+  if(!dot||!txt) return;
+  txt.textContent=dpDisabled?dpDisabledLabel:dpStatusText();
+  let cls='off';
+  if(dpDisabled) cls='err';
+  else if(connected) cls='on';
+  else if(dpState==='connecting') cls='busy';
+  else if(dpState==='error') cls='err';
+  dot.className='conn-dot '+cls;
+  if(row) row.classList.toggle('clickable',!connected&&!dpDisabled);
+  const sw=q('#liveSwitch'),hint=q('#liveHint');
+  if(sw){ sw.disabled=!connected||dpDisabled; sw.setAttribute('aria-checked',(connected&&liveOn&&!dpDisabled)?'true':'false'); }
+  if(hint){ hint.textContent=dpDisabled?dpDisabledLabel
+    :connected?(liveOn?'DotPad에 실시간 반영 중':'라이브 반영이 꺼져 있어요')
+    :'연결 후 활성화됩니다'; }
+  const lc=q('#liveChip'); if(lc) lc.style.display=(connected&&hasImage)?'inline-flex':'none';
+  const bs=q('#bsSynced'); if(bs) bs.style.display=(connected&&hasImage)?'inline-flex':'none';
+}
+
+/* ── 툴바 ── */
+function syncToolBar(){
+  const bar=q('#toolBar'); if(!bar) return;
+  qa('#toolBar .tb[data-tool]').forEach(b=>{
+    b.setAttribute('aria-pressed',b.dataset.tool===tool?'true':'false');
+  });
+  bar.dataset.tool=tool;
+  const sz=(tool==='pen'||tool==='eraser')?(toolSettings[tool]&&toolSettings[tool].size)||1:1;
+  qa('#sizeGrp2 .tb-sz').forEach(b=>b.setAttribute('aria-checked',+b.dataset.size===sz?'true':'false'));
+  const u=q('#undoBtn2'),r=q('#redoBtn2');
+  if(u) u.disabled=!(appState==='ready'&&(pageUndo[curPage]||[]).length>0);
+  if(r) r.disabled=!(appState==='ready'&&(pageRedo[curPage]||[]).length>0);
+}
+
+q('#toolBar').addEventListener('click',e=>{
+  // 도구 버튼
+  const tb=e.target.closest('.tb[data-tool]');
+  if(tb&&!tb.disabled){
+    const t=tb.dataset.tool;
+    // 엔진이 모르는 도구(hand/select/line/rect/circle/fill 등)는 move로 폴백
+    const engineTools=['move','pen','eraser'];
+    if(appState==='ready'&&engineTools.includes(t)){ selectTool(t); }
+    else if(appState==='ready'){ selectTool('move'); } // 준비 중 도구: 시각적 선택만
+    // 시각적 하이라이트
+    qa('#toolBar .tb[data-tool]').forEach(b=>b.setAttribute('aria-pressed',b===tb?'true':'false'));
+    q('#toolBar').dataset.tool=t;
+    syncToolBar();
+    return;
+  }
+  // 두께
+  const sb=e.target.closest('.tb-sz[data-size]');
+  if(sb&&appState==='ready'){ setSize(+sb.dataset.size); syncToolBar(); return; }
+  // undo/redo
+  if(e.target.closest('#undoBtn2')){ document.getElementById('undoBtn')?.click(); syncToolBar(); return; }
+  if(e.target.closest('#redoBtn2')){ document.getElementById('redoBtn')?.click(); syncToolBar(); return; }
+});
+
+/* ── 뷰 pills ── */
+qa('.vp').forEach(p=>p.addEventListener('click',()=>{
+  if(p.disabled) return;
+  // 현재(current) 버튼만 active 토글, 나머지는 그대로
+  const curr=q('#vpCurrent');
+  if(curr) curr.classList.toggle('active', p===curr);
+  const card=q('#canvasCard');
+  if(p===q('#vpBefore')){ card.dataset.view='before'; const bi=q('#beforeImg'); if(bi&&srcImage?.src) bi.src=srcImage.src; }
+  else card.dataset.view='after';
+}));
+
+/* ── 해상도 전환 ── */
+function switchRes(w,h){
+  if(GW===w&&GH===h) return;
+  if(fileKind==='tactile'){ toast('촉각 파일 해상도는 변경할 수 없어요'); return; }
+  setResolution(w,h);
+  if(hasImage&&srcImage){ renderGray(); autoSelect(); }
+  else{ grid=new Uint8Array(N); }
+  pages=[grid]; curPage=0; pageUndo=[[]]; pageRedo=[[]];
+  fitCanvas(); afterChange(false); syncQuality();
+  syncResButtons();
+}
+function syncResButtons(){
+  const b60=q('#resBtn60'),b96=q('#resBtn96');
+  const on60=GW===60;
+  if(b60){ b60.className='pp '+(on60?'pp-res':''); b60.style.background=on60?'':'var(--surface)'; b60.style.color=on60?'':'var(--muted)'; b60.style.border=on60?'':'1px solid var(--border)'; }
+  if(b96){ b96.className='pp '+(on60?'':'pp-res'); b96.style.background=!on60?'':'var(--surface)'; b96.style.color=!on60?'':'var(--muted)'; b96.style.border=!on60?'':'1px solid var(--border)'; }
+  const rc=q('#resChip'); if(rc) rc.textContent=GW+'×'+GH;
+}
+q('#resBtn60').addEventListener('click',()=>switchRes(60,40));
+q('#resBtn96').addEventListener('click',()=>switchRes(96,64));
+
+/* ── Quick edit ── */
+q('#btnInvert').addEventListener('click',()=>{ if(appState==='ready'&&hasImage) applyOp('invert'); });
+q('#btnAllUp').addEventListener('click',()=>{
+  if(appState!=='ready'||!hasImage) return;
+  pushUndo(); for(let i=0;i<N;i++) grid[i]=1; pages[curPage]=grid; afterChange(); syncQuality();
+});
+q('#btnAllDown').addEventListener('click',()=>{
+  if(appState!=='ready'||!hasImage) return;
+  pushUndo(); for(let i=0;i<N;i++) grid[i]=0; pages[curPage]=grid; afterChange(); syncQuality();
+});
+q('#btnDenoise').addEventListener('click',()=>{ if(appState==='ready'&&hasImage) applyOp('denoise'); });
+
+/* ── 연결 / 라이브 ── */
+q('#connRow').addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect(); });
+q('#connRow').addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){e.preventDefault();doConnect();} });
+q('#liveSwitch').addEventListener('click',()=>{
+  const sw=q('#liveSwitch'); if(sw.disabled) return;
+  document.getElementById('liveToggle')?.click(); syncAllConn();
+});
+
+/* ── 불러오기 드롭다운 ── */
+(function(){
+  const btn=q('#loadMenuBtn2'),menu=q('#loadMenuDrop');
+  if(!btn||!menu) return;
+  const open=v=>{ menu.classList.toggle('open',v); btn.setAttribute('aria-expanded',v?'true':'false'); if(v) menu.querySelector('button')?.focus(); };
+  btn.addEventListener('click',e=>{ e.stopPropagation(); open(!menu.classList.contains('open')); });
+  document.addEventListener('click',()=>open(false));
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') open(false); });
+  q('#menuLoadImage').addEventListener('click',()=>{ open(false); guardUnsaved(()=>pickImage()); });
+  q('#menuLoadTactile').addEventListener('click',()=>{ open(false); guardUnsaved(()=>pickTactile()); });
+})();
+
+/* ── 파일 선택 버튼 배선 ──
+   shell의 파일 버튼은 모두 <label for="imageFileInput"> 방식으로
+   input[type=file]을 직접 트리거함 → 모바일 user-gesture 체인 보장.
+   엔진이 #emptyImageBtn.onclick = pickImage를 붙이므로,
+   label 클릭 → input 열기 + onclick → imageInput.click() 이 중복 실행됨.
+   label에서는 엔진의 onclick만 preventDefault해서 이중 열림을 막음.     */
+setTimeout(()=>{
+  ['emptyImageBtn','replaceImgBtn2','replaceImgBtn3'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && el.tagName==='LABEL' && typeof el.onclick==='function'){
+      const orig=el.onclick.bind(el);
+      el.onclick=e=>{ /* label이 input을 이미 열었으므로 pickImage() 중복 호출 차단 */ };
+    }
+  });
+}, 200);
+
+/* ── 토글들 ── */
+// autoSimplify — pill 토글 (ON=green, OFF=border)
+const _asPill = q('#autoSimplifyPill');
+let _asOn = true;
+if(_asPill){
+  _asPill.addEventListener('click',function(){
+    _asOn = !_asOn;
+    this.textContent = _asOn ? 'ON' : 'OFF';
+    this.className = 'pp ' + (_asOn ? 'pp-on' : '');
+    if(!_asOn){ this.style.background='var(--surface)'; this.style.color='var(--muted)'; this.style.border='1px solid var(--border)'; }
+    else { this.style.background=''; this.style.color=''; this.style.border=''; }
+    const mc=document.getElementById('minComp'); if(mc) mc.value=_asOn?'3':'1';
+    if(hasImage&&grayBuf){ rebuild(); afterChange(); syncQuality(); }
+  });
+}
+q('#polarityTog').addEventListener('click',function(){
+  const on=this.getAttribute('aria-checked')==='true';
+  this.setAttribute('aria-checked',on?'false':'true');
+  polarity=!on;
+  if(hasImage&&grayBuf){ rebuild(); afterChange(); syncQuality(); }
+});
+
+/* ── 더 많은 설정 ── */
+q('#advToggle').addEventListener('click',()=>{
+  const show=q('#advBody').classList.toggle('show');
+  q('#advToggle').classList.toggle('open',show);
+  q('#advToggle').setAttribute('aria-expanded',show?'true':'false');
+});
+
+/* ══════════════════════════════════════════════════════
+   단계 탭 전환 — 좌·우 패널 콘텐츠 + 툴바 그룹 표시 제어
+══════════════════════════════════════════════════════ */
+let currentStep = 1;
+
+function switchStep(n){
+  currentStep = n;
+  // mode-pill active
+  qa('.mode-pill').forEach(p=>{
+    const on = +p.dataset.mode === n;
+    p.classList.toggle('active', on);
+    p.setAttribute('aria-selected', on?'true':'false');
+  });
+  // 좌패널 탭
+  qa('.panel-left .tab-panel').forEach(p=>p.classList.toggle('active', p.id===`lp-step${n}`));
+  // 우패널 탭
+  qa('.panel-right .tab-panel').forEach(p=>p.classList.toggle('active', p.id===`rp-step${n}`));
+  // 툴바: 1단계=기본, 2단계=리터치도구 강조, 3단계=최소
+  const tb = q('#toolBar');
+  if(tb){
+    tb.dataset.step = n;
+    // 3단계에서는 리터치 도구 그룹 숨김 (보기만 하는 단계)
+    qa('#toolBar .tb-group').forEach((g,i)=>{
+      if(n===3) g.style.opacity = i>=1&&i<=2 ? '.35' : '';
+      else g.style.opacity = '';
+    });
+  }
+  say(`${n}단계 패널로 이동`);
+
+  // 모바일: 해당 패널 상단으로 스크롤
+  if(window.innerWidth<=900){
+    setTimeout(()=>{
+      const target = n===1 ? q('.panel-left') : n===2 ? q('#canvasCard') : q('.panel-right');
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    }, 80);
+  }
+}
+
+qa('.mode-pill').forEach(p=>{
+  p.addEventListener('click',()=>switchStep(+p.dataset.mode));
+});
+
+/* ── 2단계: 윤곽선 버튼 ── */
+function syncOutlineBtns(){
+  qa('.outline-btn[data-ol]').forEach(b=>{
+    const on = +b.dataset.ol === outline;
+    b.classList.toggle('sel', on);
+    b.disabled = (appState!=='ready')||(fileKind==='tactile');
+  });
+  const desc = q('#olDesc');
+  if(desc) desc.textContent = outline===0?'채움 실루엣을 유지합니다.':outline===1?'실제 외곽 경계를 1핀 두께로 그립니다.':'1줄 외곽선을 1핀 더 확장합니다.';
+}
+qa('.outline-btn[data-ol]').forEach(b=>b.addEventListener('click',()=>{
+  if(b.disabled) return;
+  // 엔진 legacy secOutline 버튼 클릭으로 포워딩 (엔진 로직 그대로 사용)
+  const legacyBtn = document.querySelector(`#secOutline .seg button[data-outline="${b.dataset.ol}"]`);
+  if(legacyBtn&&!legacyBtn.disabled) legacyBtn.click();
+  syncOutlineBtns();
+}));
+
+/* ── 3단계: data-ctrl 요소 ↔ 엔진 ID 양방향 미러 ──
+   엔진이 바인딩하는 진짜 ID는 legacy 블록에만 존재.
+   3단계 패널의 data-ctrl 요소는 값 변경 시 엔진 요소를 트리거하고,
+   엔진이 값을 바꿀 때도 3단계 UI가 동기화되도록 MutationObserver 사용. */
+function ctrlEl(name){ return document.querySelector(`[data-ctrl="${name}"]`); }
+function engEl(id){ return document.getElementById(id); }
+
+// select/input: 3단계 UI → 엔진으로 값 전달
+['method','rawth','minComp','advSize'].forEach(name=>{
+  const ui=ctrlEl(name), eng=engEl(name);
+  if(!ui||!eng) return;
+  // 초기값 동기화
+  ui.value = eng.value;
+  // 3단계 UI 변경 → 엔진 요소에 값 복사 후 change/input 이벤트 발생
+  const evName = ui.tagName==='SELECT'?'change':'input';
+  ui.addEventListener(evName, ()=>{
+    eng.value = ui.value;
+    eng.dispatchEvent(new Event(evName, {bubbles:true}));
+  });
+  // 엔진 요소 변경 → 3단계 UI에 반영
+  eng.addEventListener(evName, ()=>{ if(ui.value!==eng.value) ui.value=eng.value; });
+});
+
+// recoReset 버튼
+const uiRecoReset = ctrlEl('recoReset');
+const engRecoReset = engEl('recoReset');
+if(uiRecoReset && engRecoReset){
+  uiRecoReset.addEventListener('click', ()=>engRecoReset.click());
+}
+
+// hexBtn, pngBtn 버튼
+['hexBtn','pngBtn'].forEach(name=>{
+  const ui=ctrlEl(name), eng=engEl(name);
+  if(ui&&eng){ ui.addEventListener('click',()=>eng.click()); }
+});
+
+// hexOut 텍스트 미러: MutationObserver로 엔진 #hexOut 변경 시 data-ctrl도 업데이트
+const engHexOut = engEl('hexOut');
+const uiHexOut = ctrlEl('hexOut');
+if(engHexOut && uiHexOut){
+  uiHexOut.textContent = engHexOut.textContent;
+  new MutationObserver(()=>{ uiHexOut.textContent = engHexOut.textContent; })
+    .observe(engHexOut, {childList:true, characterData:true, subtree:true});
+}
+
+/* ── 3단계 버튼 disabled 상태 동기화 ── */
+function syncStep3Btns(ready){
+  // data-ctrl 버튼들
+  ['hexBtn','pngBtn'].forEach(name=>{
+    const ui=ctrlEl(name); if(ui) ui.disabled=!ready;
+  });
+  const rr=ctrlEl('recoReset');
+  if(rr) rr.disabled=!ready||fileKind==='tactile';
+  // dtmsBtn3, outBtn3
+  const b3=q('#dtmsBtn3'), ob=q('#outBtn3');
+  if(b3) b3.disabled=!ready;
+  if(ob) ob.disabled=!ready;
+}
+// connRow2, connRow3 클릭 → doConnect
+['connRow2','connRow3'].forEach(id=>{
+  q('#'+id)?.addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect(); });
+  q('#'+id)?.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){e.preventDefault();doConnect();} });
+});
+// liveSwitch2, liveSwitch3 → liveToggle 포워딩
+['liveSwitch2','liveSwitch3'].forEach(id=>{
+  q('#'+id)?.addEventListener('click',()=>{
+    const sw=q('#'+id); if(sw?.disabled) return;
+    document.getElementById('liveToggle')?.click();
+    syncAllConn();
+  });
+});
+
+/* ── 연결 상태 다중 동기화 ── */
+function syncAllConn(){
+  const txt = dpDisabled ? dpDisabledLabel : dpStatusText();
+  let cls='off';
+  if(dpDisabled) cls='err';
+  else if(connected) cls='on';
+  else if(dpState==='connecting') cls='busy';
+  else if(dpState==='error') cls='err';
+
+  [['connDot','connText','connRow','liveSwitch','liveHint'],
+   ['connDot2','connText2','connRow2','liveSwitch2','liveHint2'],
+   ['connDot3','connText3','connRow3','liveSwitch3','liveHint3']].forEach(([dotId,txtId,rowId,swId,hintId])=>{
+    const dot=q('#'+dotId), text=q('#'+txtId), row=q('#'+rowId), sw=q('#'+swId), hint=q('#'+hintId);
+    if(dot) dot.className='conn-dot '+cls;
+    if(text) text.textContent=txt;
+    if(row) row.classList.toggle('clickable',!connected&&!dpDisabled);
+    if(sw){ sw.disabled=!connected||dpDisabled; sw.setAttribute('aria-checked',(connected&&liveOn&&!dpDisabled)?'true':'false'); }
+    if(hint){ hint.textContent = dpDisabled?dpDisabledLabel
+        :connected?(liveOn?'DotPad에 실시간 반영 중':'라이브 반영이 꺼져 있어요')
+        :'연결 후 활성화됩니다'; }
+  });
+
+  const lc=q('#liveChip'); if(lc) lc.style.display=(connected&&hasImage)?'inline-flex':'none';
+  const bs=q('#bsSynced'); if(bs) bs.style.display=(connected&&hasImage)?'inline-flex':'none';
+}
+
+/* ── 2·3단계 품질 카드 동기화 ── */
+function syncStep2Cards(){
+  const g2 = q('#scoreLabel2'), t2 = q('#scoreTitle2'), d2 = q('#scoreDesc2');
+  const g  = q('#scoreLabel'),  t  = q('#scoreTitle'),  d  = q('#scoreDesc');
+  if(g2&&g) g2.textContent=g.textContent;
+  if(t2&&t) t2.textContent=t.textContent;
+  if(d2&&d) d2.textContent=d.textContent;
+  const sc2=q('#scoreCard3'), sc=q('#scoreCard');
+  if(sc2&&sc) sc2.className=sc.className;
+}
+
+/* ── 초기 탭 설정 ── */
+qa('.mode-pill').forEach((p,i)=> p.dataset.mode = i+1);
+// dtmsBtn3 / outBtn3 포워딩
+q('#dtmsBtn3')?.addEventListener('click',()=>document.getElementById('dtmsBtn')?.click());
+q('#outBtn3')?.addEventListener('click',()=>document.getElementById('outBtn')?.click());
+['hdrSaveBtn','dtmsBtn'].forEach(id=>q('#'+id)?.addEventListener('click',()=>document.getElementById('saveTopBtn')?.click()));
+['hdrOutputBtn','outBtn'].forEach(id=>q('#'+id)?.addEventListener('click',()=>{ try{doOutput&&doOutput();}catch(e){} }));
+
+/* ══════════════════════════════════════════════════════
+   모바일 변환 과정 스크롤 + 피드백
+   - 모바일(≤900px)에서만 작동: 데스크톱은 3열이라 모두 보임
+   - analyzing 진입: 중앙 패널로 스크롤 + 단계 메시지 시퀀스
+   - ready 진입: 품질바까지 스크롤 + 결과 플래시
+══════════════════════════════════════════════════════ */
+const STEPS=[
+  {t:0,   msg:'이미지 분석 중…',       sub:'밝기와 경계를 감지하고 있어요'},
+  {t:200, msg:'점 배열 계산 중…',      sub:'최적 임계값으로 변환하고 있어요'},
+  {t:420, msg:'품질 최적화 중…',       sub:'촉각 인지 점수를 확인하고 있어요'},
+  {t:560, msg:'완성 직전…',            sub:'잠깐만 기다려 주세요'},
+];
+let _stepTimers=[];
+
+function isMobile(){ return window.innerWidth<=900; }
+
+function scrollToEl(el,offset=16){
+  if(!el) return;
+  const y=el.getBoundingClientRect().top+window.scrollY-offset;
+  window.scrollTo({top:y,behavior:'smooth'});
+}
+
+function mobileStartAnalyzing(){
+  if(!isMobile()) return;
+  // 중앙 패널 상단으로 스크롤
+  const center=document.getElementById('canvasCard');
+  if(center) setTimeout(()=>scrollToEl(center, 12), 80);
+
+  // 진행 바 초기화
+  const fill=document.getElementById('convBarFill');
+  if(fill){ fill.style.transition='none'; fill.style.width='0%';
+    setTimeout(()=>{ fill.style.transition='width .35s cubic-bezier(.4,0,.2,1)'; },20); }
+
+  // 단계 메시지 + 진행 바 시퀀스
+  _stepTimers.forEach(clearTimeout); _stepTimers=[];
+  const nameEl=document.getElementById('analyzeName');
+  const titleEl=document.querySelector('#analyzeOv h2');
+  const BAR_STEPS=[
+    {t:0,   pct:'15%', msg:'이미지 분석 중…',    sub:'밝기와 경계를 감지하고 있어요'},
+    {t:180, pct:'45%', msg:'점 배열 계산 중…',   sub:'최적 임계값으로 변환하고 있어요'},
+    {t:360, pct:'75%', msg:'품질 최적화 중…',    sub:'촉각 인지 점수를 확인하고 있어요'},
+    {t:520, pct:'92%', msg:'완성 직전…',          sub:'잠깐만 기다려 주세요'},
+  ];
+  BAR_STEPS.forEach(({t,pct,msg,sub})=>{
+    _stepTimers.push(setTimeout(()=>{
+      if(appState!=='analyzing') return;
+      if(fill) fill.style.width=pct;
+      // 텍스트 페이드
+      if(titleEl){ titleEl.style.opacity='0'; setTimeout(()=>{ titleEl.textContent=msg; titleEl.style.opacity='1'; },100); }
+      if(nameEl){  nameEl.style.opacity='0';  setTimeout(()=>{ nameEl.textContent=sub;  nameEl.style.opacity='1';  },120); }
+    }, t));
+  });
+}
+
+function mobileOnReady(){
+  _stepTimers.forEach(clearTimeout); _stepTimers=[];
+
+  // 진행 바 100% 완료
+  const fill=document.getElementById('convBarFill');
+  if(fill){ fill.style.width='100%'; setTimeout(()=>{ fill.style.transition='none'; fill.style.width='0%'; },700); }
+
+  if(!isMobile()) return;
+
+  // 1) 품질바가 보이는 위치로 스크롤
+  const qbar=document.querySelector('.quality-bar');
+  setTimeout(()=>{ if(qbar) scrollToEl(qbar, 60); }, 120);
+
+  // 2) 캔버스 플래시 효과 (변환 결과 '나타남' 연출)
+  const dotBg=document.getElementById('dotBg');
+  if(dotBg){
+    dotBg.style.transition='opacity .15s';
+    dotBg.style.opacity='0';
+    setTimeout(()=>{ dotBg.style.opacity='1'; },150);
+    setTimeout(()=>{ dotBg.style.transition=''; },400);
+  }
+
+  // 3) 품질 태그 순차 등장 (stagger)
+  const tags=document.querySelectorAll('.qt');
+  tags.forEach((t,i)=>{
+    t.style.opacity='0';
+    t.style.transform='translateY(6px)';
+    t.style.transition='none';
+    setTimeout(()=>{
+      t.style.transition='opacity .22s ease, transform .22s ease';
+      t.style.opacity='';
+      t.style.transform='';
+    }, 180 + i*60);
+  });
+
+  // 4) 우패널(점 농도 조절)로 자동 스크롤
+  const rp=document.querySelector('.panel-right');
+  if(rp) setTimeout(()=>scrollToEl(rp, 12), 600);
+}
+
+/* ── 초기화 ── */
+function init(){
+  paintSlider(threshold); fitCanvas(); syncQuality(); syncAllConn(); syncToolBar(); syncResButtons();
+  resetQuality();
+}
+if(document.readyState==='complete'||document.readyState==='interactive') setTimeout(init,0);
+else window.addEventListener('DOMContentLoaded',init);
+document.fonts?.ready?.then(fitCanvas);
+})();
+</script>
+</body>
+</html>
