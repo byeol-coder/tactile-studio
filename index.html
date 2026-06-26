@@ -88,6 +88,24 @@
   .ba-toggle:disabled{opacity:.55;cursor:not-allowed}
   .ba-toggle:not(:disabled):hover{border-color:#d6dae0}
 
+  /* ============ RETOUCH TOOLBAR ============ */
+  .tool-bar{display:flex;align-items:center;gap:4px}
+  .tool-btn{width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:none;
+    color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.1s}
+  .tool-btn svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tool-btn:hover{background:var(--pill);color:var(--text)}
+  .tool-btn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tool-btn:disabled{opacity:.35;cursor:not-allowed}
+  .tool-sep{width:1px;height:20px;background:var(--line);margin:0 4px;flex:none}
+  .size-grp{display:flex;gap:3px}
+  .size-btn{min-width:30px;height:26px;padding:0 6px;border:1px solid var(--line);background:#fff;
+    border-radius:6px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
+  .size-btn[aria-checked="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .size-btn:hover:not([aria-checked="true"]){background:var(--pill)}
+  .tool-bar[data-tool="move"] .size-grp,
+  .tool-bar[data-tool="move"] .tool-sep.size-sep{display:none}
+  body:not([data-state="ready"]) .tool-bar .tool-btn.needs-ready{opacity:.35;cursor:not-allowed;pointer-events:none}
+
   .preview{background:var(--card);border:1px solid var(--line);border-radius:14px;
     box-shadow:0 1px 2px rgba(0,0,0,.04);height:420px;display:flex;align-items:center;justify-content:center;
     overflow:clip;position:relative}
@@ -281,7 +299,38 @@
         <div class="left">
           <div class="canvas-card" id="canvasCard" data-view="after">
             <div class="mini-bar">
-              <span class="res-badge" id="resBadge">60 × 40</span>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="res-badge" id="resBadge">60 × 40</span>
+                <div class="tool-bar" id="toolBar" data-tool="move" role="toolbar" aria-label="편집 도구">
+                  <!-- 이동 -->
+                  <button class="tool-btn needs-ready" data-tool="move" aria-pressed="true" title="이동 (M)" aria-label="이동 도구">
+                    <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/><path d="M5 12l7 7 7-7" style="opacity:.4"/></svg>
+                  </button>
+                  <!-- 펜 -->
+                  <button class="tool-btn needs-ready" data-tool="pen" aria-pressed="false" title="펜 — 핀 올리기 (P)" aria-label="펜 도구">
+                    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                  </button>
+                  <!-- 지우개 -->
+                  <button class="tool-btn needs-ready" data-tool="eraser" aria-pressed="false" title="지우개 — 핀 내리기 (E)" aria-label="지우개 도구">
+                    <svg viewBox="0 0 24 24"><path d="M20 20H7L3 16l10-10 7 7-3.5 3.5"/><path d="M6.5 17.5l5-5"/></svg>
+                  </button>
+                  <div class="tool-sep size-sep" aria-hidden="true"></div>
+                  <!-- 두께 -->
+                  <div class="size-grp" id="sizeGrp2" role="radiogroup" aria-label="브러시 두께">
+                    <button class="size-btn" role="radio" data-size="1" aria-checked="true">1핀</button>
+                    <button class="size-btn" role="radio" data-size="2" aria-checked="false">2핀</button>
+                    <button class="size-btn" role="radio" data-size="3" aria-checked="false">3핀</button>
+                  </div>
+                  <div class="tool-sep" aria-hidden="true"></div>
+                  <!-- Undo / Redo -->
+                  <button class="tool-btn needs-ready" id="undoBtn2" title="실행 취소 (Ctrl+Z)" aria-label="실행 취소" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                  </button>
+                  <button class="tool-btn needs-ready" id="redoBtn2" title="다시 실행 (Ctrl+Shift+Z)" aria-label="다시 실행" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
+                  </button>
+                </div>
+              </div>
               <div class="mini-right">
                 <div class="load-wrap">
                   <button class="load-btn" id="loadMenuBtn2" aria-haspopup="true" aria-expanded="false" aria-controls="loadMenuDrop">
@@ -1193,7 +1242,7 @@ import('./DotPadSDK-3_0_0.js')
     const z=document.getElementById('sbZoom'); if(z) z.textContent=Math.round(cell/12*100)+'%';
     draw();
   }
-  layout=fitCanvas;                 // 엔진 내부 setTimeout(layout,0) 등도 새 버전 사용
+  layout=fitCanvas;
   window.addEventListener('resize',fitCanvas);
 
   /* ---------- 상태 → 화면 동기화 ---------- */
@@ -1203,7 +1252,6 @@ import('./DotPadSDK-3_0_0.js')
 
   function syncStatus(){
     const statusEl=q('#ssStatus'), badge=q('#ssBadge'), note=q('#ssThreshNote'), pctEl=q('#ssPct');
-    // 컨트롤 활성/비활성·하이라이트는 상태와 무관하게 항상 반영
     paintSlider(); syncClarityChips(); syncOutlineChips(); syncBeforeAfter(); syncEditControls(); syncResChips();
     const rb=q('#resBadge'); if(rb) rb.textContent=GW+' × '+GH;
     const pad2=document.getElementById('pad'); if(pad2) pad2.setAttribute('aria-label','DotPad '+GW+'×'+GH+' 촉각 미리보기. 방향키로 이동, 스페이스로 핀 토글.');
@@ -1269,7 +1317,7 @@ import('./DotPadSDK-3_0_0.js')
       const p=x.dataset.res.split('x'); const w=+p[0], h=+p[1];
       const on=(w===GW&&h===GH);
       x.classList.toggle('sel',on); x.setAttribute('aria-pressed',on?'true':'false');
-      x.disabled=tac;   // 불러온 촉각 파일은 해상도 변경 불가
+      x.disabled=tac;
     });
   }
   function switchRes(w,h){
@@ -1288,6 +1336,56 @@ import('./DotPadSDK-3_0_0.js')
   function invertPins(){ if(appState!=='ready'||!hasImage) return; applyOp('invert'); }
   function allPins(v){ if(appState!=='ready'||!hasImage) return; pushUndo(); for(let i=0;i<N;i++) grid[i]=v; pages[curPage]=grid; afterChange(); say(v?'전체 핀 올림':'전체 핀 내림'); toast(v?'전체 핀을 올렸어요':'전체 핀을 내렸어요'); }
 
+  /* ---------- 패치: 엔진 함수 뒤에 동기화 부착 ---------- */
+  const _updateScoreUI=updateScoreUI;
+  updateScoreUI=function(){ _updateScoreUI(); try{syncStatus();}catch(e){} };
+
+  const _setAppState=setAppState;
+  setAppState=function(s){
+    _setAppState(s);
+    try{ fitCanvas(); syncStatus(); syncConn(); }catch(e){}
+    // 불러오기 버튼 show/hide
+    const ready=(s==='ready');
+    const r2=q('#replaceImgBtn2'), lt3=q('#loadTactileBtn3');
+    if(r2) r2.hidden=!ready;
+    if(lt3) lt3.hidden=!ready;
+    // 툴바 동기화
+    try{ syncToolBar(); }catch(e){}
+  };
+
+  const _setDpState=setDpState;
+  setDpState=function(s){ _setDpState(s); try{syncConn();}catch(e){} };
+
+  let dpDisabled=false, dpDisabledLabel='';
+  const _disableConnect=disableConnect;
+  disableConnect=function(label,desc){ dpDisabled=true; dpDisabledLabel=label||'연결 불가'; _disableConnect(label,desc); try{
+      const t=q('#connText'); if(t) t.textContent=dpDisabledLabel;
+      const d=q('#connDot'); if(d) d.className='conn-dot err';
+      const r=q('#connRow'); if(r) r.classList.remove('clickable');
+    }catch(e){} };
+
+  /* ---------- autoSelect 패치: 이미지 형태 그대로 래스터화 ---------- */
+  autoSelect=function(){
+    imgMeta=Object.assign(imgMeta||{},analyzeImageType());
+    let meth, pol, t=otsu(grayBuf);
+    if(imgMeta.hasAlpha){
+      meth='alpha'; pol=false;
+    }else{
+      meth='global';
+      let m=fillT(grayBuf,t,false), on=0; for(let i=0;i<N;i++) on+=m[i];
+      pol=(on>N*0.75);
+    }
+    method=(meth==='alpha')?'alpha':'global';
+    polarity=pol; outline=0; threshold=t;
+    recoThreshold=t; recoOutline=0;
+    rebuild();
+    return {score:100, meth:(meth==='alpha'?'alpha':'global'), pol, ol:0};
+  };
+
+  const _afterChange=afterChange;
+  afterChange=function(md){ _afterChange(md); try{ syncToolBar(); }catch(e){} };
+
+  /* ---------- 연결 상태 동기화 ---------- */
   function syncConn(){
     const dotEl=q('#connDot'), txtEl=q('#connText'), row=q('#connRow');
     if(!dotEl||!txtEl) return;
@@ -1306,50 +1404,36 @@ import('./DotPadSDK-3_0_0.js')
         : '연결하면 조정 결과가 DotPad에 실시간으로 반영돼요'; }
   }
 
-  /* ---------- 패치(monkey-patch): 엔진 함수 뒤에 동기화 부착 ---------- */
-  const _updateScoreUI=updateScoreUI;
-  updateScoreUI=function(){ _updateScoreUI(); try{syncStatus();}catch(e){} };
+  /* ============================================================
+     RETOUCH TOOLBAR 배선
+  ============================================================ */
+  function syncToolBar(){
+    const bar=q('#toolBar'); if(!bar) return;
+    qa('#toolBar .tool-btn[data-tool]').forEach(b=>{
+      b.setAttribute('aria-pressed', b.dataset.tool===tool ? 'true':'false');
+    });
+    bar.dataset.tool=tool;
+    const sz=(tool==='pen'||tool==='eraser') ? toolSettings[tool].size : 1;
+    qa('#sizeGrp2 .size-btn').forEach(b=>b.setAttribute('aria-checked', +b.dataset.size===sz ? 'true':'false'));
+    const u=q('#undoBtn2'), r2=q('#redoBtn2');
+    const canU=appState==='ready'&&(pageUndo[curPage]||[]).length>0;
+    const canR=appState==='ready'&&(pageRedo[curPage]||[]).length>0;
+    if(u) u.disabled=!canU;
+    if(r2) r2.disabled=!canR;
+  }
 
-  const _setAppState=setAppState;
-  setAppState=function(s){ _setAppState(s); try{ fitCanvas(); syncStatus(); syncConn(); }catch(e){} };
-
-  const _setDpState=setDpState;
-  setDpState=function(s){ _setDpState(s); try{syncConn();}catch(e){} };
-
-  let dpDisabled=false, dpDisabledLabel='';
-  const _disableConnect=disableConnect;
-  disableConnect=function(label,desc){ dpDisabled=true; dpDisabledLabel=label||'연결 불가'; _disableConnect(label,desc); try{
-      const t=q('#connText'); if(t) t.textContent=dpDisabledLabel;
-      const d=q('#connDot'); if(d) d.className='conn-dot err';
-      const r=q('#connRow'); if(r) r.classList.remove('clickable');
-    }catch(e){} };
-
-  /* ---------- 충실 변환: 이미지 형태를 그대로 점형으로 ----------
-     기존 autoSelect는 여러 후보를 비교하다 극성을 반전(배경을 점으로)시켜
-     테두리 링 같은 음각 결과가 나올 수 있었다. 여기서는 전경(형태)을
-     그대로 올림 점으로 만든다:
-       - 투명 PNG: 불투명 영역 = 형태
-       - 그 외: Otsu 임계값으로 이진화하되, 점이 화면의 절반 이상을 덮으면
-         그 영역은 배경이므로 반전해 '형태(소수 영역)'를 점으로 유지
-       - 윤곽선 없음(채움 실루엣), 미세 점(1핀)만 정리 — 형태는 깎지 않음 */
-  autoSelect=function(){
-    imgMeta=Object.assign(imgMeta||{},analyzeImageType());
-    let meth, pol, t=otsu(grayBuf);
-    if(imgMeta.hasAlpha){
-      meth='alpha'; pol=false;
-    }else{
-      meth='global';
-      let m=fillT(grayBuf,t,false), on=0; for(let i=0;i<N;i++) on+=m[i];
-      // 기본: 어두운 형태 → 올림 점(촉각 그래픽 관례). 점이 화면을 거의 다
-      // 덮는 경우(=어두운 배경 이미지)에만 반전해 전경을 점으로 유지.
-      pol=(on>N*0.75);
-    }
-    method=(meth==='alpha')?'alpha':'global';
-    polarity=pol; outline=0; threshold=t;
-    recoThreshold=t; recoOutline=0;
-    rebuild();
-    return {score:100, meth:(meth==='alpha'?'alpha':'global'), pol, ol:0};
-  };
+  (function(){
+    const bar=q('#toolBar'); if(!bar) return;
+    bar.addEventListener('click',e=>{
+      const tb=e.target.closest('.tool-btn[data-tool]');
+      if(tb && appState==='ready'){ selectTool(tb.dataset.tool); syncToolBar(); return; }
+      const sb=e.target.closest('.size-btn[data-size]');
+      if(sb && appState==='ready'){ setSize(+sb.dataset.size); syncToolBar(); return; }
+      if(e.target.closest('#undoBtn2')){ const b=document.getElementById('undoBtn'); if(b)b.click(); syncToolBar(); return; }
+      if(e.target.closest('#redoBtn2')){ const b=document.getElementById('redoBtn'); if(b)b.click(); syncToolBar(); return; }
+    });
+    syncToolBar();
+  })();
 
   /* ---------- 촉감 방식 (임계값 프리셋) ---------- */
   q('#claritySeg').addEventListener('click',e=>{
@@ -1361,16 +1445,15 @@ import('./DotPadSDK-3_0_0.js')
     say('촉감 방식: '+b.textContent.trim());
   });
 
-  /* ---------- 윤곽선: 기존 엔진 로직(폴백 포함) 재사용 ---------- */
+  /* ---------- 윤곽선 ---------- */
   q('#outlineSeg').addEventListener('click',e=>{
     const b=e.target.closest('.chip[data-outline]'); if(!b||b.disabled||fileKind==='tactile') return;
     const hidden=document.querySelector('#secOutline .seg button[data-outline="'+b.dataset.outline+'"]');
-    if(hidden && !hidden.disabled) hidden.click();   // → 엔진 핸들러(2줄 폴백 포함) 실행
+    if(hidden && !hidden.disabled) hidden.click();
     syncOutlineChips();
   });
 
-  /* ---------- 점 조밀도 슬라이더: 엔진 input 리스너가 rebuild 담당.
-       여기서는 %·프리셋 칩 하이라이트만 추가 ---------- */
+  /* ---------- 점 조밀도 슬라이더 ---------- */
   q('#clarity').addEventListener('input',()=>{ const p=q('#ssPct'); if(p) p.textContent=pctFromThreshold(+q('#clarity').value)+'%'; paintSlider(); syncClarityChips(); });
 
   /* ---------- 출력 크기: 60×40 ↔ 96×64 ---------- */
@@ -1389,23 +1472,21 @@ import('./DotPadSDK-3_0_0.js')
     say(card.dataset.view==='before'?'원본 이미지 보기':'촉각 변환 결과 보기');
   });
 
-  /* ---------- 연결: 행 클릭 → 엔진 connect ---------- */
+  /* ---------- 연결 행 클릭 / 라이브 토글 ---------- */
   q('#connRow').addEventListener('click',()=>{ if(dpDisabled||connected) return; doConnect(); });
   q('#connRow').addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!dpDisabled&&!connected){e.preventDefault();doConnect();} });
-
-  /* ---------- 라이브 반영 토글 → 엔진 liveToggle ---------- */
   q('#liveSwitch').addEventListener('click',()=>{
     const sw=q('#liveSwitch'); if(sw.disabled) return;
-    const ht=document.getElementById('liveToggle'); if(ht) ht.click();   // 엔진: liveOn 토글 + 재전송
+    const ht=document.getElementById('liveToggle'); if(ht) ht.click();
     syncConn();
   });
 
-  /* ---------- 핀 편집 버튼 ---------- */
+  /* ---------- 편집 버튼 ---------- */
   q('#btnInvert').addEventListener('click',invertPins);
   q('#btnAllUp').addEventListener('click',()=>allPins(1));
   q('#btnAllDown').addEventListener('click',()=>allPins(0));
 
-  /* ---------- 불러오기 드롭다운 (미니바) ---------- */
+  /* ---------- 불러오기 드롭다운 ---------- */
   (function(){
     const btn=q('#loadMenuBtn2'), menu=q('#loadMenuDrop');
     if(!btn||!menu) return;
@@ -1421,15 +1502,7 @@ import('./DotPadSDK-3_0_0.js')
   q('#replaceImgBtn2').addEventListener('click', ()=>guardUnsaved(()=>pickImage()));
   q('#loadTactileBtn3').addEventListener('click', ()=>guardUnsaved(()=>pickTactile()));
 
-  /* ---------- ready 상태에서 이미지 교체·DTM 불러오기 버튼 노출 ---------- */
-  const _setAppState3=setAppState;
-  setAppState=function(s){
-    _setAppState3(s);
-    const ready=(s==='ready');
-    const r2=q('#replaceImgBtn2'), lt3=q('#loadTactileBtn3');
-    if(r2) r2.hidden=!ready;
-    if(lt3) lt3.hidden=!ready;
-  };
+  /* ---------- 탭 ---------- */
   qa('.tab').forEach(t=>t.addEventListener('click',()=>{
     qa('.tab').forEach(x=>{x.classList.toggle('active',x===t);x.setAttribute('aria-selected',x===t?'true':'false');});
     const tab=t.dataset.tab;
@@ -1437,20 +1510,18 @@ import('./DotPadSDK-3_0_0.js')
     say(tab==='image'?'이미지 변환 탭':'텍스트 생성 탭');
   }));
 
-  /* ---------- 커뮤니티에 공개 (준비 중) ---------- */
+  /* ---------- 커뮤니티 ---------- */
   q('#communityBtn').addEventListener('click',()=>{ toast('커뮤니티 공개는 준비 중이에요'); });
 
   /* ---------- 미리보기 클릭 = 업로드(빈 상태) ---------- */
-  // emptyOv 안의 버튼은 엔진이 이미 배선. 추가로 빈 캔버스 영역 클릭 시 picker.
   q('#canvasArea').addEventListener('click',e=>{
     if(appState==='empty' && !e.target.closest('button')) { const b=document.getElementById('emptyImageBtn'); if(b) b.click(); }
   });
 
   /* ---------- 초기 동기화 ---------- */
-  function init(){ paintSlider(); fitCanvas(); syncStatus(); syncConn(); }
+  function init(){ paintSlider(); fitCanvas(); syncStatus(); syncConn(); syncToolBar(); }
   if(document.readyState==='complete'||document.readyState==='interactive') setTimeout(init,0);
   else window.addEventListener('DOMContentLoaded',init);
-  // 폰트 로드 후 캔버스 크기 보정
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitCanvas);
 })();
 </script>
