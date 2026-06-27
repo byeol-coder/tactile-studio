@@ -1970,7 +1970,18 @@ draw=function(){
   if(tool!=='move'&&hasImage&&!hoverBrush){ctx.strokeStyle='#FF4D00';ctx.lineWidth=2;ctx.strokeRect(off+cursor.x*cell+1,off+cursor.y*cell+1,cell-2,cell-2);}
 };
 
-/* ── 점 농도 슬라이더 ── */
+/* ── 점 농도 슬라이더 (완전 재작성) ─────────────────────────
+   버그 원인:
+   1. clarity2 input → dispatchEvent → 엔진 clarity 핸들러(rebuild+draw) 실행
+      동시에 addon clarity 핸들러도 실행 → 이중 렌더링
+   2. rebuild() 안 removeBorder+smoothPass가 매 input마다 실행 → 성능저하
+   해결:
+   - clarity2가 UI만 직접 제어 (dispatchEvent 완전 제거)
+   - threshold를 직접 변경하고 경량 draw()만 호출
+   - 실제 rebuild는 디바운스(150ms) 후 1회만 실행
+   - clarity 엔진 핸들러 addon 리스너 제거 (이중 실행 방지)
+   ─────────────────────────────────────────────────────────── */
+
 function thPct(v){ return Math.round((+v - 20) / 220 * 100); }
 
 function paintSlider(v){
@@ -1979,54 +1990,80 @@ function paintSlider(v){
   const thumb = ge('thThumb');
   const disp  = ge('thValDisplay');
   const sl2   = ge('clarity2');
+  const engSl = ge('clarity');
   if(fill)  fill.style.width  = pct + '%';
   if(thumb) thumb.style.left  = pct + '%';
   if(disp)  disp.textContent  = pct + '%';
-  if(sl2)   sl2.value = v;
+  if(sl2 && +sl2.value !== +v)   sl2.value  = v;
+  if(engSl && +engSl.value !== +v) engSl.value = v;
 }
 
-function sliderSetValue(v){
-  v = Math.max(20, Math.min(240, +v));
-  /* clarity2 → engine clarity 동기화 */
-  const eng = ge('clarity');
-  if(eng){ eng.value = v; eng.dispatchEvent(new Event('input', {bubbles:true})); }
-  paintSlider(v);
-  const ap = ge('thApply');
-  if(ap) ap.disabled = !hasImage;
+/* 디바운스 rebuild — 슬라이더 이동 중 과도한 재계산 방지 */
+let _rebuildTimer = null;
+function debouncedRebuild(afterMs){
+  if(_rebuildTimer) clearTimeout(_rebuildTimer);
+  _rebuildTimer = setTimeout(()=>{
+    _rebuildTimer = null;
+    if(!hasImage || !grayBuf) return;
+    rebuild();
+    /* afterChange 대신 draw+syncQuality만 호출 (불필요한 fitCanvas 방지) */
+    draw();
+    syncQuality();
+    const ap = ge('thApply');
+    if(ap) ap.disabled = false;
+  }, afterMs || 120);
 }
 
+/* clarity2 (UI 슬라이더) input — 직접 threshold 변경, UI 즉시 반영 */
 ge('clarity2')?.addEventListener('input', function(){
-  sliderSetValue(+this.value);
+  const v = Math.max(20, Math.min(240, +this.value));
+  threshold = v;
+  method = 'global';
+  /* UI 즉시 업데이트 */
+  paintSlider(v);
+  /* rebuild는 디바운스 */
+  if(hasImage && grayBuf) debouncedRebuild(120);
+  const ap = ge('thApply');
+  if(ap) ap.disabled = false;
 });
 
 ge('thMinus')?.addEventListener('click', ()=>{
-  const sl = ge('clarity2');
-  if(sl) sliderSetValue(+sl.value - 1);
+  if(!hasImage){ toast('이미지를 먼저 가져와주세요'); return; }
+  const v = Math.max(20, +ge('clarity2').value - 1);
+  ge('clarity2').value = v;
+  threshold = v; method = 'global';
+  paintSlider(v);
+  debouncedRebuild(80);
 });
+
 ge('thPlus')?.addEventListener('click', ()=>{
-  const sl = ge('clarity2');
-  if(sl) sliderSetValue(+sl.value + 1);
+  if(!hasImage){ toast('이미지를 먼저 가져와주세요'); return; }
+  const v = Math.min(240, +ge('clarity2').value + 1);
+  ge('clarity2').value = v;
+  threshold = v; method = 'global';
+  paintSlider(v);
+  debouncedRebuild(80);
 });
+
 ge('thAuto')?.addEventListener('click', ()=>{
   if(!grayBuf){ toast('이미지를 먼저 가져와주세요'); return; }
   const t = otsu(grayBuf);
-  sliderSetValue(t);
+  threshold = t; method = 'global';
+  paintSlider(t);
+  rebuild(); draw(); syncQuality();
   toast('자동 임계값 ' + thPct(t) + '%');
-});
-ge('thApply')?.addEventListener('click', ()=>{
-  if(!hasImage) return;
-  rebuild(); afterChange(); syncQuality();
-  toast('점 농도 ' + thPct(threshold) + '% 적용됨');
   const ap = ge('thApply');
   if(ap) ap.disabled = true;
 });
 
-/* engine clarity input → slider 동기화 */
-ge('clarity')?.addEventListener('input', function(){
-  threshold = +this.value;
-  paintSlider(threshold);
+ge('thApply')?.addEventListener('click', ()=>{
+  if(!hasImage) return;
+  /* 즉시 rebuild + afterChange (여기서만 정식 afterChange 호출) */
+  if(_rebuildTimer){ clearTimeout(_rebuildTimer); _rebuildTimer = null; }
+  rebuild(); afterChange(false); syncQuality();
+  toast('점 농도 ' + thPct(threshold) + '% 적용됨');
   const ap = ge('thApply');
-  if(ap) ap.disabled = !hasImage;
+  if(ap) ap.disabled = true;
 });
 
 /* ── quality sync ── */
