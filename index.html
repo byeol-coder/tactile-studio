@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -638,7 +636,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
   <span id="sbTool" hidden></span><span id="sbToolDiv" hidden></span>
   <span id="sbZoom">100%</span><span id="sbPins">0</span>
   <span id="sbPerc">—</span><span id="sbDot">—</span>
-  <p id="agentLead"></p><div id="agentReco"></div>
+  <p id="agentLead"></p>
   <div id="askWrap"><input id="askInput"/><button id="askGo">↵</button></div>
   <div id="askChips">
     <button class="chipbtn" data-cmd="simpler">더 단순하게</button>
@@ -659,6 +657,8 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
       <button data-th="128" aria-pressed="true">균형</button>
       <button data-th="185" aria-pressed="false">또렷</button>
     </div>
+    <!-- 엔진 필수: id="clarity" range input -->
+    <input type="range" id="clarity" min="20" max="240" value="128"/>
     <span class="v" id="clarityVal">128</span>
     <b id="recoLabel">균형</b>
     <button id="recoReset">추천값</button>
@@ -689,6 +689,8 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     </div>
   </section>
   <section id="secSave">
+    <!-- 엔진 필수: id="outBtn" DotPad 출력 -->
+    <button id="outBtn" disabled>출력</button>
     <button id="hexBtn2" disabled>HEX</button>
     <button id="pngBtn2" disabled>PNG</button>
     <p id="saveHint">준비 중</p>
@@ -701,6 +703,12 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     <div id="hexOut">—</div>
   </section>
   <button id="mobtab">패널</button>
+  <!-- 엔진 필수 추가 ID -->
+  <div id="panel"></div>
+  <div id="agentReco">
+    <div class="grade"><span class="g" id="qGrade"></span><span class="pins" id="qPins"></span></div>
+    <div class="desc muted" id="qReason"></div>
+  </div>
 </div>
 
 <script type="module">
