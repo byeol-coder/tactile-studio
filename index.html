@@ -1,3 +1,7 @@
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzFBMUExQSIvPgogIDxjaXJjbGUgY3g9IjkiIGN5PSI5IiByPSIyLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iMTYiIGN5PSI5IiByPSIyLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iMjMiIGN5PSI5IiByPSIyLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iOSIgY3k9IjE2IiByPSIyLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIyLjUiIGZpbGw9IiNGRjREMDAiLz4KICA8Y2lyY2xlIGN4PSIyMyIgY3k9IjE2IiByPSIyLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjQiLz4KICA8Y2lyY2xlIGN4PSI5IiBjeT0iMjMiIHI9IjIuNSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuMiIvPgogIDxjaXJjbGUgY3g9IjE2IiBjeT0iMjMiIHI9IjIuNSIgZmlsbD0id2hpdGUiLz4KICA8Y2lyY2xlIGN4PSIyMyIgY3k9IjIzIiByPSIyLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjIiLz4KPC9zdmc+"/>
 <title>Dot Canvas AI — 촉각그래픽 제작 스튜디오</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -504,7 +508,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
       <p class="ov-title">이미지를 올려보세요</p>
       <p class="ov-sub">AI가 즉시 최적 촉각 그래픽으로 변환해드려요</p>
       <div class="ov-ctas">
-        <label for="imageFileInput" class="ov-cta primary" tabindex="0" role="button">
+        <label for="imageFileInput" class="ov-cta primary" tabindex="0" role="button" onclick="document.getElementById('imageFileInput').click();return false;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           파일 선택
         </label>
@@ -2116,7 +2120,7 @@ ge('fname')?.addEventListener('input',()=>{});
 
 /* ── label → input 중복 방지 ── */
 setTimeout(()=>{
-  ['emptyImageBtn'].forEach(id=>{const el=ge(id);if(el&&typeof el.onclick==='function')el.onclick=e=>e.preventDefault();});
+  /* emptyImageBtn override removed */
 },200);
 
 /* ── mobile scroll ── */
