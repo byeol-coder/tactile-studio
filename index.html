@@ -445,73 +445,68 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 <!-- WORKSPACE -->
 <div class="workspace">
 
-  <!-- TOOL RAIL -->
-  <aside class="tool-rail" role="toolbar" aria-label="도구">
-    <!-- 이동 (01-move) -->
-    <button class="tr-btn active" data-tool="move" aria-pressed="true" title="이동 (M)">
+  <!-- TOOL RAIL — 5개 도구만, 중복 없음 -->
+  <aside class="tool-rail" role="toolbar" aria-label="편집 도구">
+
+    <!-- 선택 (move로 통합 — 클릭/드래그 이동) -->
+    <button class="tr-btn active" data-tool="move" aria-pressed="true"
+      title="선택 (S) — 핀을 클릭하거나 드래그해 선택합니다">
       <svg viewBox="0 0 40 40"><path d="M19.996 30.56V9.43M23.17 27.39L20 30.56l-3.17-3.17M23.17 12.6L20 9.43l-3.17 3.17M27.39 23.17L30.56 20l-3.17-3.17M30.56 20H9.43M12.6 23.17L9.43 20l3.17-3.17" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="tr-label">선택</span>
     </button>
 
-    <!-- 선택 (03-rectangle-selection) -->
-    <button class="tr-btn" data-tool="select" aria-pressed="false" title="영역 선택 (S)">
-      <svg viewBox="0 0 40 40"><path d="M9.54 16.83V14.18C9.54 11.55 11.64 9.43 14.25 9.43H16.86M23.13 9.43H25.75C28.35 9.43 30.45 11.55 30.45 14.18v2.65M30.45 24.22v1.59C30.45 28.44 28.35 30.56 25.75 30.56H24.18M16.86 30.56H14.25C11.64 30.56 9.54 28.44 9.54 25.81V23.17" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span class="tr-label">선택</span>
-    </button>
-
-    <div class="tr-sep" aria-hidden="true"></div>
-
-    <!-- 펜 (04-pen) -->
-    <button class="tr-btn" data-tool="pen" aria-pressed="false" title="그리기 (D)">
+    <!-- 펜 (핀 추가) -->
+    <button class="tr-btn" data-tool="pen" aria-pressed="false"
+      title="펜 (D) — 클릭하거나 드래그해 핀을 추가합니다">
       <svg viewBox="0 0 40 40"><path d="M14.71 30.53L28.43 30.56M17.83 14.71H11.58M14.71 9.43C12.99 9.43 11.58 10.84 11.58 12.55V26.24C11.58 26.72 11.78 27.43 12.02 27.85L12.89 29.28C13.88 30.94 15.52 30.94 16.52 29.28l.87-1.44C17.63 27.43 17.83 26.72 17.83 26.24V12.55C17.83 10.84 16.42 9.43 14.71 9.43Z" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/></svg>
       <span class="tr-label">펜</span>
     </button>
 
-    <!-- 지우개 (08-eraser) -->
-    <button class="tr-btn" data-tool="eraser" aria-pressed="false" title="지우기 (E)">
+    <!-- 지우개 (핀 제거) -->
+    <button class="tr-btn" data-tool="eraser" aria-pressed="false"
+      title="지우개 (E) — 클릭하거나 드래그해 핀을 지웁니다">
       <svg viewBox="0 0 40 40"><path d="M16.85 30.56H29.44M10.46 25.88L14.14 29.6C14.73 30.19 15.53 30.53 16.37 30.53c.83 0 1.63-.34 2.22-.93l10.94-11.04c.59-.6.92-1.4.92-2.25 0-.84-.33-1.65-.92-2.25L25.85 10.36C25.26 9.76 24.46 9.43 23.63 9.43c-.84 0-1.64.33-2.22.93L10.46 21.4C9.87 22 9.54 22.8 9.54 23.64c0 .84.33 1.65.92 2.24Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="tr-label">지우개</span>
     </button>
 
-    <!-- 채우기 (09-fill) -->
-    <button class="tr-btn" data-tool="fill" aria-pressed="false" title="채우기 (F)">
-      <svg viewBox="0 0 40 40"><path d="M28.61 24.07L25 27.74C22.46 30.32 21.6 30.28 19.09 27.74L13.28 21.83C11.25 19.77 10.74 18.4 13.28 15.82L16.89 12.15C19.59 9.4 20.77 10.09 22.8 12.15L28.61 18.06C31.11 20.61 31.32 21.32 28.61 24.07ZM12.51 25.37l.69 1.16C14.17 28.18 13.41 29.52 11.52 29.52S8.88 28.18 9.85 26.53l.69-1.16C11.09 24.46 11.97 24.46 12.51 25.37Z" stroke="currentColor" stroke-width="1.34" stroke-linecap="round" stroke-linejoin="round"/><path d="M30.36 20.62C24.83 16.81 20.3 21.13 12.53 19.49L12 19.61" stroke="currentColor" stroke-width="1.34" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span class="tr-label" style="color:var(--subtle)">채우기</span>
-    </button>
-
     <div class="tr-sep" aria-hidden="true"></div>
 
-    <!-- Undo (12-undo) -->
-    <button class="tr-btn" id="undoBtn2" title="실행 취소 (⌘Z)" disabled>
+    <!-- 되돌리기 -->
+    <button class="tr-btn" id="undoBtn2" title="되돌리기 (⌘Z)" disabled>
       <svg viewBox="0 0 40 40"><path fill-rule="evenodd" clip-rule="evenodd" d="M23.38 16.74C26.04 16.74 28.15 18.82 28.15 21.31S26.04 25.89 23.38 25.89H14.26C13.75 25.89 13.34 26.31 13.34 26.82S13.75 27.75 14.26 27.75H23.38C27 27.75 30 24.89 30 21.31S27 14.88 23.38 14.88H10.85C10.34 14.88 9.92 15.3 9.92 15.81S10.34 16.74 10.85 16.74H23.38Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M14.13 12.28C13.77 11.91 13.19 11.9 12.82 12.26L9.9 15.08C9.72 15.25 9.62 15.49 9.62 15.74S9.72 16.24 9.9 16.41L12.82 19.23C13.19 19.58 13.77 19.57 14.13 19.21S14.48 18.25 14.11 17.9L11.88 15.74 14.11 13.59C14.48 13.24 14.49 12.65 14.13 12.28Z" fill="currentColor"/></svg>
       <span class="tr-label">되돌리기</span>
     </button>
 
-    <!-- Redo (13-redo) -->
-    <button class="tr-btn" id="redoBtn2" title="다시 실행 (⌘⇧Z)" disabled>
+    <!-- 다시하기 -->
+    <button class="tr-btn" id="redoBtn2" title="다시하기 (⌘⇧Z)" disabled>
       <svg viewBox="0 0 40 40"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.43 16.87C13.77 16.87 11.66 18.95 11.66 21.44S13.77 26.02 16.43 26.02H25.55C26.06 26.02 26.47 26.44 26.47 26.95S26.06 27.88 25.55 27.88H16.43C12.81 27.88 9.81 25.02 9.81 21.44S12.81 15.01 16.43 15.01H28.96C29.48 15.01 29.89 15.43 29.89 15.94S29.48 16.87 28.96 16.87H16.43Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M25.68 12.41C26.03 12.04 26.62 12.03 26.99 12.39L29.9 15.21C30.08 15.38 30.19 15.62 30.19 15.87S30.08 16.37 29.9 16.54L26.99 19.36C26.62 19.71 26.03 19.7 25.68 19.34S25.33 18.38 25.7 18.03L27.93 15.87 25.7 13.72C25.33 13.37 25.32 12.78 25.68 12.41Z" fill="currentColor"/></svg>
-      <span class="tr-label" style="opacity:.5">Redo</span>
+      <span class="tr-label">다시하기</span>
     </button>
 
     <div class="tr-sep" aria-hidden="true"></div>
 
-    <!-- 브러시 크기 (pen/eraser 선택 시 표시) -->
+    <!-- 브러시 크기 (펜/지우개 선택 시만 표시) -->
     <div id="brushSizeGroup" style="display:none;flex-direction:column;align-items:center;gap:3px;width:52px">
-      <span style="font-size:9px;font-weight:600;color:var(--subtle);letter-spacing:.04em;text-transform:uppercase">크기</span>
-      <div style="display:flex;flex-direction:column;gap:2px;width:100%;align-items:center">
-        <button class="tr-sz on" role="radio" data-size="1" aria-checked="true" title="1핀 (단일 점)" style="width:36px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--orange);color:#fff;border:none;cursor:pointer">1핀</button>
-        <button class="tr-sz" role="radio" data-size="2" aria-checked="false" title="2핀 브러시" style="width:36px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer">2핀</button>
-        <button class="tr-sz" role="radio" data-size="3" aria-checked="false" title="3핀 브러시" style="width:36px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer">3핀</button>
-      </div>
+      <span style="font-size:9px;font-weight:600;color:var(--subtle);letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px">크기</span>
+      <button class="tr-sz on" role="radio" data-size="1" aria-checked="true" title="1핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--orange);color:#fff;border:none;cursor:pointer;transition:all .1s">1핀</button>
+      <button class="tr-sz" role="radio" data-size="2" aria-checked="false" title="2핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer;transition:all .1s">2핀</button>
+      <button class="tr-sz" role="radio" data-size="3" aria-checked="false" title="3핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer;transition:all .1s">3핀</button>
     </div>
 
     <div style="flex:1"></div>
 
-    <!-- Clear (eraser 변형) -->
-    <button class="tr-btn danger" id="clearBtn2" title="전체 지우기">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-      <span class="tr-label">전체지우기</span>
+    <!-- 전체 지우기 (하단 고정) -->
+    <button class="tr-btn danger" id="clearBtn2" title="전체 지우기 — 모든 핀을 지웁니다">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+      <span class="tr-label">전체 지우기</span>
     </button>
+
   </aside>
 
   <!-- CANVAS -->
@@ -1836,10 +1831,10 @@ document.addEventListener('keydown',e=>{
     draw();
     return;
   }
-  // S=select, D=draw, E=erase, F=fill, M=move
-  const toolMap={s:'select',d:'pen',e:'eraser',f:'fill',m:'move'};
+  // S/M=선택, D=펜, E=지우개 (채우기·영역선택 제거)
+  const toolMap={s:'move',m:'move',d:'pen',e:'eraser'};
   if(!e.ctrlKey&&!e.metaKey&&toolMap[e.key]){
-    selectTool(toolMap[e.key]);clearSelection();
+    selectTool(toolMap[e.key]);if(typeof clearSelection==='function')clearSelection();
   }
 },true);
 
@@ -2269,7 +2264,7 @@ function syncToolBar(){
   const u=ge('undoBtn2'),r=ge('redoBtn2');
   if(u)u.disabled=!(appState==='ready'&&(pageUndo[curPage]||[]).length>0);
   if(r)r.disabled=!(appState==='ready'&&(pageRedo[curPage]||[]).length>0);
-  // 브러시 크기 그룹: pen/eraser일 때만 표시
+  // 브러시 크기 그룹: 펜/지우개일 때만 표시 (채우기 제거)
   const sg=ge('sizeGrp2');
   if(sg) sg.style.display=(tool==='pen'||tool==='eraser')?'flex':'none';
   // 새 visible 브러시 크기 그룹
@@ -2299,8 +2294,9 @@ q('.tool-rail').addEventListener('click',e=>{
   const tb=e.target.closest('.tr-btn[data-tool]');
   if(tb&&!tb.disabled&&appState==='ready'){
     const t=tb.dataset.tool;
-    // 모든 도구 엔진 selectTool로 통일 처리
-    if(typeof selectTool==='function') selectTool(t);
+    // 선택·펜·지우개만 처리 (채우기·영역선택 제거)
+    const validTools=['move','pen','eraser'];
+    if(validTools.includes(t)&&typeof selectTool==='function') selectTool(t);
     syncToolBar();return;
   }
   if(e.target.closest('#undoBtn2')){ge('undoBtn')?.click();syncToolBar();return;}
