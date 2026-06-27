@@ -958,26 +958,66 @@ function dtmsJSONFromPages(){const n=(($('fname').value)||'Untitled').trim();
    ============================================================ */
 function renderGray(){
   if(!srcImage){grayBuf=null;alphaBuf=null;return;}
-  const oc=document.createElement('canvas');oc.width=GW;oc.height=GH;const o=oc.getContext('2d',{willReadFrequently:true});
-  const pad2=2, availW=GW-pad2*2, availH=GH-pad2*2;
-  const s=Math.min(availW/srcImage.width,availH/srcImage.height),dw=srcImage.width*s,dh=srcImage.height*s;
-  o.clearRect(0,0,GW,GH);o.drawImage(srcImage,(GW-dw)/2,(GH-dh)/2,dw,dh);
+  const oc=document.createElement('canvas');oc.width=GW;oc.height=GH;
+  const o=oc.getContext('2d',{willReadFrequently:true});
+  /* 패딩 제거 — 전체 60×40 영역을 최대한 활용 */
+  const ar=srcImage.naturalWidth/srcImage.naturalHeight;
+  const gr=GW/GH;
+  let dw,dh;
+  if(ar>gr){dw=GW;dh=Math.round(GW/ar);}
+  else{dh=GH;dw=Math.round(GH*ar);}
+  dw=Math.min(dw,GW);dh=Math.min(dh,GH);
+  /* imageSmoothingQuality: high — 다운샘플링 품질 향상 */
+  o.imageSmoothingEnabled=true;o.imageSmoothingQuality='high';
+  o.fillStyle='#ffffff';o.fillRect(0,0,GW,GH);
+  o.drawImage(srcImage,Math.round((GW-dw)/2),Math.round((GH-dh)/2),dw,dh);
   const d=o.getImageData(0,0,GW,GH).data;
   grayBuf=new Uint8ClampedArray(N);alphaBuf=new Uint8ClampedArray(N);
-  for(let i=0;i<N;i++){const a=d[i*4+3];alphaBuf[i]=a;const af=a/255;grayBuf[i]=(0.299*d[i*4]+0.587*d[i*4+1]+0.114*d[i*4+2])*af+255*(1-af);}
+  for(let i=0;i<N;i++){
+    const r2=d[i*4],g2=d[i*4+1],b2=d[i*4+2],a=d[i*4+3];
+    alphaBuf[i]=a;
+    /* 알파 합성: 투명 픽셀은 흰 배경으로 프리멀티플라이 */
+    const af=a/255;
+    const rr=r2*af+255*(1-af);
+    const gg=g2*af+255*(1-af);
+    const bb=b2*af+255*(1-af);
+    grayBuf[i]=Math.round(0.2126*rr+0.7152*gg+0.0722*bb);
+  }
 }
 function analyzeImageType(){
-  let hasAlpha=false,white=0,dark=0,edges=0;const hist=new Array(256).fill(0);
-  for(let i=0;i<N;i++){if(alphaBuf[i]<250)hasAlpha=true;const v=grayBuf[i]|0;hist[v]++;if(v>225)white++;if(v<55)dark++;}
-  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;if(x+1<GW&&Math.abs(grayBuf[i]-grayBuf[i+1])>40)edges++;if(y+1<GH&&Math.abs(grayBuf[i]-grayBuf[i+GW])>40)edges++;}
-  let acc=0,p5=0,p95=255;for(let v=0;v<256;v++){acc+=hist[v];if(!p5&&acc>=N*0.05)p5=v;if(acc>=N*0.95){p95=v;break;}}
-  const whiteR=white/N,darkR=dark/N,edgeR=edges/(2*N),spread=p95-p5;let type='photo';
+  let hasAlpha=false,white=0,dark=0,edges=0,midLight=0;
+  const hist=new Array(256).fill(0);
+  for(let i=0;i<N;i++){
+    if(alphaBuf[i]<200)hasAlpha=true; // 불완전 투명도도 감지
+    const v=grayBuf[i]|0;hist[v]++;
+    if(v>220)white++;
+    if(v<50)dark++;
+    if(v>180&&v<=220)midLight++; // 밝은 회색 (JPEG 압축 배경)
+  }
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){
+    const i=y*GW+x;
+    if(x+1<GW&&Math.abs(grayBuf[i]-grayBuf[i+1])>35)edges++;
+    if(y+1<GH&&Math.abs(grayBuf[i]-grayBuf[i+GW])>35)edges++;
+  }
+  let acc=0,p5=0,p95=255;
+  for(let v=0;v<256;v++){acc+=hist[v];if(!p5&&acc>=N*0.05)p5=v;if(acc>=N*0.95){p95=v;break;}}
+  const whiteR=white/N,darkR=dark/N,edgeR=edges/(2*N),spread=p95-p5;
+  const brightR=(white+midLight)/N; // 밝은 배경 비율
+
+  let type='photo';
   if(hasAlpha)type='transparent';
-  /* 선화 감지: 흰배경(>0.5)이고 어둡지 않고(darkR<0.4), edgeR 임계 완화(0.40)
-     또는 배경이 아주 밝으면(whiteR>0.62) 선화로 판단 */
-  else if(whiteR>0.5&&darkR<0.4&&(edgeR<0.40||whiteR>0.62))type='lineart';
-  else if(spread<70)type='lowcontrast';
-  return {hasAlpha,whiteR,darkR,edgeR,spread,type,label:({transparent:'투명 PNG',lineart:'선화·아이콘',lowcontrast:'저대비',photo:'사진'})[type]};
+  /* 선화 감지 조건 강화:
+     - 밝은 배경 60% 이상 AND 어두운 픽셀 적음
+     - edgeR 임계값: 0.50 (JPEG 압축 아티팩트 허용)
+     - 또는 흰 배경 70% 이상 */
+  else if(brightR>0.60&&darkR<0.35&&(edgeR<0.50||brightR>0.70))type='lineart';
+  /* 저대비: 히스토그램 분포가 좁음 */
+  else if(spread<60)type='lowcontrast';
+  /* 아이콘/단순 그래픽: 극단값 위주 */
+  else if(whiteR+darkR>0.85)type='lineart';
+
+  return {hasAlpha,whiteR,darkR,edgeR,spread,brightR,type,
+    label:({transparent:'투명 PNG',lineart:'선화·아이콘',lowcontrast:'저대비',photo:'사진'})[type]};
 }
 
 /* ============================================================
@@ -1046,51 +1086,108 @@ function gradeReason(g,m){if(g>=3){if(m.iso/Math.max(1,m.on)<0.08&&m.count<=4)re
 function autoSelect(){
   imgMeta=Object.assign(imgMeta||{},analyzeImageType());
   const type=imgMeta.type;
-
-  /* ── 이미지 타입별 즉시 선택 ── */
   let meth,pol=false,ol=0;
 
+  /* ── 투명 PNG ── */
   if(imgMeta.hasAlpha){
-    // 투명 PNG: alpha 마스크
     const alphaM=alphaMask(false);
     const onCnt=alphaM.reduce((s,v)=>s+v,0);
+    // 불투명 영역이 65% 이상이면 반전 (어두운 형태를 배경으로 인식)
     pol=onCnt/N>0.65;
-    meth='alpha'; ol=0; // 투명 PNG도 outline 없이 먼저 시도
-  } else if(type==='lineart'){
-    // 선화(흰 배경+검은 선): Otsu, outline 절대 금지
-    // outline을 쓰면 이미 선인 픽셀의 경계만 남겨 사각형 테두리 현상 발생
-    meth='otsu'; pol=false; ol=0;
-    const t=otsu(grayBuf);
-    const m=fillT(grayBuf,t,false);
-    const on=m.reduce((s,v)=>s+v,0);
-    if(on/N>0.6) pol=true; // 어두운 배경이면 반전
-  } else if(type==='lowcontrast'){
-    meth='adaptive'; pol=false; ol=0;
-  } else if(type==='photo'){
-    // 사진: Otsu, 밀도가 높아 복잡할 때만 outline 적용
-    meth='otsu'; pol=false; ol=0;
-    const t=otsu(grayBuf);
-    const m=fillT(grayBuf,t,false);
-    const on=m.reduce((s,v)=>s+v,0);
-    const d=on/N;
-    if(d>0.7) pol=true;
-    // 채움 밀도가 35~65%인 복잡한 사진만 outline=1 (외곽선 강조)
-    else if(d>0.35&&d<=0.65) ol=1;
-  } else {
-    meth='otsu'; pol=false; ol=0;
-    const t=otsu(grayBuf);
-    const m=fillT(grayBuf,t,false);
-    const on=m.reduce((s,v)=>s+v,0);
-    if(on/N>0.65) pol=true;
+    meth='alpha'; ol=0;
+    method='alpha'; polarity=pol; outline=ol;
+    threshold=128; recoThreshold=128; recoOutline=0;
+    rebuild();
+    const q=tactileQualityScore(grid,{type,outline});
+    return {score:q.score,meth,pol,ol};
   }
 
-  method=(meth==='alpha')?'alpha':meth;
-  polarity=pol; outline=ol;
-  threshold=(meth==='mean')?Math.round(meanT(grayBuf)):otsu(grayBuf);
-  recoThreshold=threshold; recoOutline=outline;
+  /* ── Otsu 임계값 계산 ── */
+  const t=otsu(grayBuf);
+  const rawMask=fillT(grayBuf,t,false);
+  const rawOn=rawMask.reduce((s,v)=>s+v,0);
+  const rawD=rawOn/N;
+
+  /* ── 선화 (흰 배경 + 검은 선) ── */
+  if(type==='lineart'){
+    // 선화는 어두운 픽셀이 선(ON). 반전 불필요
+    // rawD가 너무 높으면 임계값을 높여서 어두운 픽셀만 잡기
+    let finalT=t;
+    if(rawD>0.5){
+      // 배경이 어두운 경우 → 반전
+      pol=true; finalT=t;
+    } else if(rawD>0.35){
+      // 너무 많이 잡힘 → 임계값 내려서 더 진한 선만
+      finalT=Math.round(t*0.75);
+    }
+    meth='otsu'; ol=0;
+    method='otsu'; polarity=pol; outline=ol;
+    threshold=finalT; recoThreshold=finalT; recoOutline=0;
+    rebuild();
+    // 결과 검증: 너무 적으면 임계값 다시 조정
+    const after=grid.reduce((s,v)=>s+v,0);
+    if(after/N<0.05&&!pol){
+      // 결과가 너무 적음 → 임계값 높여서 재시도
+      threshold=Math.min(240,Math.round(t*1.3));
+      recoThreshold=threshold;
+      rebuild();
+    }
+    const q=tactileQualityScore(grid,{type,outline});
+    return {score:q.score,meth,pol,ol};
+  }
+
+  /* ── 저대비 이미지 ── */
+  if(type==='lowcontrast'){
+    // adaptive가 세부를 더 잘 잡음
+    meth='adaptive'; pol=false; ol=0;
+    method='adaptive'; polarity=false; outline=0;
+    threshold=t; recoThreshold=t; recoOutline=0;
+    rebuild();
+    const after=grid.reduce((s,v)=>s+v,0);
+    if(after/N<0.05){
+      // 결과가 너무 적으면 sauvola로 재시도
+      method='sauvola'; rebuild();
+    }
+    const q=tactileQualityScore(grid,{type,outline});
+    return {score:q.score,meth:method,pol:false,ol:0};
+  }
+
+  /* ── 사진 / 일반 이미지 ── */
+  // 1단계: 기본 Otsu
+  meth='otsu'; pol=false; ol=0;
+  let finalT=t;
+
+  if(rawD>0.72){
+    // 너무 많이 채워짐 → 반전
+    pol=true;
+  } else if(rawD>0.55){
+    // 채움 많음 → 임계값 낮춰서 더 어두운 것만
+    finalT=Math.round(t*0.72);
+  } else if(rawD<0.05){
+    // 너무 적음 → 임계값 높여서 더 많이 잡기
+    finalT=Math.min(240,Math.round(t*1.4));
+  }
+
+  method='otsu'; polarity=pol; outline=ol;
+  threshold=finalT; recoThreshold=finalT; recoOutline=0;
   rebuild();
+
+  // 2단계: 결과 검증 및 보정
+  const after=grid.reduce((s,v)=>s+v,0);
+  const afterD=after/N;
+
+  if(afterD<0.04&&!pol){
+    // 여전히 너무 적음 → sauvola로 재시도
+    method='sauvola'; polarity=false; threshold=t; recoThreshold=t;
+    rebuild();
+  } else if(afterD>0.65&&pol){
+    // 반전 후에도 너무 많음 → outline 추가
+    ol=1; outline=1; recoOutline=1;
+    rebuild();
+  }
+
   const q=tactileQualityScore(grid,{type,outline});
-  return {score:q.score,meth,pol,ol};
+  return {score:q.score,meth:method,pol:polarity,ol:outline};
 }
 
 /* ============================================================
@@ -1496,25 +1593,28 @@ initDotPad();
 function removeBorder(g){
   const o=new Uint8Array(g);
   const runLen=(arr)=>{let mx=0,cur=0;for(const v of arr){cur=v?cur+1:0;if(cur>mx)mx=cur;}return mx;};
-  // 상단 2행: 가로 연속 핀이 GW*0.4 이상이면 border
-  for(let r=0;r<2;r++){
+  const density=(arr)=>arr.reduce((s,v)=>s+v,0)/arr.length;
+  /* 기준: 연속 핀 55% 이상 AND 밀도 60% 이상 → 의도적 테두리 아닌 경우 보호 */
+  const isBorder=(arr,len)=>runLen(arr)>len*0.55&&density(arr)>0.6;
+  // 상단 1행 (2행으로 늘리면 너무 많이 지워짐)
+  for(let r=0;r<1;r++){
     const row=[];for(let c=0;c<GW;c++)row.push(o[r*GW+c]);
-    if(runLen(row)>GW*0.4) for(let c=0;c<GW;c++)o[r*GW+c]=0;
+    if(isBorder(row,GW)) for(let c=0;c<GW;c++)o[r*GW+c]=0;
   }
-  // 하단 2행
-  for(let r=GH-2;r<GH;r++){
+  // 하단 1행
+  for(let r=GH-1;r<GH;r++){
     const row=[];for(let c=0;c<GW;c++)row.push(o[r*GW+c]);
-    if(runLen(row)>GW*0.4) for(let c=0;c<GW;c++)o[r*GW+c]=0;
+    if(isBorder(row,GW)) for(let c=0;c<GW;c++)o[r*GW+c]=0;
   }
-  // 좌측 2열
-  for(let c=0;c<2;c++){
+  // 좌측 1열
+  for(let c=0;c<1;c++){
     const col=[];for(let r=0;r<GH;r++)col.push(o[r*GW+c]);
-    if(runLen(col)>GH*0.4) for(let r=0;r<GH;r++)o[r*GW+c]=0;
+    if(isBorder(col,GH)) for(let r=0;r<GH;r++)o[r*GW+c]=0;
   }
-  // 우측 2열
-  for(let c=GW-2;c<GW;c++){
+  // 우측 1열
+  for(let c=GW-1;c<GW;c++){
     const col=[];for(let r=0;r<GH;r++)col.push(o[r*GW+c]);
-    if(runLen(col)>GH*0.4) for(let r=0;r<GH;r++)o[r*GW+c]=0;
+    if(isBorder(col,GH)) for(let r=0;r<GH;r++)o[r*GW+c]=0;
   }
   return o;
 }
@@ -1525,10 +1625,19 @@ function smoothPass(g){
   for(let y=1;y<GH-1;y++)for(let x=1;x<GW-1;x++){
     const i=y*GW+x;
     const n4=nb(g,x,y,false); // 4방향 이웃 수
-    // 고립점(이웃 0) → 제거
+    // 고립점(4방향 이웃 0개) → 제거 (잡음)
     if(g[i]&&n4===0){o[i]=0;continue;}
-    // 빈점인데 4방향 이웃이 모두 켜짐 → 채움 (구멍 메우기)
-    if(!g[i]&&n4===4) o[i]=1;
+    // 구멍 메우기는 8방향 모두 ON일 때만 (더 보수적)
+    // — 선화에서 의도적 빈 공간을 채우지 않도록
+    if(!g[i]){
+      let n8=0;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        if(dx===0&&dy===0)continue;
+        const nx=x+dx,ny=y+dy;
+        if(nx>=0&&nx<GW&&ny>=0&&ny<GH&&g[ny*GW+nx])n8++;
+      }
+      if(n8>=7)o[i]=1; // 8방향 중 7개 이상 ON이면 채움
+    }
   }
   return o;
 }
