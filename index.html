@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -441,6 +443,16 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     </button>
 
     <div class="tr-sep" aria-hidden="true"></div>
+
+    <!-- 브러시 크기 (pen/eraser 선택 시 표시) -->
+    <div id="brushSizeGroup" style="display:none;flex-direction:column;align-items:center;gap:3px;width:52px">
+      <span style="font-size:9px;font-weight:600;color:var(--subtle);letter-spacing:.04em;text-transform:uppercase">크기</span>
+      <div style="display:flex;flex-direction:column;gap:2px;width:100%;align-items:center">
+        <button class="tr-sz on" role="radio" data-size="1" aria-checked="true" title="1핀 (단일 점)" style="width:36px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--orange);color:#fff;border:none;cursor:pointer">1핀</button>
+        <button class="tr-sz" role="radio" data-size="2" aria-checked="false" title="2핀 브러시" style="width:36px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer">2핀</button>
+        <button class="tr-sz" role="radio" data-size="3" aria-checked="false" title="3핀 브러시" style="width:36px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer">3핀</button>
+      </div>
+    </div>
 
     <div style="flex:1"></div>
 
@@ -1404,6 +1416,246 @@ setAppState('empty');layout();updateScoreUI();updateUndoButtons();
 initDotPad();
 
 /* ============================================================
+   ENGINE PATCH — 변환 품질 고도화 + 툴 완전 구현
+   ============================================================ */
+
+/* ── 1. 이미지 외곽 테두리 자동 제거 ──────────────────────────
+   변환 결과에서 이미지 경계(top/bottom/left/right 1~2행)에
+   연속으로 켜진 점이 있으면 노이즈로 간주하고 지움           */
+function removeBorder(g){
+  const o=new Uint8Array(g);
+  const runLen=(arr)=>{let mx=0,cur=0;for(const v of arr){cur=v?cur+1:0;if(cur>mx)mx=cur;}return mx;};
+  // 상단 2행: 가로 연속 핀이 GW*0.4 이상이면 border
+  for(let r=0;r<2;r++){
+    const row=[];for(let c=0;c<GW;c++)row.push(o[r*GW+c]);
+    if(runLen(row)>GW*0.4) for(let c=0;c<GW;c++)o[r*GW+c]=0;
+  }
+  // 하단 2행
+  for(let r=GH-2;r<GH;r++){
+    const row=[];for(let c=0;c<GW;c++)row.push(o[r*GW+c]);
+    if(runLen(row)>GW*0.4) for(let c=0;c<GW;c++)o[r*GW+c]=0;
+  }
+  // 좌측 2열
+  for(let c=0;c<2;c++){
+    const col=[];for(let r=0;r<GH;r++)col.push(o[r*GW+c]);
+    if(runLen(col)>GH*0.4) for(let r=0;r<GH;r++)o[r*GW+c]=0;
+  }
+  // 우측 2열
+  for(let c=GW-2;c<GW;c++){
+    const col=[];for(let r=0;r<GH;r++)col.push(o[r*GW+c]);
+    if(runLen(col)>GH*0.4) for(let r=0;r<GH;r++)o[r*GW+c]=0;
+  }
+  return o;
+}
+
+/* ── 2. 스무딩 — 고립점/빈틈 정리 ────────────────────────── */
+function smoothPass(g){
+  const o=new Uint8Array(g);
+  for(let y=1;y<GH-1;y++)for(let x=1;x<GW-1;x++){
+    const i=y*GW+x;
+    const n4=nb(g,x,y,false); // 4방향 이웃 수
+    // 고립점(이웃 0) → 제거
+    if(g[i]&&n4===0){o[i]=0;continue;}
+    // 빈점인데 4방향 이웃이 모두 켜짐 → 채움 (구멍 메우기)
+    if(!g[i]&&n4===4) o[i]=1;
+  }
+  return o;
+}
+
+/* ── 3. 고도화된 rebuild ──────────────────────────────────── */
+const _rebuild=rebuild;
+rebuild=function(){
+  if(!grayBuf)return;
+  let m=cleanup(baseMask(threshold,method,polarity));
+  m=applyOutline(m,outline);
+  // 테두리 자동 제거
+  m=removeBorder(m);
+  // 스무딩 1패스
+  m=smoothPass(m);
+  grid=m;
+  pages[curPage]=grid;
+};
+
+/* ── 4. SELECT 도구 ────────────────────────────────────────── */
+let selBox=null; // {x0,y0,x1,y1}
+let selBuffer=null; // 선택 영역 내용
+let selDragStart=null;
+
+function drawSelectBox(){
+  if(!selBox)return;
+  const{x0,y0,x1,y1}=selBox;
+  const px0=off+Math.min(x0,x1)*cell;
+  const py0=off+Math.min(y0,y1)*cell;
+  const pw=(Math.abs(x1-x0)+1)*cell;
+  const ph=(Math.abs(y1-y0)+1)*cell;
+  ctx.save();
+  ctx.strokeStyle='#FF4D00';
+  ctx.lineWidth=1.5;
+  ctx.setLineDash([4,3]);
+  ctx.strokeRect(px0+.5,py0+.5,pw-1,ph-1);
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,77,0,.08)';
+  ctx.fillRect(px0,py0,pw,ph);
+  ctx.restore();
+}
+
+/* ── 5. FILL 도구 (bucket) ─────────────────────────────────── */
+function floodFill(gx,gy,val){
+  if(gx<0||gy<0||gx>=GW||gy>=GH)return;
+  const target=grid[gy*GW+gx];
+  if(target===val)return;
+  const visited=new Uint8Array(N);
+  const stack=[[gx,gy]];
+  while(stack.length){
+    const[x,y]=stack.pop();
+    if(x<0||y<0||x>=GW||y>=GH)continue;
+    const i=y*GW+x;
+    if(visited[i]||grid[i]!==target)continue;
+    visited[i]=1;
+    grid[i]=val;
+    stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+  }
+  pages[curPage]=grid;
+}
+
+/* ── 6. draw 오버라이드: select box 추가 ──────────────────── */
+const _draw2=draw;
+draw=function(){
+  _draw2();
+  if(tool==='select') drawSelectBox();
+};
+
+/* ── 7. 포인터 이벤트 확장 (select/fill) ──────────────────── */
+pad.addEventListener('pointerdown',ev=>{
+  if(appState!=='ready'||!hasImage)return;
+  if(tool==='select'){
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    const c=cellAt(ev);
+    selBox={x0:c.x,y0:c.y,x1:c.x,y1:c.y};
+    selBuffer=null;
+    draw();
+  } else if(tool==='fill'){
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    const c=cellAt(ev);
+    pushUndo();
+    const val=grid[c.y*GW+c.x]?0:1; // 클릭한 곳 반대로 채움
+    floodFill(c.x,c.y,val);
+    draw();afterChange();
+  }
+},{capture:true}); // capture:true로 엔진 기본 핸들러보다 먼저 실행
+
+pad.addEventListener('pointermove',ev=>{
+  if(tool==='select'&&selBox&&ev.buttons){
+    const c=cellAt(ev);
+    selBox.x1=c.x; selBox.y1=c.y;
+    draw();
+  }
+});
+
+pad.addEventListener('pointerup',ev=>{
+  if(tool==='select'&&selBox){
+    // 선택 완료: 선택 영역 정규화
+    const x0=Math.min(selBox.x0,selBox.x1);
+    const y0=Math.min(selBox.y0,selBox.y1);
+    const x1=Math.max(selBox.x0,selBox.x1);
+    const y1=Math.max(selBox.y0,selBox.y1);
+    selBox={x0,y0,x1,y1};
+    // 선택 영역 복사
+    selBuffer=[];
+    for(let y=y0;y<=y1;y++){
+      const row=[];
+      for(let x=x0;x<=x1;x++) row.push(grid[y*GW+x]);
+      selBuffer.push(row);
+    }
+    draw();
+  }
+});
+
+/* ── 8. Select 영역 조작 헬퍼 ─────────────────────────────── */
+function clearSelection(){selBox=null;selBuffer=null;draw();}
+function invertSelection(){
+  if(!selBox||!selBuffer)return;
+  pushUndo();
+  const{x0,y0,x1,y1}=selBox;
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    const i=y*GW+x;grid[i]=grid[i]?0:1;
+  }
+  pages[curPage]=grid;draw();afterChange();
+}
+function fillSelection(val){
+  if(!selBox)return;
+  pushUndo();
+  const{x0,y0,x1,y1}=selBox;
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)grid[y*GW+x]=val;
+  pages[curPage]=grid;draw();afterChange();
+}
+
+/* ── 9. 키보드 단축키 확장 ─────────────────────────────────── */
+document.addEventListener('keydown',e=>{
+  if(document.activeElement.tagName==='INPUT')return;
+  if(e.key==='Escape'){clearSelection();return;}
+  if(e.key==='Delete'||e.key==='Backspace'){
+    if(selBox){e.preventDefault();fillSelection(0);}
+    return;
+  }
+  if(e.key==='a'&&(e.ctrlKey||e.metaKey)){
+    e.preventDefault();
+    selBox={x0:0,y0:0,x1:GW-1,y1:GH-1};
+    selBuffer=[];
+    for(let y=0;y<GH;y++){const row=[];for(let x=0;x<GW;x++)row.push(grid[y*GW+x]);selBuffer.push(row);}
+    draw();
+    return;
+  }
+  // S=select, D=draw, E=erase, F=fill, M=move
+  const toolMap={s:'select',d:'pen',e:'eraser',f:'fill',m:'move'};
+  if(!e.ctrlKey&&!e.metaKey&&toolMap[e.key]){
+    selectTool(toolMap[e.key]);clearSelection();
+  }
+},true);
+
+/* ── 10. autoSelect 고도화 ──────────────────────────────────── */
+autoSelect=function(){
+  imgMeta=Object.assign(imgMeta||{},analyzeImageType());
+  const type=imgMeta.type;
+  let meth,pol=false,ol=0;
+
+  if(imgMeta.hasAlpha){
+    const alphaM=alphaMask(false);
+    const onCnt=alphaM.reduce((s,v)=>s+v,0);
+    pol=onCnt/N>0.65;
+    meth='alpha'; ol=0;
+  } else if(type==='lineart'){
+    meth='otsu'; pol=false; ol=0;
+    const t=otsu(grayBuf);
+    const m=fillT(grayBuf,t,false);
+    const on=m.reduce((s,v)=>s+v,0);
+    if(on/N>0.6) pol=true;
+  } else if(type==='lowcontrast'){
+    meth='adaptive'; pol=false; ol=0;
+  } else {
+    // photo / general: 더 세밀하게
+    meth='otsu'; pol=false; ol=0;
+    const t=otsu(grayBuf);
+    const m=fillT(grayBuf,t,false);
+    const on=m.reduce((s,v)=>s+v,0);
+    const d=on/N;
+    if(d>0.72) pol=true;
+    // outline은 사용 안 함 — removeBorder + smoothPass가 대신 처리
+  }
+
+  method=(meth==='alpha')?'alpha':meth;
+  polarity=pol; outline=ol;
+  threshold=(meth==='mean')?Math.round(meanT(grayBuf)):otsu(grayBuf);
+  recoThreshold=threshold; recoOutline=outline;
+  rebuild();
+  const q=tactileQualityScore(grid,{type,outline});
+  return {score:q.score,meth,pol,ol};
+};
+
+
+/* ============================================================
    Dot Canvas AI — Addon
    Clean studio UI, full engine wiring
    ============================================================ */
@@ -1703,19 +1955,52 @@ function syncToolBar(){
   const u=ge('undoBtn2'),r=ge('redoBtn2');
   if(u)u.disabled=!(appState==='ready'&&(pageUndo[curPage]||[]).length>0);
   if(r)r.disabled=!(appState==='ready'&&(pageRedo[curPage]||[]).length>0);
+  // 브러시 크기 그룹: pen/eraser일 때만 표시
+  const sg=ge('sizeGrp2');
+  if(sg) sg.style.display=(tool==='pen'||tool==='eraser')?'flex':'none';
+  // 새 visible 브러시 크기 그룹
+  const bsg=ge('brushSizeGroup');
+  if(bsg){
+    bsg.style.display=(tool==='pen'||tool==='eraser')?'flex':'none';
+    if(tool==='pen'||tool==='eraser'){
+      const sz=(toolSettings&&toolSettings[tool])?toolSettings[tool].size:1;
+      bsg.querySelectorAll('.tr-sz').forEach(b=>{
+        const on=+b.dataset.size===sz;
+        b.classList.toggle('on',on);
+        b.setAttribute('aria-checked',on?'true':'false');
+        b.style.background=on?'var(--orange)':'var(--surface)';
+        b.style.color=on?'#fff':'var(--text)';
+        b.style.border=on?'none':'1.5px solid var(--border)';
+      });
+    }
+  }
+  // 커서 스타일
+  if(pad){
+    const cursorMap={move:'default',pen:'crosshair',eraser:'cell',fill:'copy',select:'crosshair'};
+    pad.style.cursor=cursorMap[tool]||'default';
+  }
 }
 
 q('.tool-rail').addEventListener('click',e=>{
   const tb=e.target.closest('.tr-btn[data-tool]');
   if(tb&&!tb.disabled&&appState==='ready'){
     const t=tb.dataset.tool;
-    if(['move','pen','eraser'].includes(t))selectTool(t);
-    else{qa('.tr-btn[data-tool]').forEach(b=>b.classList.toggle('active',b===tb));q('.tool-rail').dataset.tool=t;}
+    // 모든 도구를 selectTool로 통일 (select, fill도 엔진에 등록)
+    if(typeof selectTool==='function') selectTool(t);
+    // select/fill은 엔진 selectTool이 무시할 수 있으므로 직접 tool 변수 설정
+    if(t==='select'||t==='fill'){
+      try{ tool=t; }catch(e2){}
+      // 전역 tool 변수가 const라면 window.tool 시도
+      try{ window.tool=t; }catch(e2){}
+    }
     syncToolBar();return;
   }
   if(e.target.closest('#undoBtn2')){ge('undoBtn')?.click();syncToolBar();return;}
   if(e.target.closest('#redoBtn2')){ge('redoBtn')?.click();syncToolBar();return;}
-  if(e.target.closest('#clearBtn2')){const b=ge('clearBtn');if(b)b.click();}
+  if(e.target.closest('#clearBtn2')){
+    if(typeof clearSelection==='function') clearSelection();
+    const b=ge('clearBtn');if(b)b.click();
+  }
 });
 
 /* ── mode buttons ── */
@@ -1870,6 +2155,14 @@ function mobileOnReady(){
 }
 
 /* ── init ── */
+/* ── 브러시 크기 그룹 클릭 ── */
+document.getElementById('brushSizeGroup')?.addEventListener('click', e=>{
+  const b=e.target.closest('.tr-sz[data-size]');
+  if(!b)return;
+  if(typeof setSize==='function') setSize(+b.dataset.size);
+  syncToolBar();
+});
+
 function init(){
   fitCanvas();syncQuality();syncConn();syncToolBar();resetQuality();
   /* 슬라이더 초기값 */
