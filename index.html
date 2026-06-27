@@ -1087,16 +1087,12 @@ function loadImageFile(f){
   resetForNewFile();const nm=f.name.replace(/\.[^.]+$/,'')||'Untitled';setFname(nm);
   const img=new Image();
   const url=URL.createObjectURL(f);
+  /* revoke는 반드시 onload/onerror 이후에 */
+  img.onload=()=>{ URL.revokeObjectURL(url); startAnalyze(img,f.name); };
+  img.onerror=()=>{ URL.revokeObjectURL(url); toast('이미지를 열 수 없어요.','err'); setAppState(hasImage?'ready':'empty'); loading=false; };
   img.src=url;
-  /* decode()로 디코딩 완료 즉시 처리 — onload보다 빠름 */
-  img.decode().then(()=>{
-    URL.revokeObjectURL(url);
-    startAnalyze(img,f.name);
-  }).catch(()=>{
-    URL.revokeObjectURL(url);
-    img.onload=()=>startAnalyze(img,f.name);
-    img.onerror=()=>{toast('이미지를 열 수 없어요.','err');setAppState(hasImage?'ready':'empty');loading=false;};
-  });
+  /* decode()가 지원되면 더 빠름 — 실패해도 onload 폴백 */
+  if(img.decode){ img.decode().then(()=>{ if(img.complete&&img.naturalWidth){ URL.revokeObjectURL(url); startAnalyze(img,f.name); } }).catch(()=>{}); }
 }
 function loadSample(){const c=document.createElement('canvas');c.width=240;c.height=160;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,240,160);g.strokeStyle='#000';g.lineWidth=12;g.lineJoin='round';g.beginPath();g.moveTo(60,150);g.lineTo(60,80);g.lineTo(120,35);g.lineTo(180,80);g.lineTo(180,150);g.closePath();g.stroke();g.strokeRect(105,108,30,42);const img=new Image();img.onload=()=>{resetForNewFile();setFname('샘플');startAnalyze(img,'샘플 이미지');};img.src=c.toDataURL();}
 
