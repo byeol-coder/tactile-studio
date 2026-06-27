@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -30,6 +31,12 @@
   --amber:     #A16207;
   --font:      'Inter','Noto Sans KR',system-ui,sans-serif;
   --r-s:4px; --r-m:8px; --r-l:12px; --r-xl:16px; --r-2xl:22px;
+  /* spacing scale */
+  --sp-xs:4px; --sp-s:8px; --sp-m:12px; --sp-l:16px; --sp-xl:20px;
+  /* component heights */
+  --h-bar:52px; --h-btn:32px; --h-btn-sm:28px;
+  /* panel widths */
+  --w-rail:64px; --w-panel:280px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);
@@ -46,11 +53,11 @@ svg{display:block;flex-shrink:0}
 
 /* ── HEADER ── */
 .app-header{
-  height:52px;background:var(--white);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0
+  height:var(--h-bar);background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 var(--sp-xl);gap:var(--sp-m);flex-shrink:0
 }
 .brand{display:flex;align-items:center;gap:9px;min-width:160px}
-.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--ink);
+.brand-mark{width:30px;height:30px;border-radius:var(--r-m);background:var(--ink);
   display:grid;place-items:center;flex-shrink:0}
 .brand-name{font-size:14px;font-weight:700;letter-spacing:-.02em}
 .brand-name span{color:var(--orange)}
@@ -61,20 +68,20 @@ svg{display:block;flex-shrink:0}
 /* ai prompt bar */
 .ai-bar{flex:1;position:relative;max-width:560px}
 .ai-bar-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none}
-.ai-bar input{width:100%;height:34px;padding:0 12px 0 32px;border-radius:10px;
+.ai-bar input{width:100%;height:var(--h-btn);padding:0 var(--sp-m) 0 32px;border-radius:var(--r-l);
   border:1.5px solid var(--border);background:var(--surface);font-size:12px;color:var(--ink)}
 .ai-bar input:focus{border-color:var(--border2);background:var(--white)}
 
 /* mode selector */
 .mode-seg{display:none;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;gap:2px}
 .mode-btn{height:26px;padding:0 11px;border-radius:7px;font-size:11px;font-weight:600;
-  color:var(--muted);transition:all .1s;white-space:nowrap}
+  color:var(--muted);transition:all .12s;white-space:nowrap}
 .mode-btn.active{background:var(--white);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .mode-btn:hover:not(.active){color:var(--text)}
 
 .hdr-actions{display:flex;gap:7px;align-items:center}
-.hdr-btn{height:32px;padding:0 14px;border-radius:9px;font-size:12px;font-weight:600;
-  display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .1s}
+.hdr-btn{height:var(--h-btn);padding:0 14px;border-radius:var(--r-l);font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .12s}
 .hdr-btn.primary{background:var(--orange);color:#fff;box-shadow:0 2px 8px rgba(255,77,0,.22)}
 .hdr-btn.primary:hover{background:var(--orange-d)}
 .hdr-btn.secondary{border:1.5px solid var(--border);background:var(--white);color:var(--text)}
@@ -86,40 +93,40 @@ svg{display:block;flex-shrink:0}
 
 /* ── TOOL RAIL ── */
 .tool-rail{
-  width:64px;background:var(--white);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:2px;flex-shrink:0
+  width:var(--w-rail);background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;padding:var(--sp-m) 0;gap:3px;flex-shrink:0
 }
 .tr-btn{
   width:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;padding:7px 4px;border-radius:10px;color:#7A7670;transition:all .1s
+  gap:4px;padding:8px 4px;border-radius:var(--r-l);color:var(--muted);transition:all .12s
 }
 .tr-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.tr-btn .tr-label{font-size:9px;font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+.tr-btn .tr-label{font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1}
 .tr-btn:hover:not(:disabled){background:var(--surface);color:var(--text)}
 .tr-btn.active{background:var(--orange);color:#fff}
 .tr-btn:disabled{opacity:.3;cursor:not-allowed}
 .tr-btn.danger:not(.active){color:var(--red)}
 .tr-btn.danger:hover{background:var(--red-bg)}
-.tr-sep{width:36px;height:1px;background:var(--border);margin:6px 0;flex-shrink:0}
+.tr-sep{width:40px;height:1px;background:var(--border);margin:8px 0;flex-shrink:0}
 
 /* ── CANVAS AREA ── */
 .canvas-area{
   flex:1;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  background:var(--bg);padding:16px 20px;overflow:hidden;position:relative
+  background:var(--bg);padding:var(--sp-l) var(--sp-xl);overflow:hidden;position:relative
 }
 .canvas-meta{
-  margin-bottom:10px;display:flex;align-items:center;gap:10px
+  margin-bottom:var(--sp-s);display:flex;align-items:center;gap:var(--sp-s)
 }
-.canvas-meta-label{font-size:11px;font-weight:500;color:var(--muted);
-  letter-spacing:.05em;text-transform:uppercase}
-.ai-done-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;
-  background:var(--orange-bg);color:var(--orange);letter-spacing:.03em}
+.canvas-meta-label{font-size:11px;font-weight:600;color:var(--muted);
+  letter-spacing:.04em}
+.ai-done-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;
+  background:var(--orange-bg);color:var(--orange);letter-spacing:.02em}
 
 /* dot grid */
 .dot-grid-wrap{
-  background:#F4F1E8;border-radius:14px;padding:10px;
-  box-shadow:0 4px 24px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04)
+  background:#F4F1E8;border-radius:var(--r-xl);padding:10px;
+  box-shadow:0 2px 16px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04)
 }
 #pad{display:block;touch-action:none;border-radius:6px}
 #beforeImg{display:none;position:absolute;inset:0;width:100%;height:100%;
@@ -144,7 +151,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 .ov-sub{font-size:12px;color:var(--muted);max-width:28ch;line-height:1.75}
 .ov-ctas{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
 .ov-cta{height:36px;padding:0 18px;border-radius:11px;font-size:13px;font-weight:600;
-  display:inline-flex;align-items:center;gap:7px;transition:all .1s;white-space:nowrap}
+  display:inline-flex;align-items:center;gap:7px;transition:all .12s;white-space:nowrap}
 .ov-cta.primary{background:var(--ink);color:#fff}
 .ov-cta.primary:hover{background:#2C2C2C}
 .ov-cta.secondary{border:1.5px solid var(--border);background:var(--white);color:var(--text)}
@@ -166,15 +173,15 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
 /* ── RIGHT PANEL (Inspector) ── */
 .right-panel{
-  width:268px;background:var(--white);border-left:1px solid var(--border);
+  width:var(--w-panel);background:var(--white);border-left:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;flex-shrink:0
 }
-.rp-header{padding:14px 16px 0;margin-bottom:2px}
+.rp-header{padding:var(--sp-l) var(--sp-l) 0;margin-bottom:0}
 .rp-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
-.rp-scroll{flex:1;overflow-y:auto;padding:12px 16px 24px;display:flex;flex-direction:column;gap:16px}
+.rp-scroll{flex:1;overflow-y:auto;padding:var(--sp-l) var(--sp-l) var(--sp-xl);display:flex;flex-direction:column;gap:14px}
 
 /* stat card */
-.stat-card{background:var(--surface);border-radius:var(--r-l);padding:10px 12px}
+.stat-card{background:var(--surface);border-radius:var(--r-l);padding:var(--sp-m)}
 .stat-num{font-size:24px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
 .stat-num-unit{font-size:12px;font-weight:500;color:var(--muted);margin-left:4px}
 .stat-sub{font-size:10px;color:var(--subtle);margin-top:3px}
@@ -183,10 +190,10 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
 /* inspector rows */
 .insp-row{display:flex;justify-content:space-between;align-items:center;
-  padding:8px 0;border-bottom:1px solid #F0EDE8}
+  padding:9px 0;border-bottom:1px solid var(--border)}
 .insp-row:last-child{border-bottom:none}
 .insp-key{font-size:12px;color:var(--text);font-weight:600}
-.pill{font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px}
+.pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.01em}
 .pill-good{background:var(--green-bg);color:var(--green)}
 .pill-warn{background:var(--amber-bg);color:var(--amber)}
 .pill-bad{background:var(--red-bg);color:var(--red)}
@@ -194,7 +201,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
 /* AI feedback card */
 .ai-feedback{background:var(--orange-bg);border:1px solid rgba(255,77,0,.2);
-  border-radius:var(--r-l);padding:12px}
+  border-radius:var(--r-l);padding:var(--sp-m)}
 .ai-fb-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
 .ai-fb-dot{width:20px;height:20px;border-radius:6px;background:var(--orange);
   display:grid;place-items:center;flex-shrink:0}
@@ -206,17 +213,17 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
 /* section title */
 .sec-title-wrap{margin-bottom:8px}
-.sec-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+.sec-title{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
 
 /* dotpad section */
-.dp-row{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer}
+.dp-row{display:flex;align-items:center;gap:var(--sp-s);padding:var(--sp-xs) 0;cursor:pointer}
 .dp-dot{width:7px;height:7px;border-radius:50%;background:var(--subtle);flex-shrink:0;transition:all .2s}
 .dp-dot.on{background:var(--green);box-shadow:0 0 6px rgba(21,128,61,.5)}
 .dp-dot.busy{background:#F59E0B;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .dp-lbl{font-size:12px;font-weight:600;color:var(--text)}
 .dp-row:hover .dp-lbl{color:var(--text)}
-.live-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.live-row{display:flex;align-items:center;justify-content:space-between;margin-top:var(--sp-xs)}
 .live-lbl{font-size:11px;color:var(--muted)}
 .sw{width:32px;height:18px;border-radius:999px;background:var(--border2);
   position:relative;cursor:pointer;border:none;transition:background .15s;flex-shrink:0}
@@ -227,8 +234,8 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 .sw:disabled{opacity:.4;cursor:not-allowed}
 
 /* export btns */
-.exp-btn{height:32px;border-radius:var(--r-m);font-size:12px;font-weight:600;
-  display:flex;align-items:center;justify-content:center;gap:6px;transition:all .1s}
+.exp-btn{height:var(--h-btn);border-radius:var(--r-l);font-size:12px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px;transition:all .12s}
 .exp-btn.accent{background:var(--orange);color:#fff}
 .exp-btn.accent:hover{background:var(--orange-d)}
 .exp-btn.ghost{border:1.5px solid var(--border);background:var(--white);color:var(--text)}
@@ -237,8 +244,8 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
 /* ── BOTTOM BAR ── */
 .bottom-bar{
-  height:46px;background:var(--white);border-top:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0
+  height:var(--h-bar);background:var(--white);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 var(--sp-xl);gap:var(--sp-m);flex-shrink:0
 }
 .bb-status{display:flex;align-items:center;gap:6px}
 .bb-dot{width:7px;height:7px;border-radius:50%;background:var(--subtle)}
@@ -251,9 +258,9 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 .bb-page-btn:disabled{color:var(--border);cursor:not-allowed}
 .bb-page-label{font-size:11px;color:var(--muted);min-width:52px;text-align:center}
 .bb-spacer{flex:1}
-.bb-btn{height:30px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border2);
+.bb-btn{height:var(--h-btn);padding:0 var(--sp-m);border-radius:var(--r-l);border:1.5px solid var(--border2);
   background:var(--surface);font-size:11px;font-weight:600;color:var(--text);
-  display:flex;align-items:center;gap:5px;white-space:nowrap}
+  display:flex;align-items:center;gap:var(--sp-xs);white-space:nowrap}
 .bb-btn:hover{background:var(--white);border-color:var(--border2)}
 .bb-btn:disabled{opacity:.35;cursor:not-allowed}
 
@@ -273,7 +280,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
   padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.15)}
 .modal h2{font-size:15px;font-weight:700;margin-bottom:6px}
 .modal p{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.65}
-.modal-btns{display:flex;flex-direction:column;gap:6px}
+.modal-btns{display:flex;flex-direction:column;gap:var(--sp-xs)}
 .modal-btns button{width:100%;height:38px;border-radius:12px;border:1px solid var(--border);
   background:var(--surface);font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
 .modal-btns button:hover{background:var(--white);border-color:var(--border2)}
@@ -290,10 +297,10 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 .th-actions{display:flex;gap:5px;margin-top:8px}
 .th-adj{flex:1;height:28px;border-radius:var(--r-m);border:1.5px solid var(--border2);
   background:var(--surface);font-size:11px;font-weight:600;color:var(--text);
-  cursor:pointer;transition:all .1s}
+  cursor:pointer;transition:all .12s}
 .th-adj:hover{background:var(--white);border-color:var(--border2);color:var(--ink)}
 .th-apply{flex:1.5;height:28px;border-radius:var(--r-m);border:none;
-  background:var(--orange);color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .1s}
+  background:var(--orange);color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .12s}
 .th-apply:hover{background:var(--orange-d)}
 .th-apply:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed}
 
@@ -302,8 +309,8 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:4px;padding:8px 4px;border-radius:var(--r-l);
   border:1.5px solid var(--border);background:var(--surface);
-  color:var(--text);font-size:9px;font-weight:600;cursor:pointer;
-  transition:all .1s;line-height:1.3;text-align:center;min-height:52px
+  color:var(--text);font-size:10px;font-weight:600;cursor:pointer;
+  transition:all .12s;line-height:1.4;text-align:center;min-height:48px
 }
 .pin-ctrl-btn:hover:not(:disabled){background:var(--white);border-color:var(--border2);color:var(--ink)}
 .pin-ctrl-btn:disabled{opacity:.35;cursor:not-allowed}
@@ -313,7 +320,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 /* ── AI 추천 칩 ── */
 .ai-ch{padding:4px 10px;border-radius:999px;border:1.5px solid var(--orange);
   background:var(--orange-bg);color:var(--orange);font-size:10px;font-weight:600;
-  cursor:pointer;transition:all .1s;white-space:nowrap}
+  cursor:pointer;transition:all .12s;white-space:nowrap;line-height:1.4}
 .ai-ch:hover{background:var(--orange);color:#fff}
 
 /* ── 점 밀도 상태 카드 ── */
@@ -360,8 +367,8 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     min-height:52px;padding:8px 12px}
   .ai-bar{order:3;flex:none;width:100%}
   .workspace{display:flex;flex-direction:column;overflow:visible;height:auto}
-  .tool-rail{width:100%;flex-direction:row;height:52px;border-right:none;
-    border-bottom:1px solid var(--border);padding:0 10px;gap:2px;overflow-x:auto}
+  .tool-rail{width:100%;flex-direction:row;height:var(--h-bar);border-right:none;
+    border-bottom:1px solid var(--border);padding:0 var(--sp-m);gap:4px;overflow-x:auto}
   .tr-sep{width:1px;height:30px;margin:0 4px}
   .canvas-area{min-height:300px}
   .right-panel{width:100%;border-left:none;border-top:1px solid var(--border)}
@@ -488,9 +495,9 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     <!-- 브러시 크기 (펜/지우개 선택 시만 표시) -->
     <div id="brushSizeGroup" style="display:none;flex-direction:column;align-items:center;gap:3px;width:52px">
       <span style="font-size:9px;font-weight:600;color:var(--subtle);letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px">크기</span>
-      <button class="tr-sz on" role="radio" data-size="1" aria-checked="true" title="1핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--orange);color:#fff;border:none;cursor:pointer;transition:all .1s">1핀</button>
-      <button class="tr-sz" role="radio" data-size="2" aria-checked="false" title="2핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer;transition:all .1s">2핀</button>
-      <button class="tr-sz" role="radio" data-size="3" aria-checked="false" title="3핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer;transition:all .1s">3핀</button>
+      <button class="tr-sz on" role="radio" data-size="1" aria-checked="true" title="1핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--orange);color:#fff;border:none;cursor:pointer;transition:all .12s">1핀</button>
+      <button class="tr-sz" role="radio" data-size="2" aria-checked="false" title="2핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer;transition:all .12s">2핀</button>
+      <button class="tr-sz" role="radio" data-size="3" aria-checked="false" title="3핀" style="width:38px;height:22px;border-radius:var(--r-s);font-size:10px;font-weight:700;background:var(--surface);color:var(--text);border:1.5px solid var(--border);cursor:pointer;transition:all .12s">3핀</button>
     </div>
 
     <div style="flex:1"></div>
@@ -557,7 +564,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
         tabindex="0" role="button" aria-label="이미지 가져오기"
         style="display:flex;flex-direction:column;align-items:center;gap:10px;
                width:100%;max-width:280px;padding:24px 20px;
-               border:2px dashed var(--border2);border-radius:16px;
+               border:2px dashed var(--border2);border-radius:var(--r-xl);
                background:var(--white);cursor:pointer;transition:all .15s;
                color:var(--muted)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
@@ -590,13 +597,13 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
   <!-- RIGHT PANEL -->
   <aside class="right-panel" aria-label="Tactile Inspector">
     <div class="rp-header">
-      <div class="rp-label">촉각 품질 분석</div>
+      <div class="rp-label" style="font-size:11px;font-weight:700;color:var(--ink);letter-spacing:-.01em">촉각 품질 분석</div>
     </div>
     <div class="rp-scroll">
 
       <!-- 점 농도 슬라이더 -->
       <div>
-        <div class="sec-title" class="sec-title-wrap">점 농도 조절</div>
+        <div class="sec-title" class="sec-title-wrap" style="margin-bottom:var(--sp-s)">점 농도 조절</div>
         <div class="th-slider-wrap">
           <div class="th-track" id="thTrack">
             <div class="th-fill" id="thFill" style="width:50%"></div>
@@ -619,7 +626,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
       </div>
 
       <!-- 점 밀도 상태 카드 (사용자 친화, 스펙 §10) -->
-      <div id="densityStateCard" style="background:var(--surface);border-radius:var(--r-l);padding:10px 12px;border:1.5px solid var(--border)">
+      <div id="densityStateCard" style="background:var(--surface);border-radius:var(--r-l);padding:var(--sp-m);border:1.5px solid var(--border)">
         <div style="font-size:10px;font-weight:700;color:var(--subtle);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">점 밀도</div>
         <div style="display:flex;align-items:baseline;gap:6px">
           <span id="densityStateLabel" style="font-size:18px;font-weight:700;color:var(--ink)">—</span>
@@ -630,9 +637,9 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
           <div id="densityFill2" style="height:4px;border-radius:2px;width:0%;transition:width .3s,background .3s"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:3px">
-          <span style="font-size:9px;color:var(--subtle)">부족</span>
-          <span style="font-size:9px;color:var(--subtle)">적정</span>
-          <span style="font-size:9px;color:var(--subtle)">많음</span>
+          <span style="font-size:9px;font-weight:500;color:var(--subtle)">부족</span>
+          <span style="font-size:9px;font-weight:500;color:var(--subtle)">적정</span>
+          <span style="font-size:9px;font-weight:500;color:var(--subtle)">많음</span>
         </div>
       </div>
 
@@ -647,9 +654,9 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
         </div>
         <div class="density-bar"><div class="density-fill" id="densityFill" style="width:0%"></div></div>
         <div style="display:flex;justify-content:space-between;margin-top:4px">
-          <span style="font-size:9px;color:var(--subtle)">부족</span>
+          <span style="font-size:9px;font-weight:500;color:var(--subtle)">부족</span>
           <span style="font-size:9px;color:var(--subtle)">표준 변환</span>
-          <span style="font-size:9px;color:var(--subtle)">많음</span>
+          <span style="font-size:9px;font-weight:500;color:var(--subtle)">많음</span>
         </div>
       </div>
 
@@ -663,7 +670,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
       <!-- AI feedback -->
       <div>
-        <div class="sec-title" class="sec-title-wrap">AI 추천</div>
+        <div class="sec-title" class="sec-title-wrap" style="margin-bottom:var(--sp-s)">AI 추천</div>
         <div class="ai-empty" id="aiFeedbackEmpty">이미지를 가져오면 AI가 주요 윤곽과 핵심 구조를 분석해 Dot Pad용 촉각그래픽으로 변환합니다.</div>
         <div class="ai-feedback" id="aiFeedbackCard" style="display:none">
           <div class="ai-fb-head">
@@ -680,7 +687,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
       <!-- 핀 빠른 편집 -->
       <div>
-        <div class="sec-title" class="sec-title-wrap">핀 제어</div>
+        <div class="sec-title" class="sec-title-wrap" style="margin-bottom:var(--sp-s)">핀 제어</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
           <button class="pin-ctrl-btn" id="btnAllUp" disabled title="모든 핀을 올립니다 (전체 채움)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12l4-4 4 4"/></svg>
@@ -699,7 +706,7 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
       <!-- DotPad -->
       <div>
-        <div class="sec-title" class="sec-title-wrap">DotPad</div>
+        <div class="sec-title" class="sec-title-wrap" style="margin-bottom:var(--sp-s)">DotPad</div>
         <div class="dp-row" id="connRow" role="button" tabindex="0">
           <span class="dp-dot" id="connDot"></span>
           <span class="dp-lbl" id="connText">Dot Pad 연결 안 됨</span>
@@ -712,8 +719,8 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 
       <!-- export -->
       <div>
-        <div class="sec-title" class="sec-title-wrap">저장 / 내보내기</div>
-        <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="sec-title" class="sec-title-wrap" style="margin-bottom:var(--sp-s)">저장 / 내보내기</div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-xs)">
           <button class="exp-btn accent" id="dtmsBtn" disabled>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             .dtms 저장
