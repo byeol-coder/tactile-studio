@@ -278,6 +278,23 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 .modal-btns .acc{background:var(--orange);border-color:var(--orange);color:#fff}
 .modal-btns .acc:hover{background:var(--orange-d)}
 
+/* ── 점 농도 슬라이더 ── */
+.th-slider-wrap{position:relative;height:20px;display:flex;align-items:center;margin:6px 0 2px}
+.th-track{width:100%;height:4px;background:var(--border2);border-radius:2px;position:relative;overflow:visible}
+.th-fill{position:absolute;left:0;top:0;height:4px;background:var(--orange);border-radius:2px;pointer-events:none;transition:width .08s}
+.th-thumb{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;
+  background:#fff;border:2.5px solid var(--orange);transform:translate(-50%,-50%);
+  pointer-events:none;transition:left .08s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.th-actions{display:flex;gap:5px;margin-top:8px}
+.th-adj{flex:1;height:28px;border-radius:var(--r-m);border:1.5px solid var(--border2);
+  background:var(--surface);font-size:11px;font-weight:600;color:var(--text);
+  cursor:pointer;transition:all .1s}
+.th-adj:hover{background:var(--white);border-color:var(--border2);color:var(--ink)}
+.th-apply{flex:1.5;height:28px;border-radius:var(--r-m);border:none;
+  background:var(--orange);color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .1s}
+.th-apply:hover{background:var(--orange-d)}
+.th-apply:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed}
+
 /* responsive */
 @media(max-width:900px){
   html,body{height:auto;overflow-x:hidden;overflow-y:auto}
@@ -488,6 +505,30 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
       <div class="rp-label">Tactile Inspector</div>
     </div>
     <div class="rp-scroll">
+
+      <!-- 점 농도 슬라이더 -->
+      <div>
+        <div class="sec-title" style="margin-bottom:8px">점 농도 조절</div>
+        <div class="th-slider-wrap">
+          <div class="th-track" id="thTrack">
+            <div class="th-fill" id="thFill" style="width:50%"></div>
+            <div class="th-thumb" id="thThumb" style="left:50%"></div>
+          </div>
+          <input type="range" id="clarity2" min="20" max="240" value="128"
+            aria-label="점 농도 조절" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%"/>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          <span style="font-size:10px;color:var(--subtle)">연하게</span>
+          <span style="font-size:12px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums" id="thValDisplay">50%</span>
+          <span style="font-size:10px;color:var(--subtle)">진하게</span>
+        </div>
+        <div class="th-actions">
+          <button class="th-adj" id="thMinus">−1</button>
+          <button class="th-adj" id="thAuto">자동</button>
+          <button class="th-adj" id="thPlus">+1</button>
+          <button class="th-apply" id="thApply" disabled>적용</button>
+        </div>
+      </div>
 
       <!-- dot count -->
       <div class="stat-card">
@@ -1449,6 +1490,65 @@ draw=function(){
   if(tool!=='move'&&hasImage&&!hoverBrush){ctx.strokeStyle='#FF4D00';ctx.lineWidth=2;ctx.strokeRect(off+cursor.x*cell+1,off+cursor.y*cell+1,cell-2,cell-2);}
 };
 
+/* ── 점 농도 슬라이더 ── */
+function thPct(v){ return Math.round((+v - 20) / 220 * 100); }
+
+function paintSlider(v){
+  const pct = thPct(v);
+  const fill  = ge('thFill');
+  const thumb = ge('thThumb');
+  const disp  = ge('thValDisplay');
+  const sl2   = ge('clarity2');
+  if(fill)  fill.style.width  = pct + '%';
+  if(thumb) thumb.style.left  = pct + '%';
+  if(disp)  disp.textContent  = pct + '%';
+  if(sl2)   sl2.value = v;
+}
+
+function sliderSetValue(v){
+  v = Math.max(20, Math.min(240, +v));
+  /* clarity2 → engine clarity 동기화 */
+  const eng = ge('clarity');
+  if(eng){ eng.value = v; eng.dispatchEvent(new Event('input', {bubbles:true})); }
+  paintSlider(v);
+  const ap = ge('thApply');
+  if(ap) ap.disabled = !hasImage;
+}
+
+ge('clarity2')?.addEventListener('input', function(){
+  sliderSetValue(+this.value);
+});
+
+ge('thMinus')?.addEventListener('click', ()=>{
+  const sl = ge('clarity2');
+  if(sl) sliderSetValue(+sl.value - 1);
+});
+ge('thPlus')?.addEventListener('click', ()=>{
+  const sl = ge('clarity2');
+  if(sl) sliderSetValue(+sl.value + 1);
+});
+ge('thAuto')?.addEventListener('click', ()=>{
+  if(!grayBuf){ toast('이미지를 먼저 올려주세요'); return; }
+  const t = otsu(grayBuf);
+  sliderSetValue(t);
+  toast('자동 임계값 ' + thPct(t) + '%');
+});
+ge('thApply')?.addEventListener('click', ()=>{
+  if(!hasImage) return;
+  rebuild(); afterChange(); syncQuality();
+  toast('점 농도 ' + thPct(threshold) + '% 적용됨');
+  const ap = ge('thApply');
+  if(ap) ap.disabled = true;
+});
+
+/* engine clarity input → slider 동기화 */
+ge('clarity')?.addEventListener('input', function(){
+  threshold = +this.value;
+  paintSlider(threshold);
+  const ap = ge('thApply');
+  if(ap) ap.disabled = !hasImage;
+});
+
 /* ── quality sync ── */
 const AI_MSGS={
   transparent:'배경 요소는 줄이고, 주요 윤곽과 핵심 내부 구조를 Dot Pad 60×40에 맞게 단순화했어요.',
@@ -1549,6 +1649,9 @@ setAppState=function(s){
   _setAppState(s);
   try{
     fitCanvas();syncQuality();syncConn();syncToolBar();
+    /* 변환 완료 시 슬라이더 동기화 */
+    paintSlider(threshold||128);
+    const ap=ge('thApply');if(ap)ap.disabled=!(appState==='ready'&&hasImage);
     const ready=(s==='ready');
     if(ready&&srcImage){const bi=ge('beforeImg');if(bi&&srcImage.src)bi.src=srcImage.src;}
     // AI badge
@@ -1769,6 +1872,8 @@ function mobileOnReady(){
 /* ── init ── */
 function init(){
   fitCanvas();syncQuality();syncConn();syncToolBar();resetQuality();
+  /* 슬라이더 초기값 */
+  paintSlider(threshold||128);
   currentMode='balanced';
   // set balanced active
   qa('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode==='balanced'));
