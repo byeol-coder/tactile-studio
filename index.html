@@ -2876,161 +2876,180 @@ function t(key){ return (I18N[_lang]||I18N.ko)[key] || (I18N.ko)[key] || key; }
 
 function applyLang(){
   const lang = _lang;
-  // 파일명 기본값
-  const fn = ge('fname');
-  if(fn && (fn.value === '새 촉각그래픽' || fn.value === 'New tactile graphic'))
-    fn.value = t('brand_sub');
 
-  // placeholder
+  /* ── 헤더 ─────────────────────────────────────────────── */
+  // 파일명 기본값
+  const fnEl = ge('fname');
+  if(fnEl && (fnEl.value === '새 촉각그래픽' || fnEl.value === 'New tactile graphic'))
+    fnEl.value = t('brand_sub');
+
+  // 프롬프트 placeholder
   const prompt = ge('aiPrompt');
   if(prompt) prompt.placeholder = t('prompt_ph');
 
-  // 헤더 버튼
+  // Dot Pad로 보내기 버튼
   const sendBtn = ge('hdrOutputBtn');
   if(sendBtn){ const sp = sendBtn.querySelector('span'); if(sp) sp.textContent = t('btn_send'); }
+
+  // 저장 버튼
   const expBtn = ge('hdrExportBtn');
   if(expBtn){ const sp = expBtn.querySelector('span'); if(sp) sp.textContent = t('btn_save'); }
 
-  // 툴바 레이블
-  const toolLabels = {
-    'move':   'tool_select',
-    'pen':    'tool_pen',
-    'eraser': 'tool_eraser',
-  };
+  /* ── 툴바 ─────────────────────────────────────────────── */
+  const toolLabelMap = {move: t('tool_select'), pen: t('tool_pen'), eraser: t('tool_eraser')};
   qa('.tr-btn[data-tool]').forEach(btn => {
-    const key = toolLabels[btn.dataset.tool];
-    if(key){ const lbl = btn.querySelector('.tr-label'); if(lbl) lbl.textContent = t(key); }
+    const k = toolLabelMap[btn.dataset.tool];
+    if(k){ const lbl = btn.querySelector('.tr-label'); if(lbl) lbl.textContent = k; }
   });
-  const undo2 = ge('undoBtn2'); if(undo2){ const lbl = undo2.querySelector('.tr-label'); if(lbl) lbl.textContent = t('tool_undo'); }
-  const redo2 = ge('redoBtn2'); if(redo2){ const lbl = redo2.querySelector('.tr-label'); if(lbl) lbl.textContent = t('tool_redo'); }
-  const clr2  = ge('clearBtn2');if(clr2) { const lbl = clr2.querySelector('.tr-label');  if(lbl) lbl.textContent = t('tool_clear'); }
-  const szLbl = document.querySelector('#brushSizeGroup > span');
-  if(szLbl) szLbl.textContent = t('size_label');
+  const undo2lbl = ge('undoBtn2')?.querySelector('.tr-label'); if(undo2lbl) undo2lbl.textContent = t('tool_undo');
+  const redo2lbl = ge('redoBtn2')?.querySelector('.tr-label'); if(redo2lbl) redo2lbl.textContent = t('tool_redo');
+  const clr2lbl  = ge('clearBtn2')?.querySelector('.tr-label'); if(clr2lbl)  clr2lbl.textContent  = t('tool_clear');
+  const szLblEl  = ge('brushSizeGroup')?.querySelector('span');if(szLblEl) szLblEl.textContent = t('size_label');
 
-  // 캔버스 메타
+  /* ── 캔버스 ────────────────────────────────────────────── */
   const meta = ge('canvasMetaLabel');
-  if(meta && !hasImage) meta.textContent = t('canvas_meta');
+  if(meta) meta.textContent = t('canvas_meta');
+  const analyzeT = ge('analyzeTitle'); if(analyzeT) analyzeT.textContent = t('converting');
+  const analyzeN = ge('analyzeName');  if(analyzeN) analyzeN.textContent = t('converting_sub');
 
-  // 빈 상태
-  const emptyTitle = document.querySelector('#emptyOv p:first-of-type');
-  if(emptyTitle && emptyTitle.style) {} // 동적 생성이므로 패스
+  /* ── 빈 상태 오버레이 ─────────────────────────────────── */
+  // 제목 (p 태그 첫 번째)
+  const emptyOvEl = ge('emptyOv');
+  if(emptyOvEl){
+    const titleEl = emptyOvEl.querySelector('p');
+    if(titleEl) titleEl.textContent = t('empty_title');
+  }
+  // 드롭존 안의 span들 (이미지 가져오기, 드래그 문구)
+  const dzEl = ge('emptyDropZone');
+  if(dzEl){
+    const spans = dzEl.querySelectorAll('span');
+    if(spans[0]) spans[0].textContent = t('empty_import');
+    if(spans[1]) spans[1].textContent = t('empty_drag');
+  }
+  const smpBtn = ge('sampleBtn'); if(smpBtn) smpBtn.textContent = t('empty_sample');
+  // .dtms 파일 열기 label
+  const dtmsLbl = document.querySelector('#emptyOv label[for="tactileFileInput"]');
+  if(dtmsLbl) dtmsLbl.textContent = t('empty_dtms');
 
-  // analyzeOv
-  const analyzeT = ge('analyzeTitle');
-  if(analyzeT) analyzeT.textContent = t('converting');
+  /* ── 다른 이미지로 변환 버튼 ──────────────────────────── */
+  const repTxt = ge('replaceImgLabelText');
+  if(repTxt) repTxt.textContent = lang === 'en' ? 'Replace image' : '다른 이미지로 변환';
 
-  // 우측 패널 레이블
-  const rpLabel = document.querySelector('.rp-label');
-  if(rpLabel) rpLabel.textContent = t('panel_title');
-
-  // 품질 지표 항목명
-  const qKeys = {
-    'qClarity':     'q_clarity',
-    'qDensity':     'q_density',
-    'qReadability': 'q_readability',
-    'qStructure':   'q_structure',
-  };
-  qa('.insp-key').forEach((el, i) => {
-    const keys = ['q_clarity','q_density','q_readability','q_structure'];
-    if(keys[i]) el.textContent = t(keys[i]);
+  /* ── 우측 패널 제목 ───────────────────────────────────── */
+  // 패널 제목 (.rp-label) + 부제목
+  const rpLbl = document.querySelector('.rp-label');
+  if(rpLbl) rpLbl.textContent = t('panel_title');
+  // 촉각 품질 섹션 제목
+  document.querySelectorAll('.sec-title').forEach(el => {
+    const txt = el.textContent.trim();
+    if(txt === '촉각 품질' || txt === 'Tactile Quality')
+      el.textContent = t('quality_title');
   });
 
-  // 섹션 제목들
-  const secTitles = document.querySelectorAll('.sec-title');
-  const secKeys = ['density_ctrl','quality_title','ai_title','pin_ctrl_title','conn_title','save_title'];
-  secTitles.forEach((el, i) => { if(secKeys[i]) el.textContent = t(secKeys[i]); });
+  /* ── 품질 지표 항목명 (insp-key 순서: 판독성/점밀도/촉각구분/구조표현) ── */
+  const inspKeys = ['q_clarity','q_density','q_readability','q_structure'];
+  document.querySelectorAll('.insp-key').forEach((el, i) => {
+    if(inspKeys[i]) el.textContent = t(inspKeys[i]);
+  });
 
-  // 슬라이더 레이블
-  const lowLbl = document.querySelector('.th-slider-wrap ~ div span:first-child');
-  const hiLbl  = document.querySelector('.th-slider-wrap ~ div span:last-child');
-  if(lowLbl) lowLbl.textContent = t('density_low');
-  if(hiLbl)  hiLbl.textContent  = t('density_high');
-  const thAuto = ge('thAuto'); if(thAuto) thAuto.textContent = t('btn_auto');
-  const thApply = ge('thApply'); if(thApply) thApply.textContent = t('btn_apply');
+  /* ── 섹션 제목 — data-i18n span 기반 ─────────────────── */
+  // HTML 구조: <div class="sec-title"><span data-i18n="...">텍스트</span></div>
+  const i18nMap = {
+    density_control: t('density_ctrl'),
+    ai_suggestion:   t('ai_title'),
+    pin_control:     t('pin_ctrl_title'),
+    save:            t('save_title'),
+    quality_analysis: t('quality_title'),
+  };
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(i18nMap[key]) el.textContent = i18nMap[key];
+  });
+  // Dot Pad 연결 — data-i18n 없는 경우 텍스트로 직접
+  document.querySelectorAll('.sec-title').forEach(el => {
+    if(el.textContent.trim() === 'Dot Pad' || el.textContent.trim() === 'Dot Pad 연결')
+      el.textContent = t('conn_title');
+  });
 
-  // 핀 제어 버튼
+  /* ── 슬라이더 레이블 ──────────────────────────────────── */
+  // "적게 (단순)" / "많게 (선명)" — th-actions 앞의 div 안
+  const thWrapDiv = document.querySelector('#thApply')?.closest('.th-actions');
+  if(thWrapDiv){
+    const prevDiv = thWrapDiv.previousElementSibling;
+    if(prevDiv){
+      const spans = prevDiv.querySelectorAll('span');
+      if(spans[0]) spans[0].textContent = t('density_low');
+      if(spans[1]) spans[1].textContent = t('density_high');
+    }
+  }
+  const thAutoEl  = ge('thAuto');  if(thAutoEl)  thAutoEl.textContent  = t('btn_auto');
+  const thApplyEl = ge('thApply'); if(thApplyEl) thApplyEl.textContent = t('btn_apply');
+
+  /* ── 핀 제어 버튼 ────────────────────────────────────── */
   const pinBtns = qa('.pin-ctrl-btn');
   const pinKeys = ['pin_up','pin_down','pin_invert'];
   pinBtns.forEach((btn, i) => {
-    if(pinKeys[i]){
-      const lbl = btn.querySelectorAll('span')[1] || btn.querySelector('span');
-      if(lbl) lbl.textContent = t(pinKeys[i]);
-    }
+    if(!pinKeys[i]) return;
+    // 버튼 안의 두 번째 span (아이콘 다음 텍스트)
+    const spans = btn.querySelectorAll('span');
+    const lbl = spans.length > 1 ? spans[1] : spans[0];
+    if(lbl) lbl.textContent = t(pinKeys[i]);
   });
 
-  // 연결 상태
-  /* 다른 이미지로 변환 버튼 */
-  const repLblTxt = ge('replaceImgLabelText');
-  if(repLblTxt) repLblTxt.textContent = lang==='en'?'Replace image':'다른 이미지로 변환';
-
+  /* ── DotPad 연결 영역 ─────────────────────────────────── */
   const connTxt = ge('connText');
   if(connTxt && !connected) connTxt.textContent = t('conn_off');
   const connHint = ge('liveHint');
   if(connHint && !connected) connHint.textContent = t('conn_hint');
 
-  // 저장 버튼
-  const dtmsBtn = ge('dtmsBtn');
-  if(dtmsBtn) dtmsBtn.childNodes[dtmsBtn.childNodes.length-1].textContent = ' '+t('btn_dtms');
-  const pngBtn  = ge('pngBtn');
-  if(pngBtn)  pngBtn.textContent  = t('btn_png');
-  const hexBtn  = ge('hexBtn');
-  if(hexBtn)  hexBtn.textContent  = t('btn_dev');
+  /* ── 저장 버튼들 ──────────────────────────────────────── */
+  // dtmsBtn 안의 마지막 텍스트 노드
+  const dtmsBtnEl = ge('dtmsBtn');
+  if(dtmsBtnEl){
+    // span 안에 텍스트가 있으면 span, 없으면 마지막 텍스트 노드
+    const sp = dtmsBtnEl.querySelector('span');
+    if(sp) sp.textContent = t('btn_dtms');
+    else {
+      const tn = [...dtmsBtnEl.childNodes].filter(n=>n.nodeType===3).pop();
+      if(tn) tn.textContent = ' ' + t('btn_dtms');
+    }
+  }
+  const pngBtnEl = ge('pngBtn'); if(pngBtnEl) pngBtnEl.textContent = t('btn_png');
+  const hexBtnEl = ge('hexBtn'); if(hexBtnEl) hexBtnEl.textContent = t('btn_dev');
 
-  // 하단바
-  const bbStatus = ge('bbStatus');
-  if(bbStatus && !connected) bbStatus.textContent = t('bb_disconnected');
+  /* ── 하단 바 ──────────────────────────────────────────── */
+  const bbSt = ge('bbStatus');
+  if(bbSt && !connected) bbSt.textContent = t('bb_disconnected');
 
-  /* ── 누락 키 완전 보완 ──────────────────────── */
-
-  /* Guard 모달 */
+  /* ── Guard 모달 ───────────────────────────────────────── */
   const guardH2 = document.querySelector('#guardModal h2');
   if(guardH2) guardH2.textContent = t('guard_title');
   const guardP = document.querySelector('#guardModal p');
   if(guardP) guardP.innerHTML = t('guard_desc').replace('\n','<br>');
-  const guardSaveBtn2 = ge('guardSave');
-  if(guardSaveBtn2) guardSaveBtn2.textContent = t('guard_save');
-  const guardProcBtn = ge('guardProceed');
-  if(guardProcBtn) guardProcBtn.textContent = t('guard_proceed');
-  const guardCnclBtn = ge('guardCancel');
-  if(guardCnclBtn) guardCnclBtn.textContent = t('guard_cancel');
+  const guardSaveEl    = ge('guardSave');    if(guardSaveEl)    guardSaveEl.textContent    = t('guard_save');
+  const guardProceedEl = ge('guardProceed'); if(guardProceedEl) guardProceedEl.textContent = t('guard_proceed');
+  const guardCancelEl  = ge('guardCancel');  if(guardCancelEl)  guardCancelEl.textContent  = t('guard_cancel');
 
-  /* 빈 상태 오버레이 */
-  const emptyTitleEl = document.querySelector('#emptyOv p:first-of-type');
-  if(emptyTitleEl) emptyTitleEl.textContent = t('empty_title');
-  const emptyDropZoneEl = ge('emptyDropZone');
-  if(emptyDropZoneEl){
-    const spans = emptyDropZoneEl.querySelectorAll('span');
-    if(spans[0]) spans[0].textContent = t('empty_import');
-    if(spans[1]) spans[1].textContent = t('empty_drag');
-  }
-  const sampleBtnEl2 = ge('sampleBtn');
-  if(sampleBtnEl2) sampleBtnEl2.textContent = t('empty_sample');
-  const dtmsLabelEl = document.querySelector('#emptyOv label[for="tactileFileInput"]');
-  if(dtmsLabelEl) dtmsLabelEl.textContent = t('empty_dtms');
+  /* ── AI 추천 빈 상태 ─────────────────────────────────── */
+  const aiFbEmpty = ge('aiFeedbackEmpty');
+  if(aiFbEmpty) aiFbEmpty.textContent = t('ai_empty');
 
-  /* 다른 이미지로 변환 버튼 */
-  const repTxtEl = ge('replaceImgLabelText');
-  if(repTxtEl) repTxtEl.textContent = lang==='en' ? 'Replace image' : '다른 이미지로 변환';
-
-  /* 변환 중 오버레이 부제목 */
-  const analyzeNameEl = ge('analyzeName');
-  if(analyzeNameEl) analyzeNameEl.textContent = t('converting_sub');
-
-  /* AI 추천 칩 텍스트 교체 */
-  const chipsEl2 = ge('aiChips');
-  if(chipsEl2){
-    const cmap={simpler:lang==='en'?'Simplify':'윤곽 중심으로 변환',
-                denoise:lang==='en'?'Reduce density':'점 밀도 낮추기',
-                auto:   lang==='en'?'Re-detect':'윤곽 다시 감지'};
-    chipsEl2.querySelectorAll('.ai-ch').forEach(ch=>{
-      const v=cmap[ch.dataset.cmd]; if(v) ch.textContent=v;
+  /* ── AI 추천 칩 텍스트 ───────────────────────────────── */
+  const chipsEl = ge('aiChips');
+  if(chipsEl){
+    const cmap = {
+      simpler: lang==='en' ? 'Simplify' : '윤곽 중심으로 변환',
+      denoise: lang==='en' ? 'Reduce density' : '점 밀도 낮추기',
+      auto:    lang==='en' ? 'Re-detect' : '윤곽 다시 감지',
+    };
+    chipsEl.querySelectorAll('.ai-ch').forEach(ch => {
+      const v = cmap[ch.dataset.cmd]; if(v) ch.textContent = v;
     });
   }
 
-  // html lang 속성
+  /* ── document.lang ───────────────────────────────────── */
   document.documentElement.lang = lang;
 }
-
 /* ── 언어 토글 버튼 헤더에 추가 ── */
 function addLangToggle(){
   /* langToggle은 HTML에 정적 배치 — 이벤트만 연결 */
