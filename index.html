@@ -286,6 +286,118 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 .modal-btns .acc{background:var(--orange);border-color:var(--orange);color:#fff}
 .modal-btns .acc:hover{background:var(--orange-d)}
 
+/* ══════════════════════════════════════════════════
+   인터랙션 & 애니메이션 시스템
+   ══════════════════════════════════════════════════ */
+
+/* 파일 드롭 인터랙션 — 파티클 효과 */
+.canvas-area.drag-over{background:var(--orange-bg)!important}
+.canvas-area.drag-over .dot-grid-wrap{
+  border:2px dashed var(--orange);
+  transform:scale(0.98);transition:transform .2s cubic-bezier(.34,1.56,.64,1)
+}
+
+/* 업로드 파티클 컨테이너 */
+#uploadParticles{
+  position:absolute;inset:0;pointer-events:none;z-index:30;overflow:hidden
+}
+.uparticle{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  background:var(--orange);opacity:0;
+  animation:upart .7s ease-out forwards
+}
+@keyframes upart{
+  0%{opacity:.9;transform:scale(1) translate(0,0)}
+  100%{opacity:0;transform:scale(0) translate(var(--tx),var(--ty))}
+}
+
+/* 변환 진행 오버레이 — 격자 스캔 효과 */
+.analyze-scan{
+  position:absolute;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent 0%,var(--orange) 50%,transparent 100%);
+  top:0;animation:scan 1.4s ease-in-out infinite;pointer-events:none;z-index:5
+}
+@keyframes scan{
+  0%{top:0;opacity:1}
+  95%{top:calc(100% - 3px);opacity:1}
+  100%{top:calc(100% - 3px);opacity:0}
+}
+
+/* 핀이 켜지는 애니메이션 효과 */
+@keyframes pinReveal{
+  0%{opacity:0;transform:scale(0.3)}
+  70%{opacity:1;transform:scale(1.15)}
+  100%{opacity:1;transform:scale(1)}
+}
+.pin-appear{animation:pinReveal .18s cubic-bezier(.34,1.56,.64,1) both}
+
+/* 변환 완료 플래시 */
+@keyframes doneFlash{
+  0%,100%{opacity:0}
+  50%{opacity:1}
+}
+.done-flash{
+  position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:rgba(21,128,61,.12);z-index:4;
+  animation:doneFlash .5s ease-out forwards
+}
+
+/* 상태 전환 — 캔버스 fade-in */
+@keyframes canvasFadeIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:none}
+}
+.canvas-ready{animation:canvasFadeIn .3s cubic-bezier(.4,0,.2,1) both}
+
+/* 헤더 파일명 편집 강조 */
+#fname:focus{
+  background:var(--orange-bg)!important;
+  border-color:var(--orange)!important;
+  box-shadow:0 0 0 3px rgba(255,77,0,.12)
+}
+
+/* 버튼 리플 효과 */
+.hdr-btn,.bb-btn,.exp-btn{overflow:hidden;position:relative}
+.hdr-btn::after,.bb-btn::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(255,255,255,.3) 0%,transparent 60%);
+  opacity:0;transition:opacity .3s
+}
+.hdr-btn:active::after,.bb-btn:active::after{opacity:1;transition:none}
+
+/* AI 추천 칩 — 등장 애니메이션 */
+@keyframes chipIn{
+  from{opacity:0;transform:scale(.85) translateY(4px)}
+  to{opacity:1;transform:none}
+}
+.ai-ch{animation:chipIn .2s cubic-bezier(.34,1.56,.64,1) both}
+.ai-ch:nth-child(1){animation-delay:0s}
+.ai-ch:nth-child(2){animation-delay:.05s}
+.ai-ch:nth-child(3){animation-delay:.1s}
+
+/* 품질 지표 — 값 변경 시 pulse */
+@keyframes valuePulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.1)}
+}
+.pill.updating{animation:valuePulse .25s ease-out}
+
+/* 슬라이더 변경 시 캔버스 흐림 효과 */
+.dot-grid-wrap.pending-rebuild{
+  opacity:.72;transition:opacity .08s
+}
+.dot-grid-wrap.pending-rebuild canvas{filter:blur(.5px)}
+.dot-grid-wrap:not(.pending-rebuild){
+  opacity:1;transition:opacity .15s
+}
+
+/* 드래그 오버 핀 그리드 펄스 */
+@keyframes gridPulse{
+  0%,100%{box-shadow:0 2px 16px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04)}
+  50%{box-shadow:0 2px 24px rgba(255,77,0,.15),0 0 0 2px rgba(255,77,0,.2)}
+}
+.canvas-area.drag-over .dot-grid-wrap{animation:gridPulse .8s ease-in-out infinite}
+
 /* ── 점 농도 슬라이더 ── */
 .th-slider-wrap{position:relative;height:20px;display:flex;align-items:center;margin:6px 0 2px}
 .th-track{width:100%;height:4px;background:var(--border2);border-radius:2px;position:relative;overflow:visible}
@@ -323,9 +435,6 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
 .ai-ch:hover{background:var(--orange);color:#fff}
 
 /* ── 점 밀도 상태 카드 ── */
-#densityStateCard[data-state="good"]{border-color:rgba(21,128,61,.3);background:var(--green-bg)}
-#densityStateCard[data-state="warn"]{border-color:rgba(161,98,7,.3);background:var(--amber-bg)}
-#densityStateCard[data-state="bad"]{border-color:rgba(185,28,28,.3);background:var(--red-bg)}
 
 /* ── 경고 배너 ── */
 .density-warn-banner{background:var(--amber-bg);border:1px solid rgba(161,98,7,.25);
@@ -520,29 +629,33 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     <div class="canvas-meta" id="canvasMeta">
       <span class="canvas-meta-label" id="canvasMetaLabel">Dot Pad 촉각 미리보기 · 60×40</span>
       <!-- 변환 후 노출: 다른 이미지로 변환 버튼 -->
-      <label for="imageFileInput" id="replaceImgLabel"
-        onclick="document.getElementById('imageFileInput').click();return false;"
-        tabindex="0" role="button"
-        style="display:none;align-items:center;gap:5px;height:24px;padding:0 10px;
+      <button id="replaceImgLabel"
+        type="button"
+        tabindex="0"
+        aria-label="다른 이미지로 변환"
+        style="display:none;align-items:center;gap:5px;height:26px;padding:0 12px;
                border-radius:999px;border:1.5px solid var(--border2);background:var(--white);
                font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;
                transition:all .12s;white-space:nowrap">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-3.88"/>
         </svg>
         <span id="replaceImgLabelText">다른 이미지로 변환</span>
-      </label>
+      </button>
     </div>
 
     <div class="dot-grid-wrap" id="dotGridWrap" style="position:relative">
+      <div id="uploadParticles" aria-hidden="true"></div>
       <div id="dotGrid" style="position:relative">
         <canvas id="pad" tabindex="0" role="application" aria-label="Dot Pad 60×40 촉각 그리드"></canvas>
         <img id="beforeImg" alt="원본 이미지"/>
 
         <!-- analyzing overlay: 소형 카드, 그리드 계속 보임 -->
         <div class="ov" id="analyzeOv">
+          <!-- 격자 스캔 효과 -->
+          <div class="analyze-scan" aria-hidden="true"></div>
           <div class="analyze-card">
             <div class="analyze-spinner-wrap">
               <div class="ai-spinner" aria-hidden="true"></div>
@@ -636,24 +749,6 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
           <button class="th-adj" id="thAuto">자동</button>
           <button class="th-adj" id="thPlus">+1</button>
           <button class="th-apply" id="thApply" disabled>적용</button>
-        </div>
-      </div>
-
-      <!-- 점 밀도 상태 카드 (사용자 친화, 스펙 §10) -->
-      <div id="densityStateCard" style="background:var(--surface);border-radius:var(--r-l);padding:var(--sp-m);border:1.5px solid var(--border)">
-        <div style="font-size:10px;font-weight:700;color:var(--subtle);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">점 밀도</div>
-        <div style="display:flex;align-items:baseline;gap:6px">
-          <span id="densityStateLabel" style="font-size:18px;font-weight:700;color:var(--ink)">—</span>
-          <span id="densityStateDesc" style="font-size:11px;color:var(--muted)"></span>
-        </div>
-        <!-- 게이지 -->
-        <div style="height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden">
-          <div id="densityFill2" style="height:4px;border-radius:2px;width:0%;transition:width .3s,background .3s"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:3px">
-          <span style="font-size:9px;font-weight:500;color:var(--subtle)">부족</span>
-          <span style="font-size:9px;font-weight:500;color:var(--subtle)">적정</span>
-          <span style="font-size:9px;font-weight:500;color:var(--subtle)">많음</span>
         </div>
       </div>
 
@@ -1117,7 +1212,11 @@ function applyOutline(m,mode){if(mode===1)return outline1(m);if(mode===2)return 
 function baseMask(t,meth,pol){
   if(!grayBuf)return new Uint8Array(N);
   if(meth==='alpha'&&imgMeta&&imgMeta.hasAlpha)return alphaMask(pol);
+  /* 'otsu': 자동 최적값 계산 (autoSelect 전용)
+     'global': 사용자 지정 threshold t 사용 (슬라이더 전용)
+     슬라이더 조작 시 method='global'로 전환해야 t가 실제 적용됨 */
   if(meth==='otsu')return fillT(grayBuf,otsu(grayBuf),pol);
+  if(meth==='global')return fillT(grayBuf,t,pol);
   if(meth==='mean')return fillT(grayBuf,meanT(grayBuf),pol);
   if(meth==='sauvola')return sauvolaFill(grayBuf,15,0.2,pol);
   if(meth==='adaptive')return adaptiveFill(grayBuf,9,8,pol);
@@ -2021,10 +2120,10 @@ function debouncedRebuild(afterMs){
 ge('clarity2')?.addEventListener('input', function(){
   const v = Math.max(20, Math.min(240, +this.value));
   threshold = v;
+  /* method='global': baseMask에서 사용자 지정 threshold t 실제 사용
+     otsu 메서드는 otsu(grayBuf)를 새로 계산해 슬라이더 값이 무시됨 */
   method = 'global';
-  /* UI 즉시 업데이트 */
   paintSlider(v);
-  /* rebuild는 디바운스 */
   if(hasImage && grayBuf) debouncedRebuild(120);
   const ap = ge('thApply');
   if(ap) ap.disabled = false;
@@ -2050,21 +2149,24 @@ ge('thPlus')?.addEventListener('click', ()=>{
 
 ge('thAuto')?.addEventListener('click', ()=>{
   if(!grayBuf){ toast('이미지를 먼저 가져와주세요'); return; }
-  const t = otsu(grayBuf);
-  threshold = t; method = 'global';
+  const tVal = otsu(grayBuf);
+  threshold = tVal; /* method는 현재 상태 유지 */
   paintSlider(t);
-  rebuild(); draw(); syncQuality();
-  toast(t('toast_auto_th') + ' ' + thPct(t) + '%');
+  /* autoSelect() 재실행으로 polarity·method·threshold 모두 최적화 */
+  autoSelect();
+  paintSlider(threshold);
+  draw(); syncQuality();
+  toast(t('toast_auto_th') + ' ' + thPct(threshold) + '%');
   const ap = ge('thApply');
   if(ap) ap.disabled = true;
 });
 
 ge('thApply')?.addEventListener('click', ()=>{
   if(!hasImage) return;
-  /* 즉시 rebuild + afterChange (여기서만 정식 afterChange 호출) */
   if(_rebuildTimer){ clearTimeout(_rebuildTimer); _rebuildTimer = null; }
+  method = 'global'; /* 사용자 threshold 실제 반영 */
   rebuild(); afterChange(false); syncQuality();
-  toast('점 농도 ' + thPct(threshold) + '% 적용됨');
+  toast(thPct(threshold) + '% 점 농도 적용됨');
   const ap = ge('thApply');
   if(ap) ap.disabled = true;
 });
@@ -2108,23 +2210,7 @@ function syncQuality(){
   const qs=ge('qDotSub');if(qs)qs.textContent='/ 2,400 · '+fill+'%';
   const df=ge('densityFill');
   if(df){df.style.width=Math.min(100,fill)+'%';df.style.background=fill<15?'#15803D':fill<40?'#FF9500':'#DC2626';}
-  // 점 밀도 상태 카드 (사용자 친화, 스펙 §10)
-  const dsc=ge('densityStateCard');
-  const dsl=ge('densityStateLabel');
-  const dsd=ge('densityStateDesc');
-  const df2=ge('densityFill2');
-  if(dsl&&dsd&&dsc){
-    let dlabel,ddesc,dstate,dcolor;
-    if(fill===0){dlabel='—';ddesc='아직 생성되지 않음';dstate='';dcolor='#CCC';}
-    else if(fill<10){dlabel='부족해요';ddesc='점이 너무 적어요';dstate='bad';dcolor='#B91C1C';}
-    else if(fill<35){dlabel='적정';ddesc='손가락으로 구분하기 좋아요';dstate='good';dcolor='#15803D';}
-    else if(fill<50){dlabel='조금 많아요';ddesc='줄이는 것을 권장해요';dstate='warn';dcolor='#A16207';}
-    else{dlabel='점이 많아요';ddesc='손가락 구분이 어려울 수 있어요';dstate='bad';dcolor='#B91C1C';}
-    dsl.textContent=dlabel;dsl.style.color=dcolor;
-    dsd.textContent=ddesc;
-    dsc.dataset.state=dstate;
-    if(df2){df2.style.width=Math.min(100,fill)+'%';df2.style.background=dcolor;}
-  }
+  /* 점 밀도 상태 카드 제거 */
 
   // pills
   // 한국어 상태값 + 점 밀도 기준 (스펙 §10)
@@ -2233,9 +2319,14 @@ setAppState=function(s){
       /* hover 효과 */
       if(!replLbl._hover){
         replLbl._hover=true;
-        replLbl.addEventListener('mouseenter',()=>{replLbl.style.background='var(--surface)';replLbl.style.borderColor='var(--border)';replLbl.style.color='var(--text)';});
+        replLbl.addEventListener('mouseenter',()=>{replLbl.style.background='var(--orange-bg)';replLbl.style.borderColor='var(--orange)';replLbl.style.color='var(--orange)';});
         replLbl.addEventListener('mouseleave',()=>{replLbl.style.background='var(--white)';replLbl.style.borderColor='var(--border2)';replLbl.style.color='var(--muted)';});
         replLbl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('imageFileInput').click();}});
+        /* button → imageFileInput 클릭 연결 */
+        replLbl.addEventListener('click',()=>{
+          const inp=document.getElementById('imageFileInput');
+          if(inp){inp.value='';inp.click();}
+        });
       }
     }
     // scanning animation
@@ -2350,6 +2441,8 @@ ge('btnAllUp')?.addEventListener('click',()=>{
   pushUndo();
   for(let i=0;i<N;i++) grid[i]=1;
   pages[curPage]=grid;
+  /* rebuild 호출 시 그리드가 유지되도록 threshold를 낮게 설정 */
+  threshold = 20; polarity = true;
   draw(); afterChange(); syncQuality();
   toast(t('toast_pin_up'));
 });
@@ -2358,12 +2451,17 @@ ge('btnAllDown')?.addEventListener('click',()=>{
   pushUndo();
   for(let i=0;i<N;i++) grid[i]=0;
   pages[curPage]=grid;
+  /* rebuild 호출 시 빈 그리드가 유지되도록 threshold를 높게 설정 */
+  threshold = 240; polarity = false;
   draw(); afterChange(); syncQuality();
   toast(t('toast_pin_down'));
 });
 ge('btnInvert')?.addEventListener('click',()=>{
   if(!hasImage&&fileKind!=='tactile') return;
   pushUndo();
+  /* polarity 변수 토글 — rebuild() 호출 시 반전 상태 유지 */
+  polarity = !polarity;
+  /* grid도 즉시 반전 (시각 즉각 반응) */
   for(let i=0;i<N;i++) grid[i]=grid[i]?0:1;
   pages[curPage]=grid;
   draw(); afterChange(); syncQuality();
@@ -2871,6 +2969,53 @@ function applyLang(){
   const bbStatus = ge('bbStatus');
   if(bbStatus && !connected) bbStatus.textContent = t('bb_disconnected');
 
+  /* ── 누락 키 완전 보완 ──────────────────────── */
+
+  /* Guard 모달 */
+  const guardH2 = document.querySelector('#guardModal h2');
+  if(guardH2) guardH2.textContent = t('guard_title');
+  const guardP = document.querySelector('#guardModal p');
+  if(guardP) guardP.innerHTML = t('guard_desc').replace('\n','<br>');
+  const guardSaveBtn2 = ge('guardSave');
+  if(guardSaveBtn2) guardSaveBtn2.textContent = t('guard_save');
+  const guardProcBtn = ge('guardProceed');
+  if(guardProcBtn) guardProcBtn.textContent = t('guard_proceed');
+  const guardCnclBtn = ge('guardCancel');
+  if(guardCnclBtn) guardCnclBtn.textContent = t('guard_cancel');
+
+  /* 빈 상태 오버레이 */
+  const emptyTitleEl = document.querySelector('#emptyOv p:first-of-type');
+  if(emptyTitleEl) emptyTitleEl.textContent = t('empty_title');
+  const emptyDropZoneEl = ge('emptyDropZone');
+  if(emptyDropZoneEl){
+    const spans = emptyDropZoneEl.querySelectorAll('span');
+    if(spans[0]) spans[0].textContent = t('empty_import');
+    if(spans[1]) spans[1].textContent = t('empty_drag');
+  }
+  const sampleBtnEl2 = ge('sampleBtn');
+  if(sampleBtnEl2) sampleBtnEl2.textContent = t('empty_sample');
+  const dtmsLabelEl = document.querySelector('#emptyOv label[for="tactileFileInput"]');
+  if(dtmsLabelEl) dtmsLabelEl.textContent = t('empty_dtms');
+
+  /* 다른 이미지로 변환 버튼 */
+  const repTxtEl = ge('replaceImgLabelText');
+  if(repTxtEl) repTxtEl.textContent = lang==='en' ? 'Replace image' : '다른 이미지로 변환';
+
+  /* 변환 중 오버레이 부제목 */
+  const analyzeNameEl = ge('analyzeName');
+  if(analyzeNameEl) analyzeNameEl.textContent = t('converting_sub');
+
+  /* AI 추천 칩 텍스트 교체 */
+  const chipsEl2 = ge('aiChips');
+  if(chipsEl2){
+    const cmap={simpler:lang==='en'?'Simplify':'윤곽 중심으로 변환',
+                denoise:lang==='en'?'Reduce density':'점 밀도 낮추기',
+                auto:   lang==='en'?'Re-detect':'윤곽 다시 감지'};
+    chipsEl2.querySelectorAll('.ai-ch').forEach(ch=>{
+      const v=cmap[ch.dataset.cmd]; if(v) ch.textContent=v;
+    });
+  }
+
   // html lang 속성
   document.documentElement.lang = lang;
 }
@@ -2920,6 +3065,218 @@ setTimeout(()=>{
 /* i18n 전역 노출 (addon 내 다른 함수에서 사용) */
 window._t = t;
 window._applyLang = applyLang;
+
+/* ══════════════════════════════════════════════════════════
+   인터랙션 시스템 — 파일 업로드 & 변환 경험 강화
+   ══════════════════════════════════════════════════════════ */
+
+/* ── 업로드 파티클 효과 ──────────────────────────────────── */
+function spawnParticles(cx, cy, count){
+  const container = ge('uploadParticles');
+  if(!container) return;
+  container.innerHTML = '';
+  const colors = ['#FF4D00','#FF8C66','#FFB899','#1A1A1A','#FF4D00'];
+  for(let i = 0; i < (count||16); i++){
+    const p = document.createElement('div');
+    p.className = 'uparticle';
+    const angle = (Math.PI * 2 / (count||16)) * i + Math.random() * 0.5;
+    const dist  = 40 + Math.random() * 80;
+    const tx = Math.cos(angle) * dist;
+    const ty = Math.sin(angle) * dist;
+    const size = 4 + Math.random() * 8;
+    p.style.cssText = `
+      left:${cx}px;top:${cy}px;
+      width:${size}px;height:${size}px;
+      background:${colors[i % colors.length]};
+      --tx:${tx}px;--ty:${ty}px;
+      animation-delay:${Math.random()*0.15}s;
+      animation-duration:${0.5+Math.random()*0.4}s
+    `;
+    container.appendChild(p);
+  }
+  setTimeout(()=>{ if(container) container.innerHTML=''; }, 900);
+}
+
+/* ── 드래그앤드롭 인터랙션 강화 ─────────────────────────── */
+const canvasAreaEl = q('.canvas-area');
+
+canvasAreaEl?.addEventListener('dragenter', ()=>{
+  canvasAreaEl.classList.add('drag-over');
+});
+canvasAreaEl?.addEventListener('dragleave', e=>{
+  if(!canvasAreaEl.contains(e.relatedTarget))
+    canvasAreaEl.classList.remove('drag-over');
+});
+canvasAreaEl?.addEventListener('drop', e=>{
+  canvasAreaEl.classList.remove('drag-over');
+  /* 드롭 위치에 파티클 생성 */
+  const rect = canvasAreaEl.getBoundingClientRect();
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+  spawnParticles(cx, cy, 20);
+});
+
+/* ── 이미지 업로드 시 파티클 (파일 선택 버튼 클릭) ──────── */
+const _origLoadImageFile = loadImageFile;
+loadImageFile = function(f){
+  /* 캔버스 중앙에 파티클 */
+  const wrap = ge('dotGridWrap');
+  if(wrap){
+    const r = wrap.getBoundingClientRect();
+    const cx = r.width/2;
+    const cy = r.height/2;
+    spawnParticles(cx, cy, 18);
+  }
+  _origLoadImageFile(f);
+};
+
+/* ── 변환 완료 — 캔버스 등장 효과 ──────────────────────── */
+const _origSetAppState = typeof setAppState === 'function' ? setAppState : null;
+
+function addDoneEffect(){
+  const wrap = ge('dotGridWrap');
+  if(!wrap) return;
+  /* 그린 플래시 */
+  const flash = document.createElement('div');
+  flash.className = 'done-flash';
+  wrap.appendChild(flash);
+  setTimeout(()=> flash.remove(), 600);
+  /* 캔버스 fade-in */
+  wrap.classList.add('canvas-ready');
+  setTimeout(()=> wrap.classList.remove('canvas-ready'), 400);
+}
+
+/* setAppState가 ready로 바뀔 때 효과 추가 */
+const __prevSetApp = setAppState;
+setAppState = function(s){
+  const wasNotReady = appState !== 'ready';
+  __prevSetApp(s);
+  if(s === 'ready' && wasNotReady && hasImage){
+    setTimeout(addDoneEffect, 50);
+  }
+};
+
+/* ── 슬라이더 조작 시 캔버스 흐림 효과 ─────────────────── */
+const dotWrap = ge('dotGridWrap');
+function markPendingRebuild(){
+  if(dotWrap) dotWrap.classList.add('pending-rebuild');
+}
+function unmarkPendingRebuild(){
+  if(dotWrap) dotWrap.classList.remove('pending-rebuild');
+}
+
+/* debouncedRebuild 래핑 — rebuild 함수 오버라이드 없이 CSS만 처리
+   (rebuild 오버라이드는 restore 실패 시 함수 영구 교체되는 버그 유발) */
+const _prevDebouncedRebuild = debouncedRebuild;
+debouncedRebuild = function(ms){
+  markPendingRebuild();
+  /* rebuild 후 unmark는 타이머 완료 시점에 CSS transition으로 처리 */
+  const _t = _prevDebouncedRebuild;
+  const origMs = ms||120;
+  _t(origMs);
+  /* rebuild 완료 예상 시점 이후 unmark */
+  setTimeout(unmarkPendingRebuild, origMs + 80);
+};
+
+/* ── 품질 지표 변경 시 pulse 효과 ──────────────────────── */
+const _origPill = typeof pill === 'function' ? pill : null;
+if(_origPill){
+  pill = function(el, text, cls){
+    const wasText = el ? el.textContent : '';
+    _origPill(el, text, cls);
+    if(el && wasText && wasText !== '—' && wasText !== text && wasText !== '—'){
+      el.classList.add('updating');
+      setTimeout(()=> el.classList.remove('updating'), 300);
+    }
+  };
+}
+
+/* ── 헤더 버튼 리플 ─────────────────────────────────────── */
+qa('.hdr-btn, .bb-btn').forEach(btn=>{
+  btn.addEventListener('pointerdown', e=>{
+    const r = btn.getBoundingClientRect();
+    const rx = ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%';
+    const ry = ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%';
+    btn.style.setProperty('--rx', rx);
+    btn.style.setProperty('--ry', ry);
+  });
+});
+
+/* ── 파일명 입력 포커스 시 전체 선택 ───────────────────── */
+ge('fname')?.addEventListener('focus', function(){
+  this.select();
+});
+
+/* ── 드롭존 drag 카운터 (스타일 안정성) ─────────────────── */
+let _dragCount = 0;
+document.addEventListener('dragenter', ()=> _dragCount++);
+document.addEventListener('dragleave', ()=>{
+  _dragCount--;
+  if(_dragCount <= 0){
+    _dragCount = 0;
+    canvasAreaEl?.classList.remove('drag-over');
+  }
+});
+document.addEventListener('drop', ()=>{ _dragCount = 0; });
+
+/* ── 이미지 미리보기 토글 — 전환 애니메이션 ─────────────── */
+ge('liveToggle')?.addEventListener('change', function(){
+  const grid = ge('dotGrid');
+  if(!grid) return;
+  grid.style.transition = 'opacity .2s';
+  grid.style.opacity = '0.4';
+  setTimeout(()=>{ grid.style.opacity = '1'; }, 220);
+});
+
+/* ── 변환 중 진행률 시뮬레이션 (UI 신뢰감) ─────────────── */
+let _progTimer = null;
+function startProgressSim(){
+  let pct = 0;
+  const bar = q('.conv-bar');
+  if(!bar) return;
+  _progTimer = setInterval(()=>{
+    /* 지수적 감속: 빠르게 시작해 85%에서 멈춤 */
+    const step = (85 - pct) * 0.12 + 0.5;
+    pct = Math.min(85, pct + step);
+    bar.style.width = pct + '%';
+    if(pct >= 85) clearInterval(_progTimer);
+  }, 80);
+}
+function finishProgressSim(){
+  clearInterval(_progTimer);
+  const bar = q('.conv-bar');
+  if(bar){
+    bar.style.transition = 'width .3s cubic-bezier(.4,0,.2,1)';
+    bar.style.width = '100%';
+    setTimeout(()=>{
+      bar.style.transition = '';
+      bar.style.width = '0%';
+    }, 400);
+  }
+}
+
+/* startAnalyze / finishAnalyze 래핑 */
+const _origStart = startAnalyze;
+startAnalyze = function(img, name){
+  startProgressSim();
+  _origStart(img, name);
+};
+const _origFinish = finishAnalyze;
+if(typeof _origFinish === 'function'){
+  finishAnalyze = function(img, name){
+    _origFinish(img, name);
+    setTimeout(finishProgressSim, 100);
+  };
+}
+
+/* ── 키보드 접근성: 포커스 링 개선 ─────────────────────── */
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Tab') document.body.classList.add('kb-nav');
+});
+document.addEventListener('mousedown', ()=>{
+  document.body.classList.remove('kb-nav');
+});
+
 </script>
 </body>
 </html>
