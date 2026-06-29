@@ -4727,6 +4727,8 @@ document.addEventListener('mousedown', ()=>{
   #saveDropMenu button:hover{background:var(--surface)}
   #saveDropMenu .drop-sep{height:1px;background:var(--border);margin:3px 0}
   #hdrExportBtn[aria-expanded="true"]{background:var(--surface)}
+  .canvas-meta{display:none!important}
+  #hdrOutputBtn{display:none!important}
   /* 빈 상태: 변환 설정·편집바·캔버스·CTA 등 모두 숨겨 canvas-area 높이를 뷰포트 높이로만 유지 */
   body[data-state="empty"] #studioControls,
   body[data-state="empty"] .edit-bar,
@@ -5249,6 +5251,74 @@ document.addEventListener('mousedown', ()=>{
   // 언어 토글 시 라벨 갱신
   try{ if(typeof applyLang==='function'){ const _l=applyLang; applyLang=function(){ _l(); try{ const ao=$('advOpenBtn'); if(ao)ao.textContent=TL('adv_title'); const pb=$('pubBtn'); if(pb)pb.textContent=TL('cta_pub'); statusUpdate(); }catch(e){} }; } }catch(e){}
 
+  /* -- 헤더 재구성: Dot Pad로 보내기 제거, 파일 불러오기 + Dot Pad 연결 버튼 추가 -- */
+  (function(){
+    // 1) "Dot Pad로 보내기" 버튼 숨김 (하단 CTA로 역할 이동)
+    const hdrOut=document.getElementById('hdrOutputBtn');
+    if(hdrOut){ hdrOut.style.display='none'; hdrOut.setAttribute('aria-hidden','true'); hdrOut.setAttribute('inert',''); }
+
+    // 2) 파일 불러오기 버튼 삽입 (hdrExportBtn 앞)
+    const hdrExp=document.getElementById('hdrExportBtn');
+    const hdrActions=hdrExp&&hdrExp.parentElement;
+    if(hdrActions&&hdrExp){
+      const loadBtn=document.createElement('button');
+      loadBtn.id='hdrLoadBtn';
+      loadBtn.type='button';
+      loadBtn.setAttribute('aria-label','파일 불러오기');
+      loadBtn.className='hdr-btn secondary';
+      loadBtn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>불러오기</span>`;
+      hdrActions.insertBefore(loadBtn, hdrExp);
+      // 실제 파일 입력 연결 (replaceImgLabel과 동일 동작)
+      loadBtn.addEventListener('click',()=>{
+        const rpl=document.getElementById('replaceImgLabel'); if(rpl){ rpl.click(); return; }
+        const fi=document.getElementById('fileInput')||document.querySelector('input[type=file]'); if(fi) fi.click();
+      });
+    }
+
+    // 3) Dot Pad 연결 버튼 삽입 (hdrExportBtn 앞)
+    if(hdrActions&&hdrExp){
+      const dpBtn=document.createElement('button');
+      dpBtn.id='hdrDpBtn';
+      dpBtn.type='button';
+      dpBtn.setAttribute('aria-label','Dot Pad 연결');
+      dpBtn.className='hdr-btn secondary';
+      dpBtn.style.cssText='display:inline-flex;align-items:center;gap:5px;';
+      dpBtn.innerHTML=`<span class="hdr-dp-dot" id="hdrDpDot" aria-hidden="true"></span><span id="hdrDpText">Dot Pad 연결</span>`;
+      hdrActions.insertBefore(dpBtn, hdrExp);
+      dpBtn.addEventListener('click',()=>{
+        const cr=document.getElementById('connRow'); if(cr) cr.click();
+      });
+    }
+
+    // 4) Dot Pad 상태 → 헤더 버튼 동기화
+    const CSS_HDR=`
+    #hdrDpDot{width:7px;height:7px;border-radius:50%;background:#c9c3b8;flex-shrink:0}
+    #hdrDpBtn[data-state="connected"]{border-color:var(--orange);color:var(--orange)}
+    #hdrDpBtn[data-state="connected"] #hdrDpDot{background:#1c9d5e}
+    #hdrDpBtn[data-state="connecting"] #hdrDpDot{background:#f59e0b}
+    #hdrLoadBtn span,#hdrDpBtn span:last-child{font-size:11px;font-weight:700}
+    `;
+    const hst=document.createElement('style'); hst.textContent=CSS_HDR; document.head.appendChild(hst);
+
+    function syncHdrDp(){
+      const btn=document.getElementById('hdrDpBtn'); if(!btn) return;
+      const conn=(typeof connected!=='undefined'&&connected);
+      const txt=document.getElementById('hdrDpText');
+      if(conn){
+        btn.dataset.state='connected';
+        if(txt) txt.textContent='Dot Pad 연결됨';
+        btn.setAttribute('aria-label','Dot Pad 연결됨');
+      } else {
+        btn.dataset.state='disconnected';
+        if(txt) txt.textContent='Dot Pad 연결';
+        btn.setAttribute('aria-label','Dot Pad 연결');
+      }
+    }
+    try{ if(typeof setDpState==='function'){ const _d=setDpState; setDpState=function(s){ _d(s); setTimeout(syncHdrDp,50); }; } }catch(e){}
+    syncHdrDp();
+    window.__syncHdrDp=syncHdrDp;
+  })();
+
   /* -- 헤더 "저장" 버튼 → 드롭다운 (DTMS / PNG / 커뮤니티 / 고급) -- */
   (function(){
     const exportBtn=document.getElementById('hdrExportBtn');
@@ -5332,6 +5402,18 @@ document.addEventListener('mousedown', ()=>{
   statusUpdate();
 })();
 
+/* -- canvasMeta 통합: 별도 줄 숨김, 정보를 canvasInfoBar로 이관 -- */
+(function(){
+  const meta=document.getElementById('canvasMeta');
+  if(meta){
+    meta.setAttribute('aria-hidden','true');
+    meta.style.cssText='display:none!important';
+  }
+  // replaceImgLabel도 숨김 (헤더 hdrLoadBtn으로 대체)
+  const rpl=document.getElementById('replaceImgLabel');
+  if(rpl){ rpl.setAttribute('aria-hidden','true'); rpl.style.display='none'; }
+})();
+
 /* ── 확장된 IIFE 닫기 ── */
 })();
 
@@ -5372,6 +5454,7 @@ document.addEventListener('mousedown', ()=>{
   .cib-action-btn:hover{border-color:var(--orange);color:var(--orange)}
   .cib-action-btn:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
   .cib-action-btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}
+  .cib-action-btn:disabled{cursor:default;pointer-events:none}
   .cib-sep{width:1px;height:20px;background:var(--border2);flex-shrink:0;margin:0 2px}
   /* 페이지 관리 드롭다운 */
   #pgMgmtWrap{position:relative;display:inline-flex}
@@ -5463,12 +5546,12 @@ document.addEventListener('mousedown', ()=>{
 
   /* ── 그림 페이지 행 ── */
   const pgRow=document.createElement('div'); pgRow.id='cibPageRow'; pgRow.setAttribute('role','group'); pgRow.setAttribute('aria-label','그림 페이지');
-  pgRow.innerHTML=`<span class="cib-section-label">그림 페이지</span>
+  pgRow.innerHTML=`<span class="cib-section-label">페이지</span>
     <button type="button" class="cib-nav-btn" id="cibPgPrev" aria-label="이전 그림 페이지" disabled>‹</button>
     <span id="cibPgInd" class="cib-page-ind" aria-live="polite">1/1</span>
     <button type="button" class="cib-nav-btn" id="cibPgNext" aria-label="다음 그림 페이지" disabled>›</button>
     <div id="pgMgmtWrap">
-      <button type="button" class="cib-action-btn" id="pgMgmtBtn" aria-haspopup="true" aria-expanded="false" aria-label="페이지 관리 메뉴 열기">페이지 관리 ···</button>
+      <button type="button" class="cib-action-btn" id="pgMgmtBtn" aria-haspopup="true" aria-expanded="false" aria-label="페이지 관리 메뉴 열기">관리 ···</button>
       <div id="pgMgmtMenu" role="menu">
         <button type="button" id="mgmtAdd" role="menuitem">페이지 추가</button>
         <button type="button" id="mgmtDup" role="menuitem">현재 페이지 복제</button>
@@ -5510,12 +5593,21 @@ document.addEventListener('mousedown', ()=>{
     const txt=document.getElementById('cibDescText');
     const v=(window.__altText||'').trim();
     if(txt){
-      if(v){ txt.textContent=v; txt.dataset.empty='0'; }
-      else { txt.textContent='설명을 추가해 주세요'; txt.dataset.empty='1'; }
+      if(v){
+        txt.textContent=v;
+        txt.dataset.empty='0';
+        txt.setAttribute('title',v);
+      } else {
+        txt.textContent='설명을 추가하면 Dot Pad에 점자로 함께 보낼 수 있어요';
+        txt.dataset.empty='1';
+        txt.removeAttribute('title');
+      }
     }
     const editBtn=document.getElementById('cibDescEdit');
-    if(editBtn) editBtn.textContent=v?'수정':'작성';
-    if(editBtn) editBtn.setAttribute('aria-label', v?'그림 설명 수정':'그림 설명 작성');
+    if(editBtn){
+      editBtn.textContent=v?'수정':'작성';
+      editBtn.setAttribute('aria-label', v?'그림 설명 수정':'그림 설명 작성');
+    }
   }
 
   /* ── 점자 페이지 동기화 ── */
@@ -5526,13 +5618,20 @@ document.addEventListener('mousedown', ()=>{
     const brPage=document.getElementById('cibBrPage');
     const brPrev=document.getElementById('cibBrPrev');
     const brNext=document.getElementById('cibBrNext');
+    const brSend=document.getElementById('cibBrSend');
+    const hasContent=i.n>0;
     if(brInfo) brInfo.textContent=i.n?i.a+'-'+i.b+' / '+i.n+'셀':'0셀';
     if(brPage){
       brPage.textContent=i.t>1?i.p+'/'+i.t:'';
-      brPage.style.display=i.t>1?'':'none';
+      brPage.style.display=(hasContent&&i.t>1)?'':'none';
     }
-    if(brPrev){ brPrev.disabled=(i.p<=1); brPrev.style.display=i.t>1?'':'none'; }
-    if(brNext){ brNext.disabled=(i.p>=i.t); brNext.style.display=i.t>1?'':'none'; }
+    if(brPrev){ brPrev.disabled=(i.p<=1||!hasContent); brPrev.style.display=(hasContent&&i.t>1)?'':'none'; }
+    if(brNext){ brNext.disabled=(i.p>=i.t||!hasContent); brNext.style.display=(hasContent&&i.t>1)?'':'none'; }
+    // 점자 보내기: 0셀이면 비활성화
+    if(brSend){
+      brSend.disabled=!hasContent;
+      brSend.style.opacity=hasContent?'':'0.4';
+    }
   }
 
   /* ── 그림 페이지 동기화 ── */
