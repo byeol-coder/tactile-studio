@@ -40,6 +40,11 @@ import { t } from './i18n.js';
 const ge  = id => document.getElementById(id);
 const qs  = s  => document.querySelector(s);
 const qsa = s  => [...document.querySelectorAll(s)];
+const MOBILE_MODE_QUERY = '(max-width: 720px)';
+
+function setPressed(el, active) {
+  if (el) el.setAttribute('aria-pressed', String(active));
+}
 
 // ─── Toast ────────────────────────────────────────────────────
 let _toastTimer = null;
@@ -117,12 +122,23 @@ function drawCanvas() {
 
 // ─── App Phase ────────────────────────────────────────────────
 function setPhase(phase) {
+  const prev = appState.phase;
   appState.phase = phase;
   document.body.dataset.state = phase;
   syncBottomBar();
   if (phase === 'ready') {
     const badge = qs('.ai-done-badge');
     if (badge) badge.style.display = '';
+    // fade-in canvas when transitioning from empty or analyzing
+    if (prev !== 'ready') {
+      const wrap = ge('dotGridWrap');
+      if (wrap) {
+        wrap.classList.remove('fadein');
+        void wrap.offsetWidth;
+        wrap.classList.add('fadein');
+        setTimeout(() => wrap.classList.remove('fadein'), 350);
+      }
+    }
   }
 }
 
@@ -410,9 +426,17 @@ function applyAiCmd(cmd) {
 // ─── Sync conversion UI ───────────────────────────────────────
 function syncConvUI() {
   // method tabs
-  qsa('.th-method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === conversionState.method));
+  qsa('.th-method-btn').forEach(b => {
+    const active = b.dataset.method === conversionState.method;
+    b.classList.toggle('active', active);
+    setPressed(b, active);
+  });
   // outline buttons
-  qsa('.outline-btn').forEach(b => b.classList.toggle('active', +b.dataset.outline === conversionState.outline));
+  qsa('.outline-btn').forEach(b => {
+    const active = +b.dataset.outline === conversionState.outline;
+    b.classList.toggle('active', active);
+    setPressed(b, active);
+  });
   // invert toggle
   const inv = ge('invertToggle');
   if (inv) inv.setAttribute('aria-checked', String(conversionState.invert));
@@ -431,7 +455,10 @@ function syncConvUI() {
     edgeEl.setAttribute('aria-pressed', String(isOn));
   }
   // a manual control change means we're no longer on a named preset
-  qsa('.preset-btn').forEach(b => b.classList.remove('active'));
+  qsa('.preset-btn').forEach(b => {
+    b.classList.remove('active');
+    setPressed(b, false);
+  });
   updatePresetChip();
 }
 
@@ -456,7 +483,11 @@ function syncConn() {
   // panel dot
   const dot2 = ge('dpDot'); if (dot2) dot2.className = 'dp-dot' + (on ? ' on' : '');
   const lbl = ge('dpLbl'); if (lbl) lbl.textContent = on ? t('bb_connected', lang) : t('conn_off', lang);
-  const liveSw = ge('liveSwitch'); if (liveSw) liveSw.disabled = !on;
+  const liveSw = ge('liveSwitch');
+  if (liveSw) {
+    liveSw.disabled = !on;
+    liveSw.setAttribute('aria-checked', String(on && dotPadState.livePreviewEnabled));
+  }
   const bleBtn = ge('bleBtn'); if (bleBtn) bleBtn.textContent = on ? '연결 끊기' : t('conn_btn_ble', lang);
   // mini mode
   const miniDot = ge('miniConnDot'); if (miniDot) miniDot.className = 'dp-dot' + (on ? ' on' : '');
@@ -478,7 +509,7 @@ function renderPageChips() {
   const total = pagesState.pages.length;
   const cur = pagesState.activePageIndex;
   bar.innerHTML = pagesState.pages.map((p, i) =>
-    `<button class="page-chip${i === cur ? ' active' : ''}" data-idx="${i}" aria-pressed="${i === cur}">${i + 1}</button>`
+    `<button class="page-chip${i === cur ? ' active' : ''}" role="tab" data-idx="${i}" aria-selected="${i === cur}" aria-label="${i + 1}페이지">${i + 1}</button>`
   ).join('');
   bar.querySelectorAll('.page-chip').forEach(b =>
     b.addEventListener('click', () => switchPage(+b.dataset.idx))
@@ -862,7 +893,11 @@ function setLanguage(lang) {
   appState.language = lang;
   document.documentElement.lang = lang === 'ko' ? 'ko' : 'en';
   applyI18n();
-  qsa('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  qsa('.lang-btn').forEach(b => {
+    const active = b.dataset.lang === lang;
+    b.classList.toggle('active', active);
+    setPressed(b, active);
+  });
 }
 
 function applyI18n() {
@@ -952,6 +987,20 @@ function wireFullMode() {
     e.target.value = '';
   });
   ge('emptyDropZone')?.addEventListener('click', () => ge('imgFileInput')?.click());
+  ge('tactileOpenBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
+
+  // hero prompt (empty-state command card)
+  ge('heroPromptForm')?.addEventListener('submit', e => {
+    e.preventDefault();
+    const inp = ge('heroPromptInput');
+    const text = inp?.value.trim(); if (!text) return;
+    parseCommand(text); if (inp) inp.value = '';
+  });
+  document.querySelectorAll('.hero-chip').forEach(btn => {
+    btn.addEventListener('click', function() { parseCommand(this.dataset.cmd || this.textContent.trim()); });
+  });
+  ge('heroAddImgBtn')?.addEventListener('click', () => ge('imgFileInput')?.click());
+  ge('heroOpenDtmsBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
 
   // drag-over visual
   const area = qs('.canvas-area');
@@ -1007,7 +1056,11 @@ function wireFullMode() {
     const page = pagesState.activePage;
     if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
     conversionState.method = b.dataset.method;
-    qsa('.th-method-btn').forEach(x => x.classList.toggle('active', x === b));
+    qsa('.th-method-btn').forEach(x => {
+      const active = x === b;
+      x.classList.toggle('active', active);
+      setPressed(x, active);
+    });
     if (conversionState.method !== 'global') {
       const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
       conversionState.threshold = p.threshold;
@@ -1021,7 +1074,11 @@ function wireFullMode() {
     const page = pagesState.activePage;
     if (!page?.sourceImageState) return;
     conversionState.outline = +b.dataset.outline;
-    qsa('.outline-btn').forEach(x => x.classList.toggle('active', x === b));
+    qsa('.outline-btn').forEach(x => {
+      const active = x === b;
+      x.classList.toggle('active', active);
+      setPressed(x, active);
+    });
     rebuild();
   }));
 
@@ -1051,7 +1108,11 @@ function wireFullMode() {
     paintSlider(conversionState.threshold);
     syncConvUI();   // syncs controls; also clears preset active state
     // re-mark the chosen preset as active AFTER syncConvUI's reset
-    qsa('.preset-btn').forEach(x => x.classList.toggle('active', x === b));
+    qsa('.preset-btn').forEach(x => {
+      const active = x === b;
+      x.classList.toggle('active', active);
+      setPressed(x, active);
+    });
     updatePresetChip();
     rebuild();
   }));
@@ -1148,7 +1209,11 @@ function wireFullMode() {
   qsa('.res-btn').forEach(b => b.addEventListener('click', () => {
     const [c, r] = b.dataset.res.split('x').map(Number);
     setResolution(c, r);
-    qsa('.res-btn').forEach(x => x.classList.toggle('active', x === b));
+    qsa('.res-btn').forEach(x => {
+      const active = x === b;
+      x.classList.toggle('active', active);
+      setPressed(x, active);
+    });
   }));
 
   // File name
@@ -1203,8 +1268,11 @@ function wireMiniMode() {
   // resolution chips
   document.querySelectorAll('[data-mini-res]').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('[data-mini-res]').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
+      document.querySelectorAll('[data-mini-res]').forEach(b => {
+        const active = b === this;
+        b.classList.toggle('active', active);
+        setPressed(b, active);
+      });
       const [c, r] = this.dataset.miniRes.split('x').map(Number);
       setResolution(c, r);
     });
@@ -1252,8 +1320,10 @@ function wireMiniMode() {
 // ─── Detect mode ──────────────────────────────────────────────
 function detectMode() {
   const params = new URLSearchParams(location.search);
+  if (params.get('mode') === 'full') return 'full';
   if (params.has('mini') || params.get('mode') === 'mini') return 'mini';
   if (window.self !== window.top) return 'embed';
+  if (window.matchMedia?.(MOBILE_MODE_QUERY).matches) return 'mini';
   return 'full';
 }
 
