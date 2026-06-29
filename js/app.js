@@ -402,6 +402,7 @@ function syncConvUI() {
   }
   // a manual control change means we're no longer on a named preset
   qsa('.preset-btn').forEach(b => b.classList.remove('active'));
+  updatePresetChip();
 }
 
 // ─── Sync helpers ─────────────────────────────────────────────
@@ -819,6 +820,20 @@ function applyI18n() {
   });
   const ph = ge('promptInput'); if (ph) ph.placeholder = t('prompt_ph', lang);
   syncQuality(); syncConn();
+  updatePresetChip();
+}
+
+// Reflect the active conversion preset (or "custom") in the summary chip.
+function updatePresetChip() {
+  const chip = ge('presetChip'); if (!chip) return;
+  const active = qsa('.preset-btn').find(b => b.classList.contains('active'));
+  if (active) {
+    chip.textContent = active.querySelector('.preset-name')?.textContent?.trim() || '';
+    chip.classList.add('is-active');
+  } else {
+    chip.textContent = t('preset_none', appState.language);
+    chip.classList.remove('is-active');
+  }
 }
 
 // ─── Resolution change ────────────────────────────────────────
@@ -972,8 +987,10 @@ function wireFullMode() {
     pushUndo();
     Object.assign(conversionState, p);
     paintSlider(conversionState.threshold);
+    syncConvUI();   // syncs controls; also clears preset active state
+    // re-mark the chosen preset as active AFTER syncConvUI's reset
     qsa('.preset-btn').forEach(x => x.classList.toggle('active', x === b));
-    syncConvUI();
+    updatePresetChip();
     rebuild();
   }));
 

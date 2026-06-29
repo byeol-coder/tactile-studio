@@ -34,6 +34,7 @@ export const I18N = {
     panel_dotpad:     'Dot Pad',
     panel_export:     '내보내기',
     panel_braille:    '점자 설명',
+    preset_none:      '사용자 지정',
 
     q_clarity:        '판독성',
     q_density:        '점 밀도',
@@ -161,6 +162,7 @@ export const I18N = {
     panel_dotpad:     'Dot Pad',
     panel_export:     'Export',
     panel_braille:    'Braille Description',
+    preset_none:      'Custom',
 
     q_clarity:        'Clarity',
     q_density:        'Density',
