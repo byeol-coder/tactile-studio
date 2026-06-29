@@ -4697,10 +4697,30 @@ document.addEventListener('mousedown', ()=>{
 
   /* ---------- CSS ---------- */
   const css=`
-  .right-panel{display:none!important}   /* 우측 고정 패널 제거 — 스크롤 문제 해소 */
-  .workspace{display:block;overflow:auto}
-  /* 작업 카드 컬럼: 폭 제한 + 단일 스크롤(workspace), CTA는 이 흐름의 마지막 = 캔버스 안 가림 */
-  .canvas-area{max-width:1140px;margin:0 auto;width:100%;overflow:visible;padding:10px var(--sp-l) 22px;min-height:calc(100dvh - var(--h-bar,48px))}
+  .right-panel{display:none!important}
+  /* 안 A: 고정 뷰포트 — 스크롤 없이 한 화면에 모든 요소 */
+  .workspace{height:calc(100dvh - var(--h-bar,48px));overflow:hidden;display:flex;flex-direction:column}
+  .canvas-area{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;align-items:stretch;
+    max-width:1140px;margin:0 auto;width:100%;padding:8px var(--sp-l) 0;position:relative;gap:6px}
+  /* 캔버스 그리드: 남은 공간 전부 차지 */
+  #dotGridWrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  /* 하단 푸터: 상태줄·AI피드백·CTA */
+  #studioFooter{width:100%;max-width:1140px;margin:0 auto;padding:0 var(--sp-l) 8px;box-sizing:border-box;
+    display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+  body[data-state="empty"] #studioFooter{display:none!important}
+  /* 안 B: 변환 설정 접기 — 헤더와 바디를 분리 */
+  #scHead{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;user-select:none;min-height:40px}
+  #scHead:hover{background:rgba(0,0,0,.02)}
+  #scSummary{font-size:11px;font-weight:600;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #scToggle{flex-shrink:0;min-height:26px;padding:0 10px;border-radius:999px;border:1.5px solid var(--border2);
+    background:#fff;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+  #scToggle:hover{border-color:var(--orange);color:var(--orange)}
+  #scBody{overflow:hidden;transition:max-height .25s cubic-bezier(.4,0,.2,1),opacity .2s,padding .25s;
+    padding:0 14px 12px;max-height:400px;opacity:1}
+  #studioControls.sc-collapsed #scBody{max-height:0;opacity:0;padding:0 14px}
+  #studioControls.sc-collapsed #scHead{border-bottom:none}
+  #studioControls{width:100%;box-sizing:border-box;background:var(--white);border:1px solid var(--border2);
+    border-radius:14px;margin-bottom:8px;flex-shrink:0;padding:0}
   /* 빈 상태: 변환 설정·편집바·캔버스·CTA 등 모두 숨겨 canvas-area 높이를 뷰포트 높이로만 유지 */
   body[data-state="empty"] #studioControls,
   body[data-state="empty"] .edit-bar,
@@ -4710,13 +4730,12 @@ document.addEventListener('mousedown', ()=>{
   body[data-state="empty"] .cta-bar,
   body[data-state="empty"] #studioStatus,
   body[data-state="empty"] #canvasStatus { display:none!important }
-  /* 변환 설정: compact 3열 (캔버스 크기 35 · 임계값 35 · 굵기+효과 30) */
-  #studioControls{width:100%;box-sizing:border-box;background:var(--white);border:1px solid var(--border2);
-    border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-start}
+  /* 변환 설정 바디: compact 3열 */
+  #scBody{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-start}
   #studioControls>*{min-width:0;margin:0!important}
-  #studioControls>#resSec{flex:1 1 30%} #studioControls>#densitySec{flex:1 1 33%} #studioControls>#convExtra{flex:1 1 28%}
+  #scBody>#resSec{flex:1 1 30%} #scBody>#densitySec{flex:1 1 33%} #scBody>#convExtra{flex:1 1 28%}
   #studioControls .sec-title{margin-bottom:4px!important}
-  #studioControls .th-desc{display:none}   /* 설명은 슬라이더 helper로 충분 — compact */
+  #studioControls .th-desc{display:none}
   #studioControls #resSel{min-height:34px}
   #studioControls .th-actions{margin-top:6px}
   /* AI 요약 (접힘) */
@@ -4767,7 +4786,7 @@ document.addEventListener('mousedown', ()=>{
   #advModal .adv-sec+.adv-sec{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
   @media(max-width:1023px){ .canvas-area,.cta-bar{max-width:none} }
   @media(max-width:767px){
-    #studioControls{gap:12px;padding:12px}
+    #scBody{gap:12px;padding:0 12px 12px}
     .cta-btn{flex:1 1 100%;min-height:48px}
     .cta-btn.ghost{flex:1 1 100%}
   }`;
@@ -4776,12 +4795,54 @@ document.addEventListener('mousedown', ()=>{
   const canvasArea=$('canvasArea'), canvasMeta=$('canvasMeta'), editBar=document.querySelector('.edit-bar');
   const gridWrap=$('dotGridWrap'), canvasStatus=$('canvasStatus'), bottomBar=document.querySelector('.bottom-bar');
 
-  /* ---------- 1) 변환 설정 → 캔버스 위 compact 그룹 ---------- */
+  /* ---------- 1) 변환 설정 → 캔버스 위 compact 그룹 (헤더+바디 접기 구조) ---------- */
   const ctrls=document.createElement('div'); ctrls.id='studioControls'; ctrls.setAttribute('role','group'); ctrls.setAttribute('aria-label',TL('studio_controls'));
-  ['resSec','densitySec','convExtra'].forEach(id=>{ const n=$(id); if(n) ctrls.appendChild(n); });
-  // 편집 툴바 위에 배치 (변환 설정 → 편집 도구 → 캔버스 순서)
+  // 헤더 (요약 + 토글 버튼)
+  const scHead=document.createElement('div'); scHead.id='scHead'; scHead.setAttribute('role','button'); scHead.setAttribute('aria-expanded','true'); scHead.setAttribute('aria-controls','scBody'); scHead.tabIndex=0;
+  scHead.innerHTML=`<span id="scSummary">변환 설정</span><button id="scToggle" type="button" aria-label="설정 접기">접기</button>`;
+  ctrls.appendChild(scHead);
+  // 바디 (실제 컨트롤들)
+  const scBody=document.createElement('div'); scBody.id='scBody';
+  ['resSec','densitySec','convExtra'].forEach(id=>{ const n=$(id); if(n) scBody.appendChild(n); });
+  ctrls.appendChild(scBody);
   if(editBar&&editBar.parentElement) editBar.parentElement.insertBefore(ctrls,editBar);
   else if(canvasMeta) canvasMeta.insertAdjacentElement('afterend',ctrls);
+
+  // 접기/펼치기 토글
+  function scCollapse(v, announce2){
+    const collapsed=(v===undefined)?!ctrls.classList.contains('sc-collapsed'):v;
+    ctrls.classList.toggle('sc-collapsed',collapsed);
+    scHead.setAttribute('aria-expanded',String(!collapsed));
+    const btn=document.getElementById('scToggle'); if(btn) btn.textContent=collapsed?'펼치기':'접기';
+    if(announce2) _stAnnounce(collapsed?'변환 설정 접힘':'변환 설정 펼침');
+    setTimeout(()=>{ try{ if(typeof measureAndRelayout==='function') measureAndRelayout(); }catch(e){} }, 280);
+  }
+  scHead.addEventListener('click',()=>scCollapse(undefined,true));
+  scHead.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();scCollapse(undefined,true);} });
+  document.getElementById('scToggle').addEventListener('click',e=>{ e.stopPropagation(); scCollapse(undefined,true); });
+
+  // 요약 텍스트 갱신 함수 (접혔을 때 현재 설정을 한 줄로 표시)
+  function updateScSummary(){
+    try{
+      const sumEl=document.getElementById('scSummary'); if(!sumEl) return;
+      if(!ctrls.classList.contains('sc-collapsed')){ sumEl.textContent='변환 설정'; return; }
+      const resSel=document.getElementById('resSel'); const resText=resSel?resSel.options[resSel.selectedIndex]?.text:'';
+      const thPctEl=document.querySelector('#thPct'); const thText=thPctEl?thPctEl.textContent:'';
+      const activeThick=document.querySelector('#thickSeg button[aria-pressed="true"],.thick-seg button[aria-pressed="true"]');
+      const thickText=activeThick?activeThick.textContent:'';
+      sumEl.textContent=[resText,thText?'임계값 '+thText:'',thickText].filter(Boolean).join(' · ')||'변환 설정';
+    }catch(e){}
+  }
+
+  // 적용 버튼 클릭 후 자동 접기 (변환 완료 시)
+  try{
+    const apBtn=$('thApply');
+    if(apBtn) apBtn.addEventListener('click',()=>{
+      setTimeout(()=>{
+        if(!ctrls.classList.contains('sc-collapsed')){ scCollapse(true,false); updateScSummary(); }
+      },400);
+    });
+  }catch(e){}
 
   /* ---------- 2) 핀 제어(전체 채우기/비우기/점 반전) → 편집 툴바 '캔버스' 그룹 ---------- */
   const pinSec=($('btnAllUp')&&$('btnAllUp').parentElement)?$('btnAllUp').parentElement.parentElement:null;
@@ -4854,14 +4915,39 @@ document.addEventListener('mousedown', ()=>{
   adv.addEventListener('click',e=>{ if(e.target===adv) advShow(false); });
   adv.addEventListener('keydown',e=>{ if(e.key==='Escape') advShow(false); });
 
+  /* ---------- 4b) 고정 뷰포트 캔버스 크기 재계산 ---------- */
+  // gridWrap의 실제 픽셀 크기를 측정해 cell을 최대화
+  function measureAndRelayout(){
+    try{
+      const gw=gridWrap; if(!gw) return;
+      const r=gw.getBoundingClientRect();
+      const availW=r.width-off*2-4, availH=r.height-off*2-4;
+      if(availW<30||availH<30) return;
+      const cw=Math.floor(availW/GW), ch=Math.floor(availH/GH);
+      const nc=Math.max(4,Math.min(24,Math.min(cw,ch)));
+      const z=window.__dispZoom||1;
+      const nc2=Math.max(2,Math.round(nc*z));
+      if(Math.abs(nc2-cell)>0){ cell=nc2;
+        const w=GW*cell+off*2, h=GH*cell+off*2, dpr=window.devicePixelRatio||1;
+        pad.width=w*dpr; pad.height=h*dpr; pad.style.width=w+'px'; pad.style.height=h+'px';
+        ctx.setTransform(dpr,0,0,dpr,0,0); if(typeof draw==='function') draw(); }
+    }catch(e){}
+  }
+  // ResizeObserver: 패널 접기/펼치기나 창 크기 변화 시 자동 재계산
+  try{
+    if(typeof ResizeObserver!=='undefined'&&gridWrap){
+      const ro=new ResizeObserver(()=>{ clearTimeout(window.__roT); window.__roT=setTimeout(measureAndRelayout,60); });
+      ro.observe(gridWrap);
+    }
+  }catch(e){}
+
   /* ---------- 5) 표시 확대(viewportState) — 원본 데이터 불변, Undo 기록 없음, dirty 미설정 ---------- */
   const ZOOMS=[0.5,0.75,1,1.5,2,3,4]; window.__dispZoom=window.__dispZoom||1;
   window.__dpPreviewMode=window.__dpPreviewMode||'full';  // 'full' | 'viewport'
   const _stAnnounce=m=>{ try{if(typeof say==='function')say(m);}catch(e){} };
-  function applyZoom(){ try{ const z=window.__dispZoom; if(z===1) return;
-      const nc=Math.max(2,Math.round(cell*z)); cell=nc; const w=GW*cell+off*2,h=GH*cell+off*2,dpr=window.devicePixelRatio||1;
-      pad.width=w*dpr;pad.height=h*dpr;pad.style.width=w+'px';pad.style.height=h+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); if(typeof draw==='function')draw(); }catch(e){} }
-  try{ if(typeof layout==='function'){ const _l=layout; layout=function(){ _l(); applyZoom(); try{statusUpdate();}catch(e){} }; } }catch(e){}
+  function applyZoom(){ /* measureAndRelayout가 cell 크기를 담당 — zoom만 cell에 곱함 */
+    try{ if(typeof measureAndRelayout==='function') measureAndRelayout(); }catch(e){} }
+  try{ if(typeof layout==='function'){ const _l=layout; layout=function(){ _l(); try{setTimeout(measureAndRelayout,0);}catch(e){} try{statusUpdate();}catch(e){} }; } }catch(e){}
   function setZoom(z){
     window.__dispZoom=Math.max(0.5,Math.min(4,z));
     if(typeof layout==='function')layout();
@@ -5004,6 +5090,24 @@ document.addEventListener('mousedown', ()=>{
   try{ if(typeof selectTool==='function'){ const _s=selectTool; selectTool=function(tt){ _s(tt); try{statusUpdate();}catch(e){} }; } }catch(e){}
   // 언어 토글 시 라벨 갱신
   try{ if(typeof applyLang==='function'){ const _l=applyLang; applyLang=function(){ _l(); try{ const ao=$('advOpenBtn'); if(ao)ao.textContent=TL('adv_title'); const pb=$('pubBtn'); if(pb)pb.textContent=TL('cta_pub'); const zf=$('zFit'); if(zf)zf.textContent=TL('zoom_fit'); statusUpdate(); }catch(e){} }; } }catch(e){}
+
+  /* -- 초기 로드 시 변환 설정 자동 접기 (캔버스 공간 확보) -- */
+  try{ scCollapse(true, false); }catch(e){}
+
+  /* -- 하단 요소를 canvas-area 밖 footer로 이동 (dotGridWrap flex:1이 캔버스를 채우도록) -- */
+  (function(){
+    const ca=document.querySelector('.canvas-area');
+    const ws=document.querySelector('.workspace');
+    if(!ca||!ws) return;
+    const footer=document.createElement('div'); footer.id='studioFooter';
+    ws.insertBefore(footer, ca.nextSibling);
+    ['studioStatus','aiSummary'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) footer.appendChild(el);
+    });
+    const ctaEl=document.querySelector('.cta-bar');
+    if(ctaEl) footer.appendChild(ctaEl);
+  })();
 
   try{ if(typeof layout==='function') layout(); }catch(e){}
   statusUpdate();
