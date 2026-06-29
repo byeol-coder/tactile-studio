@@ -18,11 +18,11 @@
   --border2:  #D1D1D6;
   --ink:      #1C1C1E;
   --text:     #3A3A3C;
-  --sub:      #6C6C70;
-  --hint:     #AEAEB2;
-  --accent:   #FF4D00;
-  --accent-d: #E34400;
-  --accent-bg:#FFF3EE;
+  --sub:      #56565C;
+  --hint:     #6E6E73;
+  --accent:   #C94400;
+  --accent-d: #A73700;
+  --accent-bg:#FFF0E8;
   --green:    #30D158;
   --green-d:  #25A244;
   --green-bg: #F0FBF3;
@@ -235,18 +235,52 @@ svg { display: block; flex-shrink: 0 }
 .canvas-wrap.rebuilding { opacity: .65 }
 #pad { display: block; touch-action: none; border-radius: var(--r6) }
 
+/* ── Empty Hero (command-first landing) ───────────────────── */
+#emptyHero {
+  position: absolute; inset: 0; z-index: 15;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 28px; background: var(--bg);
+}
+body[data-state="empty"] #emptyHero { display: flex; animation: hero-in .22s ease }
+@keyframes hero-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+
+.hero-inner { width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 14px }
+.hero-heading { font-size: 17px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); text-align: center }
+.hero-form {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r12);
+  padding: 0 8px 0 14px; height: 50px; box-shadow: var(--shadow-sm); transition: border-color .15s, box-shadow .15s;
+}
+.hero-form:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
+.hero-form svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.75; flex-shrink: 0 }
+.hero-form input { flex: 1; background: none; border: none; font-size: 13px; color: var(--ink); min-width: 0 }
+.hero-form input::placeholder { color: var(--hint) }
+.hero-submit {
+  height: 36px; padding: 0 16px; border-radius: var(--r8); background: var(--accent);
+  color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; transition: background .12s;
+}
+.hero-submit:hover { background: var(--accent-d) }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center }
+.hero-chip {
+  height: 30px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: 11px; font-weight: 600; color: var(--text); transition: .12s; white-space: nowrap;
+}
+.hero-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg) }
+.hero-secondary { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 2px }
+
+/* canvas fade-in when result first appears */
+@keyframes canvas-fadein { from { opacity: 0; transform: scale(.97) } to { opacity: 1; transform: scale(1) } }
+.canvas-wrap.fadein { animation: canvas-fadein .28s ease forwards }
+
 /* ── Overlays ─────────────────────────────────────────────── */
 .ov {
   position: absolute; inset: 0; display: none; flex-direction: column;
   align-items: center; justify-content: center; gap: 10px;
   text-align: center; padding: 28px; z-index: 10; border-radius: var(--r16);
 }
-#emptyOv {
-  background: rgba(238,235,224,.92); backdrop-filter: blur(4px);
-}
 #analyzeOv { background: transparent; pointer-events: none }
 
-body[data-state="empty"] #emptyOv    { display: flex }
 body[data-state="analyzing"] #analyzeOv { display: flex }
 
 .ov-icon {
@@ -261,7 +295,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 .ov-ctas { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px }
 .ov-btn {
   height: 34px; padding: 0 16px; border-radius: var(--r10);
-  font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   transition: all .12s;
 }
 .ov-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
@@ -717,8 +751,10 @@ details.adv > summary:hover { color: var(--ink) }
 .mini-btn:disabled { opacity: .35; cursor: not-allowed }
 
 /* ── Accessibility ───────────────────────────────────────── */
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0) }
-[aria-live] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0) }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap;
+}
 </style>
 </head>
 <body data-state="empty">
@@ -784,16 +820,16 @@ details.adv > summary:hover { color: var(--ink) }
 
 <!-- Tool Rail -->
 <nav class="rail" role="toolbar" aria-label="편집 도구">
-  <button class="rail-btn active" data-tool="move" aria-pressed="true" title="이동 (V)">
+  <button class="rail-btn active" data-tool="move" aria-label="이동 도구 (V)" aria-pressed="true" title="이동 (V)">
     <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
   </button>
-  <button class="rail-btn" data-tool="pen" title="펜 (P)">
+  <button class="rail-btn" data-tool="pen" aria-label="펜 도구 (P)" aria-pressed="false" title="펜 (P)">
     <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
   </button>
-  <button class="rail-btn" data-tool="eraser" title="지우개 (E)">
+  <button class="rail-btn" data-tool="eraser" aria-label="지우개 도구 (E)" aria-pressed="false" title="지우개 (E)">
     <svg viewBox="0 0 24 24"><path d="M20 20H7L3 16l11.5-11.5a2 2 0 0 1 2.83 0l2.12 2.12a2 2 0 0 1 0 2.83L8 20"/><path d="M6.25 18.25l-3-3"/></svg>
   </button>
-  <button class="rail-btn" data-tool="select" title="선택 영역">
+  <button class="rail-btn" data-tool="select" aria-label="선택 영역 도구" aria-pressed="false" title="선택 영역">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
   </button>
 
@@ -807,13 +843,13 @@ details.adv > summary:hover { color: var(--ink) }
 
   <div class="rail-sep" aria-hidden="true"></div>
 
-  <button class="rail-btn" id="undoBtn" title="되돌리기 (⌘Z)">
+  <button class="rail-btn" id="undoBtn" aria-label="되돌리기 (Command Z)" title="되돌리기 (⌘Z)">
     <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.07"/></svg>
   </button>
-  <button class="rail-btn" id="redoBtn" title="다시하기 (⌘⇧Z)">
+  <button class="rail-btn" id="redoBtn" aria-label="다시하기 (Command Shift Z)" title="다시하기 (⌘⇧Z)">
     <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.07"/></svg>
   </button>
-  <button class="rail-btn" id="clearBtn" title="전체 지우기">
+  <button class="rail-btn" id="clearBtn" aria-label="전체 지우기" title="전체 지우기">
     <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
   </button>
 </nav>
@@ -821,6 +857,43 @@ details.adv > summary:hover { color: var(--ink) }
 <!-- Canvas Area -->
 <main class="canvas-area" role="main" aria-label="캔버스 작업 영역"
   id="canvasAreaEl">
+
+  <!-- ── Empty Hero — command-first landing ─────────────── -->
+  <div id="emptyHero" role="region" aria-label="시작 안내">
+    <div class="hero-inner">
+      <p class="hero-heading">무엇을 촉각그래픽으로 만들까요?</p>
+      <form class="hero-form" id="heroPromptForm" autocomplete="off">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/>
+          <path d="M19 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2L16 18l2.2-.8z"/>
+        </svg>
+        <input id="heroPromptInput" type="text"
+               placeholder="하트 그려줘 / y=sin(x) / 나비 그려줘 / 외곽선만 / 점자로 안녕하세요…"
+               aria-label="명령어 입력"/>
+        <button type="submit" class="hero-submit">생성</button>
+      </form>
+      <div class="hero-chips" role="group" aria-label="예시 명령어">
+        <button class="hero-chip" data-cmd="Dot Pad에 맞게 최적화" type="button">✦ 최적화</button>
+        <button class="hero-chip" data-cmd="하트 그려줘" type="button">하트 그려줘</button>
+        <button class="hero-chip" data-cmd="나비 그려줘" type="button">나비 그려줘</button>
+        <button class="hero-chip" data-cmd="y=sin(x)" type="button">y=sin(x)</button>
+        <button class="hero-chip" data-cmd="별 그려줘" type="button">별 그려줘</button>
+        <button class="hero-chip" data-cmd="외곽선만 남기기" type="button">외곽선만</button>
+        <button class="hero-chip" data-cmd="점자로 안녕하세요" type="button">점자로 안녕하세요</button>
+        <button class="hero-chip" data-cmd="y=x*x-4" type="button">y=x²−4</button>
+      </div>
+      <div class="hero-secondary">
+        <button type="button" id="heroAddImgBtn" class="ov-btn outline">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          이미지 가져오기
+        </button>
+        <button type="button" id="heroOpenDtmsBtn" class="ov-btn outline">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          .dtms 열기
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- meta strip -->
   <div class="canvas-meta" aria-live="polite">
@@ -832,30 +905,6 @@ details.adv > summary:hover { color: var(--ink) }
   <!-- canvas wrapper -->
   <div class="canvas-wrap" id="dotGridWrap">
     <canvas id="pad" aria-label="촉각그래픽 캔버스" role="img"></canvas>
-
-    <!-- empty overlay -->
-    <div class="ov" id="emptyOv" role="region" aria-label="시작 안내">
-      <div class="ov-icon" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-        </svg>
-      </div>
-      <p class="ov-title" data-i18n="empty_title">촉각그래픽을 만들어보세요</p>
-      <p class="ov-sub" data-i18n="empty_sub">AI가 Dot Pad에 맞게
-촉각그래픽으로 자동 변환해드려요</p>
-      <div class="ov-ctas">
-        <div id="emptyDropZone" class="ov-btn fill" role="button" tabindex="0"
-             aria-label="이미지 선택" style="cursor:pointer">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span data-i18n="empty_import">이미지 가져오기</span>
-        </div>
-        <label class="ov-btn outline" for="tactileFileInput" style="cursor:pointer">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span data-i18n="empty_dtms">.dtms 열기</span>
-        </label>
-      </div>
-      <p class="ov-drag" data-i18n="empty_drag">클릭하거나 파일을 드래그하세요</p>
-    </div>
 
     <!-- analyzing overlay -->
     <div class="ov" id="analyzeOv" role="status" aria-live="polite">
@@ -918,19 +967,19 @@ details.adv > summary:hover { color: var(--ink) }
 
       <!-- Presets -->
       <div class="preset-grid" style="margin-bottom:10px">
-        <button class="preset-btn" data-preset="braille">
+        <button class="preset-btn" data-preset="braille" aria-pressed="false">
           <span class="preset-name">점자</span>
           <span class="preset-desc">세밀한 윤곽</span>
         </button>
-        <button class="preset-btn" data-preset="tactile">
+        <button class="preset-btn" data-preset="tactile" aria-pressed="false">
           <span class="preset-name">촉각</span>
           <span class="preset-desc">표준 점 밀도</span>
         </button>
-        <button class="preset-btn" data-preset="learning">
+        <button class="preset-btn" data-preset="learning" aria-pressed="false">
           <span class="preset-name">학습용</span>
           <span class="preset-desc">굵고 단순하게</span>
         </button>
-        <button class="preset-btn" data-preset="detail">
+        <button class="preset-btn" data-preset="detail" aria-pressed="false">
           <span class="preset-name">세밀</span>
           <span class="preset-desc">최대 해상도</span>
         </button>
@@ -957,9 +1006,9 @@ details.adv > summary:hover { color: var(--ink) }
       <div style="margin-top:12px">
         <div class="ctrl-lbl" data-i18n="outline_title">윤곽선</div>
         <div class="outline-row" role="group" aria-label="윤곽선 모드">
-          <button class="outline-btn active" data-outline="0" data-i18n="outline_none">없음</button>
-          <button class="outline-btn" data-outline="1">1줄</button>
-          <button class="outline-btn" data-outline="2">2줄</button>
+          <button class="outline-btn active" data-outline="0" aria-pressed="true" data-i18n="outline_none">없음</button>
+          <button class="outline-btn" data-outline="1" aria-pressed="false">1줄</button>
+          <button class="outline-btn" data-outline="2" aria-pressed="false">2줄</button>
         </div>
       </div>
 
@@ -969,10 +1018,10 @@ details.adv > summary:hover { color: var(--ink) }
         <div class="adv-body">
           <div class="ctrl-lbl" data-i18n="method_title">이진화 방식</div>
           <div class="th-method-row" role="group" aria-label="이진화 방식">
-            <button class="th-method-btn active" data-method="global" title="수동 임계값">수동</button>
-            <button class="th-method-btn" data-method="otsu"   title="자동 Otsu">Otsu</button>
-            <button class="th-method-btn" data-method="adaptive" title="적응형">적응형</button>
-            <button class="th-method-btn" data-method="alpha"  title="투명도 기반">Alpha</button>
+            <button class="th-method-btn active" data-method="global" aria-pressed="true" title="수동 임계값">수동</button>
+            <button class="th-method-btn" data-method="otsu" aria-pressed="false" title="자동 Otsu">Otsu</button>
+            <button class="th-method-btn" data-method="adaptive" aria-pressed="false" title="적응형">적응형</button>
+            <button class="th-method-btn" data-method="alpha" aria-pressed="false" title="투명도 기반">Alpha</button>
           </div>
 
           <div class="ctrl-lbl" style="margin-top:10px" data-i18n="proc_title">처리</div>
@@ -984,8 +1033,8 @@ details.adv > summary:hover { color: var(--ink) }
           </div>
 
           <div class="toggle-row" style="margin-top:10px">
-            <span class="toggle-lbl" data-i18n="tone_invert">명암 반전</span>
-            <button class="sw" id="invertToggle" role="switch" aria-checked="false"></button>
+            <span class="toggle-lbl" id="invertToggleLabel" data-i18n="tone_invert">명암 반전</span>
+            <button class="sw" id="invertToggle" role="switch" aria-checked="false" aria-labelledby="invertToggleLabel"></button>
           </div>
         </div>
       </details>
@@ -1003,8 +1052,8 @@ details.adv > summary:hover { color: var(--ink) }
         <button class="dp-btn" id="usbBtn" data-i18n="conn_btn_usb">USB 연결</button>
       </div>
       <div class="live-row">
-        <span class="live-lbl" data-i18n="live_label">라이브 미리보기</span>
-        <button class="sw" id="liveSwitch" role="switch" aria-checked="false" disabled></button>
+        <span class="live-lbl" id="liveSwitchLabel" data-i18n="live_label">라이브 미리보기</span>
+        <button class="sw" id="liveSwitch" role="switch" aria-checked="false" aria-labelledby="liveSwitchLabel" disabled></button>
       </div>
 
       <div class="panel-subsection">
@@ -1046,8 +1095,8 @@ details.adv > summary:hover { color: var(--ink) }
     <div class="panel-section">
       <div class="sec-hd">해상도</div>
       <div class="res-row control-grid cols-2">
-        <button class="exp-btn res-btn active" data-res="60x40">60×40</button>
-        <button class="exp-btn res-btn" data-res="96x64">96×64</button>
+        <button class="exp-btn res-btn active" data-res="60x40" aria-pressed="true">60×40</button>
+        <button class="exp-btn res-btn" data-res="96x64" aria-pressed="false">96×64</button>
       </div>
     </div>
 
@@ -1132,18 +1181,18 @@ details.adv > summary:hover { color: var(--ink) }
         이미지 추가
       </button>
       <div class="mini-res-chips" role="group" aria-label="해상도 선택">
-        <button class="mini-res-chip active" data-mini-res="60x40" type="button">60×40</button>
-        <button class="mini-res-chip" data-mini-res="96x64" type="button">96×64</button>
-        <button class="mini-res-chip" data-mini-res="28x40" type="button">28×40</button>
+        <button class="mini-res-chip active" data-mini-res="60x40" type="button" aria-pressed="true">60×40</button>
+        <button class="mini-res-chip" data-mini-res="96x64" type="button" aria-pressed="false">96×64</button>
+        <button class="mini-res-chip" data-mini-res="28x40" type="button" aria-pressed="false">28×40</button>
       </div>
     </div>
   </div>
 
   <!-- ② Canvas + density -->
   <div class="mini-canvas-card">
-    <div id="miniDropZone" class="mini-drop-zone" role="button" tabindex="0" aria-label="이미지를 여기에 드래그하거나 클릭해서 선택">
+    <button id="miniDropZone" class="mini-drop-zone" type="button" aria-label="이미지를 여기에 드래그하거나 클릭해서 선택">
       이미지를 드래그하거나 클릭해서 가져오기
-    </div>
+    </button>
     <canvas id="pad-mini" aria-label="촉각그래픽 캔버스" role="img" style="border-radius:6px"></canvas>
     <div class="mini-th-row">
       <label for="miniThSlider">농도</label>
