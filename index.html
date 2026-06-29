@@ -4417,20 +4417,6 @@ document.addEventListener('mousedown', ()=>{
   /* ---------- CSS ---------- */
   const css=`
   .workspace{align-items:stretch}
-  /* 좌측 작업 단계 패널 */
-  .step-panel{width:188px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);
-    padding:var(--sp-l) var(--sp-m);display:flex;flex-direction:column;gap:4px;overflow:auto}
-  .step-panel h2{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--subtle);margin:2px 4px 8px}
-  .step-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;border:1.5px solid transparent;
-    background:none;color:var(--muted);cursor:pointer;text-align:left;transition:all .12s;width:100%}
-  .step-item:hover{background:var(--surface)}
-  .step-item .num{width:22px;height:22px;border-radius:7px;background:var(--surface);color:var(--subtle);
-    display:grid;place-items:center;font-size:10px;font-weight:800;flex-shrink:0}
-  .step-item .lbl{font-size:12px;font-weight:600;line-height:1.2}
-  .step-item[aria-current="step"]{background:var(--orange-bg);border-color:var(--orange);color:var(--ink)}
-  .step-item[aria-current="step"] .num{background:var(--orange);color:#fff}
-  .step-item[data-done="1"] .num{background:#d8efe0;color:#1c7a4d}
-  .step-item:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
   /* 편집 툴바 — Dot Pad 미리보기 바로 위(인접) */
   .edit-bar{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
     background:var(--white);border:1px solid var(--border2);border-radius:12px;
@@ -4483,15 +4469,9 @@ document.addEventListener('mousedown', ()=>{
   #canvasStatus .cs-chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px 10px}
   #canvasStatus .cs-chip b{color:var(--ink);font-weight:800}
   @media(max-width:1023px){
-    .step-panel{width:100%;flex-direction:row;flex-wrap:wrap;border-right:none;border-bottom:1px solid var(--border);padding:8px 12px;gap:6px}
-    .step-panel h2{display:none}
-    .step-item{width:auto;flex:0 0 auto;padding:6px 9px}
-    .step-item .lbl{font-size:11px}
     .edit-bar{padding:8px 10px;gap:6px}
   }
   @media(max-width:767px){
-    .step-item .lbl{display:none}
-    .step-item{padding:6px}
     .edit-bar{gap:5px;padding:8px}
     .edit-bar .tool-rail .tr-btn{padding:7px 9px}
     .edit-bar .tool-rail .tr-label{display:none}   /* 좁은 화면: 아이콘만, 줄바꿈 자연스럽게 */
@@ -4504,26 +4484,10 @@ document.addEventListener('mousedown', ()=>{
   const rpScroll=document.querySelector('.rp-scroll');
   const bottomBar=document.querySelector('.bottom-bar');
 
-  /* ---------- 1) 좌측 작업 단계 패널 ---------- */
-  const steps=[['step1'],['step2'],['step3'],['step4'],['step5']];
-  const sp=document.createElement('aside'); sp.className='step-panel'; sp.id='stepPanel'; sp.setAttribute('aria-label',TL('step_title'));
-  sp.innerHTML=`<h2 id="stepTitle">${TL('step_title')}</h2>`+steps.map((s,i)=>
-    `<button class="step-item" type="button" data-step="${i+1}" id="stepItem${i+1}"><span class="num">0${i+1}</span><span class="lbl" data-sk="${s[0]}">${TL(s[0])}</span></button>`).join('');
-  if(workspace&&rail) workspace.insertBefore(sp,rail);
-  function curStep(){ if(!hasImg()) return 1; if(typeof appState!=='undefined'&&appState==='analyzing') return 2;
-    if(typeof connected!=='undefined'&&connected) return 5; return 3; }
-  function syncSteps(){ const c=curStep();
-    sp.querySelectorAll('.step-item').forEach(b=>{ const n=+b.dataset.step;
-      if(n===c) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');
-      b.dataset.done=(n<c)?'1':'0'; }); }
-  sp.querySelectorAll('.step-item').forEach(b=>b.addEventListener('click',()=>{
-    const n=+b.dataset.step;
-    if(n===1){ const inp=$('anyFileInput')||$('imageFileInput'); if(inp){inp.value='';inp.click();} }
-    else if(n===5){ const d=$('dtmsBtn'); if(d&&!d.disabled) d.focus(); }
-    else { const pad=$('pad'); if(pad) pad.focus(); }
-    announce(TL('step'+n)); }));
+  /* ---------- 1) 좌측 작업 단계 패널 — 제거됨 (캔버스 공간 확보·단순화) ---------- */
+  function syncSteps(){}
 
-  /* ---------- 2) 하단 편집 툴바 (도구 레일 이동 + 직선 도구) ---------- */
+  /* ---------- 2) 편집 툴바 (도구 레일 이동 + 직선 도구) ---------- */
   // 직선 도구 버튼 삽입 (채우기 다음)
   const fillBtn=rail&&rail.querySelector('.tr-btn[data-tool="fill"]');
   if(fillBtn){ const lb=document.createElement('button'); lb.className='tr-btn'; lb.dataset.tool='line'; lb.setAttribute('aria-pressed','false');
@@ -4702,12 +4666,10 @@ document.addEventListener('mousedown', ()=>{
   function relabelAll(){ try{
     document.querySelectorAll('[data-ck]').forEach(el=>el.textContent=TL(el.dataset.ck));
     document.querySelectorAll('.tool-rail [data-sk]').forEach(el=>el.textContent=TL(el.dataset.sk));
-    const st2=$('stepTitle'); if(st2)st2.textContent=TL('step_title');
-    sp.querySelectorAll('.step-item .lbl').forEach(el=>el.textContent=TL(el.dataset.sk));
     updateHint(); }catch(e){} }
   try{ if(typeof applyLang==='function'){ const _l=applyLang; applyLang=function(){ _l(); relabelAll(); }; } }catch(e){}
 
-  window.__uiPro={ syncSteps, aiUpdate, statusUpdate, curStep, lineCommit:commitLine, dilate, erode };
+  window.__uiPro={ aiUpdate, statusUpdate, lineCommit:commitLine, dilate, erode };
   refreshAll(); relabelAll();
 })();
 
