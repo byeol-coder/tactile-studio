@@ -202,10 +202,12 @@ export function deletePage() {
 }
 
 /** Set source image state on active page */
-export function setActivePageSourceImage(sourceImageState, meta) {
+export function setActivePageSourceImage(sourceImageState, meta, img) {
   const page = pagesState.activePage;
   if (!page) return;
   page.sourceImageState = sourceImageState;
   page.sourceImageMeta = meta;
+  // keep the decoded original so the image can be re-rendered at any resolution
+  if (img !== undefined) page.sourceImage = img;
   page.updatedAt = Date.now();
 }
