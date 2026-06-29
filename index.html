@@ -74,8 +74,8 @@ svg { display: block; flex-shrink: 0 }
 .hd-file {
   display: flex; align-items: center; gap: 5px; min-width: 0;
 }
-.hd-file svg { width: 12px; height: 12px; stroke: var(--hint); fill: none;
-  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
+.hd-file svg { width: 14px; height: 14px; stroke: var(--hint); fill: none;
+  stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
 .hd-file input {
   background: none; border: none; color: var(--sub); font-size: 12px; font-weight: 500;
   width: 120px; padding: 3px 6px; border-radius: var(--r6); min-width: 0;
@@ -93,7 +93,7 @@ svg { display: block; flex-shrink: 0 }
 }
 .hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
 .hd-prompt svg { width: 14px; height: 14px; stroke: var(--accent); fill: none;
-  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
+  stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
 .hd-prompt input {
   flex: 1; background: none; border: none; font-size: 12px; color: var(--ink); min-width: 0;
 }
@@ -149,7 +149,7 @@ svg { display: block; flex-shrink: 0 }
 .hd-btn.accent { background: var(--accent); color: #fff; border: 1px solid transparent }
 .hd-btn.accent:hover { background: var(--accent-d) }
 .hd-btn:disabled { opacity: .38; cursor: not-allowed }
-.hd-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.hd-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
 
 /* conn dot in header */
 .hd-conn { width: 7px; height: 7px; border-radius: 50%; background: var(--hint); flex-shrink: 0; transition: .2s }
@@ -170,7 +170,7 @@ svg { display: block; flex-shrink: 0 }
   color: var(--sub); transition: all .12s; position: relative;
 }
 .rail-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none;
-  stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8 }
+  stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.75 }
 .rail-btn:hover:not(:disabled) { background: var(--surface2); color: var(--ink) }
 .rail-btn.active { background: var(--accent); color: #fff }
 .rail-btn:disabled { opacity: .3; cursor: not-allowed }
@@ -249,7 +249,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
   font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
   transition: all .12s;
 }
-.ov-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.ov-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
 .ov-btn.fill { background: var(--ink); color: #fff }
 .ov-btn.fill:hover { background: #2C2C2E }
 .ov-btn.outline { border: 1px solid var(--border); background: var(--surface); color: var(--text) }
@@ -366,15 +366,32 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
   display: grid; place-items: center; }
 .th-step:hover { background: var(--surface); color: var(--text) }
 
-/* proc grid + outline */
-.proc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px }
-.outline-row { display: flex; gap: 3px }
-.outline-btn {
-  flex: 1; height: 26px; border-radius: var(--r6); font-size: 10px; font-weight: 700;
+/* small control label — unified for outline/method/proc/etc. */
+.ctrl-lbl { font-size: 10px; color: var(--hint); font-weight: 600; margin-bottom: 5px }
+
+/* proc grid + outline + method (shared pill styling) */
+.proc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px }
+.outline-row { display: flex; gap: 4px }
+.outline-btn, .proc-btn {
+  flex: 1; height: 28px; border-radius: var(--r6); font-size: 11px; font-weight: 600;
   border: 1px solid var(--border); background: var(--surface2); color: var(--sub); transition: .12s;
 }
-.outline-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(255,77,0,.35) }
-.outline-btn:hover:not(.active) { background: var(--surface); color: var(--text) }
+.outline-btn.active, .proc-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(255,77,0,.35) }
+.outline-btn:hover:not(.active), .proc-btn:hover:not(.active) { background: var(--surface); color: var(--text) }
+
+/* advanced disclosure */
+details.adv { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px }
+details.adv > summary {
+  list-style: none; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--sub);
+  display: flex; align-items: center; gap: 5px; user-select: none; padding: 2px 0;
+}
+details.adv > summary::-webkit-details-marker { display: none }
+details.adv > summary::before {
+  content: '▸'; font-size: 9px; color: var(--hint); transition: transform .15s;
+}
+details.adv[open] > summary::before { transform: rotate(90deg) }
+details.adv > summary:hover { color: var(--ink) }
+.adv-body { padding-top: 10px; display: flex; flex-direction: column; }
 
 /* invert toggle */
 .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0 }
@@ -443,7 +460,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 }
 .exp-btn:hover { background: var(--surface); border-color: var(--border2) }
 .exp-btn:disabled { opacity: .35; cursor: not-allowed }
-.exp-btn svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.exp-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
 
 /* ── Bottom Bar ───────────────────────────────────────────── */
 .btm {
@@ -777,14 +794,6 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
         </button>
       </div>
 
-      <!-- Method -->
-      <div class="th-method-row" style="margin-bottom:8px" role="group" aria-label="이진화 방식">
-        <button class="th-method-btn active" data-method="global" title="수동 임계값">수동</button>
-        <button class="th-method-btn" data-method="otsu"   title="자동 Otsu">Otsu</button>
-        <button class="th-method-btn" data-method="adaptive" title="적응형">적응형</button>
-        <button class="th-method-btn" data-method="alpha"  title="투명도 기반">Alpha</button>
-      </div>
-
       <!-- Threshold slider -->
       <div class="th-section">
         <div class="th-slider-wrap">
@@ -798,39 +807,46 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
             <button class="th-step" id="thPlus"  aria-label="임계값 높이기">+</button>
           </div>
           <span class="th-val" id="thValDisplay">50%</span>
-          <div class="th-btns">
-            <button class="th-btn" id="thAuto">자동</button>
-            <button class="th-btn acc" id="thApply" disabled>적용</button>
-          </div>
+          <button class="th-btn" id="thAuto" data-i18n="btn_auto">자동</button>
         </div>
       </div>
 
       <!-- Outline -->
-      <div style="margin-top:10px">
-        <div style="font-size:10px;color:var(--hint);margin-bottom:5px;font-weight:600">윤곽선</div>
+      <div style="margin-top:12px">
+        <div class="ctrl-lbl" data-i18n="outline_title">윤곽선</div>
         <div class="outline-row" role="group" aria-label="윤곽선 모드">
-          <button class="outline-btn active" data-outline="0">없음</button>
+          <button class="outline-btn active" data-outline="0" data-i18n="outline_none">없음</button>
           <button class="outline-btn" data-outline="1">1줄</button>
           <button class="outline-btn" data-outline="2">2줄</button>
         </div>
       </div>
 
-      <!-- Processing toggles -->
-      <div style="margin-top:10px">
-        <div style="font-size:10px;color:var(--hint);margin-bottom:5px;font-weight:600">처리</div>
-        <div class="proc-grid">
-          <button class="outline-btn" id="dilatBtn" data-proc="dilate" aria-pressed="false" title="점을 주변으로 확장">팽창</button>
-          <button class="outline-btn" id="erodeBtn" data-proc="erode" aria-pressed="false" title="가는 선·고립 점 제거">수축</button>
-          <button class="outline-btn" id="denoiseBtn" data-proc="denoise" aria-pressed="false" title="고립된 점 제거">노이즈</button>
-          <button class="outline-btn" id="edgeBtn" data-proc="edge" aria-pressed="false" title="Sobel 엣지 감지">엣지</button>
-        </div>
-      </div>
+      <!-- Advanced (collapsed by default) -->
+      <details class="adv">
+        <summary data-i18n="adv_settings">고급 설정</summary>
+        <div class="adv-body">
+          <div class="ctrl-lbl" data-i18n="method_title">이진화 방식</div>
+          <div class="th-method-row" role="group" aria-label="이진화 방식">
+            <button class="th-method-btn active" data-method="global" title="수동 임계값">수동</button>
+            <button class="th-method-btn" data-method="otsu"   title="자동 Otsu">Otsu</button>
+            <button class="th-method-btn" data-method="adaptive" title="적응형">적응형</button>
+            <button class="th-method-btn" data-method="alpha"  title="투명도 기반">Alpha</button>
+          </div>
 
-      <!-- Invert -->
-      <div class="toggle-row" style="margin-top:8px">
-        <span class="toggle-lbl">반전</span>
-        <button class="sw" id="invertToggle" role="switch" aria-checked="false"></button>
-      </div>
+          <div class="ctrl-lbl" style="margin-top:10px" data-i18n="proc_title">처리</div>
+          <div class="proc-grid">
+            <button class="proc-btn" id="dilatBtn" data-proc="dilate" aria-pressed="false" title="점을 주변으로 확장">팽창</button>
+            <button class="proc-btn" id="erodeBtn" data-proc="erode" aria-pressed="false" title="가는 선·고립 점 제거">수축</button>
+            <button class="proc-btn" id="denoiseBtn" data-proc="denoise" aria-pressed="false" title="고립된 점 제거">노이즈</button>
+            <button class="proc-btn" id="edgeBtn" data-proc="edge" aria-pressed="false" title="Sobel 엣지 감지">엣지</button>
+          </div>
+
+          <div class="toggle-row" style="margin-top:10px">
+            <span class="toggle-lbl" data-i18n="tone_invert">명암 반전</span>
+            <button class="sw" id="invertToggle" role="switch" aria-checked="false"></button>
+          </div>
+        </div>
+      </details>
     </div>
 
     <!-- ③ Dot Pad 연결 -->
@@ -871,12 +887,8 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 
     <!-- ④ 저장 / 내보내기 -->
     <div>
-      <div class="sec-hd" data-i18n="panel_export">저장 · 내보내기</div>
+      <div class="sec-hd" data-i18n="panel_export">내보내기</div>
       <div class="exp-stack">
-        <button class="exp-main" id="dotpadBtnPanel" disabled>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></svg>
-          <span data-i18n="btn_dotpad">Dot Pad로 출력</span>
-        </button>
         <div class="exp-row">
           <button class="exp-btn" id="dtmsBtn" disabled>
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
