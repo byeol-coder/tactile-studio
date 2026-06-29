@@ -487,6 +487,52 @@ export function gradeReason(g, m, lang = 'ko') {
   return lang === 'ko' ? '형태를 더 단순하게 다듬으면 좋아요.' : 'Simplifying the shape would help.';
 }
 
+// ─── Density Proofing ─────────────────────────────────────────
+/**
+ * Inspect a grid for tactile crowding.
+ * "crowded" = an on-pin whose 8-neighbourhood is (almost) fully raised —
+ * the interior of a solid blob, which is hard to read by touch.
+ * @returns {{pct:number, on:number, crowded:number, crowdFrac:number, level:'ok'|'mid'|'high', mask:Uint8Array}}
+ */
+export function analyzeDensity(grid, cols, rows) {
+  const n = cols * rows;
+  let on = 0, crowded = 0;
+  const mask = new Uint8Array(n);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    const i = y * cols + x;
+    if (!grid[i]) continue;
+    on++;
+    if (nb(grid, x, y, cols, rows, true) >= 7) { mask[i] = 1; crowded++; }
+  }
+  const pct = Math.round(on / n * 100);
+  const crowdFrac = on ? crowded / on : 0;
+  const level = (pct >= 45 || crowdFrac > 0.4) ? 'high'
+    : (pct >= 30 || crowdFrac > 0.22) ? 'mid' : 'ok';
+  return { pct, on, crowded, crowdFrac, level, mask };
+}
+
+/**
+ * Thin overly dense regions by peeling fully-surrounded interior pins,
+ * converting solid blobs toward readable outlines. Edges are preserved.
+ * @returns {Uint8Array}
+ */
+export function autoThinDots(grid, cols, rows, maxIter = 6) {
+  let g = new Uint8Array(grid);
+  for (let it = 0; it < maxIter; it++) {
+    const d = analyzeDensity(g, cols, rows);
+    if (d.level === 'ok' || d.crowded === 0) break;
+    const next = new Uint8Array(g);
+    let changed = 0;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const i = y * cols + x;
+      if (g[i] && nb(g, x, y, cols, rows, true) === 8) { next[i] = 0; changed++; }
+    }
+    if (!changed) break;
+    g = next;
+  }
+  return g;
+}
+
 // ─── Encoder (column-major, Dot Pad HEX format) ───────────────
 const dotBit = (lx, ly) => lx * 4 + ly;
 

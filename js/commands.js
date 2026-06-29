@@ -12,6 +12,8 @@
 //     matched:  true,                                      // did anything match?
 //   }
 
+import { isMathLike, normalizeExpr } from './mathgraph.js';
+
 const R = (ko, en) => ({ ko, en });
 
 // Pick the Korean object particle 을/를 by final-consonant (받침) of the last char.
@@ -68,6 +70,11 @@ const RULES = [
     test: /노이즈|잡티|점\s*제거|깨끗|정리|denoise|clean|noise/i,
     patch: { denoise: true, minComp: 4 },
     reply: R('흩어진 점을 정리했어요', 'Cleaned up scattered dots'),
+  },
+  {
+    test: /솎|성기게|덜\s*촘촘|덜\s*빽빽|thin\s*out|\bthin\b|밀도\s*검수|proof/i,
+    action: 'thin',
+    reply: R('빽빽한 점을 솎아 읽기 쉽게 했어요', 'Thinned crowded dots for readability'),
   },
   {
     test: /점\s*(많|늘|높|진)|더\s*많|밀도\s*(높|올)|more\s*dots|dense|denser/i,
@@ -171,6 +178,13 @@ function detectBrailleText(s, lang) {
 export function interpretCommand(text, lang = 'ko') {
   const s = (text || '').trim();
 
+  // ⓪ Math expressions route to the graph renderer (y=…, f(x)=…, sin(x)…).
+  if (isMathLike(s)) {
+    return { patch: {}, deltaThreshold: 0, optimize: false, action: 'math',
+      create: null, brailleText: null, mathExpr: normalizeExpr(s),
+      reply: (lang === 'ko' ? `수식 그래프를 그렸어요` : 'Plotted the graph'), matched: true };
+  }
+
   // ① Creation commands take priority — they synthesize a new graphic.
   const create = detectCreate(s);
   if (create) {
@@ -243,7 +257,7 @@ export const QUICK_COMMANDS = [
   { group: { ko: '만들기', en: 'Create' },
     icon: '○', text: { ko: '원 그려줘',             en: 'Draw a circle' } },
   { icon: '△', text: { ko: '삼각형 그려줘',         en: 'Draw a triangle' } },
-  { icon: '∿', text: { ko: '사인파 그려줘',         en: 'Draw a sine wave' } },
+  { icon: 'ƒ', text: { ko: 'y = sin(x)',           en: 'y = sin(x)' } },
   { icon: '▦', text: { ko: '격자 그려줘',           en: 'Draw a grid' } },
   { icon: '⠿', text: { ko: '점자로 안녕하세요',     en: 'Braille: hello' } },
   { icon: '☷', text: { ko: '이 그래픽 설명해줘',    en: 'Describe this graphic' } },

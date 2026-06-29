@@ -13,12 +13,13 @@ import {
 import {
   createSourceImageState, analyzeImageType,
   convertToDots, autoSelectParams, optimizeForDotPad,
-  tactileQualityScore, gradeReason,
+  tactileQualityScore, gradeReason, analyzeDensity, autoThinDots,
   gridToHex, hexToGrid, textToBraillePages,
 } from './engine.js';
 
 import { interpretCommand, QUICK_COMMANDS } from './commands.js';
 import { drawPrimitive, renderBrailleGrid, describeTactile } from './generate.js';
+import { renderMathGraph } from './mathgraph.js';
 
 import {
   computeCanvasLayout, applyLayout, renderGrid,
@@ -614,6 +615,20 @@ function parseCommand(text) {
   const intent = interpretCommand(text, lang);
   const { width: cols, height: rows } = canvasState;
 
+  // ── Math: plot an expression as a tactile graph (no image needed) ──
+  if (intent.action === 'math' && intent.mathExpr) {
+    const { data, error } = renderMathGraph(cols, rows, intent.mathExpr);
+    if (error) { toast((lang === 'ko' ? '수식 오류: ' : 'Math error: ') + error); return; }
+    pushUndo();
+    canvasState.data = data;
+    setActivePageSourceImage(null, null);
+    if (appState.phase !== 'ready') setPhase('ready');
+    appState.isDirty = true;
+    afterChange();
+    toast(`y = ${intent.mathExpr}`, 'ok');
+    return;
+  }
+
   // ── Creation: synthesize a graphic from scratch (no image needed) ──
   if (intent.create) {
     pushUndo();
@@ -639,6 +654,18 @@ function parseCommand(text) {
       afterChange();
       toast(intent.reply, 'ok');
     });
+    return;
+  }
+
+  // ── Thin: peel crowded interior pins (works on the current grid) ──
+  if (intent.action === 'thin') {
+    if (!canvasState.data.some(v => v)) { toast(t('toast_need_image', lang)); return; }
+    const before = canvasState.data.reduce((s, v) => s + v, 0);
+    pushUndo();
+    canvasState.data = autoThinDots(canvasState.data, cols, rows);
+    const after = canvasState.data.reduce((s, v) => s + v, 0);
+    afterChange();
+    toast(`${intent.reply} (${before}→${after}핀)`, 'ok');
     return;
   }
 
