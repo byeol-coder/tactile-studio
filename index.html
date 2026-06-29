@@ -707,13 +707,13 @@ body[data-state="analyzing"] #analyzeOv{display:flex}
     <!-- empty overlay: canvas-area 전체에 걸쳐 표시 -->
     <div id="emptyOv" style="display:none;position:absolute;inset:0;z-index:20;
       background:rgba(244,241,232,.90);backdrop-filter:blur(2px);
-      flex-direction:column;align-items:center;justify-content:center;gap:0;text-align:center;padding:32px">
+      flex-direction:column;align-items:center;justify-content:center;gap:0;text-align:center;padding:20px">
 
       <!-- 핵심 메시지 -->
-      <p style="font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.02em;margin-bottom:8px;line-height:1.3">
+      <p style="font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.02em;margin-bottom:6px;line-height:1.3">
         이미지를 가져와 촉각그래픽으로 변환하세요
       </p>
-      <p id="emptySub" style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:28px;max-width:30ch">
+      <p id="emptySub" style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px;max-width:30ch">
         AI가 Dot Pad 60×40에 맞게 윤곽과 핵심 구조를 자동으로 정리해드려요
       </p>
 
@@ -4249,7 +4249,7 @@ document.addEventListener('mousedown', ()=>{
   /* "자르기" 버튼 — 캔버스 상단 메타 바(이미지일 때만 노출) */
   const meta=document.getElementById('canvasMeta');
   if(meta){ const b=document.createElement('button'); b.id='cropBtn'; b.type='button'; b.textContent=TL('crop_open'); b.setAttribute('aria-label',TL('crop_title'));
-    b.style.cssText='display:none;align-items:center;gap:5px;height:26px;padding:0 12px;border-radius:999px;border:1.5px solid var(--orange,#ff5a1f);background:var(--white,#fff);font-size:10px;font-weight:700;color:var(--orange,#ff5a1f);cursor:pointer;white-space:nowrap';
+    b.style.cssText='display:none;align-items:center;gap:5px;min-height:36px;padding:0 12px;border-radius:10px;border:1.5px solid var(--orange,#ff5a1f);background:var(--white,#fff);font-size:11px;font-weight:700;color:var(--orange,#ff5a1f);cursor:pointer;white-space:nowrap';
     b.addEventListener('click',open); meta.appendChild(b); }
   function refreshBtn(){ const b=document.getElementById('cropBtn'); if(b) b.style.display=(typeof fileKind!=='undefined'&&fileKind==='image'&&typeof appState!=='undefined'&&appState==='ready')?'inline-flex':'none'; }
   try{ if(typeof setAppState==='function'){ const _a=setAppState; setAppState=function(s){ _a(s); try{refreshBtn();}catch(e){} }; } }catch(e){}
@@ -4281,7 +4281,7 @@ document.addEventListener('mousedown', ()=>{
   const ready=()=>typeof appState!=='undefined'&&appState==='ready';
 
   const css=`
-  #gridBtn{display:none;align-items:center;gap:5px;height:26px;padding:0 12px;border-radius:999px;border:1.5px solid var(--border2,#e3ddd2);background:var(--white,#fff);font-size:10px;font-weight:700;color:var(--muted,#6b6357);cursor:pointer;white-space:nowrap}
+  #gridBtn{display:none;align-items:center;gap:5px;min-height:36px;padding:0 12px;border-radius:10px;border:1.5px solid var(--border2,#e3ddd2);background:var(--white,#fff);font-size:11px;font-weight:700;color:var(--muted,#6b6357);cursor:pointer;white-space:nowrap}
   #gridBtn[aria-pressed="true"]{border-color:var(--orange,#ff5a1f);color:var(--orange,#ff5a1f)}
   #pgSec{display:none} #pgSec[data-on="1"]{display:block}
   #pgRow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -4426,8 +4426,8 @@ document.addEventListener('mousedown', ()=>{
   .edit-bar .tool-rail .tr-btn{flex-direction:row;width:auto;min-width:0;gap:6px;padding:7px 11px;min-height:36px}
   .edit-bar .tool-rail .tr-btn svg{width:17px;height:17px}
   .edit-bar .tool-rail .tr-label{font-size:11px;text-transform:none;letter-spacing:0;font-weight:600}
-  /* 자르기·격자 버튼을 툴바 톤에 맞춤 */
-  .edit-bar #cropBtn,.edit-bar #gridBtn{height:36px}
+  /* 자르기·격자 버튼 — 툴바 다른 버튼과 동일 높이/폰트로 통일 */
+  .edit-bar #cropBtn,.edit-bar #gridBtn{min-height:36px!important;font-size:11px!important;border-radius:10px!important}
   .edit-bar .tr-sep{width:1px;height:24px;margin:0 4px;background:var(--border)}
   .edit-bar #brushSizeGroup{flex-direction:row!important;width:auto!important;gap:4px;align-items:center}
   .edit-bar #brushSizeGroup>span{margin:0 2px 0 0}
@@ -4700,7 +4700,16 @@ document.addEventListener('mousedown', ()=>{
   .right-panel{display:none!important}   /* 우측 고정 패널 제거 — 스크롤 문제 해소 */
   .workspace{display:block;overflow:auto}
   /* 작업 카드 컬럼: 폭 제한 + 단일 스크롤(workspace), CTA는 이 흐름의 마지막 = 캔버스 안 가림 */
-  .canvas-area{max-width:1140px;margin:0 auto;width:100%;overflow:visible;padding:10px var(--sp-l) 22px}
+  .canvas-area{max-width:1140px;margin:0 auto;width:100%;overflow:visible;padding:10px var(--sp-l) 22px;min-height:calc(100dvh - var(--h-bar,48px))}
+  /* 빈 상태: 변환 설정·편집바·캔버스·CTA 등 모두 숨겨 canvas-area 높이를 뷰포트 높이로만 유지 */
+  body[data-state="empty"] #studioControls,
+  body[data-state="empty"] .edit-bar,
+  body[data-state="empty"] #dotGridWrap,
+  body[data-state="empty"] .canvas-meta,
+  body[data-state="empty"] #aiSummary,
+  body[data-state="empty"] .cta-bar,
+  body[data-state="empty"] #studioStatus,
+  body[data-state="empty"] #canvasStatus { display:none!important }
   /* 변환 설정: compact 3열 (캔버스 크기 35 · 임계값 35 · 굵기+효과 30) */
   #studioControls{width:100%;box-sizing:border-box;background:var(--white);border:1px solid var(--border2);
     border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-start}
@@ -4742,6 +4751,13 @@ document.addEventListener('mousedown', ()=>{
   #zoomCtl button:hover{background:var(--white)}
   #zoomCtl button:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
   #zoomCtl .zlvl{min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
+  /* Dot Pad 보기 모드 토글 */
+  #dpViewCtl{display:inline-flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:2px}
+  #dpViewCtl button{min-height:28px;padding:0 10px;border-radius:999px;border:none;background:none;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+  #dpViewCtl button:hover{background:var(--white)}
+  #dpViewCtl button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  #dpViewCtl button:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
+  #csDpMode{color:var(--orange);font-weight:700}
   /* 고급 옵션 모달 */
   #advModal{display:none;position:fixed;inset:0;z-index:200;background:rgba(26,26,26,.45);align-items:center;justify-content:center;padding:18px}
   #advModal[data-on="1"]{display:flex}
@@ -4838,15 +4854,72 @@ document.addEventListener('mousedown', ()=>{
   adv.addEventListener('click',e=>{ if(e.target===adv) advShow(false); });
   adv.addEventListener('keydown',e=>{ if(e.key==='Escape') advShow(false); });
 
-  /* ---------- 5) 표시 확대(viewportState) — 데이터 불변, 전송 안 함 ---------- */
+  /* ---------- 5) 표시 확대(viewportState) — 원본 데이터 불변, Undo 기록 없음, dirty 미설정 ---------- */
   const ZOOMS=[0.5,0.75,1,1.5,2,3,4]; window.__dispZoom=window.__dispZoom||1;
+  window.__dpPreviewMode=window.__dpPreviewMode||'full';  // 'full' | 'viewport'
+  const _stAnnounce=m=>{ try{if(typeof say==='function')say(m);}catch(e){} };
   function applyZoom(){ try{ const z=window.__dispZoom; if(z===1) return;
       const nc=Math.max(2,Math.round(cell*z)); cell=nc; const w=GW*cell+off*2,h=GH*cell+off*2,dpr=window.devicePixelRatio||1;
       pad.width=w*dpr;pad.height=h*dpr;pad.style.width=w+'px';pad.style.height=h+'px'; ctx.setTransform(dpr,0,0,dpr,0,0); if(typeof draw==='function')draw(); }catch(e){} }
   try{ if(typeof layout==='function'){ const _l=layout; layout=function(){ _l(); applyZoom(); try{statusUpdate();}catch(e){} }; } }catch(e){}
-  function setZoom(z){ window.__dispZoom=Math.max(0.5,Math.min(4,z)); if(typeof layout==='function')layout(); announce(TL('cs_zoom')+' '+Math.round(window.__dispZoom*100)+'%'); statusUpdate(); }
+  function setZoom(z){
+    window.__dispZoom=Math.max(0.5,Math.min(4,z));
+    if(typeof layout==='function')layout();
+    const pct=Math.round(window.__dispZoom*100);
+    const isVP=window.__dpPreviewMode==='viewport';
+    const dpNote=isVP?'Dot Pad 현재 보기 반영 중':'';
+    _stAnnounce('현재 확대 '+pct+'퍼센트입니다.'+(isVP?' Dot Pad에는 현재 확대 영역이 표시됩니다.':''));
+    statusUpdate();
+    if(isVP) try{if(typeof forceSend==='function')forceSend();}catch(e){}
+  }
   function zoomStep(dir){ const cur=window.__dispZoom; let i=ZOOMS.findIndex(v=>Math.abs(v-cur)<0.001); if(i<0){ i=ZOOMS.findIndex(v=>v>=cur); if(i<0)i=ZOOMS.length-1; } i=Math.max(0,Math.min(ZOOMS.length-1,i+dir)); setZoom(ZOOMS[i]); }
-  function fitZoom(){ setZoom(1); }   /* 맞춤 = 영역에 맞춤(기본 배율) */
+  function fitZoom(){ setZoom(1); _stAnnounce('화면 맞춤 보기입니다.'+(window.__dpPreviewMode==='viewport'?' Dot Pad에는 전체 그래픽이 맞춰져 표시됩니다.':'')); }
+
+  /* ---------- 5b) 촉각 뷰포트 미리보기 렌더러 (원본 canvasState 불변) ---------- */
+  // visibleRect: 현재 화면에 보이는 그리드 셀 범위 계산
+  function getVisibleGridRect(){
+    const z=window.__dispZoom||1; if(z<=1) return {x:0,y:0,w:GW,h:GH};
+    try{
+      const r=pad.getBoundingClientRect();
+      const hdr=document.querySelector('.top-bar'); const hdrH=hdr?hdr.offsetHeight:56;
+      const vpW=window.innerWidth, vpH=window.innerHeight;
+      const cl=Math.max(0,-r.left), ct=Math.max(0,hdrH-r.top);
+      const cr2=Math.min(r.width,vpW-r.left), cb=Math.min(r.height,vpH-r.top);
+      if(cr2<=cl||cb<=ct) return {x:0,y:0,w:GW,h:GH};
+      const sx=Math.max(0,Math.floor((cl-off)/cell)), sy=Math.max(0,Math.floor((ct-off)/cell));
+      const ex=Math.min(GW,Math.ceil((cr2-off)/cell)), ey=Math.min(GH,Math.ceil((cb-off)/cell));
+      return {x:sx,y:sy,w:Math.max(1,ex-sx),h:Math.max(1,ey-sy)};
+    }catch(e){return {x:0,y:0,w:GW,h:GH};}
+  }
+  // renderDotPadPreviewBuf: 보기 모드에 따라 Dot Pad 출력용 hex 생성
+  const _gridToHexOrig=(typeof gridToHex==='function')?gridToHex:null;
+  function renderDotPadPreviewBuf(mode){
+    if(!_gridToHexOrig) return null;
+    if(mode!=='viewport') return _gridToHexOrig(grid);
+    const vr=getVisibleGridRect();
+    if(vr.w>=GW&&vr.h>=GH) return _gridToHexOrig(grid);
+    // 현재 보기 영역을 GW×GH Dot Pad 해상도로 최근접 보간
+    const out=new Uint8Array(GW*GH);
+    for(let dy=0;dy<GH;dy++) for(let dx=0;dx<GW;dx++){
+      const sx=vr.x+Math.floor(dx*vr.w/GW), sy=vr.y+Math.floor(dy*vr.h/GH);
+      if(sx<GW&&sy<GH) out[dy*GW+dx]=grid[sy*GW+sx];
+    }
+    return _gridToHexOrig(out);
+  }
+  // gridToHex 무인수 호출(라이브 전송)을 미리보기 모드로 가로챔 — 원본 grid 불변
+  if(_gridToHexOrig){
+    gridToHex=function(g){
+      if(g===undefined&&window.__dpPreviewMode==='viewport') return renderDotPadPreviewBuf('viewport');
+      return _gridToHexOrig(g);
+    };
+  }
+  // 스크롤 시 현재 보기 모드에서 Dot Pad 즉시 갱신
+  try{
+    const _wa=document.querySelector('.workspace')||document.body;
+    _wa.addEventListener('scroll',()=>{
+      if(window.__dpPreviewMode==='viewport') try{if(typeof forceSend==='function')forceSend();}catch(e){}
+    },{passive:true});
+  }catch(e){}
 
   /* ---------- 6) 상태바(모드·해상도·활성점·확대·좌표) + 보기 컨트롤 ---------- */
   if(canvasStatus) canvasStatus.style.display='none';   // uiPro 상태줄 대체
@@ -4854,12 +4927,16 @@ document.addEventListener('mousedown', ()=>{
   sBar.innerHTML=`<span class="cs-mode" id="csMode"></span>
     <span class="cs-chip" id="csRes"><b>${GW}×${GH}</b></span>
     <span class="cs-chip" id="csDots">활성 점 <b>0</b></span>
+    <span id="dpViewCtl" role="group" aria-label="Dot Pad 보기 모드" title="Dot Pad 보기 모드">
+      <button type="button" id="dpVFull" aria-pressed="true">전체</button>
+      <button type="button" id="dpVPort" aria-pressed="false">현재 보기</button></span>
     <span id="zoomCtl" role="group" aria-label="확대 보기">
       <button type="button" id="zOut" aria-label="축소">−</button>
       <span class="zlvl" id="zLvl" aria-live="polite">100%</span>
       <button type="button" id="zIn" aria-label="확대">+</button>
       <button type="button" id="zReset" aria-label="100% 초기화">100%</button>
       <button type="button" id="zFit" aria-label="화면 맞춤">${TL('zoom_fit')}</button></span>
+    <span class="cs-chip" id="csDpMode" aria-live="polite" style="display:none"></span>
     <span class="cs-chip" id="csCoord" aria-label="좌표">x –, y –</span>`;
   if(canvasStatus&&canvasStatus.parentElement) canvasStatus.parentElement.insertBefore(sBar,canvasStatus.nextSibling);
   else if(gridWrap&&gridWrap.parentElement) gridWrap.parentElement.insertBefore(sBar,gridWrap.nextSibling);
@@ -4867,6 +4944,20 @@ document.addEventListener('mousedown', ()=>{
   $('zIn').addEventListener('click',()=>zoomStep(1));
   $('zReset').addEventListener('click',()=>setZoom(1));
   $('zFit').addEventListener('click',fitZoom);
+  // Dot Pad 보기 모드 토글
+  $('dpVFull').addEventListener('click',()=>{
+    window.__dpPreviewMode='full';
+    statusUpdate();
+    try{if(typeof forceSend==='function')forceSend();}catch(e){}
+    _stAnnounce('Dot Pad 전체 보기 모드입니다. 원본 전체 그래픽이 표시됩니다.');
+  });
+  $('dpVPort').addEventListener('click',()=>{
+    window.__dpPreviewMode='viewport';
+    statusUpdate();
+    try{if(typeof forceSend==='function')forceSend();}catch(e){}
+    const pct=Math.round((window.__dispZoom||1)*100);
+    _stAnnounce('Dot Pad 현재 보기 모드입니다. '+pct+'퍼센트 확대 영역이 Dot Pad에 반영됩니다.');
+  });
   // 키보드: + - 0 f  (입력창 제외)
   document.addEventListener('keydown',e=>{ if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
     if(e.key==='+'||e.key==='='){ zoomStep(1); } else if(e.key==='-'||e.key==='_'){ zoomStep(-1); }
@@ -4883,6 +4974,21 @@ document.addEventListener('mousedown', ()=>{
     let on=0; if(typeof grid!=='undefined'){ for(let i=0;i<N;i++) on+=grid[i]?1:0; }
     const dEl=$('csDots'); if(dEl) dEl.innerHTML='활성 점 <b>'+on+'</b>';
     const z=$('zLvl'); if(z) z.textContent=Math.round((window.__dispZoom||1)*100)+'%';
+    // Dot Pad 보기 모드 토글 상태
+    const vf=$('dpVFull'),vp=$('dpVPort');
+    const isVP=window.__dpPreviewMode==='viewport';
+    if(vf) vf.setAttribute('aria-pressed',String(!isVP));
+    if(vp) vp.setAttribute('aria-pressed',String(isVP));
+    // csDpMode 칩: 현재 보기 + 확대 시에만 표시
+    const modeChip=$('csDpMode');
+    if(modeChip){
+      const cz=window.__dispZoom||1;
+      if(isVP&&cz>1){
+        const vr=(typeof getVisibleGridRect==='function')?getVisibleGridRect():{x:0,y:0,w:GW,h:GH};
+        modeChip.textContent='Dot Pad 현재 보기 · '+Math.round(cz*100)+'% · x'+vr.x+' y'+vr.y+' '+vr.w+'×'+vr.h;
+        modeChip.style.display='';
+      } else { modeChip.style.display='none'; }
+    }
     aiSummaryLine();
     const dpd=$('ctaDpDot'), dpt=$('ctaDpText'), os=$('outSend');
     const conn=(typeof connected!=='undefined'&&connected);
