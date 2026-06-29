@@ -19,10 +19,38 @@ export function exportDtms(pages, fileName, cols, rows) {
 }
 
 /**
- * Export current canvas as PNG.
+ * Export pin grid as PNG with transparent background.
+ * Only "on" pins (value 1) are drawn as solid dots; the canvas background
+ * is left transparent so the file contains dot pattern only.
+ *
+ * @param {Uint8Array} gridData
+ * @param {number} cols
+ * @param {number} rows
+ * @param {string} fileName
+ * @param {number} [dotSize=10]  pixels per grid cell
  */
-export function exportPng(canvasEl, fileName) {
-  canvasEl.toBlob(blob => {
+export function exportPng(gridData, cols, rows, fileName, dotSize = 10) {
+  const offscreen = document.createElement('canvas');
+  offscreen.width  = cols * dotSize;
+  offscreen.height = rows * dotSize;
+  const ctx = offscreen.getContext('2d');
+  // no fill → transparent background
+  ctx.fillStyle = '#1C1C1E';
+  const r = Math.max(1, dotSize * 0.38);
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      if (gridData[row * cols + col]) {
+        ctx.beginPath();
+        ctx.arc(
+          col * dotSize + dotSize / 2,
+          row * dotSize + dotSize / 2,
+          r, 0, Math.PI * 2
+        );
+        ctx.fill();
+      }
+    }
+  }
+  offscreen.toBlob(blob => {
     if (blob) download(blob, (fileName || 'tactile') + '.png');
   });
 }

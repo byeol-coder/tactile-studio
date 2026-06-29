@@ -1035,7 +1035,7 @@ function wireFullMode() {
     toast(t('toast_dtms', appState.language), 'ok');
   });
   ge('pngBtn')?.addEventListener('click', () => {
-    exportPng(padEl, appState.fileName);
+    exportPng(canvasState.data, canvasState.width, canvasState.height, appState.fileName);
     toast(t('toast_png', appState.language), 'ok');
   });
   ge('hexBtn')?.addEventListener('click', async () => {
@@ -1106,7 +1106,7 @@ function wireMiniMode() {
     toast(t('toast_dtms', appState.language), 'ok');
   });
   ge('miniPngBtn')?.addEventListener('click', () => {
-    exportPng(padEl, appState.fileName);
+    exportPng(canvasState.data, canvasState.width, canvasState.height, appState.fileName);
     toast(t('toast_png', appState.language), 'ok');
   });
   ge('miniThSlider')?.addEventListener('input', function() {
