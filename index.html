@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link rel="manifest" href="./manifest.json"/>
 <script>
 (function(){
   try{
@@ -4122,8 +4123,11 @@ document.addEventListener('mousedown', ()=>{
     if(fileKind==='tactile') return;             /* DTM·DTMS는 파일 해상도 유지 */
     if(GW===w&&GH===h){ updateMetaLabel(); refresh(); return; }
     setResolution(w,h);
-    grid=new Uint8Array(N); pages=[grid]; curPage=0; pageUndo=[[]]; pageRedo=[[]];
+    grid=new Uint8Array(N);
+    if(!pages||!pages.length){ pages=[grid]; curPage=0; pageUndo=[[]]; pageRedo=[[]]; }
+    else{ pages[curPage]=grid; pageUndo[curPage]=[]; pageRedo[curPage]=[]; }
     if(typeof srcImage!=='undefined' && srcImage){ renderGray(); autoSelect(); pages[curPage]=grid; }
+    try{ if(typeof window.__pmSave==='function') window.__pmSave(); }catch(e){}
     updateMetaLabel();
     try{ if(typeof layout==='function') layout(); }catch(e){}
     try{ afterChange(false); }catch(e){}
@@ -4986,7 +4990,7 @@ document.addEventListener('mousedown', ()=>{
       const resBtn=document.querySelector('#scResSeg button[aria-pressed="true"]');
       if(resBtn&&resBtn.dataset.res){
         const [w,h]=resBtn.dataset.res.split('x').map(Number);
-        if(typeof setCanvasRes==='function'&&(w!==GW||h!==GH)) setCanvasRes(w,h);
+        if(w!==GW||h!==GH) try{ window.__setRes(w,h); }catch(e){}
       }
       // 민감도 → clarity2/clarity sync
       const engSl=document.getElementById('clarity2')||document.getElementById('clarity');
@@ -4997,9 +5001,9 @@ document.addEventListener('mousedown', ()=>{
       const tkBtn=document.querySelector('#scThickSeg button[aria-pressed="true"]');
       if(tkBtn&&hasImg()){
         const w=tkBtn.dataset.w;
-        if(w==='thin' && typeof erode==='function') erode(1);
-        else if(w==='thick' && typeof dilate==='function') dilate(1);
-        else if(w==='thicker' && typeof dilate==='function') dilate(2);
+        if(w==='thin'&&window.__uiPro) window.__uiPro.erode(1);
+        else if(w==='thick'&&window.__uiPro) window.__uiPro.dilate(1);
+        else if(w==='thicker'&&window.__uiPro) window.__uiPro.dilate(2);
         // 'normal'은 추가 변환 없음
       }
       // 효과 (pressed인 것만 적용)
