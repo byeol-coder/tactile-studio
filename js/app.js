@@ -22,7 +22,6 @@ import { drawPrimitive, renderBrailleGrid, describeTactile } from './generate.js
 import { initBank, loadSymbol } from './bank.js';
 import { svgIcon } from './icons.js';
 import { renderMathGraph } from './mathgraph.js';
-import { setSonify, sonifyMove, sonifySweep, isSonifyEnabled } from './sense.js';
 
 import {
   computeCanvasLayout, applyLayout, renderGrid,
@@ -51,6 +50,15 @@ function toast(msg, kind = '') {
   el.className = 'show' + (kind ? ' ' + kind : '');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  announce(msg);   // mirror status to the screen-reader live region
+}
+
+/** Push a message to the screen-reader live region (no visual UI).
+ * Clear-then-set forces re-announcement of repeated text. Uses setTimeout
+ * (not rAF) so it still fires in a backgrounded tab / hidden iframe. */
+function announce(text) {
+  const live = ge('liveRegion');
+  if (live && text) { live.textContent = ''; setTimeout(() => { live.textContent = text; }, 40); }
 }
 
 // ─── Canvas elements ──────────────────────────────────────────
@@ -185,6 +193,9 @@ function finishAnalyze() {
   syncConvUI();
   syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
   toast(t('toast_converted', appState.language), 'ok');
+  // Accessibility: announce a one-line tactile summary to the live region so
+  // screen-reader users get a readout of the result (replaces hover sonify).
+  announce(describeTactile(canvasState.data, canvasState.width, canvasState.height, appState.language));
 }
 
 function loadTactileFile(file) {
@@ -499,11 +510,6 @@ function onPointerDown(e) {
 function onPointerMove(e) {
   const { col, row } = getPointerCell(e, padEl, layout);
   const tool = toolState.currentTool;
-  // Sonification: only on the move (hand) tool, so it never fights drawing.
-  if (tool === 'move' && isSonifyEnabled()) {
-    sonifyMove({ col, row }, canvasState.data, canvasState.width, canvasState.height,
-      { volume: dotPadState.sonifyVolume ?? 0.6, sensitivity: dotPadState.sonifySens ?? 3 });
-  }
   if (tool === 'pen' || tool === 'eraser') {
     toolState.hoverBrush = getBrushCells(col, row, toolState.brushSize);
     drawCanvas();
@@ -698,19 +704,12 @@ async function parseCommand(text) {
     return;
   }
 
-  // ── Sonify: play an audio sweep of the current graphic ──
-  if (intent.action === 'sonify') {
-    if (!canvasState.data.some(v => v)) { toast(t('toast_need_image', lang)); return; }
-    sonifySweep(canvasState.data, cols, rows, { volume: dotPadState.sonifyVolume ?? 0.6 });
-    toast(intent.reply, 'ok');
-    return;
-  }
-
   // ── Describe: announce a text summary of the current graphic ──
   if (intent.action === 'describe') {
     const desc = describeTactile(canvasState.data, cols, rows, lang);
     showDescription(desc);
     toast(intent.reply, 'ok');
+    announce(desc);   // ensure the screen reader's final readout is the description itself
     return;
   }
 
@@ -1024,20 +1023,6 @@ function wireFullMode() {
     if (checked) syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
   });
 
-  // Sonification toggle — enabling it also switches to the move tool so hover works.
-  ge('sonifySwitch')?.addEventListener('click', function() {
-    const checked = this.getAttribute('aria-checked') !== 'true';
-    setSonify(checked);
-    this.setAttribute('aria-checked', String(checked));
-    if (checked) {
-      selectTool('move');
-      toast(t('sonify_on', appState.language), 'ok');
-    }
-  });
-  ge('sonifySweepBtn')?.addEventListener('click', () => {
-    if (!canvasState.data.some(v => v)) { toast(t('toast_need_image', appState.language)); return; }
-    sonifySweep(canvasState.data, canvasState.width, canvasState.height, { volume: dotPadState.sonifyVolume ?? 0.6 });
-  });
   ge('dotpadBtn')?.addEventListener('click', () => {
     if (!dotPadState.connected) { toast(t('toast_not_conn', appState.language)); return; }
     sendGraphicData(gridToHex(canvasState.data, canvasState.width, canvasState.height), true);
