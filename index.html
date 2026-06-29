@@ -626,8 +626,8 @@ details.adv > summary:hover { color: var(--ink) }
 
   <div class="hd-right">
     <div class="hd-lang" role="group" aria-label="언어">
-      <button class="lang-btn active" data-lang="ko" aria-pressed="true">한</button>
-      <button class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      <button class="lang-btn active" data-lang="ko" aria-pressed="true">한국어</button>
+      <button class="lang-btn" data-lang="en" aria-pressed="false">영어</button>
     </div>
     <div class="hd-conn" id="bbDot" title="Dot Pad 연결 상태"></div>
     <span class="sr-only" id="bbStatus">Dot Pad 연결 안 됨</span>
@@ -733,50 +733,11 @@ details.adv > summary:hover { color: var(--ink) }
 <aside class="panel" role="complementary" aria-label="설정 패널">
   <div class="panel-scroll">
 
-    <!-- ① 점 밀도 통계 -->
-    <div>
-      <div class="sec-hd" data-i18n="panel_quality">촉각 품질</div>
-      <div class="stat-card">
-        <div>
-          <div class="stat-num" id="qDotCount">0</div>
-          <div class="stat-unit" id="qDotSub">/ 2,400 핀</div>
-          <div class="density-track" style="width:120px">
-            <div class="density-fill" id="densityFill"></div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
-          <div class="qual-row" style="border:none;padding:0;gap:8px;flex-direction:column;align-items:flex-end">
-            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <span style="font-size:10px;color:var(--hint)">판독성</span>
-              <span class="pill pill-n" id="qClarity">—</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <span style="font-size:10px;color:var(--hint)">밀도</span>
-              <span class="pill pill-n" id="qDensity">—</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <span style="font-size:10px;color:var(--hint)">구조</span>
-              <span class="pill pill-n" id="qStructure">—</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- AI feedback -->
-      <div class="ai-card" id="aiFeedbackCard" style="margin-top:8px">
-        <div class="ai-badge" data-i18n="ai_title">AI 추천</div>
-        <div class="ai-text" id="aiFeedbackText"></div>
-        <div class="ai-chips" id="aiChips"></div>
-      </div>
-      <div class="ai-empty" id="aiFeedbackEmpty" data-i18n="ai_empty" style="margin-top:8px">
-        이미지를 가져오면 AI가 촉각그래픽으로 변환해드려요.
-      </div>
-    </div>
-
-    <!-- ② 변환 설정 (Presets + Threshold) -->
+    <!-- ① 변환 설정: 프리셋 → 슬라이더 → 윤곽선 → 고급(접힘) -->
     <div>
       <div class="sec-hd">변환 설정</div>
 
-      <!-- Presets -->
+      <!-- Presets (2×2 chip grid — one-click workflow setup) -->
       <div class="preset-grid" style="margin-bottom:10px">
         <button class="preset-btn" data-preset="braille">
           <span class="preset-name">점자</span>
@@ -823,7 +784,7 @@ details.adv > summary:hover { color: var(--ink) }
         </div>
       </div>
 
-      <!-- Advanced (collapsed by default) -->
+      <!-- Advanced (collapsed — method / proc / invert / resolution) -->
       <details class="adv">
         <summary data-i18n="adv_settings">고급 설정</summary>
         <div class="adv-body">
@@ -847,37 +808,59 @@ details.adv > summary:hover { color: var(--ink) }
             <span class="toggle-lbl" data-i18n="tone_invert">명암 반전</span>
             <button class="sw" id="invertToggle" role="switch" aria-checked="false"></button>
           </div>
+
+          <!-- Resolution — rarely changed, lives here out of main flow -->
+          <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+            <div class="ctrl-lbl">해상도</div>
+            <div style="display:flex;gap:5px">
+              <button class="exp-btn res-btn active" data-res="60x40" style="flex:1;justify-content:center">60×40</button>
+              <button class="exp-btn res-btn" data-res="96x64" style="flex:1;justify-content:center">96×64</button>
+            </div>
+          </div>
         </div>
       </details>
     </div>
 
-    <!-- ③ Dot Pad 연결 -->
+    <!-- ② 촉각 품질 — informational, after conversion controls -->
     <div>
-      <div class="sec-hd" data-i18n="panel_dotpad">Dot Pad</div>
-      <div class="dp-status">
-        <div class="dp-dot" id="dpDot"></div>
-        <span class="dp-lbl" id="dpLbl" data-i18n="conn_off">연결 안 됨</span>
-      </div>
-      <div class="dp-conn-row" style="margin-top:6px">
-        <button class="dp-btn" id="bleBtn" data-i18n="conn_btn_ble">BLE 연결</button>
-        <button class="dp-btn" id="usbBtn" data-i18n="conn_btn_usb">USB 연결</button>
-      </div>
-      <div class="live-row">
-        <span class="live-lbl" data-i18n="live_label">라이브 미리보기</span>
-        <button class="sw" id="liveSwitch" role="switch" aria-checked="false" disabled></button>
-      </div>
-
-      <div style="margin-top:8px">
-        <div style="font-size:10px;color:var(--hint);margin-bottom:5px;font-weight:600" data-i18n="pin_ctrl_title">핀 제어</div>
-        <div class="pin-row">
-          <button class="pin-btn" id="pinUpBtn" data-i18n="pin_up">전체 올리기</button>
-          <button class="pin-btn" id="pinDownBtn" data-i18n="pin_down">전체 내리기</button>
-          <button class="pin-btn" id="pinInvBtn" data-i18n="pin_invert">반전</button>
+      <div class="sec-hd" data-i18n="panel_quality">촉각 품질</div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-num" id="qDotCount">0</div>
+          <div class="stat-unit" id="qDotSub">/ 2,400 핀</div>
+          <div class="density-track" style="width:120px">
+            <div class="density-fill" id="densityFill"></div>
+          </div>
         </div>
+        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+          <div class="qual-row" style="border:none;padding:0;gap:8px;flex-direction:column;align-items:flex-end">
+            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+              <span style="font-size:10px;color:var(--hint)">판독성</span>
+              <span class="pill pill-n" id="qClarity">—</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+              <span style="font-size:10px;color:var(--hint)">밀도</span>
+              <span class="pill pill-n" id="qDensity">—</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+              <span style="font-size:10px;color:var(--hint)">구조</span>
+              <span class="pill pill-n" id="qStructure">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- AI feedback -->
+      <div class="ai-card" id="aiFeedbackCard" style="margin-top:8px">
+        <div class="ai-badge" data-i18n="ai_title">AI 추천</div>
+        <div class="ai-text" id="aiFeedbackText"></div>
+        <div class="ai-chips" id="aiChips"></div>
+      </div>
+      <div class="ai-empty" id="aiFeedbackEmpty" data-i18n="ai_empty" style="margin-top:8px">
+        이미지를 가져오면 AI가 촉각그래픽으로 변환해드려요.
       </div>
     </div>
 
-    <!-- ④ 저장 / 내보내기 -->
+    <!-- ③ 내보내기 — end-of-workflow, above hardware section -->
     <div>
       <div class="sec-hd" data-i18n="panel_export">내보내기</div>
       <div class="exp-stack">
@@ -902,12 +885,28 @@ details.adv > summary:hover { color: var(--ink) }
       </div>
     </div>
 
-    <!-- Resolution selector (hidden but accessible) -->
+    <!-- ④ Dot Pad 연결 — hardware, least-frequent -->
     <div>
-      <div class="sec-hd">해상도</div>
-      <div style="display:flex;gap:5px">
-        <button class="exp-btn res-btn active" data-res="60x40" style="flex:1;justify-content:center">60×40</button>
-        <button class="exp-btn res-btn" data-res="96x64" style="flex:1;justify-content:center">96×64</button>
+      <div class="sec-hd" data-i18n="panel_dotpad">Dot Pad</div>
+      <div class="dp-status">
+        <div class="dp-dot" id="dpDot"></div>
+        <span class="dp-lbl" id="dpLbl" data-i18n="conn_off">연결 안 됨</span>
+      </div>
+      <div class="dp-conn-row" style="margin-top:6px">
+        <button class="dp-btn" id="bleBtn" data-i18n="conn_btn_ble">BLE 연결</button>
+        <button class="dp-btn" id="usbBtn" data-i18n="conn_btn_usb">USB 연결</button>
+      </div>
+      <div class="live-row">
+        <span class="live-lbl" data-i18n="live_label">라이브 미리보기</span>
+        <button class="sw" id="liveSwitch" role="switch" aria-checked="false" disabled></button>
+      </div>
+      <div style="margin-top:8px">
+        <div style="font-size:10px;color:var(--hint);margin-bottom:5px;font-weight:600" data-i18n="pin_ctrl_title">핀 제어</div>
+        <div class="pin-row">
+          <button class="pin-btn" id="pinUpBtn" data-i18n="pin_up">전체 올리기</button>
+          <button class="pin-btn" id="pinDownBtn" data-i18n="pin_down">전체 내리기</button>
+          <button class="pin-btn" id="pinInvBtn" data-i18n="pin_invert">반전</button>
+        </div>
       </div>
     </div>
 
