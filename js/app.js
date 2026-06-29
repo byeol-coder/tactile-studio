@@ -386,11 +386,13 @@ function syncConvUI() {
     edgeEl.classList.toggle('active', isOn);
     edgeEl.setAttribute('aria-pressed', String(isOn));
   }
+  // a manual control change means we're no longer on a named preset
+  qsa('.preset-btn').forEach(b => b.classList.remove('active'));
 }
 
 // ─── Sync helpers ─────────────────────────────────────────────
 function syncBtns(hasContent) {
-  const ids = ['dtmsBtn','pngBtn','dotpadBtn','dotpadBtnPanel','hexBtn'];
+  const ids = ['dtmsBtn','pngBtn','dotpadBtn','hexBtn'];
   ids.forEach(id => { const el = ge(id); if (el) el.disabled = !hasContent; });
   const aiBadge = ge('aiBadge');
   if (aiBadge) aiBadge.style.display = hasContent ? '' : 'none';
@@ -719,7 +721,7 @@ function parseCommand(text) {
     const best = optimizeForDotPad(page.sourceImageState, canvasState.width, canvasState.height);
     Object.assign(conversionState, best.params);
     paintSlider(conversionState.threshold);
-    syncControlsFromState();
+    syncConvUI();
     rebuild();
     const gradeTxt = ['', '다시 확인', '주의', '좋음', '아주 좋음'][best.grade] || '';
     toast(`${intent.reply} · 품질 ${gradeTxt}`.trim(), 'ok');
@@ -743,24 +745,11 @@ function parseCommand(text) {
     paintSlider(conversionState.threshold);
   }
 
-  syncControlsFromState();
+  syncConvUI();
   rebuild();
   toast(intent.reply, 'ok');
 }
 
-/** Reflect conversionState back into the panel controls (chips, toggles, slider). */
-function syncControlsFromState() {
-  qsa('.th-method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === conversionState.method));
-  qsa('.outline-btn[data-outline]').forEach(b => b.classList.toggle('active', +b.dataset.outline === conversionState.outline));
-  qsa('[data-proc]').forEach(b => {
-    const key = b.dataset.proc;
-    const on = key === 'edge' ? conversionState.edge === 'sobel' : !!conversionState[key];
-    b.classList.toggle('active', on);
-    b.setAttribute('aria-pressed', String(on));
-  });
-  const inv = ge('invertToggle'); if (inv) inv.setAttribute('aria-checked', String(!!conversionState.invert));
-  qsa('.preset-btn').forEach(b => b.classList.remove('active'));
-}
 
 // ─── Prompt suggestion dropdown ───────────────────────────────
 function renderPromptSuggestions() {
@@ -891,8 +880,8 @@ function wireFullMode() {
     const v = Math.max(20, Math.min(240, +this.value));
     conversionState.threshold = v; conversionState.method = 'global';
     paintSlider(v);
-    rebuild(120);
-    const ap = ge('thApply'); if (ap) ap.disabled = false;
+    rebuild(120);                       // live — no separate "적용" step
+    syncConvUI();            // reflect method→수동 on the chip
   });
   ge('thMinus')?.addEventListener('click', () => {
     const sl = ge('thSlider'); if (!sl) return;
@@ -912,12 +901,8 @@ function wireFullMode() {
     const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
     Object.assign(conversionState, p);
     paintSlider(conversionState.threshold);
+    syncConvUI();
     rebuild(); toast(t('toast_auto_th', appState.language) + ' ' + Math.round((conversionState.threshold - 20) / 220 * 100) + '%');
-  });
-  ge('thApply')?.addEventListener('click', () => {
-    if (_rebuildTimer) { clearTimeout(_rebuildTimer); _rebuildTimer = null; }
-    rebuild(); syncQuality();
-    const ap = ge('thApply'); if (ap) ap.disabled = true;
   });
 
   // method selector
@@ -986,35 +971,10 @@ function wireFullMode() {
     rebuild(80);
   }));
 
-  // processing toggles (dilate / erode / denoise / edge)
-  qsa('[data-proc]').forEach(b => b.addEventListener('click', () => {
-    const page = pagesState.activePage;
-    if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
-    const key = b.dataset.proc;
-    if (key === 'edge') {
-      const next = conversionState.edge === 'sobel' ? 'none' : 'sobel';
-      conversionState.edge = next;
-      b.classList.toggle('active', next === 'sobel');
-      b.setAttribute('aria-pressed', String(next === 'sobel'));
-    } else {
-      conversionState[key] = !conversionState[key];
-      b.classList.toggle('active', !!conversionState[key]);
-      b.setAttribute('aria-pressed', String(!!conversionState[key]));
-    }
-    rebuild();
-  }));
-
   // save btn
   ge('saveBtn')?.addEventListener('click', () => {
     exportDtms(pagesState.pages, appState.fileName, canvasState.width, canvasState.height);
     toast(t('toast_dtms', appState.language), 'ok');
-  });
-
-  // panel send button (same as header send)
-  ge('dotpadBtnPanel')?.addEventListener('click', () => {
-    if (!dotPadState.connected) { toast(t('toast_not_conn', appState.language)); return; }
-    sendGraphicData(gridToHex(canvasState.data, canvasState.width, canvasState.height), true);
-    toast(t('toast_sent', appState.language), 'ok');
   });
 
   // pin control
