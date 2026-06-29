@@ -2774,7 +2774,7 @@ const I18N = {
     panel_title:      '촉각 품질 분석',
     panel_sub:        '이 결과가 Dot Pad에서 잘 읽히는지 확인해드려요.',
     density_title:    '점 밀도',
-    density_ctrl:     '점 농도 조절',
+    density_ctrl:     '임계값',
     density_low:      '적게 (단순)',
     density_high:     '많게 (선명)',
     btn_minus:        '−1',
@@ -2938,7 +2938,7 @@ const I18N = {
     panel_title:      'Tactile Quality',
     panel_sub:        "See how well this will read on a Dot Pad.",
     density_title:    'Dot Density',
-    density_ctrl:     'Density Control',
+    density_ctrl:     'Threshold',
     density_low:      'Fewer (simpler)',
     density_high:     'More (detailed)',
     btn_minus:        '−1',
@@ -4387,8 +4387,7 @@ document.addEventListener('mousedown', ()=>{
   try{ Object.assign(I18N.ko,{
     step_title:'작업 단계', step1:'이미지 가져오기', step2:'AI 변환 설정', step3:'캔버스 편집', step4:'촉각 품질 확인', step5:'출력 / 저장',
     card_conv:'변환 설정', card_ai:'AI 촉각 피드백', card_out:'Dot Pad 출력', card_export:'내보내기',
-    density_control:'변환 민감도',
-    conv_method:'변환 방식', conv_outline:'외곽선 변환', conv_fill:'면 채움 변환',
+    density_control:'임계값', th_desc:'이미지의 밝고 어두운 영역을 기준으로 촉각 점을 생성해요.',
     conv_thick:'변환 선 굵기', t_thin:'얇게', t_normal:'보통', t_thick:'굵게', t_thicker:'더 굵게',
     conv_effect:'효과', fx_invert:'흑백 반전', fx_denoise:'작은 점 정리',
     ai_density:'점 밀도', ai_legib:'손끝 판독성', ai_struct:'구조 단순화',
@@ -4402,8 +4401,7 @@ document.addEventListener('mousedown', ()=>{
   }); Object.assign(I18N.en,{
     step_title:'Steps', step1:'Import image', step2:'AI convert', step3:'Edit canvas', step4:'Check quality', step5:'Export / Save',
     card_conv:'Conversion', card_ai:'AI tactile feedback', card_out:'Dot Pad output', card_export:'Export',
-    density_control:'Conversion sensitivity',
-    conv_method:'Conversion mode', conv_outline:'Outline', conv_fill:'Filled',
+    density_control:'Threshold', th_desc:'Generates tactile dots from the light and dark areas of the image.',
     conv_thick:'Line weight', t_thin:'Thin', t_normal:'Normal', t_thick:'Thick', t_thicker:'Thicker',
     conv_effect:'Effects', fx_invert:'Invert', fx_denoise:'Clean dots',
     ai_density:'Dot density', ai_legib:'Fingertip legibility', ai_struct:'Structure',
@@ -4433,26 +4431,31 @@ document.addEventListener('mousedown', ()=>{
   .step-item[aria-current="step"] .num{background:var(--orange);color:#fff}
   .step-item[data-done="1"] .num{background:#d8efe0;color:#1c7a4d}
   .step-item:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
-  /* 하단 편집 툴바 */
-  .edit-bar{display:flex;align-items:center;gap:10px;background:var(--white);border-top:1px solid var(--border);
-    padding:6px var(--sp-xl);flex-shrink:0;flex-wrap:wrap}
+  /* 편집 툴바 — Dot Pad 미리보기 바로 위(인접) */
+  .edit-bar{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
+    background:var(--white);border:1px solid var(--border2);border-radius:12px;
+    padding:8px 12px;flex-shrink:0;flex-wrap:wrap;margin-bottom:8px}
   .edit-bar .et-title{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--subtle);flex-shrink:0}
-  .edit-bar .tool-rail{flex-direction:row;width:auto;border-right:none;padding:0;gap:3px;align-items:center;background:none;flex-wrap:wrap}
-  .edit-bar .tool-rail .tr-btn{flex-direction:row;width:auto;min-width:0;gap:6px;padding:7px 11px}
+  .edit-bar .tool-rail{flex-direction:row;width:auto;border-right:none;padding:0;gap:4px;align-items:center;background:none;flex-wrap:wrap}
+  .edit-bar .tool-rail .tr-btn{flex-direction:row;width:auto;min-width:0;gap:6px;padding:7px 11px;min-height:36px}
   .edit-bar .tool-rail .tr-btn svg{width:17px;height:17px}
   .edit-bar .tool-rail .tr-label{font-size:11px;text-transform:none;letter-spacing:0;font-weight:600}
-  .edit-bar .tr-sep{width:1px;height:26px;margin:0 4px;background:var(--border)}
+  /* 자르기·격자 버튼을 툴바 톤에 맞춤 */
+  .edit-bar #cropBtn,.edit-bar #gridBtn{height:36px}
+  .edit-bar .tr-sep{width:1px;height:24px;margin:0 4px;background:var(--border)}
   .edit-bar #brushSizeGroup{flex-direction:row!important;width:auto!important;gap:4px;align-items:center}
   .edit-bar #brushSizeGroup>span{margin:0 2px 0 0}
-  .edit-bar .et-spacer{flex:1}
+  .edit-bar .et-spacer{flex:1;min-width:8px}
   #toolStatus{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
-  /* 우측 카드 */
-  .rp-card{background:var(--white);border:1px solid var(--border2);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.02)}
-  .rp-card>.rp-card-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--ink);margin:0 0 12px;letter-spacing:-.01em}
+  /* 임계값 설명 */
+  .th-desc{font-size:11px;line-height:1.55;color:var(--subtle);margin:0 0 8px}
+  /* 우측 카드 — 간격 통일 (카드 padding 18, 섹션 간 20) */
+  .rp-card{background:var(--white);border:1px solid var(--border2);border-radius:16px;padding:18px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.02)}
+  .rp-card>.rp-card-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--ink);margin:0 0 14px;letter-spacing:-.01em}
   .rp-card>.rp-card-h .ic{width:18px;height:18px;border-radius:6px;background:var(--orange-bg);color:var(--orange);display:grid;place-items:center;font-size:11px;flex-shrink:0}
-  .rp-card>div+div,.rp-card>section+section{margin-top:14px}
-  .seg{display:flex;gap:6px;flex-wrap:wrap}
-  .seg button{flex:1 1 auto;min-width:0;min-height:32px;padding:0 10px;border-radius:8px;border:1.5px solid var(--border2);background:#fff;color:#2c2c2a;font-size:11px;font-weight:700;cursor:pointer}
+  .rp-card>div+div,.rp-card>section+section{margin-top:16px}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{flex:1 1 auto;min-width:0;min-height:36px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border2);background:#fff;color:#2c2c2a;font-size:11px;font-weight:700;cursor:pointer}
   .seg button[aria-pressed="true"]{background:var(--orange);color:#fff;border-color:var(--orange)}
   .seg button:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
   .ui-sub{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--subtle);margin-bottom:6px}
@@ -4484,12 +4487,15 @@ document.addEventListener('mousedown', ()=>{
     .step-panel h2{display:none}
     .step-item{width:auto;flex:0 0 auto;padding:6px 9px}
     .step-item .lbl{font-size:11px}
-    .edit-bar{position:sticky;bottom:0;z-index:60;padding:6px 12px;
-      padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+    .edit-bar{padding:8px 10px;gap:6px}
   }
   @media(max-width:767px){
     .step-item .lbl{display:none}
     .step-item{padding:6px}
+    .edit-bar{gap:5px;padding:8px}
+    .edit-bar .tool-rail .tr-btn{padding:7px 9px}
+    .edit-bar .tool-rail .tr-label{display:none}   /* 좁은 화면: 아이콘만, 줄바꿈 자연스럽게 */
+    .edit-bar .et-title,#toolStatus{display:none}
   }`;
   const stEl=document.createElement('style'); stEl.textContent=css; document.head.appendChild(stEl);
 
@@ -4526,10 +4532,19 @@ document.addEventListener('mousedown', ()=>{
     fillBtn.insertAdjacentElement('afterend',lb); }
   const editBar=document.createElement('div'); editBar.className='edit-bar'; editBar.setAttribute('role','toolbar'); editBar.setAttribute('aria-label',TL('edit_tools'));
   editBar.innerHTML=`<span class="et-title" id="etTitle">${TL('edit_tools')}</span>`;
+  // 자르기·격자 버튼을 편집 툴바 앞쪽으로 합치기 (캔버스 인접 도구 일원화)
+  const cropBtnEl=$('cropBtn'), gridBtnEl=$('gridBtn');
+  if(cropBtnEl) editBar.appendChild(cropBtnEl);
+  if(gridBtnEl) editBar.appendChild(gridBtnEl);
+  if(cropBtnEl||gridBtnEl){ const sep0=document.createElement('span'); sep0.className='tr-sep'; sep0.setAttribute('aria-hidden','true'); editBar.appendChild(sep0); }
   if(rail) editBar.appendChild(rail);
   const spc=document.createElement('span'); spc.className='et-spacer'; editBar.appendChild(spc);
   const tStat=document.createElement('span'); tStat.id='toolStatus'; tStat.setAttribute('role','status'); tStat.setAttribute('aria-live','polite'); editBar.appendChild(tStat);
-  if(bottomBar&&bottomBar.parentElement) bottomBar.parentElement.insertBefore(editBar,bottomBar);
+  /* Dot Pad 미리보기 영역(캔버스) 바로 위에 편집 툴바 배치 — 미리보기와 인접 */
+  const cArea=$('canvasArea'), cMeta=$('canvasMeta');
+  if(cMeta) cMeta.insertAdjacentElement('afterend',editBar);
+  else if(cArea) cArea.insertBefore(editBar, cArea.firstChild);
+  else if(bottomBar&&bottomBar.parentElement) bottomBar.parentElement.insertBefore(editBar,bottomBar);
 
   /* 직선 도구 엔진 (capture 단계로 기존 핸들러보다 먼저 가로채기) */
   const pad=$('pad');
@@ -4573,15 +4588,15 @@ document.addEventListener('mousedown', ()=>{
   const expSec=$('dtmsBtn')?$('dtmsBtn').parentElement.parentElement:null;
   const hexBtn=$('hexBtn');   /* 노드 이동 전에 참조 확보 (이동 후엔 getElementById가 못 찾음) */
 
-  // 변환 설정: 해상도 → 방식 → 굵기 → 효과 → 민감도
+  // 변환 설정: 해상도 → 임계값(핵심) → 선 굵기 → 효과  (변환 방식 선택 UI 제거)
   moveIn(cConv,resSec);
+  moveIn(cConv,densitySec);
+  // 임계값 설명 문구 (제목 바로 아래)
+  if(densitySec){ const stt=densitySec.querySelector('.sec-title');
+    if(stt && !densitySec.querySelector('.th-desc')){ const d=document.createElement('p'); d.className='th-desc'; d.setAttribute('data-ck','th_desc'); d.textContent=TL('th_desc'); stt.insertAdjacentElement('afterend',d); } }
   const conv=document.createElement('div'); conv.id='convExtra';
   conv.innerHTML=`
-    <div class="ui-sub" data-ck="conv_method">${TL('conv_method')}</div>
-    <div class="seg" id="methodSeg" role="group" aria-label="${TL('conv_method')}">
-      <button type="button" data-m="outline" data-ck="conv_outline">${TL('conv_outline')}</button>
-      <button type="button" data-m="fill" data-ck="conv_fill">${TL('conv_fill')}</button></div>
-    <div class="ui-sub" style="margin-top:12px" data-ck="conv_thick">${TL('conv_thick')}</div>
+    <div class="ui-sub" data-ck="conv_thick">${TL('conv_thick')}</div>
     <div class="seg" id="thickSeg" role="group" aria-label="${TL('conv_thick')}">
       <button type="button" data-w="thin" data-ck="t_thin">${TL('t_thin')}</button>
       <button type="button" data-w="normal" aria-pressed="true" data-ck="t_normal">${TL('t_normal')}</button>
@@ -4592,7 +4607,6 @@ document.addEventListener('mousedown', ()=>{
       <button type="button" data-fx="invert" data-ck="fx_invert">${TL('fx_invert')}</button>
       <button type="button" data-fx="denoise" data-ck="fx_denoise">${TL('fx_denoise')}</button></div>`;
   cConv.appendChild(conv);
-  moveIn(cConv,densitySec);
 
   // 엔진 헬퍼: 굵기(팽창/침식)
   function dilate(times){ if(!hasImg())return; try{ if(typeof pushUndo==='function')pushUndo();
@@ -4602,10 +4616,6 @@ document.addEventListener('mousedown', ()=>{
     for(let k=0;k<times;k++){ const s=grid.slice(); for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){ let keep=s[y*GW+x]; if(keep){ for(let dy=-1;dy<=1&&keep;dy++)for(let dx=-1;dx<=1&&keep;dx++){ const nx=x+dx,ny=y+dy; if(nx<0||ny<0||nx>=GW||ny>=GH||!s[ny*GW+nx])keep=0; } } grid[y*GW+x]=keep?1:0; } }
     pages[curPage]=grid; if(typeof afterChange==='function')afterChange(); }catch(e){} }
   function pressSeg(seg,el){ seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===el?'true':'false')); }
-  conv.querySelector('#methodSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!hasImg())return;
-    pressSeg(conv.querySelector('#methodSeg'),b);
-    if(b.dataset.m==='outline'){ if(typeof applyOp==='function')applyOp('outline'); }
-    else { try{ if(typeof outline!=='undefined')outline=0; if(typeof rebuild==='function')rebuild(); if(typeof afterChange==='function')afterChange(); if(typeof updateOutlineDesc==='function')updateOutlineDesc(); }catch(_){} announce(TL('conv_fill')); } });
   conv.querySelector('#thickSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!hasImg())return;
     pressSeg(conv.querySelector('#thickSeg'),b); const w=b.dataset.w;
     if(w==='thin')erode(1); else if(w==='thick')dilate(1); else if(w==='thicker')dilate(2);
