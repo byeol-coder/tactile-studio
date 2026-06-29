@@ -12,9 +12,12 @@ import {
 
 import {
   createSourceImageState, analyzeImageType,
-  convertToDots, autoSelectParams, tactileQualityScore, gradeReason,
+  convertToDots, autoSelectParams, optimizeForDotPad,
+  tactileQualityScore, gradeReason,
   gridToHex, hexToGrid, textToBraillePages,
 } from './engine.js';
+
+import { interpretCommand, QUICK_COMMANDS } from './commands.js';
 
 import {
   computeCanvasLayout, applyLayout, renderGrid,
@@ -145,7 +148,10 @@ function startAnalyze(img, name) {
     if (inp) { appState.fileName = name; inp.value = name; }
   }
   const id = ++_currentConvId;
-  requestAnimationFrame(() => {
+  // setTimeout (not rAF) so analysis still runs when the tab/iframe is
+  // backgrounded — rAF is throttled to ~0 Hz when not visible, which would
+  // otherwise hang conversion forever in an embedded (TIB/iframe) context.
+  setTimeout(() => {
     if (id !== _currentConvId) return;
     const sourceState = createSourceImageState(img, canvasState.width, canvasState.height);
     const meta = analyzeImageType(sourceState.grayBuf, sourceState.alphaBuf, canvasState.width, canvasState.height);
@@ -160,7 +166,7 @@ function startAnalyze(img, name) {
 
     paintSlider(conversionState.threshold);
     finishAnalyze();
-  });
+  }, 16);
 }
 
 function finishAnalyze() {
@@ -600,20 +606,101 @@ function guardUnsavedChanges() {
   });
 }
 
-// ─── Command bar parsing ──────────────────────────────────────
+// ─── Command bar (Figma-mini prompt brain) ───────────────────
 function parseCommand(text) {
-  const t2 = text.trim().toLowerCase();
+  const lang = appState.language;
   const page = pagesState.activePage;
-  if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
+  const intent = interpretCommand(text, lang);
+
+  // Actions that don't require a source image.
+  if (intent.action === 'send' || intent.action === 'braille') {
+    if (intent.action === 'braille') {
+      sendBrailleText(brailleState.brailleText || page?.altText || '');
+    } else {
+      if (!dotPadState.connected) { toast(t('toast_not_conn', lang)); return; }
+      sendGraphicData(gridToHex(canvasState.data, canvasState.width, canvasState.height), true);
+    }
+    toast(intent.reply, 'ok');
+    return;
+  }
+  if (intent.action === 'clear') {
+    if (!canvasState.data.some(v => v)) return;
+    pushUndo(); canvasState.data.fill(0); afterChange();
+    toast(intent.reply, 'ok');
+    return;
+  }
+
+  // Everything below needs a converted image.
+  if (!page?.sourceImageState) { toast(t('toast_need_image', lang)); return; }
+  if (!intent.matched) { toast(intent.reply); return; }
+
   pushUndo();
-  if (/단순|simple|simpler/.test(t2))     { conversionState.outline = 1; conversionState.minComp = 4; }
-  if (/또렷|detail|clear/.test(t2))        { conversionState.minComp = 1; conversionState.outline = 0; }
-  if (/외곽|outline/.test(t2))             { conversionState.outline = 1; }
-  if (/채워|fill/.test(t2))                { conversionState.outline = 0; }
-  if (/읽기 쉽|readable/.test(t2))        { conversionState.minComp = 4; conversionState.outline = 1; }
-  if (/점자|braille/.test(t2))            { sendBrailleText(brailleState.brailleText || page.altText || ''); toast(t('toast_sent', appState.language), 'ok'); return; }
-  rebuild(); paintSlider(conversionState.threshold);
+
+  if (intent.optimize) {
+    const best = optimizeForDotPad(page.sourceImageState, canvasState.width, canvasState.height);
+    Object.assign(conversionState, best.params);
+    paintSlider(conversionState.threshold);
+    syncControlsFromState();
+    rebuild();
+    const gradeTxt = ['', '다시 확인', '주의', '좋음', '아주 좋음'][best.grade] || '';
+    toast(`${intent.reply} · 품질 ${gradeTxt}`.trim(), 'ok');
+    return;
+  }
+
+  if (intent.action === 'reset') {
+    const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
+    Object.assign(conversionState, p, { dilate: false, erode: false, denoise: false, edge: 'none' });
+    paintSlider(conversionState.threshold);
+  } else if (intent.action === 'invert') {
+    conversionState.invert = !conversionState.invert;
+  }
+
+  // Merge patch.
+  if (intent.patch && Object.keys(intent.patch).length) Object.assign(conversionState, intent.patch);
+
+  // Relative threshold nudge.
+  if (intent.deltaThreshold) {
+    conversionState.threshold = Math.max(20, Math.min(240, conversionState.threshold + intent.deltaThreshold));
+    paintSlider(conversionState.threshold);
+  }
+
+  syncControlsFromState();
+  rebuild();
+  toast(intent.reply, 'ok');
 }
+
+/** Reflect conversionState back into the panel controls (chips, toggles, slider). */
+function syncControlsFromState() {
+  qsa('.th-method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === conversionState.method));
+  qsa('.outline-btn[data-outline]').forEach(b => b.classList.toggle('active', +b.dataset.outline === conversionState.outline));
+  qsa('[data-proc]').forEach(b => {
+    const key = b.dataset.proc;
+    const on = key === 'edge' ? conversionState.edge === 'sobel' : !!conversionState[key];
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+  const inv = ge('invertToggle'); if (inv) inv.setAttribute('aria-checked', String(!!conversionState.invert));
+  qsa('.preset-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ─── Prompt suggestion dropdown ───────────────────────────────
+function renderPromptSuggestions() {
+  const box = ge('promptSuggest'); if (!box) return;
+  const lang = appState.language;
+  box.innerHTML = QUICK_COMMANDS.map(c =>
+    `<button class="ps-item${c.primary ? ' primary' : ''}" data-cmd="${(c.text[lang] || c.text.ko).replace(/"/g, '&quot;')}">
+       <span class="ps-icon">${c.icon}</span>${c.text[lang] || c.text.ko}
+     </button>`
+  ).join('');
+  box.querySelectorAll('.ps-item').forEach(b => b.addEventListener('mousedown', e => {
+    e.preventDefault();
+    hidePromptSuggestions();
+    const inp = ge('promptInput'); if (inp) inp.value = '';
+    parseCommand(b.dataset.cmd);
+  }));
+}
+function showPromptSuggestions() { const b = ge('promptSuggest'); if (b) { renderPromptSuggestions(); b.classList.add('show'); } }
+function hidePromptSuggestions() { const b = ge('promptSuggest'); if (b) b.classList.remove('show'); }
 
 // ─── Language toggle ──────────────────────────────────────────
 function setLanguage(lang) {
@@ -700,8 +787,12 @@ function wireFullMode() {
   ge('promptForm')?.addEventListener('submit', e => {
     e.preventDefault();
     const inp = ge('promptInput'); if (!inp?.value.trim()) return;
+    hidePromptSuggestions();
     parseCommand(inp.value); inp.value = '';
   });
+  const promptInp = ge('promptInput');
+  promptInp?.addEventListener('focus', showPromptSuggestions);
+  promptInp?.addEventListener('blur', () => setTimeout(hidePromptSuggestions, 120));
 
   // threshold slider
   ge('thSlider')?.addEventListener('input', function() {

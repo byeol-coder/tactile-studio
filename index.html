@@ -84,19 +84,48 @@ svg { display: block; flex-shrink: 0 }
 .hd-file input:focus { background: var(--surface2); color: var(--ink); outline: 1px solid var(--border2) }
 
 /* prompt bar */
+.hd-prompt-wrap { flex: 1; position: relative; min-width: 0; max-width: 480px; display: flex }
 .hd-prompt {
   flex: 1; display: flex; align-items: center; background: var(--surface2);
   border: 1px solid var(--border); border-radius: var(--r10);
-  padding: 0 10px; gap: 8px; height: 32px; min-width: 0; max-width: 480px;
+  padding: 0 8px 0 10px; gap: 8px; height: 32px; min-width: 0;
   transition: border-color .15s, box-shadow .15s;
 }
-.hd-prompt:focus-within { border-color: var(--border2); box-shadow: 0 0 0 3px rgba(255,77,0,.1) }
-.hd-prompt svg { width: 13px; height: 13px; stroke: var(--hint); fill: none;
-  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
+.hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
+.hd-prompt svg { width: 14px; height: 14px; stroke: var(--accent); fill: none;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
 .hd-prompt input {
   flex: 1; background: none; border: none; font-size: 12px; color: var(--ink); min-width: 0;
 }
 .hd-prompt input::placeholder { color: var(--hint) }
+.hd-prompt-kbd {
+  font-size: 10px; font-weight: 700; color: var(--hint); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; flex-shrink: 0;
+  font-family: var(--font);
+}
+.hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: rgba(255,77,0,.3) }
+
+/* suggestion dropdown */
+.prompt-suggest {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r12);
+  box-shadow: var(--shadow-md); padding: 5px; display: none; flex-direction: column; gap: 1px;
+  max-height: 320px; overflow-y: auto;
+}
+.prompt-suggest.show { display: flex; animation: ps-in .12s ease }
+@keyframes ps-in { from { opacity: 0; transform: translateY(-4px) } to { opacity: 1; transform: none } }
+.ps-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: var(--r8);
+  font-size: 12px; font-weight: 500; color: var(--text); text-align: left; transition: background .1s;
+}
+.ps-item:hover { background: var(--surface2) }
+.ps-item.primary { color: var(--accent); font-weight: 600 }
+.ps-item.primary:hover { background: var(--accent-bg) }
+.ps-icon {
+  width: 20px; height: 20px; border-radius: 6px; background: var(--surface2);
+  display: grid; place-items: center; font-size: 11px; flex-shrink: 0; color: var(--sub);
+}
+.ps-item.primary .ps-icon { background: var(--accent-bg); color: var(--accent) }
 
 .hd-right { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0 }
 
@@ -562,10 +591,14 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
     <input id="fname" type="text" value="Untitled" aria-label="파일명" spellcheck="false" maxlength="60"/>
   </div>
 
-  <form class="hd-prompt" id="promptForm" role="search">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input id="promptInput" type="text" placeholder="더 단순하게 / 외곽선만 / Dot Pad에서 읽기 쉽게…" autocomplete="off" aria-label="AI 명령어"/>
-  </form>
+  <div class="hd-prompt-wrap">
+    <form class="hd-prompt" id="promptForm" role="search">
+      <svg viewBox="0 0 24 24"><path d="M12 2l1.6 4.6L18 8l-4.4 1.4L12 14l-1.6-4.6L6 8l4.4-1.4z"/><circle cx="18" cy="17" r="2.5"/></svg>
+      <input id="promptInput" type="text" placeholder="명령으로 변환하기 — 최적화 / 외곽선만 / 단순하게…" autocomplete="off" aria-label="AI 명령어" aria-expanded="false" aria-controls="promptSuggest"/>
+      <kbd class="hd-prompt-kbd" aria-hidden="true">↵</kbd>
+    </form>
+    <div class="prompt-suggest" id="promptSuggest" role="listbox" aria-label="추천 명령"></div>
+  </div>
 
   <div class="hd-right">
     <div class="hd-lang" role="group" aria-label="언어">

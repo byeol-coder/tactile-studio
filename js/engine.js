@@ -364,6 +364,66 @@ export function autoSelectParams(sourceImageState, cols, rows) {
   return { method, threshold, invert, outline, minComp: 2 };
 }
 
+// ─── DotPad Optimization Search ───────────────────────────────
+/**
+ * Search a bounded space of conversion params and return the one that
+ * maximizes tactile readability on the target pin grid.
+ * This is the core "Dot Pad 최적화" routine — it does NOT mutate state.
+ *
+ * @returns {{ params: object, score: number, grade: number }}
+ */
+export function optimizeForDotPad(sourceImageState, cols, rows, opts = {}) {
+  if (!sourceImageState) return { params: {}, score: 0, grade: 1 };
+  const { grayBuf, alphaBuf } = sourceImageState;
+  const meta = analyzeImageType(grayBuf, alphaBuf, cols, rows);
+
+  // Candidate axes — kept bounded (~40 evals) for instant response.
+  const base = autoSelectParams(sourceImageState, cols, rows);
+  const ot = otsu(grayBuf);
+  const methods = meta.hasAlpha ? ['alpha'] : ['otsu', 'adaptive', 'global'];
+  const thresholds = [ot - 30, ot - 15, ot, ot + 15, ot + 30]
+    .map(v => Math.max(20, Math.min(240, v)));
+  const outlines = [0, 1];
+  const denoises = [false, true];
+
+  let best = null;
+  const evalParams = (p) => {
+    const conv = { method: 'global', threshold: ot, invert: false,
+      outline: 0, minComp: 2, dilate: false, erode: false, denoise: false, edge: 'none', ...p };
+    const grid = convertToDots(sourceImageState, conv, cols, rows);
+    const on = grid.reduce((s, v) => s + v, 0);
+    // Reject empty / saturated results outright.
+    const dens = on / (cols * rows);
+    if (dens < 0.02 || dens > 0.6) return;
+    const q = tactileQualityScore(grid, cols, rows, { type: meta.type, outline: conv.outline });
+    if (!best || q.score > best.score) best = { params: conv, score: q.score, grade: q.grade };
+  };
+
+  for (const method of methods) {
+    if (method === 'global') {
+      for (const threshold of thresholds)
+        for (const outline of outlines)
+          for (const denoise of denoises)
+            evalParams({ method, threshold, invert: base.invert, outline, denoise });
+    } else {
+      for (const outline of outlines)
+        for (const denoise of denoises) {
+          evalParams({ method, invert: base.invert, outline, denoise });
+          // also try inverted, in case auto-detect picked the wrong polarity
+          evalParams({ method, invert: !base.invert, outline, denoise });
+        }
+    }
+  }
+
+  // Fallback: if everything was rejected, return the safe auto params.
+  if (!best) {
+    const grid = convertToDots(sourceImageState, base, cols, rows);
+    const q = tactileQualityScore(grid, cols, rows, { type: meta.type, outline: base.outline });
+    best = { params: { ...base, dilate: false, erode: false, denoise: false, edge: 'none' }, score: q.score, grade: q.grade };
+  }
+  return best;
+}
+
 // ─── Tactile Quality Score ────────────────────────────────────
 function metricsOf(g, cols, rows) {
   let on = 0, iso = 0, ends = 0;
