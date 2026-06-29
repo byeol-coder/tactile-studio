@@ -4702,8 +4702,11 @@ document.addEventListener('mousedown', ()=>{
   .workspace{height:calc(100dvh - var(--h-bar,48px));overflow:hidden;display:flex;flex-direction:column}
   .canvas-area{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;align-items:stretch;
     max-width:1140px;margin:0 auto;width:100%;padding:8px var(--sp-l) 0;position:relative;gap:6px}
-  /* 캔버스 그리드: 남은 공간 전부 차지, 최소 높이 보장 */
-  #dotGridWrap{flex:1;min-height:160px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  /* 캔버스 그리드: 남은 공간 전부 차지, 줌인 시 패닝 가능 */
+  #dotGridWrap{flex:1;min-height:160px;overflow:auto;display:block;scroll-behavior:auto}
+  #dotGridWrap::-webkit-scrollbar{width:6px;height:6px}
+  #dotGridWrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+  #dotGrid{display:flex;align-items:center;justify-content:center;min-width:100%;min-height:100%;box-sizing:border-box}
   /* 하단 푸터: 상태줄·AI피드백·CTA — 최대 높이로 캔버스 공간 보호 */
   #studioFooter{width:100%;max-width:1140px;margin:0 auto;padding:0 var(--sp-l) 8px;box-sizing:border-box;
     display:flex;flex-direction:column;gap:6px;flex-shrink:0;
@@ -4787,8 +4790,9 @@ document.addEventListener('mousedown', ()=>{
   #zoomCtl button:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
   #zoomCtl .zlvl{min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
   /* Dot Pad 보기 모드 토글 */
-  #dpViewCtl{display:inline-flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:2px}
-  #dpViewCtl button{min-height:28px;padding:0 10px;border-radius:999px;border:none;background:none;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+  #dpViewCtl{display:inline-flex;align-items:center;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:2px 6px 2px 2px}
+  #dpViewCtl .dp-view-label{font-size:10px;font-weight:700;color:var(--muted);padding:0 4px 0 6px;white-space:nowrap;letter-spacing:-.01em}
+  #dpViewCtl button{min-height:26px;padding:0 10px;border-radius:999px;border:none;background:none;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
   #dpViewCtl button:hover{background:var(--white)}
   #dpViewCtl button[aria-pressed="true"]{background:var(--ink);color:#fff}
   #dpViewCtl button:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
@@ -4961,67 +4965,92 @@ document.addEventListener('mousedown', ()=>{
   const ZOOMS=[0.5,0.75,1,1.5,2,3,4]; window.__dispZoom=window.__dispZoom||1;
   window.__dpPreviewMode=window.__dpPreviewMode||'full';  // 'full' | 'viewport'
   const _stAnnounce=m=>{ try{if(typeof say==='function')say(m);}catch(e){} };
-  function applyZoom(){ /* measureAndRelayout가 cell 크기를 담당 — zoom만 cell에 곱함 */
-    try{ if(typeof measureAndRelayout==='function') measureAndRelayout(); }catch(e){} }
   try{ if(typeof layout==='function'){ const _l=layout; layout=function(){ _l(); try{setTimeout(measureAndRelayout,0);}catch(e){} try{statusUpdate();}catch(e){} }; } }catch(e){}
+
   function setZoom(z){
     window.__dispZoom=Math.max(0.5,Math.min(4,z));
-    if(typeof layout==='function')layout();
+    if(typeof layout==='function') layout();
     const pct=Math.round(window.__dispZoom*100);
     const isVP=window.__dpPreviewMode==='viewport';
-    const dpNote=isVP?'Dot Pad 현재 보기 반영 중':'';
     _stAnnounce('현재 확대 '+pct+'퍼센트입니다.'+(isVP?' Dot Pad에는 현재 확대 영역이 표시됩니다.':''));
-    statusUpdate();
-    if(isVP) try{if(typeof forceSend==='function')forceSend();}catch(e){}
+    // 줌 변경 후 dotGridWrap 중앙으로 스크롤
+    setTimeout(()=>{
+      try{
+        const gw=gridWrap; if(!gw) return;
+        const msx=gw.scrollWidth-gw.clientWidth, msy=gw.scrollHeight-gw.clientHeight;
+        if(msx>0) gw.scrollLeft=msx/2;
+        if(msy>0) gw.scrollTop=msy/2;
+      }catch(e){}
+      statusUpdate();
+      if(isVP) try{if(typeof forceSend==='function')forceSend();}catch(e){}
+    },80);
   }
   function zoomStep(dir){ const cur=window.__dispZoom; let i=ZOOMS.findIndex(v=>Math.abs(v-cur)<0.001); if(i<0){ i=ZOOMS.findIndex(v=>v>=cur); if(i<0)i=ZOOMS.length-1; } i=Math.max(0,Math.min(ZOOMS.length-1,i+dir)); setZoom(ZOOMS[i]); }
-  function fitZoom(){ setZoom(1); _stAnnounce('화면 맞춤 보기입니다.'+(window.__dpPreviewMode==='viewport'?' Dot Pad에는 전체 그래픽이 맞춰져 표시됩니다.':'')); }
+  function fitZoom(){
+    window.__dispZoom=1;
+    if(typeof layout==='function') layout();
+    setTimeout(()=>{
+      try{ if(gridWrap){ gridWrap.scrollLeft=0; gridWrap.scrollTop=0; } }catch(e){}
+      statusUpdate();
+      if(window.__dpPreviewMode==='viewport') try{if(typeof forceSend==='function')forceSend();}catch(e){}
+    },80);
+    _stAnnounce('화면 맞춤 보기입니다.'+(window.__dpPreviewMode==='viewport'?' Dot Pad에는 전체 그래픽이 맞춰져 표시됩니다.':''));
+  }
 
   /* ---------- 5b) 촉각 뷰포트 미리보기 렌더러 (원본 canvasState 불변) ---------- */
-  // visibleRect: 현재 화면에 보이는 그리드 셀 범위 계산
+  // visibleRect: dotGridWrap 스크롤 위치 기반으로 현재 보이는 그리드 셀 범위 계산
   function getVisibleGridRect(){
     const z=window.__dispZoom||1; if(z<=1) return {x:0,y:0,w:GW,h:GH};
     try{
-      const r=pad.getBoundingClientRect();
-      const hdr=document.querySelector('.top-bar'); const hdrH=hdr?hdr.offsetHeight:56;
-      const vpW=window.innerWidth, vpH=window.innerHeight;
-      const cl=Math.max(0,-r.left), ct=Math.max(0,hdrH-r.top);
-      const cr2=Math.min(r.width,vpW-r.left), cb=Math.min(r.height,vpH-r.top);
-      if(cr2<=cl||cb<=ct) return {x:0,y:0,w:GW,h:GH};
-      const sx=Math.max(0,Math.floor((cl-off)/cell)), sy=Math.max(0,Math.floor((ct-off)/cell));
-      const ex=Math.min(GW,Math.ceil((cr2-off)/cell)), ey=Math.min(GH,Math.ceil((cb-off)/cell));
+      const gw=gridWrap;
+      const padR=pad.getBoundingClientRect(), gwR=gw.getBoundingClientRect();
+      // pad 좌표계 기준 가시 영역 (픽셀)
+      const visL=Math.max(gwR.left,padR.left)-padR.left;
+      const visT=Math.max(gwR.top,padR.top)-padR.top;
+      const visR=Math.min(gwR.right,padR.right)-padR.left;
+      const visB=Math.min(gwR.bottom,padR.bottom)-padR.top;
+      if(visR<=visL||visB<=visT) return {x:0,y:0,w:GW,h:GH};
+      // 픽셀 → 그리드 셀 변환
+      const sx=Math.max(0,Math.floor((visL-off)/cell));
+      const sy=Math.max(0,Math.floor((visT-off)/cell));
+      const ex=Math.min(GW,Math.ceil((visR-off)/cell));
+      const ey=Math.min(GH,Math.ceil((visB-off)/cell));
       return {x:sx,y:sy,w:Math.max(1,ex-sx),h:Math.max(1,ey-sy)};
     }catch(e){return {x:0,y:0,w:GW,h:GH};}
   }
-  // renderDotPadPreviewBuf: 보기 모드에 따라 Dot Pad 출력용 hex 생성
+
+  // renderDotPadPreview: canvasState × viewportState → Dot Pad 해상도 preview buffer
   const _gridToHexOrig=(typeof gridToHex==='function')?gridToHex:null;
-  function renderDotPadPreviewBuf(mode){
+  function renderDotPadPreview(mode){
     if(!_gridToHexOrig) return null;
-    if(mode!=='viewport') return _gridToHexOrig(grid);
+    if(mode!=='viewport') return _gridToHexOrig(grid);  // full: 원본 전체
     const vr=getVisibleGridRect();
-    if(vr.w>=GW&&vr.h>=GH) return _gridToHexOrig(grid);
-    // 현재 보기 영역을 GW×GH Dot Pad 해상도로 최근접 보간
+    if(vr.w>=GW&&vr.h>=GH) return _gridToHexOrig(grid); // 전체 보임
+    // 현재 보기 영역 → GW×GH 최근접 보간 (확대 표현)
     const out=new Uint8Array(GW*GH);
     for(let dy=0;dy<GH;dy++) for(let dx=0;dx<GW;dx++){
       const sx=vr.x+Math.floor(dx*vr.w/GW), sy=vr.y+Math.floor(dy*vr.h/GH);
-      if(sx<GW&&sy<GH) out[dy*GW+dx]=grid[sy*GW+sx];
+      if(sx>=0&&sy>=0&&sx<GW&&sy<GH) out[dy*GW+dx]=grid[sy*GW+sx];
     }
     return _gridToHexOrig(out);
   }
-  // gridToHex 무인수 호출(라이브 전송)을 미리보기 모드로 가로챔 — 원본 grid 불변
+  // gridToHex 무인수 호출(라이브 전송) 가로채기 — 원본 grid 불변
   if(_gridToHexOrig){
     gridToHex=function(g){
-      if(g===undefined&&window.__dpPreviewMode==='viewport') return renderDotPadPreviewBuf('viewport');
+      if(g===undefined&&window.__dpPreviewMode==='viewport') return renderDotPadPreview('viewport');
       return _gridToHexOrig(g);
     };
   }
-  // 스크롤 시 현재 보기 모드에서 Dot Pad 즉시 갱신
-  try{
-    const _wa=document.querySelector('.workspace')||document.body;
-    _wa.addEventListener('scroll',()=>{
-      if(window.__dpPreviewMode==='viewport') try{if(typeof forceSend==='function')forceSend();}catch(e){}
+  // dotGridWrap 스크롤(pan) 시 Dot Pad 즉시 갱신 + 상태바 갱신
+  if(gridWrap){
+    gridWrap.addEventListener('scroll',()=>{
+      statusUpdate();
+      if(window.__dpPreviewMode==='viewport'){
+        clearTimeout(window.__vpScrollT);
+        window.__vpScrollT=setTimeout(()=>{ try{if(typeof forceSend==='function')forceSend();}catch(e){} },100);
+      }
     },{passive:true});
-  }catch(e){}
+  }
 
   /* ---------- 6) 상태바(모드·해상도·활성점·확대·좌표) + 보기 컨트롤 ---------- */
   if(canvasStatus) canvasStatus.style.display='none';   // uiPro 상태줄 대체
@@ -5029,17 +5058,18 @@ document.addEventListener('mousedown', ()=>{
   sBar.innerHTML=`<span class="cs-mode" id="csMode"></span>
     <span class="cs-chip" id="csRes"><b>${GW}×${GH}</b></span>
     <span class="cs-chip" id="csDots">활성 점 <b>0</b></span>
-    <span id="dpViewCtl" role="group" aria-label="Dot Pad 보기 모드" title="Dot Pad 보기 모드">
-      <button type="button" id="dpVFull" aria-pressed="true">전체</button>
-      <button type="button" id="dpVPort" aria-pressed="false">현재 보기</button></span>
-    <span id="zoomCtl" role="group" aria-label="확대 보기">
-      <button type="button" id="zOut" aria-label="축소">−</button>
-      <span class="zlvl" id="zLvl" aria-live="polite">100%</span>
-      <button type="button" id="zIn" aria-label="확대">+</button>
+    <span id="zoomCtl" role="group" aria-label="확대/축소">
+      <button type="button" id="zOut" aria-label="축소 (−)">−</button>
+      <span class="zlvl" id="zLvl" aria-live="polite" aria-label="현재 확대율">100%</span>
+      <button type="button" id="zIn" aria-label="확대 (+)">+</button>
       <button type="button" id="zReset" aria-label="100% 초기화">100%</button>
-      <button type="button" id="zFit" aria-label="화면 맞춤">${TL('zoom_fit')}</button></span>
-    <span class="cs-chip" id="csDpMode" aria-live="polite" style="display:none"></span>
-    <span class="cs-chip" id="csCoord" aria-label="좌표">x –, y –</span>`;
+      <button type="button" id="zFit" aria-label="전체 화면 맞춤">${TL('zoom_fit')}</button></span>
+    <span id="dpViewCtl" role="group" aria-label="Dot Pad 보기 모드">
+      <span class="dp-view-label">Dot Pad 보기</span>
+      <button type="button" id="dpVFull" aria-pressed="true" title="Dot Pad에 원본 전체 표시">전체</button>
+      <button type="button" id="dpVPort" aria-pressed="false" title="Dot Pad에 현재 확대 영역 표시">현재 보기</button></span>
+    <span class="cs-chip" id="csDpMode" aria-live="polite" aria-atomic="true" style="display:none"></span>
+    <span class="cs-chip" id="csCoord" aria-label="현재 좌표">x –, y –</span>`;
   if(canvasStatus&&canvasStatus.parentElement) canvasStatus.parentElement.insertBefore(sBar,canvasStatus.nextSibling);
   else if(gridWrap&&gridWrap.parentElement) gridWrap.parentElement.insertBefore(sBar,gridWrap.nextSibling);
   $('zOut').addEventListener('click',()=>zoomStep(-1));
@@ -5081,13 +5111,18 @@ document.addEventListener('mousedown', ()=>{
     const isVP=window.__dpPreviewMode==='viewport';
     if(vf) vf.setAttribute('aria-pressed',String(!isVP));
     if(vp) vp.setAttribute('aria-pressed',String(isVP));
-    // csDpMode 칩: 현재 보기 + 확대 시에만 표시
+    // csDpMode 칩: 현재 보기 모드 표시
     const modeChip=$('csDpMode');
     if(modeChip){
       const cz=window.__dispZoom||1;
-      if(isVP&&cz>1){
+      if(isVP){
         const vr=(typeof getVisibleGridRect==='function')?getVisibleGridRect():{x:0,y:0,w:GW,h:GH};
-        modeChip.textContent='Dot Pad 현재 보기 · '+Math.round(cz*100)+'% · x'+vr.x+' y'+vr.y+' '+vr.w+'×'+vr.h;
+        const isFull=(vr.w>=GW&&vr.h>=GH);
+        if(isFull){
+          modeChip.textContent='Dot Pad 현재 보기 · 전체';
+        } else {
+          modeChip.textContent='Dot Pad 현재 보기 · '+Math.round(cz*100)+'% · x'+vr.x+',y'+vr.y+' ('+vr.w+'×'+vr.h+')';
+        }
         modeChip.style.display='';
       } else { modeChip.style.display='none'; }
     }
