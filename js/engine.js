@@ -195,6 +195,32 @@ function erode4(g, cols, rows) {
   return o;
 }
 
+function dilate4(g, cols, rows) {
+  const o = new Uint8Array(g);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    if (!g[y * cols + x]) continue;
+    for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = x + a, ny = y + b;
+      if (nx >= 0 && ny >= 0 && nx < cols && ny < rows) o[ny * cols + nx] = 1;
+    }
+  }
+  return o;
+}
+
+function sobelEdge(gray, cols, rows, thr = 40) {
+  const o = new Uint8Array(cols * rows);
+  for (let y = 1; y < rows - 1; y++) for (let x = 1; x < cols - 1; x++) {
+    const Gx =
+      -gray[(y-1)*cols+(x-1)] - 2*gray[y*cols+(x-1)] - gray[(y+1)*cols+(x-1)]
+      +gray[(y-1)*cols+(x+1)] + 2*gray[y*cols+(x+1)] + gray[(y+1)*cols+(x+1)];
+    const Gy =
+      -gray[(y-1)*cols+(x-1)] - 2*gray[(y-1)*cols+x] - gray[(y-1)*cols+(x+1)]
+      +gray[(y+1)*cols+(x-1)] + 2*gray[(y+1)*cols+x] + gray[(y+1)*cols+(x+1)];
+    if (Math.sqrt(Gx*Gx + Gy*Gy) > thr) o[y * cols + x] = 1;
+  }
+  return o;
+}
+
 function denoiseG(g, cols, rows) {
   const o = new Uint8Array(cols * rows);
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++)
@@ -286,14 +312,22 @@ export function computeBaseMask(grayBuf, alphaBuf, cols, rows, convState) {
 }
 
 // ─── Full Conversion Pipeline ─────────────────────────────────
-/**
- * Run the full conversion pipeline.
- * Returns a new Uint8Array canvasData.
- */
 export function convertToDots(sourceImageState, convState, cols, rows) {
   if (!sourceImageState) return new Uint8Array(cols * rows);
   const { grayBuf, alphaBuf } = sourceImageState;
-  const m = computeBaseMask(grayBuf, alphaBuf, cols, rows, convState);
+
+  let m;
+  if (convState.edge === 'sobel') {
+    m = sobelEdge(grayBuf, cols, rows);
+    if (convState.invert) { for (let i = 0; i < m.length; i++) m[i] ^= 1; }
+  } else {
+    m = computeBaseMask(grayBuf, alphaBuf, cols, rows, convState);
+  }
+
+  if (convState.dilate)  m = dilate4(m, cols, rows);
+  if (convState.erode)   m = erode4(m, cols, rows);
+  if (convState.denoise) m = denoiseG(m, cols, rows);
+
   const cleaned = removeSmall(m, convState.minComp ?? 2, cols, rows);
   return applyOutline(cleaned, convState.outline ?? 0, cols, rows);
 }

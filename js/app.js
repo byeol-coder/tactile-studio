@@ -170,6 +170,7 @@ function finishAnalyze() {
   setPhase('ready');
   drawCanvas();
   syncQuality();
+  syncConvUI();
   syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
   toast(t('toast_converted', appState.language), 'ok');
 }
@@ -305,13 +306,14 @@ function syncQuality() {
     renderAiChips(fill, sc);
   }
 
-  // canvas status bar
-  const resCh = ge('resChip'); if (resCh) resCh.textContent = `${cols}×${rows}`;
-  const dotCh = ge('dotChip');
-  if (dotCh) {
-    dotCh.textContent = `${pins.toLocaleString()} 핀 · ${fill}%`;
-    dotCh.className = 'info-chip ' + (fill < 10 ? 'chip-warn' : fill < 45 ? 'chip-ok' : 'chip-warn');
-  }
+  // canvas meta strip + bottom bar chips
+  const resText = `${cols}×${rows}`;
+  const dotText = `${pins.toLocaleString()} 핀 · ${fill}%`;
+  const dotCls  = fill < 10 ? 'chip chip-w' : fill < 45 ? 'chip chip-ok' : 'chip chip-w';
+  const resCh = ge('resChip'); if (resCh) resCh.textContent = resText;
+  const dotCh = ge('dotChip'); if (dotCh) { dotCh.textContent = dotText; dotCh.className = dotCls; }
+  const resCh2 = ge('resChipBtm'); if (resCh2) resCh2.textContent = resText;
+  const dotCh2 = ge('dotChipBtm'); if (dotCh2) { dotCh2.textContent = dotText; dotCh2.className = 'dot-chip ' + (fill < 10 ? 'chip-w' : fill < 45 ? 'chip-ok' : 'chip-w'); }
   syncBtns(true);
 }
 
@@ -352,19 +354,55 @@ function applyAiCmd(cmd) {
   rebuild();
 }
 
+// ─── Sync conversion UI ───────────────────────────────────────
+function syncConvUI() {
+  // method tabs
+  qsa('.th-method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === conversionState.method));
+  // outline buttons
+  qsa('.outline-btn').forEach(b => b.classList.toggle('active', +b.dataset.outline === conversionState.outline));
+  // invert toggle
+  const inv = ge('invertToggle');
+  if (inv) inv.setAttribute('aria-checked', String(conversionState.invert));
+  // processing toggles
+  ['dilate','erode','denoise'].forEach(p => {
+    const el = ge(p === 'dilate' ? 'dilatBtn' : p + 'Btn');
+    if (el) {
+      el.classList.toggle('active', !!conversionState[p]);
+      el.setAttribute('aria-pressed', String(!!conversionState[p]));
+    }
+  });
+  const edgeEl = ge('edgeBtn');
+  if (edgeEl) {
+    const isOn = conversionState.edge !== 'none';
+    edgeEl.classList.toggle('active', isOn);
+    edgeEl.setAttribute('aria-pressed', String(isOn));
+  }
+}
+
 // ─── Sync helpers ─────────────────────────────────────────────
 function syncBtns(hasContent) {
-  const ids = ['dtmsBtn','pngBtn','dotpadBtn','hexBtn'];
+  const ids = ['dtmsBtn','pngBtn','dotpadBtn','dotpadBtnPanel','hexBtn'];
   ids.forEach(id => { const el = ge(id); if (el) el.disabled = !hasContent; });
+  const aiBadge = ge('aiBadge');
+  if (aiBadge) aiBadge.style.display = hasContent ? '' : 'none';
 }
 
 function syncConn() {
-  const dot = ge('bbDot'); if (dot) dot.className = 'bb-dot' + (dotPadState.connected ? ' connected' : '');
-  const txt = ge('bbStatus'); if (txt) txt.textContent = dotPadState.connected ? t('bb_connected', appState.language) : t('bb_disconnected', appState.language);
-  const dot2 = ge('dpDot'); if (dot2) dot2.className = 'dp-dot' + (dotPadState.connected ? ' on' : '');
-  const lbl = ge('dpLbl'); if (lbl) lbl.textContent = dotPadState.connected ? 'Dot Pad 연결됨' : t('conn_off', appState.language);
-  const liveSw = ge('liveSwitch'); if (liveSw) liveSw.disabled = !dotPadState.connected;
-  const bleBtn = ge('bleBtn'); if (bleBtn) bleBtn.textContent = dotPadState.connected ? '연결 끊기' : t('conn_btn_ble', appState.language);
+  const on = dotPadState.connected;
+  const lang = appState.language;
+  // header dot
+  const hdDot = ge('bbDot'); if (hdDot) hdDot.className = 'hd-conn' + (on ? ' on' : '');
+  const txt = ge('bbStatus'); if (txt) txt.textContent = on ? t('bb_connected', lang) : t('bb_disconnected', lang);
+  // bottom bar dot
+  const btmDot = ge('btmDot'); if (btmDot) btmDot.className = 'btm-dot' + (on ? ' on' : '');
+  // panel dot
+  const dot2 = ge('dpDot'); if (dot2) dot2.className = 'dp-dot' + (on ? ' on' : '');
+  const lbl = ge('dpLbl'); if (lbl) lbl.textContent = on ? t('bb_connected', lang) : t('conn_off', lang);
+  const liveSw = ge('liveSwitch'); if (liveSw) liveSw.disabled = !on;
+  const bleBtn = ge('bleBtn'); if (bleBtn) bleBtn.textContent = on ? '연결 끊기' : t('conn_btn_ble', lang);
+  // mini mode
+  const miniDot = ge('miniConnDot'); if (miniDot) miniDot.className = 'dp-dot' + (on ? ' on' : '');
+  const miniBtn = ge('miniConnBtn'); if (miniBtn) miniBtn.textContent = on ? '연결 끊기' : 'BLE 연결';
 }
 
 function syncPageUI() {
@@ -406,14 +444,19 @@ function selectTool(name) {
   toolState.currentTool = name;
   toolState.selection = null;
   toolState.hoverBrush = null;
-  qsa('.tr-btn[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === name));
-  qsa('[data-tool-indicator]').forEach(el => el.textContent = t('tool_' + name, appState.language));
+  qsa('.rail-btn[data-tool]').forEach(b => {
+    b.classList.toggle('active', b.dataset.tool === name);
+    b.setAttribute('aria-pressed', String(b.dataset.tool === name));
+  });
   drawCanvas();
 }
 
 function setSize(s) {
   toolState.brushSize = s;
-  qsa('.tr-sz').forEach(b => b.classList.toggle('active', +b.dataset.size === s));
+  qsa('.sz-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.size === s);
+    b.setAttribute('aria-pressed', String(+b.dataset.size === s));
+  });
 }
 
 // ─── Pointer events ───────────────────────────────────────────
@@ -606,7 +649,7 @@ function setResolution(cols, rows) {
 // ─── Full Mode wiring ─────────────────────────────────────────
 function wireFullMode() {
   // tool rail
-  qsa('.tr-btn[data-tool]').forEach(b => b.addEventListener('click', () => selectTool(b.dataset.tool)));
+  qsa('.rail-btn[data-tool]').forEach(b => b.addEventListener('click', () => selectTool(b.dataset.tool)));
   ge('undoBtn')?.addEventListener('click', undo);
   ge('redoBtn')?.addEventListener('click', redo);
   ge('clearBtn')?.addEventListener('click', () => {
@@ -617,7 +660,7 @@ function wireFullMode() {
     toast('전체 지웠어요');
   });
   ge('brushSizeGroup')?.addEventListener('click', e => {
-    const b = e.target.closest('.tr-sz[data-size]'); if (!b) return;
+    const b = e.target.closest('.sz-btn[data-size]'); if (!b) return;
     setSize(+b.dataset.size);
   });
 
@@ -694,6 +737,20 @@ function wireFullMode() {
     const ap = ge('thApply'); if (ap) ap.disabled = true;
   });
 
+  // method selector
+  qsa('.th-method-btn').forEach(b => b.addEventListener('click', () => {
+    const page = pagesState.activePage;
+    if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
+    conversionState.method = b.dataset.method;
+    qsa('.th-method-btn').forEach(x => x.classList.toggle('active', x === b));
+    if (conversionState.method !== 'global') {
+      const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
+      conversionState.threshold = p.threshold;
+      paintSlider(conversionState.threshold);
+    }
+    rebuild();
+  }));
+
   // outline selector
   qsa('.outline-btn').forEach(b => b.addEventListener('click', () => {
     const page = pagesState.activePage;
@@ -702,6 +759,62 @@ function wireFullMode() {
     qsa('.outline-btn').forEach(x => x.classList.toggle('active', x === b));
     rebuild();
   }));
+
+  // invert toggle
+  ge('invertToggle')?.addEventListener('click', function() {
+    const page = pagesState.activePage;
+    if (!page?.sourceImageState) return;
+    const next = this.getAttribute('aria-checked') !== 'true';
+    this.setAttribute('aria-checked', String(next));
+    conversionState.invert = next;
+    rebuild();
+  });
+
+  // preset buttons
+  const PRESETS = {
+    braille:  { method: 'otsu',     threshold: 110, outline: 1, minComp: 1, invert: false, dilate: false, erode: false, denoise: true,  edge: 'none' },
+    tactile:  { method: 'otsu',     threshold: 128, outline: 0, minComp: 2, invert: false, dilate: false, erode: false, denoise: false, edge: 'none' },
+    learning: { method: 'global',   threshold: 100, outline: 1, minComp: 5, invert: false, dilate: true,  erode: false, denoise: false, edge: 'none' },
+    detail:   { method: 'adaptive', threshold: 128, outline: 0, minComp: 1, invert: false, dilate: false, erode: false, denoise: false, edge: 'none' },
+  };
+  qsa('.preset-btn').forEach(b => b.addEventListener('click', () => {
+    const page = pagesState.activePage;
+    if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
+    const p = PRESETS[b.dataset.preset]; if (!p) return;
+    pushUndo();
+    Object.assign(conversionState, p);
+    paintSlider(conversionState.threshold);
+    qsa('.preset-btn').forEach(x => x.classList.toggle('active', x === b));
+    syncConvUI();
+    rebuild();
+  }));
+
+  // processing toggles (dilate / erode / denoise / edge)
+  qsa('[data-proc]').forEach(b => b.addEventListener('click', () => {
+    const page = pagesState.activePage;
+    if (!page?.sourceImageState) return;
+    const proc = b.dataset.proc;
+    if (proc === 'edge') {
+      conversionState.edge = conversionState.edge === 'none' ? 'sobel' : 'none';
+    } else {
+      conversionState[proc] = !conversionState[proc];
+    }
+    syncConvUI();
+    rebuild(80);
+  }));
+
+  // save btn
+  ge('saveBtn')?.addEventListener('click', () => {
+    exportDtms(pagesState.pages, appState.fileName, canvasState.width, canvasState.height);
+    toast(t('toast_dtms', appState.language), 'ok');
+  });
+
+  // panel send button (same as header send)
+  ge('dotpadBtnPanel')?.addEventListener('click', () => {
+    if (!dotPadState.connected) { toast(t('toast_not_conn', appState.language)); return; }
+    sendGraphicData(gridToHex(canvasState.data, canvasState.width, canvasState.height), true);
+    toast(t('toast_sent', appState.language), 'ok');
+  });
 
   // pin control
   ge('pinUpBtn')?.addEventListener('click',   () => { pushUndo(); canvasState.data.fill(1); afterChange(); toast(t('toast_pin_up', appState.language)); });

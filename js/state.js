@@ -23,6 +23,10 @@ export function createBlankPage(cols = 60, rows = 40) {
       invert: false,
       outline: 0,
       minComp: 2,
+      dilate: false,
+      erode: false,
+      denoise: false,
+      edge: 'none',
     },
     altText: '',
     brailleText: '',
@@ -60,11 +64,15 @@ export const canvasState = {
 
 // ── Conversion State (mirrors active page.conversionState) ────
 export const conversionState = {
-  method: 'global',
+  method: 'global',   // 'global' | 'otsu' | 'adaptive' | 'alpha'
   threshold: 128,
   invert: false,
-  outline: 0,
+  outline: 0,         // 0 | 1 | 2
   minComp: 2,
+  dilate: false,
+  erode: false,
+  denoise: false,
+  edge: 'none',       // 'none' | 'sobel'
 };
 
 // ── Viewport State ────────────────────────────────────────────
