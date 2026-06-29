@@ -986,9 +986,6 @@ function wireFullMode() {
     const f = e.target.files[0]; if (f) loadTactileFile(f);
     e.target.value = '';
   });
-  ge('emptyDropZone')?.addEventListener('click', () => ge('imgFileInput')?.click());
-  ge('tactileOpenBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
-
   // hero prompt (empty-state command card)
   ge('heroPromptForm')?.addEventListener('submit', e => {
     e.preventDefault();
