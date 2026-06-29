@@ -1029,6 +1029,7 @@ let tool='select';
 let grid=new Uint8Array(N);
 let srcImage=null, grayBuf=null, alphaBuf=null, imgMeta=null;
 let vpZoom=1, vpCx=0.5, vpCy=0.5;   /* 그래픽 탐색 뷰포트: 확대배율·중심(0~1) — 원본 이미지를 확대/스크롤해 60×40로 재변환 */
+let cropActive=false, cropX0=0, cropY0=0, cropX1=1, cropY1=1;   /* 이미지 자르기: 활성 시 원본의 (0~1 비율) 사각 영역만 변환 */
 let threshold=128, polarity=false, method='global', outline=0, minComp=2;
 let recoThreshold=128, recoOutline=0;
 let liveOn=true, connected=false, sdk=null, dotDevice=null;
@@ -1126,10 +1127,17 @@ function renderGray(){
   /* 뷰포트 크롭: 원본에서 (vpZoom 배율, vpCx·vpCy 중심) 영역만 잘라 60×40에 맞춤.
      vpZoom=1이면 전체 이미지(기존과 동일) */
   const W=srcImage.naturalWidth||srcImage.width, H=srcImage.naturalHeight||srcImage.height;
-  const z=Math.max(1,vpZoom||1), cw=W/z, ch=H/z;
-  let cx=(vpCx==null?0.5:vpCx)*W, cy=(vpCy==null?0.5:vpCy)*H;
-  cx=Math.max(cw/2,Math.min(W-cw/2,cx)); cy=Math.max(ch/2,Math.min(H-ch/2,cy));
-  const sx=cx-cw/2, sy=cy-ch/2;
+  let sx,sy,cw,ch;
+  if(cropActive && cropX1>cropX0 && cropY1>cropY0){
+    /* 자르기 영역(임의 사각형) 사용 */
+    sx=cropX0*W; sy=cropY0*H; cw=(cropX1-cropX0)*W; ch=(cropY1-cropY0)*H;
+  } else {
+    /* 뷰포트 확대/이동(중심 기준 균일 크롭) */
+    const z=Math.max(1,vpZoom||1); cw=W/z; ch=H/z;
+    let cx=(vpCx==null?0.5:vpCx)*W, cy=(vpCy==null?0.5:vpCy)*H;
+    cx=Math.max(cw/2,Math.min(W-cw/2,cx)); cy=Math.max(ch/2,Math.min(H-ch/2,cy));
+    sx=cx-cw/2; sy=cy-ch/2;
+  }
   const ar=cw/ch, gr=GW/GH;
   let dw,dh;
   if(ar>gr){dw=GW;dh=Math.round(GW/ar);}
@@ -1433,7 +1441,7 @@ function setDpState(s){dpState=s;const chip=$('chip');chip.className='chip '+(s=
 function resetForNewFile(){
   clearTimeout(sendT);sendT=null;lastSentHex=null;sendBusy=false;hoverBrush=null;
   srcImage=null;grayBuf=null;alphaBuf=null;imgMeta=null;tactileMeta=null;pendingImg=null;
-  vpZoom=1;vpCx=0.5;vpCy=0.5;
+  vpZoom=1;vpCx=0.5;vpCy=0.5;cropActive=false;cropX0=0;cropY0=0;cropX1=1;cropY1=1;
   grid=new Uint8Array(N);pages=[];pageUndo=[];pageRedo=[];curPage=0;
   threshold=128;polarity=false;method='global';outline=0;recoThreshold=128;recoOutline=0;
   cursor={x:0,y:0};setClarityFb('','');
@@ -2201,6 +2209,8 @@ ge('clarity2')?.addEventListener('input', function(){
   const ap = ge('thApply');
   if(ap) ap.disabled = false;
 });
+/* (수정) 슬라이더를 누른 채 커서가 편집창/창 밖으로 나가도 조작이 끊기지 않도록 포인터 캡처 */
+ge('clarity2')?.addEventListener('pointerdown', function(e){ try{ this.setPointerCapture(e.pointerId); }catch(_){} });
 
 ge('thMinus')?.addEventListener('click', ()=>{
   if(fileKind==='tactile') return;
@@ -3988,9 +3998,9 @@ document.addEventListener('mousedown', ()=>{
 
   function isImg(){ return typeof fileKind!=='undefined' && fileKind==='image' && typeof srcImage!=='undefined' && !!srcImage; }
   function apply(){ if(!isImg())return; try{ renderGray(); rebuild(); afterChange(); }catch(e){} refresh(); }
-  function zoomBy(d){ if(!isImg())return; vpZoom=clamp((vpZoom||1)+d*0.5,1,4); if(vpZoom===1){vpCx=0.5;vpCy=0.5;} apply(); sayPos(); }
+  function zoomBy(d){ if(!isImg())return; cropActive=false; vpZoom=clamp((vpZoom||1)+d*0.5,1,4); if(vpZoom===1){vpCx=0.5;vpCy=0.5;} apply(); sayPos(); }
   function panBy(dx,dy){ if(!isImg()||vpZoom<=1)return; const step=0.18/vpZoom; vpCx=clamp(vpCx+dx*step,0,1); vpCy=clamp(vpCy+dy*step,0,1); apply(); sayPos(); }
-  function resetVp(){ if(!isImg())return; vpZoom=1;vpCx=0.5;vpCy=0.5; apply(); sayPos(); }
+  function resetVp(){ if(!isImg())return; cropActive=false; vpZoom=1;vpCx=0.5;vpCy=0.5; apply(); sayPos(); }
   function sayPos(){ announce(TL('vp_say').replace('{z}',Math.round(vpZoom*100)).replace('{x}',Math.round(vpCx*100)).replace('{y}',Math.round(vpCy*100))); }
   window.__vpZoomBy=zoomBy; window.__vpPanBy=panBy; window.__vpReset=resetVp;
   window.__vpInfo=()=>({zoom:vpZoom,cx:vpCx,cy:vpCy,visible:isImg()});
@@ -4100,6 +4110,80 @@ document.addEventListener('mousedown', ()=>{
   relabel(); refresh(); updateMetaLabel();
   try{ if(typeof setAppState==='function'){ const _a=setAppState; setAppState=function(s){ _a(s); try{refresh();updateMetaLabel();}catch(e){} }; } }catch(e){}
   try{ if(typeof applyLang==='function'){ const _l=applyLang; applyLang=function(){ _l(); try{relabel();updateMetaLabel();}catch(e){} }; } }catch(e){}
+})();
+
+/* ============================================================
+   IMAGE CROP — 이미지 가져온 뒤 불필요한 영역을 잘라 그 부분만 변환
+   - 원본 위에 드래그 사각형으로 영역 선택 → 적용 시 해당 영역만 60×40으로 재변환
+   - renderGray의 크롭 영역(cropX0..cropY1) 사용. 뷰포트 확대와는 배타적(서로 해제).
+   ============================================================ */
+(function imageCrop(){
+  if(window.__cropWired) return; window.__cropWired=true;
+  try{ Object.assign(I18N.ko,{crop_title:'이미지 자르기', crop_open:'자르기', crop_apply:'적용', crop_full:'전체', crop_cancel:'취소', crop_hint:'드래그해 사용할 영역을 선택하세요'});
+       Object.assign(I18N.en,{crop_title:'Crop image', crop_open:'Crop', crop_apply:'Apply', crop_full:'Full', crop_cancel:'Cancel', crop_hint:'Drag to select the area to keep'}); }catch(e){}
+  const TL=k=>{ try{return t(k);}catch(e){return k;} };
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+  const css=`
+  #cropOv{display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,18,15,.6);align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:18px}
+  #cropOv[data-on="1"]{display:flex}
+  #cropTitle{color:#fff;font-size:14px;font-weight:700}
+  #cropStage{position:relative;line-height:0;background:#fff;border-radius:8px;overflow:hidden;touch-action:none}
+  #cropImg{display:block;max-width:92vw;max-height:62vh;user-select:none;-webkit-user-drag:none}
+  #cropRect{position:absolute;border:2px solid #ff5a1f;background:rgba(255,90,31,.15);box-sizing:border-box;pointer-events:none}
+  #cropHint{color:#eee;font-size:11px}
+  #cropOv .ca{display:flex;gap:8px}
+  #cropOv .ca button{min-height:38px;padding:0 18px;border-radius:9px;font-size:13px;font-weight:700;border:2px solid;cursor:pointer}
+  #cropApply{background:#ff5a1f;color:#fff;border-color:#ff5a1f}
+  #cropFull{background:#fff;color:#2c2c2a;border-color:#d8d2c6}
+  #cropCancel{background:#fff;color:#5f5e5a;border-color:#d8d2c6}`;
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  const ov=document.createElement('div'); ov.id='cropOv'; ov.dataset.on='0'; ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true');
+  ov.innerHTML=`<div id="cropTitle"></div>
+    <div id="cropStage"><img id="cropImg" alt=""><div id="cropRect"></div></div>
+    <div id="cropHint"></div>
+    <div class="ca"><button id="cropApply" type="button"></button><button id="cropFull" type="button"></button><button id="cropCancel" type="button"></button></div>`;
+  document.body.appendChild(ov);
+  const stage=ov.querySelector('#cropStage'), img=ov.querySelector('#cropImg'), rectEl=ov.querySelector('#cropRect');
+  let rect={x0:0,y0:0,x1:1,y1:1};
+  function drawRect(){ const w=img.clientWidth,h=img.clientHeight;
+    rectEl.style.left=(Math.min(rect.x0,rect.x1)*w)+'px'; rectEl.style.top=(Math.min(rect.y0,rect.y1)*h)+'px';
+    rectEl.style.width=(Math.abs(rect.x1-rect.x0)*w)+'px'; rectEl.style.height=(Math.abs(rect.y1-rect.y0)*h)+'px'; }
+  function relabel(){ ov.querySelector('#cropTitle').textContent=TL('crop_title'); ov.querySelector('#cropHint').textContent=TL('crop_hint');
+    ov.querySelector('#cropApply').textContent=TL('crop_apply'); ov.querySelector('#cropFull').textContent=TL('crop_full'); ov.querySelector('#cropCancel').textContent=TL('crop_cancel'); }
+  let dragging=false;
+  const toFrac=e=>{ const r=img.getBoundingClientRect(); return {x:clamp((e.clientX-r.left)/(r.width||1),0,1), y:clamp((e.clientY-r.top)/(r.height||1),0,1)}; };
+  stage.addEventListener('pointerdown',e=>{ e.preventDefault(); dragging=true; const p=toFrac(e); rect={x0:p.x,y0:p.y,x1:p.x,y1:p.y}; try{stage.setPointerCapture(e.pointerId);}catch(_){} drawRect(); });
+  stage.addEventListener('pointermove',e=>{ if(!dragging)return; const p=toFrac(e); rect.x1=p.x; rect.y1=p.y; drawRect(); });
+  stage.addEventListener('pointerup',()=>{ dragging=false; });
+  function open(){ if(typeof srcImage==='undefined'||!srcImage||fileKind!=='image') return;
+    try{ img.src=srcImage.src; }catch(e){}
+    rect = cropActive ? {x0:cropX0,y0:cropY0,x1:cropX1,y1:cropY1} : {x0:0,y0:0,x1:1,y1:1};
+    ov.dataset.on='1'; relabel();
+    if(img.complete) drawRect(); else img.addEventListener('load',drawRect,{once:true});
+    setTimeout(drawRect,30); }
+  function close(){ ov.dataset.on='0'; }
+  function applyCrop(){
+    const x0=Math.min(rect.x0,rect.x1),y0=Math.min(rect.y0,rect.y1),x1=Math.max(rect.x0,rect.x1),y1=Math.max(rect.y0,rect.y1);
+    if((x1-x0)<0.03||(y1-y0)<0.03){ close(); return; }
+    cropX0=x0;cropY0=y0;cropX1=x1;cropY1=y1; cropActive=true; vpZoom=1;vpCx=0.5;vpCy=0.5;
+    close();
+    try{ renderGray(); autoSelect(); if(typeof layout==='function')layout(); afterChange(false); forceSend(); }catch(e){ console.warn('crop apply',e); }
+    try{ if(typeof say==='function') say(TL('crop_title')); }catch(e){}
+  }
+  window.__cropOpen=open; window.__cropApply=applyCrop; window.__cropSetRect=r=>{rect=r;};
+  ov.querySelector('#cropApply').addEventListener('click',applyCrop);
+  ov.querySelector('#cropFull').addEventListener('click',()=>{ rect={x0:0,y0:0,x1:1,y1:1}; drawRect(); });
+  ov.querySelector('#cropCancel').addEventListener('click',close);
+  ov.addEventListener('keydown',e=>{ if(e.key==='Escape')close(); });
+
+  /* "자르기" 버튼 — 그래픽 탐색 섹션에 추가(이미지일 때만 노출) */
+  const vpSec=document.getElementById('vpSec');
+  if(vpSec){ const b=document.createElement('button'); b.id='cropBtn'; b.type='button'; b.textContent=TL('crop_open');
+    b.style.cssText='margin-top:8px;width:100%;min-height:32px;border-radius:8px;border:1.5px solid var(--orange,#ff5a1f);background:#fff;color:var(--orange,#ff5a1f);font-size:12px;font-weight:700;cursor:pointer';
+    b.addEventListener('click',open); vpSec.appendChild(b); }
+  try{ if(typeof applyLang==='function'){ const _l=applyLang; applyLang=function(){ _l(); try{relabel(); const b=document.getElementById('cropBtn'); if(b)b.textContent=TL('crop_open'); }catch(e){} }; } }catch(e){}
 })();
 
 /* ── 확장된 IIFE 닫기 ── */
