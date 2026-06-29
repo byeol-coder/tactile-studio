@@ -19,40 +19,43 @@ export function exportDtms(pages, fileName, cols, rows) {
 }
 
 /**
- * Export pin grid as PNG with transparent background.
- * Only "on" pins (value 1) are drawn as solid dots; the canvas background
- * is left transparent so the file contains dot pattern only.
+ * Export the dot pattern as a transparent PNG.
+ * Renders ONLY raised (ON) pins as solid dots on a fully transparent
+ * background — no canvas fill, grid lines, axes, or OFF dots.
  *
- * @param {Uint8Array} gridData
+ * @param {Uint8Array} data - pin data (ON = truthy)
  * @param {number} cols
  * @param {number} rows
  * @param {string} fileName
- * @param {number} [dotSize=10]  pixels per grid cell
+ * @param {object} [opts] - { cell, color, pad }
  */
-export function exportPng(gridData, cols, rows, fileName, dotSize = 10) {
-  const offscreen = document.createElement('canvas');
-  offscreen.width  = cols * dotSize;
-  offscreen.height = rows * dotSize;
-  const ctx = offscreen.getContext('2d');
-  // no fill → transparent background
-  ctx.fillStyle = '#1C1C1E';
-  const r = Math.max(1, dotSize * 0.38);
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      if (gridData[row * cols + col]) {
-        ctx.beginPath();
-        ctx.arc(
-          col * dotSize + dotSize / 2,
-          row * dotSize + dotSize / 2,
-          r, 0, Math.PI * 2
-        );
-        ctx.fill();
-      }
+export function exportPng(data, cols, rows, fileName, opts = {}) {
+  const cell  = opts.cell  ?? 16;            // px per pin (export resolution, zoom-independent)
+  const color = opts.color ?? '#1C1C1E';     // dot color, matches on-screen DOT_ON
+  const pad   = opts.pad   ?? cell;          // transparent margin around the pattern (1 pin by default)
+  const dotR  = cell * 0.40;                 // matches on-screen rOn ratio
+
+  const cv = document.createElement('canvas');
+  cv.width  = cols * cell + pad * 2;
+  cv.height = rows * cell + pad * 2;
+  const ctx = cv.getContext('2d');
+  // background left transparent on purpose — do NOT fillRect.
+
+  ctx.fillStyle = color;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (!data[y * cols + x]) continue;     // only ON pins
+      const cx = pad + x * cell + cell / 2;
+      const cy = pad + y * cell + cell / 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
-  offscreen.toBlob(blob => {
+
+  cv.toBlob(blob => {
     if (blob) download(blob, (fileName || 'tactile') + '.png');
-  });
+  }, 'image/png');
 }
 
 /**
