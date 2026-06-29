@@ -1498,7 +1498,10 @@ function startAnalyze(img,name){loading=true;pendingImg=img;pendingName=name||'�
   setTimeout(()=>{if(appState==='analyzing'&&pendingImg===img)finishAnalyze(img,name);},0);}
 function finishAnalyze(img,name){
   fileKind='image';srcImage=img;hasImage=true;renderGray();
-  const best=autoSelect();pages=[grid];curPage=0;pageUndo=[[]];pageRedo=[[]];
+  const best=autoSelect();
+  // 현재 페이지에만 적용 (기존 페이지들을 덮어쓰지 않음)
+  if(!pages.length){ pages=[grid];curPage=0;pageUndo=[[]];pageRedo=[[]]; }
+  else { pages[curPage]=grid; pageUndo[curPage]=[]; pageRedo[curPage]=[]; }
   $('infoFile').textContent=(name||'이미지').slice(0,22);$('infoSize').textContent=img.naturalWidth+'×'+img.naturalHeight;$('infoType').textContent=imgMeta.label;
   $('infoReco').textContent=({alpha:'알파',otsu:'Otsu',sauvola:'Sauvola',adaptive:'Adaptive',mean:'평균',global:'자동'})[best.meth]+' · '+(outline?outline+'줄':'채움');
   $('method').value=(method==='alpha')?'global':method;syncSliders();syncOutlineSeg();updateOutlineDesc();buildAgentReco();
@@ -5426,48 +5429,34 @@ document.addEventListener('mousedown', ()=>{
 
   /* ── CSS ── */
   const css=`
-  #canvasInfoBar{width:100%;max-width:1140px;margin:0 auto 0;box-sizing:border-box;
-    padding:0 var(--sp-l,16px) 6px;display:none;flex-direction:column;gap:0;flex-shrink:0}
-  #cibInner{background:var(--white);border:1px solid var(--border2);border-radius:14px;
-    padding:7px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:11px;color:var(--muted)}
-  /* 그림 설명 행 */
-  #cibDescRow{display:flex;align-items:center;gap:6px;flex:1 1 100%;min-width:0}
-  #cibDescLabel{font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0}
-  #cibDescText{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    font-size:11px;font-weight:600;color:var(--ink)}
-  #cibDescText[data-empty="1"]{color:var(--subtle,#8a847a);font-weight:400}
-  #cibDescEdit{flex-shrink:0;min-height:24px;padding:0 8px;border-radius:999px;border:1.5px solid var(--border2);
-    background:#fff;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
-  #cibDescEdit:hover{border-color:var(--orange);color:var(--orange)}
-  #cibDescEdit:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
-  /* 점자/그림 페이지 행 */
-  #cibBrailleRow,#cibPageRow{display:flex;align-items:center;gap:5px;flex:1 1 auto;white-space:nowrap}
-  .cib-section-label{font-size:10px;font-weight:700;color:var(--muted);padding-right:4px;white-space:nowrap}
-  .cib-page-ind{font-size:11px;font-weight:700;color:var(--ink);min-width:36px;text-align:center}
-  .cib-nav-btn{min-width:26px;min-height:26px;border-radius:8px;border:1.5px solid var(--border2);
-    background:#fff;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
-  .cib-nav-btn:disabled{opacity:.35;cursor:default}
-  .cib-nav-btn:hover:not(:disabled){border-color:var(--orange);color:var(--orange)}
-  .cib-nav-btn:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
-  .cib-action-btn{min-height:26px;padding:0 10px;border-radius:999px;border:1.5px solid var(--border2);
-    background:#fff;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
-  .cib-action-btn:hover{border-color:var(--orange);color:var(--orange)}
-  .cib-action-btn:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
-  .cib-action-btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}
-  .cib-action-btn:disabled{cursor:default;pointer-events:none}
-  .cib-sep{width:1px;height:20px;background:var(--border2);flex-shrink:0;margin:0 2px}
-  /* 페이지 관리 드롭다운 */
-  #pgMgmtWrap{position:relative;display:inline-flex}
-  #pgMgmtMenu{position:absolute;top:calc(100% + 5px);right:0;min-width:160px;
+  /* ── compact chip bar ── */
+  #cibChipBar{display:none;align-items:center;gap:6px;padding:7px 14px 6px;
+    flex-shrink:0;min-height:40px;border-bottom:1px solid var(--border2,#e8e3da)}
+  body[data-state="ready"] #cibChipBar{display:flex}
+  #cibMetaLabel{font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;margin-right:auto}
+  .cib-chip{display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:0 10px;
+    border-radius:999px;border:1.5px solid var(--border2,#e8e3da);background:#fff;
+    font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;
+    transition:border-color .12s,color .12s}
+  .cib-chip:hover{border-color:var(--orange);color:var(--orange)}
+  .cib-chip:focus-visible{outline:2px solid var(--orange);outline-offset:1px}
+  .cib-chip:disabled{opacity:.45;cursor:default;pointer-events:none}
+  .cib-chip.primary{background:var(--orange);border-color:var(--orange);color:#fff}
+  .cib-chip.primary:hover{background:#e04400}
+  #cibDescChip[data-has="1"]{color:var(--ink);border-color:var(--border2)}
+  /* 페이지 관리 wrap */
+  #cibPgWrap{position:relative;display:inline-flex}
+  #cibPgMenu{position:absolute;top:calc(100% + 5px);right:0;min-width:168px;
     background:var(--white);border:1px solid var(--border2);border-radius:12px;
     box-shadow:0 8px 28px rgba(0,0,0,.13);z-index:500;padding:5px;
     flex-direction:column;gap:1px;display:none}
-  #pgMgmtMenu[data-open="1"]{display:flex}
-  #pgMgmtMenu button{width:100%;min-height:32px;text-align:left;padding:0 12px;border-radius:8px;
+  #cibPgMenu[data-open="1"]{display:flex}
+  #cibPgMenu button{width:100%;min-height:32px;text-align:left;padding:0 12px;border-radius:8px;
     border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)}
-  #pgMgmtMenu button:hover{background:var(--surface)}
-  #pgMgmtMenu .mgmt-sep{height:1px;background:var(--border);margin:3px 0}
-  #pgMgmtMenu .mgmt-del{color:#c0392b}
+  #cibPgMenu button:hover{background:var(--surface)}
+  #cibPgMenu button:disabled{opacity:.4;cursor:default}
+  #cibPgMenu .pgm-sep{height:1px;background:var(--border,#e3ddd2);margin:3px 0}
+  #cibPgMenu .pgm-del{color:#c0392b}
   /* 그림 설명 편집 모달 */
   #descEditModal{display:none;position:fixed;inset:0;z-index:600;
     background:rgba(26,26,26,.45);align-items:center;justify-content:center;padding:18px}
@@ -5506,67 +5495,39 @@ document.addEventListener('mousedown', ()=>{
   #libModal .lm-item button{min-height:26px;padding:0 8px;border-radius:6px;border:1.5px solid var(--border2);
     background:#fff;font-size:10px;font-weight:700;cursor:pointer}
   #libModal .lm-item .lm-op{color:var(--orange);border-color:#f0c46a}
-  #libModal .lm-item .lm-dl{color:#9a3412;border-color:#e7b9a3}
-  @media(max-width:767px){
-    #cibDescRow{flex:1 1 100%}
-    #cibBrailleRow,#cibPageRow{flex:1 1 auto}
-  }`;
+  #libModal .lm-item .lm-dl{color:#9a3412;border-color:#e7b9a3}`;
   const stEl=document.createElement('style'); stEl.textContent=css; document.head.appendChild(stEl);
 
-  /* ── 바 삽입: workspace 내, canvas-area 앞 ── */
-  const ws=document.querySelector('.workspace');
+  /* ── chip bar 삽입: .canvas-area 내부, #dotGridWrap 앞 ── */
   const ca=document.querySelector('.canvas-area');
-  if(!ws||!ca) return;
-  const bar=document.createElement('div'); bar.id='canvasInfoBar';
-  const inner=document.createElement('div'); inner.id='cibInner'; bar.appendChild(inner);
-  ws.insertBefore(bar, ca);
+  const dgw=document.getElementById('dotGridWrap');
+  if(!ca||!dgw) return;
 
-  /* ── 그림 설명 행 ── */
-  const descRow=document.createElement('div'); descRow.id='cibDescRow';
-  descRow.innerHTML=`<span id="cibDescLabel">그림 설명</span>
-    <span id="cibDescText" data-empty="1">설명을 추가해 주세요</span>
-    <button type="button" id="cibDescEdit" aria-label="그림 설명 수정">수정</button>`;
-  inner.appendChild(descRow);
-
-  /* ── 구분선 ── */
-  const sep1=document.createElement('span'); sep1.className='cib-sep'; inner.appendChild(sep1);
-
-  /* ── 점자 페이지 행 ── */
-  const brRow=document.createElement('div'); brRow.id='cibBrailleRow'; brRow.setAttribute('role','group'); brRow.setAttribute('aria-label','점자 페이지');
-  brRow.innerHTML=`<span class="cib-section-label">점자</span>
-    <span id="cibBrInfo" class="cib-page-ind" aria-live="polite">0셀</span>
-    <button type="button" class="cib-nav-btn" id="cibBrPrev" aria-label="이전 점자 페이지" disabled>‹</button>
-    <span id="cibBrPage" class="cib-page-ind" aria-live="polite"></span>
-    <button type="button" class="cib-nav-btn" id="cibBrNext" aria-label="다음 점자 페이지" disabled>›</button>
-    <button type="button" class="cib-action-btn primary" id="cibBrSend" aria-label="점자 보내기">점자 보내기</button>`;
-  inner.appendChild(brRow);
-
-  /* ── 구분선 ── */
-  const sep2=document.createElement('span'); sep2.className='cib-sep'; inner.appendChild(sep2);
-
-  /* ── 그림 페이지 행 ── */
-  const pgRow=document.createElement('div'); pgRow.id='cibPageRow'; pgRow.setAttribute('role','group'); pgRow.setAttribute('aria-label','그림 페이지');
-  pgRow.innerHTML=`<span class="cib-section-label">페이지</span>
-    <button type="button" class="cib-nav-btn" id="cibPgPrev" aria-label="이전 그림 페이지" disabled>‹</button>
-    <span id="cibPgInd" class="cib-page-ind" aria-live="polite">1/1</span>
-    <button type="button" class="cib-nav-btn" id="cibPgNext" aria-label="다음 그림 페이지" disabled>›</button>
-    <div id="pgMgmtWrap">
-      <button type="button" class="cib-action-btn" id="pgMgmtBtn" aria-haspopup="true" aria-expanded="false" aria-label="페이지 관리 메뉴 열기">관리 ···</button>
-      <div id="pgMgmtMenu" role="menu">
-        <button type="button" id="mgmtAdd" role="menuitem">페이지 추가</button>
-        <button type="button" id="mgmtDup" role="menuitem">현재 페이지 복제</button>
-        <button type="button" id="mgmtDel" role="menuitem" class="mgmt-del">현재 페이지 삭제</button>
-        <div class="mgmt-sep"></div>
-        <button type="button" id="mgmtLib" role="menuitem">내 그림 보관함</button>
-        <button type="button" id="mgmtSave" role="menuitem">현재 그림 저장</button>
+  const bar=document.createElement('div'); bar.id='cibChipBar'; bar.setAttribute('aria-label','캔버스 메타 정보');
+  bar.innerHTML=`
+    <span id="cibMetaLabel">60×40 촉각 미리보기</span>
+    <button type="button" class="cib-chip" id="cibDescChip" data-has="0" aria-label="그림 설명 작성">설명 작성</button>
+    <button type="button" class="cib-chip primary" id="cibBrSendChip" aria-label="점자 보내기" style="display:none">점자 보내기</button>
+    <div id="cibPgWrap">
+      <button type="button" class="cib-chip" id="cibPgChip" aria-haspopup="true" aria-expanded="false" aria-label="그림 페이지 및 관리">그림 1/1 · 관리 ▾</button>
+      <div id="cibPgMenu" role="menu">
+        <button type="button" id="pgmPrev" role="menuitem" disabled>‹ 이전 페이지</button>
+        <button type="button" id="pgmNext" role="menuitem" disabled>다음 페이지 ›</button>
+        <div class="pgm-sep pgm-nav-sep" style="display:none"></div>
+        <button type="button" id="pgmAdd" role="menuitem">페이지 추가</button>
+        <button type="button" id="pgmDup" role="menuitem">현재 페이지 복제</button>
+        <button type="button" id="pgmDel" role="menuitem" class="pgm-del">현재 페이지 삭제</button>
+        <div class="pgm-sep"></div>
+        <button type="button" id="pgmLib" role="menuitem">내 그림 보관함</button>
+        <button type="button" id="pgmSave" role="menuitem">현재 그림 저장</button>
       </div>
     </div>`;
-  inner.appendChild(pgRow);
+  ca.insertBefore(bar, dgw);
 
   /* ── 그림 설명 편집 모달 ── */
   const descModal=document.createElement('div'); descModal.id='descEditModal';
   descModal.innerHTML=`<div class="dem-card" role="dialog" aria-modal="true" aria-label="그림 설명 편집">
-    <div class="dem-title">그림 설명 수정
+    <div class="dem-title">그림 설명
       <button type="button" class="dem-close" id="demClose" aria-label="모달 닫기">✕</button>
     </div>
     <textarea id="demText" rows="3" placeholder="이 그림을 설명하세요. 점자로 Dot Pad에 전송할 수 있어요." aria-label="그림 설명 입력"></textarea>
@@ -5588,78 +5549,64 @@ document.addEventListener('mousedown', ()=>{
   </div>`;
   document.body.appendChild(libModal);
 
-  /* ── 그림 설명 동기화 ── */
+  /* ── 그림 설명 + 점자 칩 동기화 ── */
   function updateDescDisplay(){
-    const txt=document.getElementById('cibDescText');
+    const chip=document.getElementById('cibDescChip');
+    const sendChip=document.getElementById('cibBrSendChip');
     const v=(window.__altText||'').trim();
-    if(txt){
+    const pfn=window.__brPageInfo;
+    const br=(typeof pfn==='function')?pfn():{n:0};
+    if(chip){
       if(v){
-        txt.textContent=v;
-        txt.dataset.empty='0';
-        txt.setAttribute('title',v);
+        const cellTxt=br.n?` · 점자 ${br.n}셀`:'';
+        chip.textContent='설명 있음'+cellTxt;
+        chip.dataset.has='1';
+        chip.setAttribute('aria-label','그림 설명 수정');
+        chip.title=v;
       } else {
-        txt.textContent='설명을 추가하면 Dot Pad에 점자로 함께 보낼 수 있어요';
-        txt.dataset.empty='1';
-        txt.removeAttribute('title');
+        chip.textContent='설명 작성';
+        chip.dataset.has='0';
+        chip.setAttribute('aria-label','그림 설명 작성');
+        chip.removeAttribute('title');
       }
     }
-    const editBtn=document.getElementById('cibDescEdit');
-    if(editBtn){
-      editBtn.textContent=v?'수정':'작성';
-      editBtn.setAttribute('aria-label', v?'그림 설명 수정':'그림 설명 작성');
+    if(sendChip){
+      const show=v&&br.n>0;
+      sendChip.style.display=show?'':'none';
     }
   }
 
-  /* ── 점자 페이지 동기화 ── */
-  function updateBrailleDisplay(){
-    const pfn=window.__brPageInfo; if(typeof pfn!=='function') return;
-    const i=pfn();
-    const brInfo=document.getElementById('cibBrInfo');
-    const brPage=document.getElementById('cibBrPage');
-    const brPrev=document.getElementById('cibBrPrev');
-    const brNext=document.getElementById('cibBrNext');
-    const brSend=document.getElementById('cibBrSend');
-    const hasContent=i.n>0;
-    if(brInfo) brInfo.textContent=i.n?i.a+'-'+i.b+' / '+i.n+'셀':'0셀';
-    if(brPage){
-      brPage.textContent=i.t>1?i.p+'/'+i.t:'';
-      brPage.style.display=(hasContent&&i.t>1)?'':'none';
-    }
-    if(brPrev){ brPrev.disabled=(i.p<=1||!hasContent); brPrev.style.display=(hasContent&&i.t>1)?'':'none'; }
-    if(brNext){ brNext.disabled=(i.p>=i.t||!hasContent); brNext.style.display=(hasContent&&i.t>1)?'':'none'; }
-    // 점자 보내기: 0셀이면 비활성화
-    if(brSend){
-      brSend.disabled=!hasContent;
-      brSend.style.opacity=hasContent?'':'0.4';
-    }
-  }
+  function updateBrailleDisplay(){ updateDescDisplay(); }
 
-  /* ── 그림 페이지 동기화 ── */
+  /* ── 그림 페이지 칩 동기화 ── */
   function updatePageDisplay(){
-    const ind=document.getElementById('cibPgInd');
-    const prev=document.getElementById('cibPgPrev');
-    const next=document.getElementById('cibPgNext');
-    const del=document.getElementById('mgmtDel');
+    const pgChip=document.getElementById('cibPgChip');
+    const pgmPrev=document.getElementById('pgmPrev');
+    const pgmNext=document.getElementById('pgmNext');
+    const pgmDel=document.getElementById('pgmDel');
+    const navSep=document.querySelector('.pgm-nav-sep');
     try{
       const n=typeof pages!=='undefined'?pages.length:1;
       const p=typeof curPage!=='undefined'?curPage+1:1;
-      if(ind) ind.textContent=p+'/'+n;
-      if(prev) prev.disabled=(p<=1);
-      if(next) next.disabled=(p>=n);
-      if(del) del.disabled=(n<=1);
+      if(pgChip) pgChip.textContent=`그림 ${p}/${n} · 관리 ▾`;
+      const multi=n>1;
+      if(pgmPrev){ pgmPrev.disabled=(p<=1); pgmPrev.style.display=multi?'':'none'; }
+      if(pgmNext){ pgmNext.disabled=(p>=n); pgmNext.style.display=multi?'':'none'; }
+      if(navSep) navSep.style.display=multi?'':'none';
+      if(pgmDel) pgmDel.disabled=(n<=1);
     }catch(e){}
   }
 
-  function refreshAll(){ updateDescDisplay(); updateBrailleDisplay(); updatePageDisplay(); }
+  function refreshAll(){ updateDescDisplay(); updatePageDisplay(); }
 
-  /* ── 이벤트: 그림 설명 수정 버튼 ── */
-  document.getElementById('cibDescEdit').addEventListener('click',()=>{
+  /* ── 이벤트: 그림 설명 칩 ── */
+  document.getElementById('cibDescChip').addEventListener('click',()=>{
     const ta=document.getElementById('demText');
     if(ta) ta.value=window.__altText||'';
     descModal.dataset.on='1';
     setTimeout(()=>{ if(ta) ta.focus(); },50);
   });
-  const closeDescModal=()=>{ descModal.dataset.on='0'; document.getElementById('cibDescEdit').focus(); };
+  const closeDescModal=()=>{ descModal.dataset.on='0'; document.getElementById('cibDescChip').focus(); };
   document.getElementById('demClose').addEventListener('click',closeDescModal);
   document.getElementById('demCancel').addEventListener('click',closeDescModal);
   descModal.addEventListener('click',e=>{ if(e.target===descModal) closeDescModal(); });
@@ -5667,56 +5614,48 @@ document.addEventListener('mousedown', ()=>{
     const ta=document.getElementById('demText');
     const val=(ta?ta.value:'').trim();
     window.__altText=val;
-    // 기존 altText textarea도 동기화
     const oldTa=document.getElementById('altText');
     if(oldTa){ oldTa.value=val; oldTa.dispatchEvent(new Event('input',{bubbles:true})); }
-    updateDescDisplay(); updateBrailleDisplay();
+    updateDescDisplay();
     closeDescModal();
     try{ if(typeof say==='function') say(val?'그림 설명을 저장했어요':'그림 설명을 비웠어요'); }catch(e){}
   });
 
-  /* ── 이벤트: 점자 페이지 ── */
-  document.getElementById('cibBrPrev').addEventListener('click',()=>{
-    if(typeof window.__brPan==='function'){ window.__brPan(-1); setTimeout(updateBrailleDisplay,50); }
-  });
-  document.getElementById('cibBrNext').addEventListener('click',()=>{
-    if(typeof window.__brPan==='function'){ window.__brPan(1); setTimeout(updateBrailleDisplay,50); }
-  });
-  document.getElementById('cibBrSend').addEventListener('click',()=>{
-    if(typeof window.__sendBraille==='function'){ window.__sendBraille(true); setTimeout(updateBrailleDisplay,50); }
+  /* ── 이벤트: 점자 보내기 칩 ── */
+  document.getElementById('cibBrSendChip').addEventListener('click',()=>{
+    if(typeof window.__sendBraille==='function'){ window.__sendBraille(true); }
     else { try{ if(typeof say==='function') say('먼저 Dot Pad를 연결하세요'); }catch(e){} }
   });
 
-  /* ── 이벤트: 그림 페이지 ── */
-  document.getElementById('cibPgPrev').addEventListener('click',()=>{
-    if(typeof gotoPage==='function') gotoPage(curPage-1); setTimeout(updatePageDisplay,50);
-  });
-  document.getElementById('cibPgNext').addEventListener('click',()=>{
-    if(typeof gotoPage==='function') gotoPage(curPage+1); setTimeout(updatePageDisplay,50);
-  });
-
   /* ── 페이지 관리 드롭다운 ── */
-  const mgmtBtn=document.getElementById('pgMgmtBtn');
-  const mgmtMenu=document.getElementById('pgMgmtMenu');
-  const openMgmt=()=>{ mgmtMenu.dataset.open='1'; mgmtBtn.setAttribute('aria-expanded','true'); };
-  const closeMgmt=()=>{ mgmtMenu.dataset.open='0'; mgmtBtn.setAttribute('aria-expanded','false'); };
-  mgmtBtn.addEventListener('click',e=>{ e.stopPropagation(); mgmtMenu.dataset.open==='1'?closeMgmt():openMgmt(); });
-  document.addEventListener('click',()=>closeMgmt());
-  document.getElementById('mgmtAdd').addEventListener('click',()=>{
-    closeMgmt(); if(typeof window.__pgAdd==='function') window.__pgAdd(); setTimeout(updatePageDisplay,80);
+  const pgChip=document.getElementById('cibPgChip');
+  const pgMenu=document.getElementById('cibPgMenu');
+  const openPgMenu=()=>{ pgMenu.dataset.open='1'; pgChip.setAttribute('aria-expanded','true'); };
+  const closePgMenu=()=>{ pgMenu.dataset.open='0'; pgChip.setAttribute('aria-expanded','false'); };
+  pgChip.addEventListener('click',e=>{ e.stopPropagation(); pgMenu.dataset.open==='1'?closePgMenu():openPgMenu(); });
+  document.addEventListener('click',()=>closePgMenu());
+
+  document.getElementById('pgmPrev').addEventListener('click',()=>{
+    closePgMenu(); if(typeof gotoPage==='function') gotoPage(curPage-1); setTimeout(updatePageDisplay,50);
   });
-  document.getElementById('mgmtDup').addEventListener('click',()=>{
-    closeMgmt(); if(typeof window.__pgDup==='function') window.__pgDup(); setTimeout(updatePageDisplay,80);
+  document.getElementById('pgmNext').addEventListener('click',()=>{
+    closePgMenu(); if(typeof gotoPage==='function') gotoPage(curPage+1); setTimeout(updatePageDisplay,50);
   });
-  document.getElementById('mgmtDel').addEventListener('click',()=>{
-    closeMgmt();
+  document.getElementById('pgmAdd').addEventListener('click',()=>{
+    closePgMenu(); if(typeof window.__pgAdd==='function') window.__pgAdd(); setTimeout(updatePageDisplay,80);
+  });
+  document.getElementById('pgmDup').addEventListener('click',()=>{
+    closePgMenu(); if(typeof window.__pgDup==='function') window.__pgDup(); setTimeout(updatePageDisplay,80);
+  });
+  document.getElementById('pgmDel').addEventListener('click',()=>{
+    closePgMenu();
     const n=typeof pages!=='undefined'?pages.length:1;
     if(n<=1) return;
     if(!confirm('현재 페이지를 삭제할까요? 이 작업은 되돌릴 수 없어요.')) return;
     if(typeof window.__pgDel==='function') window.__pgDel(); setTimeout(updatePageDisplay,80);
   });
 
-  /* ── 보관함 모달 ── */
+  /* ── 보관함 ── */
   const KEY='dca_drawings';
   const loadLib=()=>{ try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return [];} };
   const saveLib=a=>{ try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){} };
@@ -5757,38 +5696,27 @@ document.addEventListener('mousedown', ()=>{
     }catch(e){ console.warn('lib save',e); }
   }
 
-  document.getElementById('mgmtLib').addEventListener('click',()=>{ closeMgmt(); libModal.dataset.on='1'; renderLibModal(); });
-  document.getElementById('mgmtSave').addEventListener('click',()=>{ closeMgmt(); saveCurrentToLib(); });
+  document.getElementById('pgmLib').addEventListener('click',()=>{ closePgMenu(); libModal.dataset.on='1'; renderLibModal(); });
+  document.getElementById('pgmSave').addEventListener('click',()=>{ closePgMenu(); saveCurrentToLib(); });
   document.getElementById('lmClose').addEventListener('click',()=>{ libModal.dataset.on='0'; });
   libModal.addEventListener('click',e=>{ if(e.target===libModal) libModal.dataset.on='0'; });
   document.getElementById('lmSaveBtn').addEventListener('click',saveCurrentToLib);
 
-  /* ── 키보드: Escape로 모달 닫기 ── */
+  /* ── 키보드: Escape ── */
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if(descModal.dataset.on==='1') closeDescModal();
       if(libModal.dataset.on==='1') libModal.dataset.on='0';
-      if(mgmtMenu.dataset.open==='1') closeMgmt();
+      if(pgMenu.dataset.open==='1') closePgMenu();
     }
   });
 
-  /* ── bar visibility ── */
-  function updateBarVisibility(){
-    const b=document.getElementById('canvasInfoBar');
-    if(!b) return;
-    const isReady=(typeof appState!=='undefined'&&appState==='ready')||
-      (document.body.dataset.state==='ready')||(typeof hasImage!=='undefined'&&hasImage);
-    b.style.display=isReady?'flex':'none';
-  }
-
-  /* ── 기존 훅에 refreshAll 연결 ── */
-  try{ if(typeof setAppState==='function'){ const _a=setAppState; setAppState=function(s){ _a(s); setTimeout(()=>{updateBarVisibility();refreshAll();},80); }; } }catch(e){}
-  try{ if(typeof afterChange==='function'){ const _ac=afterChange; afterChange=function(m){ _ac(m); try{updateBrailleDisplay();}catch(e){} }; } }catch(e){}
-  // __altText 변경 감지 (altTextBraille IIFE의 onInput이 호출될 때)
+  /* ── 훅 연결 ── */
+  try{ if(typeof setAppState==='function'){ const _a=setAppState; setAppState=function(s){ _a(s); setTimeout(refreshAll,80); }; } }catch(e){}
+  try{ if(typeof afterChange==='function'){ const _ac=afterChange; afterChange=function(m){ _ac(m); setTimeout(refreshAll,50); }; } }catch(e){}
   const oldAltTa=document.getElementById('altText');
-  if(oldAltTa){ oldAltTa.addEventListener('input',()=>setTimeout(()=>{ updateDescDisplay(); updateBrailleDisplay(); },100)); }
+  if(oldAltTa){ oldAltTa.addEventListener('input',()=>setTimeout(updateDescDisplay,100)); }
 
-  updateBarVisibility();
   refreshAll();
   window.__cibRefresh=refreshAll;
 })();
