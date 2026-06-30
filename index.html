@@ -967,6 +967,19 @@ body.show-help-nudge .help-nudge { display: block }
   place-items: center; flex-shrink: 0; cursor: pointer;
 }
 .mini-prompt-submit:disabled { opacity: .4; cursor: not-allowed }
+.mini-suggest {
+  display: none; flex-direction: column; gap: 2px; margin: 0 -4px;
+}
+.mini-suggest.show { display: flex }
+.mini-suggest-item {
+  display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: var(--r8);
+  font-size: 12px; font-weight: 500; color: var(--text); text-align: left;
+  background: none; border: none; cursor: pointer; width: 100%; transition: background .1s;
+}
+.mini-suggest-item:hover { background: var(--surface2) }
+.mini-suggest-item .ps-icon { color: var(--accent) }
+.mini-suggest-label { flex: 1; text-align: left; font-size: 12px }
+.mini-suggest-tag { font-size: 10px; color: var(--hint) }
 .mini-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
 .mini-import-grid {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%;
@@ -1602,6 +1615,7 @@ body[data-kind="image"] #recropRow { display: block }
       <input type="text" id="miniPromptInput" placeholder="꽃 모양 테두리를 60×40으로 단순하게 만들어줘" aria-label="명령어 입력"/>
       <button type="submit" class="mini-prompt-submit" id="miniPromptSubmit" aria-label="생성">↵</button>
     </form>
+    <div id="miniSuggest" class="mini-suggest" role="listbox"></div>
     <div class="mini-import-grid">
       <button class="mini-img-btn" id="miniAddImgBtn" type="button">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">

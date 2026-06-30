@@ -27,6 +27,17 @@ const PATHS = {
   sun:      '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
   arrow:    '<line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/>',
   shapes:   '<rect x="4" y="4" width="7" height="7" rx="1.5"/><circle cx="16.5" cy="16.5" r="3.5"/>',
+
+  // bank categories
+  fish:     '<path d="M5 12c0 0 2.5-4.5 7-4.5s7 4.5 7 4.5-2.5 4.5-7 4.5S5 12 5 12z"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><path d="M5 12L2 9m3 3l-3 3"/>',
+  book:     '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="2" x2="12" y2="17"/>',
+  note:     '<path d="M9 17V6l12-2v11"/><circle cx="6" cy="17" r="3"/><circle cx="18" cy="15" r="3"/>',
+  abc:      '<path d="M4 17l3.5-10 3.5 10"/><line x1="5.5" y1="13" x2="10" y2="13"/><line x1="15" y1="6" x2="15" y2="17"/><line x1="13" y1="11.5" x2="17" y2="11.5"/>',
+  map:      '<polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>',
+  body:     '<circle cx="12" cy="5.5" r="2.5"/><path d="M8.5 9.5h7l1 6H7.5z"/><line x1="9" y1="15.5" x2="8" y2="21"/><line x1="15" y1="15.5" x2="16" y2="21"/>',
+  landmark: '<path d="M3 21h18"/><path d="M5 21V9l7-6 7 6v12"/><rect x="9" y="14" width="6" height="7"/>',
+  palette:  '<circle cx="12" cy="12" r="8.5"/><circle cx="8.5" cy="10" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="9" r="1.5" fill="currentColor" stroke="none"/><circle cx="17" cy="15" r="1.5" fill="currentColor" stroke="none"/><circle cx="9" cy="16" r="1.5" fill="currentColor" stroke="none"/>',
+  joystick: '<rect x="6" y="11" width="12" height="8" rx="2"/><line x1="12" y1="11" x2="12" y2="6"/><circle cx="12" cy="5" r="2"/><line x1="9" y1="15" x2="9" y2="15" stroke-linecap="round" stroke-width="3"/><line x1="15" y1="15" x2="15" y2="15" stroke-linecap="round" stroke-width="3"/>',
 };
 
 /** Return a full inline <svg> string for an icon name (empty if unknown). */

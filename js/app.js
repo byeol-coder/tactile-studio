@@ -19,7 +19,7 @@ import {
 
 import { interpretCommand, QUICK_COMMANDS } from './commands.js';
 import { drawPrimitive, renderBrailleGrid, describeTactile } from './generate.js';
-import { initBank, loadSymbol } from './bank.js';
+import { initBank, loadSymbol, searchSymbols, loadSymbolById } from './bank.js';
 import { svgIcon } from './icons.js';
 import { renderMathGraph } from './mathgraph.js';
 
@@ -1235,6 +1235,34 @@ function showPromptSuggestions() {
 }
 function hidePromptSuggestions() { const b = ge('promptSuggest'); if (b) b.classList.remove('show'); }
 
+// ─── Mini bank-search suggest dropdown ────────────────────────
+function _renderBankHits(hits) {
+  const box = ge('miniSuggest'); if (!box) return;
+  if (!hits.length) { box.innerHTML = ''; box.classList.remove('show'); return; }
+  box.innerHTML = hits.slice(0, 8).map(e =>
+    `<button class="mini-suggest-item" role="option" data-bank-id="${e.id}">
+       <span class="ps-icon">${svgIcon(e.icon || 'shapes')}</span>
+       <span class="mini-suggest-label">${e.label}</span>
+     </button>`
+  ).join('');
+  box.querySelectorAll('.mini-suggest-item').forEach(btn => {
+    btn.addEventListener('mousedown', async ev => {
+      ev.preventDefault();
+      const inp = ge('miniPromptInput'); if (inp) inp.value = '';
+      box.innerHTML = ''; box.classList.remove('show');
+      const { width: cols, height: rows } = canvasState;
+      try {
+        const sym = await loadSymbolById(btn.dataset.bankId, cols, rows);
+        if (sym.data) {
+          placeGeneratedGrid(sym.data, sym.altText || sym.label);
+          toast(`${sym.label} ${t('toast_drew', appState.language)}`, 'ok');
+        }
+      } catch (err) { console.warn('[bank] hit load failed:', err.message); }
+    });
+  });
+  box.classList.add('show');
+}
+
 /** Surface a generated description in the AI feedback card + screen-reader live region. */
 function showDescription(text) {
   const card = ge('aiFeedbackCard');
@@ -1809,10 +1837,18 @@ function wireMiniMode() {
   // command prompt form
   ge('miniPromptForm')?.addEventListener('submit', e => {
     e.preventDefault();
+    const box = ge('miniSuggest'); if (box) { box.innerHTML = ''; box.classList.remove('show'); }
     const inp = ge('miniPromptInput');
     const text = inp?.value.trim(); if (!text) return;
     parseCommand(text);
     if (inp) inp.value = '';
+  });
+
+  // live bank-search as user types
+  ge('miniPromptInput')?.addEventListener('input', function() {
+    if (!bankReady) return;
+    const hits = searchSymbols(this.value);
+    _renderBankHits(hits);
   });
 
   // resolution chips
