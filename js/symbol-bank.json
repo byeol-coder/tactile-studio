@@ -26,6 +26,9 @@
     "butterfly": { "kind": "dtms", "file": "banks/nature.dtms", "page": 1, "label": "나비",   "emoji": "🦋", "tags": ["나비","butterfly","🦋"], "reviewed": false },
     "flower":    { "kind": "dtms", "file": "banks/nature.dtms", "page": 2, "label": "꽃",     "emoji": "🌸", "tags": ["꽃","플라워","flower","🌸","🌼"], "reviewed": false },
     "tree":      { "kind": "dtms", "file": "banks/nature.dtms", "page": 3, "label": "나무",   "emoji": "🌳", "tags": ["나무","트리","tree","🌳","🌲"], "reviewed": false },
-    "fish":      { "kind": "dtms", "file": "banks/nature.dtms", "page": 4, "label": "물고기", "emoji": "🐟", "tags": ["물고기","생선","어류","fish","🐟"], "reviewed": false }
+    "fish":        { "kind": "dtms", "file": "banks/nature.dtms",            "page": 4, "label": "물고기",    "emoji": "🐟", "tags": ["물고기","생선","어류","fish","🐟"], "reviewed": false },
+
+    "flower-border": { "kind": "dtms", "file": "banks/flower_border_60x40.dtms", "page": 1, "label": "꽃 테두리", "emoji": "🌸", "tags": ["꽃테두리","꽃 테두리","flower border","테두리","border","꽃","flower","장식","decoration"], "reviewed": false },
+    "shrimp":        { "kind": "dtms", "file": "banks/shrimp.dtms",               "page": 1, "label": "새우",     "emoji": "🦐", "tags": ["새우","shrimp","갑각류","crustacean","해양생물","sea creature","🦐"], "reviewed": false }
   }
 }
