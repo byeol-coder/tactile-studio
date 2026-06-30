@@ -120,7 +120,7 @@ svg { display: block; flex-shrink: 0 }
   padding: 0 8px 0 10px; gap: 8px; height: 32px; min-width: 0;
   transition: border-color .15s, box-shadow .15s;
 }
-.hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
+.hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px var(--accent-100) }
 .hd-prompt svg { width: 14px; height: 14px; stroke: var(--accent); fill: none;
   stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
 .hd-prompt input {
@@ -132,7 +132,7 @@ svg { display: block; flex-shrink: 0 }
   border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; flex-shrink: 0;
   font-family: var(--font);
 }
-.hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: rgba(255,77,0,.3) }
+.hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: var(--accent-200) }
 
 /* suggestion dropdown */
 .prompt-suggest {
@@ -177,10 +177,29 @@ svg { display: block; flex-shrink: 0 }
 }
 .hd-btn.ghost { border: 1px solid var(--border); background: var(--surface); color: var(--text) }
 .hd-btn.ghost:hover { background: var(--surface2) }
-.hd-btn.accent { background: var(--accent); color: #fff; border: 1px solid transparent }
-.hd-btn.accent:hover { background: var(--accent-d) }
+.hd-btn.accent { background: var(--surface); border: 1px solid var(--gray-200); color: var(--gray-600) }
+.hd-btn.accent:hover { background: var(--gray-100); color: var(--gray-700) }
+body[data-state="ready"] .hd-btn.accent { background: var(--accent-500); border-color: var(--accent-500); color: #fff }
+body[data-state="ready"] .hd-btn.accent:hover { background: var(--accent-600); border-color: var(--accent-600) }
 .hd-btn:disabled { opacity: .38; cursor: not-allowed }
 .hd-btn svg { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
+
+/* import dropdown */
+.import-wrap { position: relative; flex-shrink: 0 }
+.import-menu {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r8); box-shadow: 0 4px 16px rgba(0,0,0,.14);
+  min-width: 168px; padding: 4px; z-index: 200; display: none;
+}
+.import-menu.open { display: block }
+.import-menu-item {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 8px 10px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; color: var(--text); text-align: left; white-space: nowrap;
+}
+.import-menu-item:hover { background: var(--surface2) }
+.import-menu-item svg { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
 
 /* conn dot in header */
 .hd-conn { width: 7px; height: 7px; border-radius: 50%; background: var(--hint); flex-shrink: 0; transition: .2s }
@@ -226,7 +245,7 @@ svg { display: block; flex-shrink: 0 }
   align-items: center; justify-content: center;
   background: var(--bg); padding: 16px 20px; position: relative; overflow: hidden;
 }
-.canvas-area.drag-over { background: var(--accent-bg) }
+.canvas-area.drag-over { background: var(--gray-50) }
 .canvas-area.drag-over .canvas-wrap { outline: 2px dashed var(--accent) }
 
 /* info strip above canvas */
@@ -267,7 +286,7 @@ body[data-state="empty"] #emptyHero { display: flex; animation: hero-in .22s eas
   background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r12);
   padding: 0 8px 0 14px; height: 50px; box-shadow: var(--shadow-sm); transition: border-color .15s, box-shadow .15s;
 }
-.hero-form:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
+.hero-form:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-100) }
 .hero-form svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.75; flex-shrink: 0 }
 .hero-form input { flex: 1; background: none; border: none; font-size: 13px; color: var(--ink); min-width: 0 }
 .hero-form input::placeholder { color: var(--hint) }
@@ -282,7 +301,7 @@ body[data-state="empty"] #emptyHero { display: flex; animation: hero-in .22s eas
   border: 1px solid var(--border); background: var(--surface);
   font-size: 11px; font-weight: 600; color: var(--text); transition: .12s; white-space: nowrap;
 }
-.hero-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg) }
+.hero-chip:hover { border-color: var(--gray-300); color: var(--gray-700); background: var(--gray-100) }
 .hero-secondary { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 2px }
 
 /* canvas fade-in when result first appears */
@@ -393,7 +412,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 /* AI card */
 .ai-card {
   background: linear-gradient(135deg, #FFF5F0 0%, #FFF0E8 100%);
-  border: 1px solid rgba(255,77,0,.15); border-radius: var(--r10); padding: 12px;
+  border: 1px solid var(--accent-100); border-radius: var(--r10); padding: 12px;
   display: none;
 }
 .ai-badge {
@@ -406,10 +425,10 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 .ai-text { font-size: 12px; color: #6B4530; line-height: 1.75 }
 .ai-chips { display: none; flex-wrap: wrap; gap: 5px; margin-top: 8px }
 .ai-ch {
-  height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid rgba(255,77,0,.25);
+  height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--accent-200);
   background: #fff; font-size: 11px; font-weight: 600; color: var(--accent); transition: .12s;
 }
-.ai-ch:hover { background: var(--accent); color: #fff }
+.ai-ch:hover { background: var(--gray-100); color: var(--gray-700) }
 .ai-empty {
   font-size: 12px; color: var(--sub); line-height: 1.75;
   background: var(--surface2); border-radius: var(--r8); padding: 10px;
@@ -424,7 +443,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   transition: .12s;
 }
-.th-method-btn.active { background: var(--accent); border-color: var(--accent); color: #fff }
+.th-method-btn.active { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
 .th-method-btn:hover:not(.active) { background: var(--surface); color: var(--text) }
 
 .th-slider-wrap { position: relative; height: 26px }
@@ -471,7 +490,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
   border: 1px solid var(--border); background: var(--surface2); color: var(--sub); transition: .12s;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
 }
-.outline-btn.active, .proc-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(255,77,0,.35) }
+.outline-btn.active, .proc-btn.active { background: var(--accent-50); color: var(--accent-700); border-color: var(--accent-200) }
 .outline-btn:hover:not(.active), .proc-btn:hover:not(.active) { background: var(--surface); color: var(--text) }
 
 /* advanced disclosure */
@@ -511,10 +530,10 @@ details.adv > summary:hover { color: var(--ink) }
   background: var(--surface2); transition: .12s; cursor: pointer;
 }
 .preset-btn:hover { background: var(--surface); border-color: var(--border2) }
-.preset-btn.active { background: var(--accent-bg); border-color: rgba(255,77,0,.35) }
+.preset-btn.active { background: var(--accent-50); border-color: var(--accent-200) }
 .preset-name { font-size: 11px; font-weight: 700; color: var(--ink) }
 .preset-desc { font-size: 10px; color: var(--hint) }
-.preset-btn.active .preset-name { color: var(--accent) }
+.preset-btn.active .preset-name { color: var(--accent-700) }
 /* active-preset summary chip */
 .sec-hd-row { display: flex; align-items: center; justify-content: space-between; gap: 8px }
 .preset-chip {
@@ -522,7 +541,7 @@ details.adv > summary:hover { color: var(--ink) }
   padding: 2px 9px; border-radius: 999px;
   background: var(--surface2); color: var(--hint); white-space: nowrap;
 }
-.preset-chip.is-active { background: var(--accent-bg); color: var(--accent) }
+.preset-chip.is-active { background: var(--accent-50); color: var(--accent-700) }
 
 /* DotPad section */
 .dp-status {
@@ -574,7 +593,7 @@ details.adv > summary:hover { color: var(--ink) }
 }
 .panel :where(.dp-btn, .pin-btn, .exp-btn).active,
 .panel :where(.dp-btn, .pin-btn, .exp-btn)[aria-pressed="true"] {
-  background: var(--accent-bg); border-color: rgba(255,77,0,.38); color: var(--accent);
+  background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700);
 }
 .panel :where(.dp-btn, .pin-btn, .exp-btn):disabled {
   background: #F7F7F8; border-color: var(--border); color: #8E8E93;
@@ -620,7 +639,7 @@ details.adv > summary:hover { color: var(--ink) }
   background: var(--surface2); color: var(--hint); font-size: 10px; font-weight: 700;
   display: grid; place-items: center;
 }
-.page-chip.active { background: var(--accent); border-color: var(--accent); color: #fff }
+.page-chip.active { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
 .page-chip:hover:not(.active) { background: var(--surface); color: var(--text) }
 .page-nav-btn {
   width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border);
@@ -634,7 +653,7 @@ details.adv > summary:hover { color: var(--ink) }
   background: var(--surface2); color: var(--hint); font-size: 15px; font-weight: 400;
   display: grid; place-items: center; line-height: 1;
 }
-.page-add-btn:hover { background: var(--surface); color: var(--accent) }
+.page-add-btn:hover { background: var(--surface); color: var(--gray-700) }
 .page-lbl { font-size: 10px; color: var(--hint); font-weight: 600; min-width: 28px; text-align: center }
 
 /* zoom */
@@ -721,7 +740,7 @@ details.adv > summary:hover { color: var(--ink) }
   background: var(--surface); font-size: 11px; font-weight: 600; color: var(--text); transition: .12s;
   display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; cursor: pointer;
 }
-.mini-img-btn:hover { border-color: var(--accent); color: var(--accent) }
+.mini-img-btn:hover { border-color: var(--gray-300); color: var(--gray-700) }
 .mini-res-chips { display: flex; gap: 4px }
 .mini-res-chip {
   height: 28px; padding: 0 9px; border-radius: var(--r8); border: 1.5px solid var(--border);
@@ -739,7 +758,7 @@ details.adv > summary:hover { color: var(--ink) }
   display: flex; align-items: center; justify-content: center; cursor: pointer;
   font-size: 12px; color: var(--hint); transition: .15s;
 }
-.mini-drop-zone:hover, .mini-drop-zone.drag-over { border-color: var(--accent); color: var(--accent); background: var(--accent-bg) }
+.mini-drop-zone:hover, .mini-drop-zone.drag-over { border-color: var(--gray-300); color: var(--gray-700); background: var(--gray-50) }
 .mini-th-row { width: 100%; display: flex; align-items: center; gap: 8px }
 .mini-th-row label { font-size: 11px; font-weight: 600; color: var(--sub); flex-shrink: 0 }
 .mini-th-row input[type=range] { flex: 1; accent-color: var(--accent) }
@@ -752,8 +771,8 @@ details.adv > summary:hover { color: var(--ink) }
   border: 1.5px solid var(--border); background: var(--surface2);
   font-size: 11px; font-weight: 600; color: var(--text); cursor: pointer; transition: .12s; white-space: nowrap;
 }
-.mini-quick-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg) }
-.mini-quick-btn.accent { background: var(--accent-bg); border-color: rgba(255,77,0,.3); color: var(--accent) }
+.mini-quick-btn:hover { border-color: var(--gray-300); color: var(--gray-700); background: var(--gray-50) }
+.mini-quick-btn.accent { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
 .mini-quick-btn:disabled { opacity: .35; cursor: not-allowed }
 
 .mini-actions { display: flex; gap: 6px }
@@ -820,6 +839,22 @@ details.adv > summary:hover { color: var(--ink) }
     </div>
     <div class="hd-conn" id="bbDot" title="Dot Pad 연결 상태"></div>
     <span class="sr-only" id="bbStatus">Dot Pad 연결 안 됨</span>
+    <div class="import-wrap">
+      <button class="hd-btn ghost" id="importBtn" aria-haspopup="menu" aria-controls="importMenu" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>불러오기</span>
+      </button>
+      <div class="import-menu" id="importMenu" role="menu">
+        <button class="import-menu-item" id="importImageBtn" role="menuitem">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          이미지 불러오기
+        </button>
+        <button class="import-menu-item" id="importTactileBtn" role="menuitem">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          촉각 파일 불러오기
+        </button>
+      </div>
+    </div>
     <button class="hd-btn ghost" id="saveBtn" title="저장 (⌘S)">
       <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       <span>저장</span>

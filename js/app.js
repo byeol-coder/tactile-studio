@@ -169,6 +169,7 @@ function redo() {
 
 function afterChange() {
   appState.isDirty = true;
+  if (appState.phase !== 'ready' && canvasState.data.some(v => v)) setPhase('ready');
   saveCurrentPageState();
   drawCanvas();
   syncQuality();
@@ -237,7 +238,12 @@ function finishAnalyze() {
   announce(describeTactile(canvasState.data, canvasState.width, canvasState.height, appState.language));
 }
 
-function loadTactileFile(file) {
+async function loadTactileFile(file) {
+  if (!file) return;
+  if (appState.isDirty && appState.phase === 'ready') {
+    const proceed = await guardUnsavedChanges();
+    if (!proceed) return;
+  }
   const reader = new FileReader();
   reader.onload = async e => {
     try {
@@ -998,6 +1004,37 @@ function wireFullMode() {
   });
   ge('heroAddImgBtn')?.addEventListener('click', () => ge('imgFileInput')?.click());
   ge('heroOpenDtmsBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
+
+  // header import dropdown
+  const importBtn = ge('importBtn');
+  const importMenu = ge('importMenu');
+  const closeImportMenu = () => {
+    importMenu?.classList.remove('open');
+    importBtn?.setAttribute('aria-expanded', 'false');
+  };
+  importBtn?.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!importMenu) return;
+    const open = importMenu.classList.toggle('open');
+    importBtn.setAttribute('aria-expanded', String(open));
+    if (open) ge('importImageBtn')?.focus();
+  });
+  importMenu?.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeImportMenu();
+      importBtn?.focus();
+    }
+  });
+  document.addEventListener('click', closeImportMenu);
+  importMenu?.addEventListener('click', e => e.stopPropagation());
+  ge('importImageBtn')?.addEventListener('click', () => {
+    closeImportMenu();
+    ge('imgFileInput')?.click();
+  });
+  ge('importTactileBtn')?.addEventListener('click', () => {
+    closeImportMenu();
+    ge('tactileFileInput')?.click();
+  });
 
   // drag-over visual
   const area = qs('.canvas-area');
