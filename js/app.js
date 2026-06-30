@@ -1368,6 +1368,12 @@ async function setResolution(cols, rows) {
       return;
     }
 
+    // Generated content (shape/graph/symbol via command) — auto-resample silently.
+    if (page?.sourceKind === 'generated') {
+      _doResolutionResample(cols, rows);
+      return;
+    }
+
     if (hasContent) {
       // No source image but canvas has content — ask what to do.
       const choice = await showResChangeDialog('no_source');
@@ -1404,7 +1410,13 @@ function _doResolutionResample(cols, rows) {
   const srcC = canvasState.width, srcR = canvasState.height;
   canvasState.width = cols; canvasState.height = rows;
   canvasState.data  = resampleDots(srcData, srcC, srcR, cols, rows);
-  if (page) { page.width = cols; page.height = rows; }
+  if (page) {
+    page.width = cols; page.height = rows;
+    // Keep generatedBaseData in sync so applyGeneratedDensity works at the new resolution.
+    if (page.generatedBaseData) {
+      page.generatedBaseData = resampleDots(page.generatedBaseData, srcC, srcR, cols, rows);
+    }
+  }
   toolState.undoStack = []; toolState.redoStack = [];
   saveCurrentPageState();
   setPhase(canvasState.data.some(v => v) ? 'ready' : 'empty');
