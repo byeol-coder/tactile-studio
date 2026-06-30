@@ -19,7 +19,7 @@ import {
 
 import { interpretCommand, QUICK_COMMANDS } from './commands.js';
 import { drawPrimitive, renderBrailleGrid, describeTactile } from './generate.js';
-import { initBank, loadSymbol } from './bank.js';
+import { initBank, loadSymbol, loadSymbolById, searchSymbols } from './bank.js';
 import { svgIcon } from './icons.js';
 import { renderMathGraph } from './mathgraph.js';
 
@@ -1235,6 +1235,51 @@ function showPromptSuggestions() {
 }
 function hidePromptSuggestions() { const b = ge('promptSuggest'); if (b) b.classList.remove('show'); }
 
+function _renderBankHits(box, hits, inputId, hideFn) {
+  const lang = appState.language;
+  const header = lang === 'ko' ? '촉각 라이브러리' : 'Tactile Library';
+  box.innerHTML =
+    `<div class="ps-group">${header} (${hits.length})</div>` +
+    hits.map(({ id, entry: e }) =>
+      `<button class="ps-item ps-bank-item" role="option" data-bank-id="${id}">` +
+        `<span class="ps-icon">${e.emoji || '📄'}</span>` +
+        `<span class="ps-bank-label">${e.label}</span>` +
+        (e.reviewed ? '<span class="ps-reviewed" aria-label="검수완료">✓</span>' : '') +
+      `</button>`
+    ).join('');
+  box.querySelectorAll('.ps-bank-item').forEach(b => {
+    b.addEventListener('mousedown', async ev => {
+      ev.preventDefault();
+      hideFn();
+      const inp = ge(inputId); if (inp) inp.value = '';
+      const id = b.dataset.bankId;
+      try {
+        const sym = await loadSymbolById(id, canvasState.width, canvasState.height);
+        if (sym.source !== 'none' && sym.data) {
+          placeGeneratedGrid(sym.data, sym.altText || sym.label);
+          toast(`${sym.emoji || ''} ${sym.label} ${t('toast_drew', appState.language)}`.trim(), 'ok');
+        }
+      } catch (err) { console.warn('[bank] loadById failed:', err); }
+    });
+  });
+  box.classList.add('show');
+}
+
+function showBankSearchResults(query) {
+  const box = ge('promptSuggest'); if (!box) return;
+  const hits = searchSymbols(query).slice(0, 12);
+  if (!hits.length) { renderPromptSuggestions(); return; }
+  _renderBankHits(box, hits, 'promptInput', hidePromptSuggestions);
+}
+
+function showMiniBankSearch(query) {
+  const box = ge('miniSuggest'); if (!box) return;
+  if (!query.trim() || !bankReady) { box.classList.remove('show'); return; }
+  const hits = searchSymbols(query).slice(0, 10);
+  if (!hits.length) { box.classList.remove('show'); return; }
+  _renderBankHits(box, hits, 'miniPromptInput', () => { const b = ge('miniSuggest'); if (b) b.classList.remove('show'); });
+}
+
 /** Surface a generated description in the AI feedback card + screen-reader live region. */
 function showDescription(text) {
   const card = ge('aiFeedbackCard');
@@ -1551,6 +1596,14 @@ function wireFullMode() {
     if (!promptInp.disabled && appState.phase === 'ready') showPromptSuggestions();
   });
   promptInp?.addEventListener('blur', () => setTimeout(hidePromptSuggestions, 120));
+  promptInp?.addEventListener('input', () => {
+    if (promptInp.disabled) return;
+    const q = promptInp.value.trim();
+    if (!q || !bankReady) { if (appState.phase === 'ready') showPromptSuggestions(); return; }
+    const box = ge('promptSuggest');
+    if (!box) return;
+    showBankSearchResults(q);
+  });
 
   // threshold slider
   ge('thSlider')?.addEventListener('input', function() {
@@ -1811,9 +1864,13 @@ function wireMiniMode() {
     e.preventDefault();
     const inp = ge('miniPromptInput');
     const text = inp?.value.trim(); if (!text) return;
+    ge('miniSuggest')?.classList.remove('show');
     parseCommand(text);
     if (inp) inp.value = '';
   });
+  const miniInp = ge('miniPromptInput');
+  miniInp?.addEventListener('input', () => showMiniBankSearch(miniInp.value.trim()));
+  miniInp?.addEventListener('blur', () => setTimeout(() => ge('miniSuggest')?.classList.remove('show'), 150));
 
   // resolution chips
   document.querySelectorAll('[data-mini-res]').forEach(btn => {
