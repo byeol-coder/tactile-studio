@@ -173,6 +173,12 @@ export const I18N = {
     toast_cleared:    '전체 지웠어요',
     toast_file_loaded:'불러왔어요 ✓',
     toast_drew:       '그렸어요',
+    toast_page_dup:   '페이지를 복제했어요',
+    toast_img_err:    '이미지를 불러올 수 없어요',
+    toast_file_err:   '파일을 읽을 수 없어요',
+    toast_ble_on:     'Dot Pad 연결됐어요 ✓',
+    toast_ble_off:    'Dot Pad 연결이 끊어졌어요',
+    dot_edit_title:   '점 편집 모드',
 
     guard_title:      '변경 사항이 저장되지 않았어요',
     guard_desc:       '지금 불러오면 현재 작업 내용이 사라집니다.',
@@ -195,9 +201,17 @@ export const I18N = {
     outline_2:        '외곽선 2줄',
 
     method_global:    '사용자 임계값',
+    method_global_short: '수동',
     method_otsu:      '자동 (Otsu)',
     method_adaptive:  '적응형',
     method_alpha:     '투명도 기반',
+
+    outline_1_btn:    '1줄',
+    outline_2_btn:    '2줄',
+    btn_json_export:  'JSON 내보내기',
+    crop_full:        '전체 이미지',
+    crop_ratio_3_2:   '60×40 비율',
+    crop_ratio_free:  '자유 비율',
 
     mini_intro:          '무엇을 촉각그래픽으로 만들까요?',
     mini_ph:             '꽃 모양 테두리를 60×40으로 단순하게 만들어줘',
@@ -209,6 +223,25 @@ export const I18N = {
     mini_quick_clean:    '점 정리',
     mini_quick_optimize: '최적화',
     mini_send:           'Dot Pad 전송',
+
+    crop_title:          '이미지 자르기',
+    crop_cancel:         '취소',
+    crop_use_original:   '그대로 변환',
+    crop_confirm:        '자르고 변환',
+
+    help_nudge:          '처음이신가요? ? 버튼에서 기본 사용법을 볼 수 있어요.',
+    help_title:          '처음 사용하시나요?',
+    help_intro:          'Dot Canvas 기본 흐름을 안내해드릴게요.',
+    help_step1_title:    '명령어로 만들기',
+    help_step1_body:     '"별 그려줘", "하트 그려줘"처럼 입력하면 촉각그래픽을 만들 수 있어요.',
+    help_step2_title:    '이미지 불러오기',
+    help_step2_body:     '이미지나 .dtms/.dtm 파일을 불러올 수 있어요.',
+    help_step3_title:    '필요한 부분 자르기',
+    help_step3_body:     '이미지를 불러온 뒤 필요한 영역만 간단히 잘라 변환할 수 있어요.',
+    help_step4_title:    '읽기 쉽게 조정',
+    help_step4_body:     '이미지는 임계값과 윤곽선, 명령어 그래픽은 점 밀도 중심으로 조정해요.',
+    help_step5_title:    'Dot Pad로 보내기',
+    help_step5_body:     '완성된 촉각그래픽을 Dot Pad로 출력해요.',
   },
 
   en: {
@@ -383,6 +416,12 @@ export const I18N = {
     toast_cleared:    'Canvas cleared',
     toast_file_loaded:'Loaded ✓',
     toast_drew:       'drawn',
+    toast_page_dup:   'Page duplicated',
+    toast_img_err:    'Could not load the image',
+    toast_file_err:   'Could not read the file',
+    toast_ble_on:     'Dot Pad connected ✓',
+    toast_ble_off:    'Dot Pad disconnected',
+    dot_edit_title:   'Dot Edit Mode',
 
     guard_title:      'Unsaved changes',
     guard_desc:       'Loading a new file will discard your current work.',
@@ -405,9 +444,17 @@ export const I18N = {
     outline_2:        '2-line outline',
 
     method_global:    'Manual threshold',
+    method_global_short: 'Manual',
     method_otsu:      'Auto (Otsu)',
     method_adaptive:  'Adaptive',
     method_alpha:     'Alpha-based',
+
+    outline_1_btn:    '1-line',
+    outline_2_btn:    '2-line',
+    btn_json_export:  'JSON Export',
+    crop_full:        'Full image',
+    crop_ratio_3_2:   '60×40 ratio',
+    crop_ratio_free:  'Free ratio',
 
     mini_intro:          'What would you like to create?',
     mini_ph:             'Make a simple 60×40 flower border',
@@ -419,6 +466,25 @@ export const I18N = {
     mini_quick_clean:    'Clean up',
     mini_quick_optimize: 'Optimize',
     mini_send:           'Send to Dot Pad',
+
+    crop_title:          'Crop Image',
+    crop_cancel:         'Cancel',
+    crop_use_original:   'Use Original',
+    crop_confirm:        'Crop & Convert',
+
+    help_nudge:          'New here? Click the ? button for a quick guide.',
+    help_title:          'Getting started',
+    help_intro:          'Here\'s a quick walkthrough of Dot Canvas.',
+    help_step1_title:    'Create with commands',
+    help_step1_body:     'Type things like "draw a star" or "draw a heart" to generate tactile graphics.',
+    help_step2_title:    'Import an image',
+    help_step2_body:     'You can import images or .dtms/.dtm tactile files.',
+    help_step3_title:    'Crop what you need',
+    help_step3_body:     'After importing, crop to keep just the area you want before converting.',
+    help_step4_title:    'Adjust readability',
+    help_step4_body:     'For images, tweak the threshold and outline. For generated graphics, adjust the density.',
+    help_step5_title:    'Send to Dot Pad',
+    help_step5_body:     'Output the finished tactile graphic to your Dot Pad.',
   },
 };
 
