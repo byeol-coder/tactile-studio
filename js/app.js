@@ -140,7 +140,9 @@ function initCanvas() {
 }
 
 function fitCanvas() {
-  const area = qs('.canvas-area') || qs('.mini-canvas-card');
+  const area = appState.mode === 'mini'
+    ? qs('.mini-canvas-card')
+    : qs('.canvas-area') || qs('.mini-canvas-card');
   if (!area || !padEl) return;
   const aw = Math.max(240, area.clientWidth  - 24);
   const ah = Math.max(160, area.clientHeight - 24);
@@ -391,7 +393,7 @@ async function loadTactileFile(file) {
       drawCanvas(); syncQuality();
       syncPageUI(); syncConvUI(); syncConvPanel(); fitCanvas();
       syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
-      toast(displayFileName + ' 불러왔어요 ✓', 'ok');
+      toast(displayFileName + ' ' + t('toast_file_loaded', appState.language), 'ok');
       announce(describeTactile(canvasState.data, canvasState.width, canvasState.height, appState.language));
     } catch (err) {
       console.error('[dtms] load failed:', err);
@@ -529,12 +531,12 @@ function updateThresholdOrDensity(value, delay = 120) {
 }
 
 // ─── Quality Panel ────────────────────────────────────────────
-const AI_MSGS = {
-  transparent: '배경을 제거하고 주요 윤곽을 남겼어요. 손끝으로 형태를 구분하기 좋아요.',
-  lineart:     '선화를 감지했어요. 주요 윤곽선을 핀으로 직접 변환했어요.',
-  lowcontrast: '대비가 낮은 이미지예요. 핵심 구조를 찾아 변환했어요.',
-  photo:       '사진을 감지했어요. 주요 윤곽과 핵심 구조를 중심으로 단순화했어요.',
-  default:     'AI가 주요 윤곽과 핵심 구조를 분석해 손가락으로 읽기 쉬운 형태로 정리했어요.',
+const AI_MSG_KEYS = {
+  transparent: 'ai_msg_transparent',
+  lineart:     'ai_msg_lineart',
+  lowcontrast: 'ai_msg_lowcontrast',
+  photo:       'ai_msg_photo',
+  default:     'ai_msg_default',
 };
 
 function pill(el, txt, kind) {
@@ -544,8 +546,9 @@ function pill(el, txt, kind) {
 }
 
 function syncCanvasMeta(cols, rows, pins, fill, hasContent) {
+  const lang = appState.language;
   const resText = `${cols}×${rows}`;
-  const dotText = `${pins.toLocaleString()} 핀 · ${fill}%`;
+  const dotText = `${pins.toLocaleString()} ${t('pin_unit', lang)} · ${fill}%`;
   const dotCls = fill < 10 ? 'chip chip-w' : fill < 45 ? 'chip chip-ok' : 'chip chip-w';
   const btmDotCls = fill < 10 ? 'chip-w' : fill < 45 ? 'chip-ok' : 'chip-w';
   const resCh = ge('resChip'); if (resCh) resCh.textContent = resText;
@@ -593,10 +596,10 @@ function syncQuality() {
 
   // AI feedback
   if (meta) {
-    const base = AI_MSGS[meta.type] || AI_MSGS.default;
-    let extra = fill >= 50 ? ' 점 밀도가 높아요. 윤곽 중심으로 단순화해보세요.'
-      : fill < 10 ? ' 점이 너무 적어요. 점 밀도를 조금 높여보세요.'
-      : ' 현재 점 밀도는 Dot Pad에서 읽기에 적정해요.';
+    const base = t(AI_MSG_KEYS[meta.type] || AI_MSG_KEYS.default, lang);
+    let extra = fill >= 50 ? t('ai_extra_dense', lang)
+      : fill < 10 ? t('ai_extra_sparse', lang)
+      : t('ai_extra_ok', lang);
     const aiTxt = ge('aiFeedbackText');
     if (aiTxt) aiTxt.textContent = base + extra;
     const card = ge('aiFeedbackCard'); if (card) card.style.display = 'block';
@@ -632,9 +635,10 @@ function renderAiChips(fill, sc) {
   if (fill >= 50) cmds = ['simpler', 'denoise'];
   else if (fill < 10) cmds = ['auto', 'boost'];
   else cmds = ['simpler', 'outline'];
+  const lang = appState.language;
   const labels = {
-    simpler: '윤곽 중심으로 변환', denoise: '점 밀도 낮추기',
-    auto: '윤곽 다시 감지', boost: '점 밀도 높이기', outline: '외곽선 1줄',
+    simpler: t('ai_chip_simpler', lang), denoise: t('ai_chip_denoise', lang),
+    auto: t('ai_chip_auto', lang), boost: t('ai_chip_boost', lang), outline: t('ai_chip_outline', lang),
   };
   el.style.display = 'flex';
   el.innerHTML = cmds.map(cmd => `<button class="ai-ch" data-cmd="${cmd}">${labels[cmd]}</button>`).join('');
@@ -706,27 +710,48 @@ function syncConvPanel() {
   const convTitle = ge('convPanelTitle');
   const modeChip = ge('sourceModeChip');
   const helper = ge('thHelperText');
+  const miniTitle = ge('miniModeTitle');
+  const miniChip = ge('miniModeChip');
+  const miniHelp = ge('miniModeHelp');
+  const miniLabel = ge('miniThLabel');
   const controls = ['thSlider', 'thMinus', 'thPlus', 'thAuto'];
 
+  const lang = appState.language;
   if (hasSourceImage) {
-    if (thLabel) thLabel.textContent = '이미지 감도';
-    if (convTitle) convTitle.textContent = '변환 설정';
-    if (modeChip) modeChip.textContent = '이미지 변환 모드';
-    if (helper) helper.textContent = '슬라이더를 조정하면 변환 결과에 바로 반영돼요';
+    if (thLabel) thLabel.textContent = t('conv_label_sensitivity', lang);
+    if (convTitle) convTitle.textContent = t('conv_title_image', lang);
+    if (modeChip) modeChip.textContent = t('conv_chip_image', lang);
+    if (helper) helper.textContent = t('conv_helper_image', lang);
+    if (miniTitle) miniTitle.textContent = t('conv_label_sensitivity', lang);
+    if (miniChip) miniChip.textContent = t('conv_chip_image', lang);
+    if (miniHelp) miniHelp.textContent = t('conv_helper_image', lang);
+    if (miniLabel) miniLabel.textContent = t('conv_label_sensitivity', lang);
   } else if (isGeneratedMode) {
-    if (thLabel) thLabel.textContent = '점 밀도';
-    if (convTitle) convTitle.textContent = '생성 그래픽 조정';
-    if (modeChip) modeChip.textContent = '생성 그래픽';
-    if (helper) helper.textContent = '점 밀도를 조정하면 생성 그래픽에 바로 반영돼요';
+    if (thLabel) thLabel.textContent = t('conv_label_density', lang);
+    if (convTitle) convTitle.textContent = t('conv_title_generated', lang);
+    if (modeChip) modeChip.textContent = t('conv_chip_generated', lang);
+    if (helper) helper.textContent = t('conv_helper_generated', lang);
+    if (miniTitle) miniTitle.textContent = t('conv_label_density', lang);
+    if (miniChip) miniChip.textContent = t('conv_chip_generated', lang);
+    if (miniHelp) miniHelp.textContent = t('conv_helper_generated', lang);
+    if (miniLabel) miniLabel.textContent = t('conv_label_density', lang);
   } else if (isDotEditMode) {
-    if (convTitle) convTitle.textContent = '점 편집 모드';
-    if (modeChip) modeChip.textContent = '원본 이미지 없음';
-    if (helper) helper.textContent = '이미지를 다시 불러오면 감도를 조정할 수 있어요';
+    if (convTitle) convTitle.textContent = t('conv_title_dot', lang);
+    if (modeChip) modeChip.textContent = t('conv_chip_dot', lang);
+    if (helper) helper.textContent = t('conv_helper_dot', lang);
+    if (miniTitle) miniTitle.textContent = t('conv_title_dot', lang);
+    if (miniChip) miniChip.textContent = t('conv_chip_dot', lang);
+    if (miniHelp) miniHelp.textContent = t('dot_edit_help', lang);
+    if (miniLabel) miniLabel.textContent = t('conv_title_dot', lang);
   } else {
-    if (thLabel) thLabel.textContent = '이미지 감도';
-    if (convTitle) convTitle.textContent = '변환 설정';
-    if (modeChip) modeChip.textContent = '이미지 없음';
-    if (helper) helper.textContent = '이미지를 불러오면 감도를 조정할 수 있어요';
+    if (thLabel) thLabel.textContent = t('conv_label_sensitivity', lang);
+    if (convTitle) convTitle.textContent = t('conv_title_image', lang);
+    if (modeChip) modeChip.textContent = t('conv_chip_empty', lang);
+    if (helper) helper.textContent = t('conv_helper_empty', lang);
+    if (miniTitle) miniTitle.textContent = t('conv_label_sensitivity', lang);
+    if (miniChip) miniChip.textContent = t('conv_chip_empty', lang);
+    if (miniHelp) miniHelp.textContent = t('conv_helper_empty', lang);
+    if (miniLabel) miniLabel.textContent = t('conv_label_sensitivity', lang);
   }
   controls.forEach(id => {
     const el = ge(id);
@@ -739,16 +764,8 @@ function syncConvPanel() {
 
 function noImageMsg(lang) {
   const kind = pagesState.activePage?.sourceKind;
-  if (kind === 'generated') {
-    return lang === 'ko'
-      ? '생성 그래픽은 점 밀도와 직접 편집으로 조정할 수 있어요'
-      : 'Generated graphics can be adjusted with dot density and direct editing';
-  }
-  if (kind === 'tactile') {
-    return lang === 'ko'
-      ? '현재 그래픽은 점 편집 모드예요'
-      : 'This graphic is in dot edit mode';
-  }
+  if (kind === 'generated') return t('toast_no_img_generated', lang);
+  if (kind === 'tactile') return t('toast_no_img_tactile', lang);
   return t('toast_need_image', lang);
 }
 
@@ -778,10 +795,10 @@ function syncConn() {
     liveSw.disabled = !on;
     liveSw.setAttribute('aria-checked', String(on && dotPadState.livePreviewEnabled));
   }
-  const bleBtn = ge('bleBtn'); if (bleBtn) bleBtn.textContent = on ? '연결 끊기' : t('conn_btn_ble', lang);
+  const bleBtn = ge('bleBtn'); if (bleBtn) bleBtn.textContent = on ? t('conn_disconnect', lang) : t('conn_btn_ble', lang);
   // mini mode
   const miniDot = ge('miniConnDot'); if (miniDot) miniDot.className = 'dp-dot' + (on ? ' on' : '');
-  const miniBtn = ge('miniConnBtn'); if (miniBtn) miniBtn.textContent = on ? '연결 끊기' : 'BLE 연결';
+  const miniBtn = ge('miniConnBtn'); if (miniBtn) miniBtn.textContent = on ? t('conn_disconnect', lang) : t('conn_btn_ble', lang);
 }
 
 function syncPageUI() {
@@ -1084,7 +1101,7 @@ async function parseCommand(text) {
       const sym = await loadSymbol(text, cols, rows);
       if (sym.source !== 'none' && sym.data) {
         placeGeneratedGrid(sym.data, sym.altText || sym.label);
-        toast(`${sym.label} 그렸어요`, 'ok');
+        toast(`${sym.label} ${t('toast_drew', appState.language)}`, 'ok');
         return;
       }
     } catch (err) { console.warn('[bank] resolve failed:', err.message); }
@@ -1121,7 +1138,7 @@ async function parseCommand(text) {
     canvasState.data = autoThinDots(canvasState.data, cols, rows);
     const after = canvasState.data.reduce((s, v) => s + v, 0);
     afterChange();
-    toast(`${intent.reply} (${before}→${after}핀)`, 'ok');
+    toast(`${intent.reply} (${before}→${after} ${t('pin_unit', lang)})`, 'ok');
     return;
   }
 
@@ -1164,8 +1181,8 @@ async function parseCommand(text) {
     paintSlider(conversionState.threshold);
     syncConvUI();
     rebuild();
-    const gradeTxt = ['', '다시 확인', '주의', '좋음', '아주 좋음'][best.grade] || '';
-    toast(`${intent.reply} · 품질 ${gradeTxt}`.trim(), 'ok');
+    const gradeTxt = ['', t('state_poor', lang), t('state_warning', lang), t('state_good', lang), t('grade_great', lang)][best.grade] || '';
+    toast(`${intent.reply} · ${t('quality_label', lang)} ${gradeTxt}`.trim(), 'ok');
     return;
   }
 
@@ -1247,7 +1264,10 @@ function applyI18n() {
     const v = t(key, lang); if (v) el.textContent = v;
   });
   const ph = ge('promptInput'); if (ph) ph.placeholder = t('prompt_ph', lang);
-  syncQuality(); syncConn();
+  const heroPh = ge('heroPromptInput'); if (heroPh) heroPh.placeholder = t('hero_ph', lang);
+  const miniPh = ge('miniPromptInput'); if (miniPh) miniPh.placeholder = t('mini_ph', lang);
+  const dotHelp = ge('dotEditHelp'); if (dotHelp) dotHelp.textContent = t('dot_edit_help', lang);
+  syncQuality(); syncConn(); syncConvPanel();
   updatePresetChip();
 }
 
@@ -1297,7 +1317,7 @@ function wireFullMode() {
     pushUndo();
     canvasState.data.fill(0);
     afterChange();
-    toast('전체 지웠어요');
+    toast(t('toast_cleared', appState.language));
   });
   ge('brushSizeGroup')?.addEventListener('click', e => {
     const b = e.target.closest('.sz-btn[data-size]'); if (!b) return;
@@ -1631,9 +1651,14 @@ function wireMiniMode() {
     const f = e.target.files[0]; if (f) loadImageFile(f);
     e.target.value = '';
   });
+  ge('tactileFileInput')?.addEventListener('change', e => {
+    const f = e.target.files[0]; if (f) loadTactileFile(f);
+    e.target.value = '';
+  });
 
   // "이미지 추가" button routes to the same hidden input
   ge('miniAddImgBtn')?.addEventListener('click', () => ge('miniImgInput')?.click());
+  ge('miniOpenTactileBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
 
   // drop zone — click + drag-and-drop
   const dz = ge('miniDropZone');
@@ -1643,7 +1668,10 @@ function wireMiniMode() {
     dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
     dz.addEventListener('drop', e => {
       e.preventDefault(); dz.classList.remove('drag-over');
-      const f = e.dataTransfer?.files[0]; if (f && f.type.startsWith('image/')) loadImageFile(f);
+      const f = e.dataTransfer?.files[0];
+      if (!f) return;
+      if (isTactileFile(f)) loadTactileFile(f);
+      else if (f.type.startsWith('image/')) loadImageFile(f);
     });
   }
 
@@ -1680,6 +1708,20 @@ function wireMiniMode() {
   ge('miniThSlider')?.addEventListener('input', function() {
     updateThresholdOrDensity(+this.value, 120);
   });
+
+  // direct dot editing controls for imported tactile files
+  qsa('.dot-tool-btn[data-dot-tool]').forEach(b => b.addEventListener('click', () => {
+    selectTool(b.dataset.dotTool);
+  }));
+  qsa('.dot-size-btn[data-dot-size]').forEach(b => b.addEventListener('click', () => {
+    setSize(+b.dataset.dotSize);
+  }));
+  qsa('.dot-edit-action[data-dot-action]').forEach(b => b.addEventListener('click', () => {
+    const action = b.dataset.dotAction;
+    if (action === 'up') fillAllPins(1);
+    else if (action === 'down') fillAllPins(0);
+    else if (action === 'invert') invertAllPins();
+  }));
 
   // output actions
   ge('miniSendBtn')?.addEventListener('click', () => {
