@@ -172,8 +172,6 @@ body.is-loading .hd-prompt {
 .ps-icon svg { width: 14px; height: 14px }
 .ps-item:hover .ps-icon { color: var(--text) }
 .ps-item.primary .ps-icon { background: var(--accent-bg); color: var(--accent) }
-.ps-bank-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.ps-reviewed { font-size: 9px; color: var(--hint); flex-shrink: 0; margin-left: auto }
 
 .hd-right { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0 }
 
@@ -950,15 +948,8 @@ body.show-help-nudge .help-nudge { display: block }
 /* prompt card */
 .mini-prompt-card {
   background: var(--surface); border-radius: var(--r12); border: 1px solid var(--border);
-  padding: 12px; display: flex; flex-direction: column; gap: 8px; position: relative;
+  padding: 12px; display: flex; flex-direction: column; gap: 8px;
 }
-.mini-suggest {
-  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 60;
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r12);
-  box-shadow: var(--shadow-md); padding: 5px; display: none; flex-direction: column; gap: 1px;
-  max-height: 260px; overflow-y: auto;
-}
-.mini-suggest.show { display: flex; animation: ps-in .12s ease }
 .mini-intro { font-size: 13px; font-weight: 800; color: var(--ink); margin: 0 }
 .mini-prompt-form {
   display: flex; align-items: center; gap: 6px;
@@ -1611,7 +1602,6 @@ body[data-kind="image"] #recropRow { display: block }
       <input type="text" id="miniPromptInput" placeholder="꽃 모양 테두리를 60×40으로 단순하게 만들어줘" aria-label="명령어 입력"/>
       <button type="submit" class="mini-prompt-submit" id="miniPromptSubmit" aria-label="생성">↵</button>
     </form>
-    <div class="mini-suggest" id="miniSuggest" role="listbox" aria-label="촉각 라이브러리 검색결과"></div>
     <div class="mini-import-grid">
       <button class="mini-img-btn" id="miniAddImgBtn" type="button">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
