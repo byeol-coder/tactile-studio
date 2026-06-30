@@ -64,6 +64,23 @@ export function listSymbols() {
 }
 
 /**
+ * Search all symbols matching a query — returns every hit, not just the first.
+ * Results are sorted: exact label/tag matches first, then substring matches.
+ * @param {string} prompt
+ * @returns {Array<{id:string, entry:object}>}
+ */
+export function searchSymbols(prompt) {
+  const s = String(prompt || '').toLowerCase().trim();
+  if (!s || !MANIFEST) return [];
+  const exact = [], partial = [];
+  for (const k of KEY_INDEX) {
+    if (k.keywords.some(w => w === s))                          exact.push(entry(k.id));
+    else if (k.keywords.some(w => w.includes(s) || s.includes(w))) partial.push(entry(k.id));
+  }
+  return [...exact, ...partial];
+}
+
+/**
  * Resolve a prompt to a ready-to-place pin grid.
  * @param {string} prompt
  * @param {number} cols  target resolution (default 60)
@@ -76,8 +93,23 @@ export function listSymbols() {
 export async function loadSymbol(prompt, cols = 60, rows = 40) {
   const hit = resolve(prompt);
   if (!hit) return none();
-  const { id, entry: e } = hit;
+  return loadEntryData(hit.id, hit.entry, cols, rows);
+}
 
+/**
+ * Load a specific symbol by its manifest ID.
+ * @param {string} id
+ * @param {number} cols
+ * @param {number} rows
+ */
+export async function loadSymbolById(id, cols = 60, rows = 40) {
+  if (!MANIFEST) return none();
+  const e = MANIFEST.symbols[id];
+  if (!e) return none(id, 'id not found');
+  return loadEntryData(id, e, cols, rows);
+}
+
+async function loadEntryData(id, e, cols, rows) {
   try {
     if (e.kind === 'proc') {
       return {

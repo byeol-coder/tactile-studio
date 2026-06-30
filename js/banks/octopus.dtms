@@ -1,0 +1,25 @@
+{
+  "title": "octopus",
+  "lang": "korean",
+  "lang_option": "1",
+  "device": "dotpad320",
+  "audioPath": "",
+  "items": [
+    {
+      "page": 1,
+      "title": "octopus",
+      "graphic": {
+        "name": "1.dtm",
+        "data": "000000000000000000000000e0f6f6f6f6c4000000000000000000000000000000000000e064440000fefffffffffffff70000a0a4c40000000000000000000000007fc4000000ffffffffffffffff000000e0bf00000000000000000000000010ff77c40039314effffb10c0f00e0bedf0600000000000000000000e0e4c4081b8ef9e6fffefffff7fff4ce791301e0e4c4000000000000000001083b7762a42cf7fffffffffffffe656494be1f0108000000000000000000000088511a9bcbf4ff1f39ffe6dd5a138a4100000000000000000000000000fe1b1b3f3fff7f03000018bfff3f3f1b1bf70000000000000000000000000900000000bf4500000000a8ff00000000090000000000000000000000000000000000081b030000181b010000000000000000000000"
+      },
+      "text": {
+        "name": "1.txt",
+        "data": "",
+        "plain": ""
+      },
+      "audio": {
+        "fileName": ""
+      }
+    }
+  ]
+}
