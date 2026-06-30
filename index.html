@@ -477,10 +477,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 }
 .dot-edit-head { display: flex; align-items: center; justify-content: space-between; gap: 8px }
 .dot-edit-title { font-size: 12px; font-weight: 700; color: var(--ink) }
-.dot-edit-tools,
-.dot-edit-actions { display: grid; gap: 6px }
-.dot-edit-tools { grid-template-columns: repeat(4, 1fr) }
-.dot-edit-actions { grid-template-columns: repeat(3, 1fr) }
+.dot-edit-actions { display: grid; gap: 6px; grid-template-columns: repeat(3, 1fr) }
 .dot-size-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px }
 .dot-tool-btn,
 .dot-size-btn,
@@ -1410,17 +1407,6 @@ body[data-kind="image"] #recropRow { display: block }
             <span class="mode-chip" data-i18n="conv_chip_dot">원본 이미지 없음</span>
           </div>
           <p id="dotEditHelp">현재 그래픽은 점 편집 모드예요. 펜과 지우개로 점을 직접 편집할 수 있고, 이미지를 다시 불러오면 감도를 조정할 수 있어요.</p>
-          <div class="dot-edit-tools" role="group" aria-label="점 편집 도구">
-            <button type="button" class="dot-tool-btn" data-dot-tool="move" aria-pressed="true" data-i18n="tool_move">이동</button>
-            <button type="button" class="dot-tool-btn" data-dot-tool="pen" aria-pressed="false" data-i18n="tool_pen">펜</button>
-            <button type="button" class="dot-tool-btn" data-dot-tool="eraser" aria-pressed="false" data-i18n="tool_eraser">지우개</button>
-            <button type="button" class="dot-tool-btn" data-dot-tool="select" aria-pressed="false" data-i18n="tool_select">선택</button>
-          </div>
-          <div class="dot-size-row" role="group" aria-label="브러시 크기">
-            <button type="button" class="dot-size-btn" data-dot-size="1" aria-pressed="true">1×</button>
-            <button type="button" class="dot-size-btn" data-dot-size="2" aria-pressed="false">2×</button>
-            <button type="button" class="dot-size-btn" data-dot-size="3" aria-pressed="false">3×</button>
-          </div>
           <div class="dot-edit-actions" role="group" aria-label="전체 핀 편집">
             <button type="button" class="dot-edit-action" data-dot-action="up" data-i18n="pin_up">전체 올리기</button>
             <button type="button" class="dot-edit-action" data-dot-action="down" data-i18n="pin_down">전체 내리기</button>
