@@ -1451,8 +1451,8 @@ body[data-kind="image"] #recropRow { display: block }
         <div class="ctrl-lbl" data-i18n="outline_title">윤곽선</div>
         <div class="outline-row" role="group" aria-label="윤곽선 모드">
           <button class="outline-btn active" data-outline="0" aria-pressed="true" data-i18n="outline_none">없음</button>
-          <button class="outline-btn" data-outline="1" aria-pressed="false">1줄</button>
-          <button class="outline-btn" data-outline="2" aria-pressed="false">2줄</button>
+          <button class="outline-btn" data-outline="1" aria-pressed="false" data-i18n="outline_1_btn">1줄</button>
+          <button class="outline-btn" data-outline="2" aria-pressed="false" data-i18n="outline_2_btn">2줄</button>
         </div>
       </div>
 
@@ -1462,9 +1462,9 @@ body[data-kind="image"] #recropRow { display: block }
         <div class="adv-body">
           <div class="ctrl-lbl" data-i18n="method_title">이진화 방식</div>
           <div class="th-method-row" role="group" aria-label="이진화 방식">
-            <button class="th-method-btn active" data-method="global" aria-pressed="true" title="수동 임계값">수동</button>
+            <button class="th-method-btn active" data-method="global" aria-pressed="true" title="수동 임계값" data-i18n="method_global_short">수동</button>
             <button class="th-method-btn" data-method="otsu" aria-pressed="false" title="자동 Otsu">Otsu</button>
-            <button class="th-method-btn" data-method="adaptive" aria-pressed="false" title="적응형">적응형</button>
+            <button class="th-method-btn" data-method="adaptive" aria-pressed="false" title="적응형" data-i18n="method_adaptive">적응형</button>
             <button class="th-method-btn" data-method="alpha" aria-pressed="false" title="투명도 기반">Alpha</button>
           </div>
 
@@ -1530,7 +1530,7 @@ body[data-kind="image"] #recropRow { display: block }
         </div>
         <button class="exp-btn exp-wide" id="jsonBtn">
           <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          JSON 내보내기
+          <span data-i18n="btn_json_export">JSON 내보내기</span>
         </button>
       </div>
     </div>
@@ -1712,15 +1712,15 @@ body[data-kind="image"] #recropRow { display: block }
   ?
 </button>
 
-<div id="helpNudge" class="help-nudge" aria-hidden="true">
+<div id="helpNudge" class="help-nudge" aria-hidden="true" data-i18n="help_nudge">
   처음이신가요? ? 버튼에서 기본 사용법을 볼 수 있어요.
 </div>
 
 <div id="helpPanel" class="help-panel" role="dialog" aria-modal="false" aria-labelledby="helpTitle" aria-describedby="helpIntro" hidden>
   <div class="help-head">
     <div>
-      <strong id="helpTitle">처음 사용하시나요?</strong>
-      <p id="helpIntro">Dot Canvas 기본 흐름을 안내해드릴게요.</p>
+      <strong id="helpTitle" data-i18n="help_title">처음 사용하시나요?</strong>
+      <p id="helpIntro" data-i18n="help_intro">Dot Canvas 기본 흐름을 안내해드릴게요.</p>
     </div>
     <button id="helpClose" type="button" aria-label="도움말 닫기">×</button>
   </div>
@@ -1729,40 +1729,40 @@ body[data-kind="image"] #recropRow { display: block }
     <div class="help-step">
       <span>1</span>
       <div>
-        <strong>명령어로 만들기</strong>
-        <p>“별 그려줘”, “하트 그려줘”처럼 입력하면 촉각그래픽을 만들 수 있어요.</p>
+        <strong data-i18n="help_step1_title">명령어로 만들기</strong>
+        <p data-i18n="help_step1_body">"별 그려줘", "하트 그려줘"처럼 입력하면 촉각그래픽을 만들 수 있어요.</p>
       </div>
     </div>
 
     <div class="help-step">
       <span>2</span>
       <div>
-        <strong>이미지 불러오기</strong>
-        <p>이미지나 .dtms/.dtm 파일을 불러올 수 있어요.</p>
+        <strong data-i18n="help_step2_title">이미지 불러오기</strong>
+        <p data-i18n="help_step2_body">이미지나 .dtms/.dtm 파일을 불러올 수 있어요.</p>
       </div>
     </div>
 
     <div class="help-step">
       <span>3</span>
       <div>
-        <strong>필요한 부분 자르기</strong>
-        <p>이미지를 불러온 뒤 필요한 영역만 간단히 잘라 변환할 수 있어요.</p>
+        <strong data-i18n="help_step3_title">필요한 부분 자르기</strong>
+        <p data-i18n="help_step3_body">이미지를 불러온 뒤 필요한 영역만 간단히 잘라 변환할 수 있어요.</p>
       </div>
     </div>
 
     <div class="help-step">
       <span>4</span>
       <div>
-        <strong>읽기 쉽게 조정</strong>
-        <p>이미지는 임계값과 윤곽선, 명령어 그래픽은 점 밀도 중심으로 조정해요.</p>
+        <strong data-i18n="help_step4_title">읽기 쉽게 조정</strong>
+        <p data-i18n="help_step4_body">이미지는 임계값과 윤곽선, 명령어 그래픽은 점 밀도 중심으로 조정해요.</p>
       </div>
     </div>
 
     <div class="help-step">
       <span>5</span>
       <div>
-        <strong>Dot Pad로 보내기</strong>
-        <p>완성된 촉각그래픽을 Dot Pad로 출력해요.</p>
+        <strong data-i18n="help_step5_title">Dot Pad로 보내기</strong>
+        <p data-i18n="help_step5_body">완성된 촉각그래픽을 Dot Pad로 출력해요.</p>
       </div>
     </div>
   </div>
@@ -1772,21 +1772,21 @@ body[data-kind="image"] #recropRow { display: block }
 <div class="modal-bg" id="cropModal" role="dialog" aria-modal="true" aria-label="이미지 자르기">
   <div class="crop-inner">
     <div class="crop-head">
-      <span class="crop-title">이미지 자르기</span>
+      <span class="crop-title" data-i18n="crop_title">이미지 자르기</span>
       <button id="cropCloseBtn" type="button" class="crop-close" aria-label="닫기">×</button>
     </div>
     <div class="crop-canvas-area">
       <canvas id="cropCanvas"></canvas>
     </div>
     <div class="crop-ratio-row">
-      <button class="crop-ratio-btn" data-ratio="full">전체 이미지</button>
-      <button class="crop-ratio-btn active" data-ratio="3:2">60×40 비율</button>
-      <button class="crop-ratio-btn" data-ratio="free">자유 비율</button>
+      <button class="crop-ratio-btn" data-ratio="full" data-i18n="crop_full">전체 이미지</button>
+      <button class="crop-ratio-btn active" data-ratio="3:2" data-i18n="crop_ratio_3_2">60×40 비율</button>
+      <button class="crop-ratio-btn" data-ratio="free" data-i18n="crop_ratio_free">자유 비율</button>
     </div>
     <div class="crop-foot">
-      <button id="cropCancelBtn" type="button" class="crop-btn-cancel">취소</button>
-      <button id="cropOriginalBtn" type="button" class="crop-btn-orig">그대로 변환</button>
-      <button id="cropConfirmBtn" type="button" class="crop-btn-confirm">자르고 변환</button>
+      <button id="cropCancelBtn" type="button" class="crop-btn-cancel" data-i18n="crop_cancel">취소</button>
+      <button id="cropOriginalBtn" type="button" class="crop-btn-orig" data-i18n="crop_use_original">그대로 변환</button>
+      <button id="cropConfirmBtn" type="button" class="crop-btn-confirm" data-i18n="crop_confirm">자르고 변환</button>
     </div>
   </div>
 </div>
