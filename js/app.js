@@ -293,7 +293,7 @@ async function loadImageFile(file) {
       },
     });
   };
-  img.onerror = () => { URL.revokeObjectURL(src); toast('이미지를 불러올 수 없어요'); };
+  img.onerror = () => { URL.revokeObjectURL(src); toast(t('toast_img_err', appState.language)); };
   img.src = src;
 }
 
@@ -397,10 +397,10 @@ async function loadTactileFile(file) {
       announce(describeTactile(canvasState.data, canvasState.width, canvasState.height, appState.language));
     } catch (err) {
       console.error('[dtms] load failed:', err);
-      toast('파일을 읽을 수 없어요');
+      toast(t('toast_file_err', appState.language));
     }
   };
-  reader.onerror = () => toast('파일을 읽을 수 없어요');
+  reader.onerror = () => toast(t('toast_file_err', appState.language));
   reader.readAsText(file);
 }
 
@@ -817,7 +817,7 @@ function renderPageChips() {
   const total = pagesState.pages.length;
   const cur = pagesState.activePageIndex;
   bar.innerHTML = pagesState.pages.map((p, i) =>
-    `<button class="page-chip${i === cur ? ' active' : ''}" role="tab" data-idx="${i}" aria-selected="${i === cur}" aria-label="${i + 1}페이지">${i + 1}</button>`
+    `<button class="page-chip${i === cur ? ' active' : ''}" role="tab" data-idx="${i}" aria-selected="${i === cur}" aria-label="${t('page_label', appState.language)} ${i + 1}">${i + 1}</button>`
   ).join('');
   bar.querySelectorAll('.page-chip').forEach(b =>
     b.addEventListener('click', () => switchPage(+b.dataset.idx))
@@ -1560,8 +1560,8 @@ function wireFullMode() {
 
   // DotPad
   initDotPad(
-    () => { syncConn(); if (dotPadState.livePreviewEnabled) syncLivePreview(canvasState.data, canvasState.width, canvasState.height); toast('Dot Pad 연결됐어요 ✓', 'ok'); },
-    () => { syncConn(); toast('Dot Pad 연결이 끊어졌어요'); }
+    () => { syncConn(); if (dotPadState.livePreviewEnabled) syncLivePreview(canvasState.data, canvasState.width, canvasState.height); toast(t('toast_ble_on', appState.language), 'ok'); },
+    () => { syncConn(); toast(t('toast_ble_off', appState.language)); }
   );
   ge('bleBtn')?.addEventListener('click', async () => {
     if (dotPadState.connected) { disconnectDotPad(); } else { await connectBle(); }
@@ -1601,7 +1601,7 @@ function wireFullMode() {
   ge('pagePrev')?.addEventListener('click', () => switchPage(pagesState.activePageIndex - 1));
   ge('pageNext')?.addEventListener('click', () => switchPage(pagesState.activePageIndex + 1));
   ge('pageAdd')?.addEventListener('click', () => { addPage(); drawCanvas(); syncQuality(); syncPageUI(); toast(t('toast_page_added', appState.language)); });
-  ge('pageDup')?.addEventListener('click', () => { duplicatePage(); drawCanvas(); syncQuality(); syncPageUI(); toast('페이지를 복제했어요'); });
+  ge('pageDup')?.addEventListener('click', () => { duplicatePage(); drawCanvas(); syncQuality(); syncPageUI(); toast(t('toast_page_dup', appState.language)); });
   ge('pageDelete')?.addEventListener('click', () => {
     if (pagesState.pages.length <= 1) return;
     deletePage(); drawCanvas(); syncQuality(); syncPageUI();
