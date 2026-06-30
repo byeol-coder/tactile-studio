@@ -133,6 +133,16 @@ svg { display: block; flex-shrink: 0 }
   font-family: var(--font);
 }
 .hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: var(--accent-200) }
+body[data-state="empty"] .header-command { display: none }
+body.is-empty .header-command { display: none }
+body[data-state="analyzing"] .header-command,
+body.is-loading .header-command {
+  display: flex; opacity: .58;
+}
+body[data-state="analyzing"] .hd-prompt,
+body.is-loading .hd-prompt {
+  pointer-events: none;
+}
 
 /* suggestion dropdown */
 .prompt-suggest {
@@ -276,7 +286,12 @@ body[data-state="ready"] .hd-btn.accent:hover { background: var(--accent-600); b
   display: none; flex-direction: column; align-items: center; justify-content: center;
   padding: 24px 28px; background: var(--bg);
 }
-body[data-state="empty"] #emptyHero { display: flex; animation: hero-in .22s ease }
+body[data-state="empty"] #emptyHero,
+body.is-empty .empty-command { display: flex; animation: hero-in .22s ease }
+body[data-state="ready"] #emptyHero,
+body.is-ready .empty-command,
+body[data-state="analyzing"] #emptyHero,
+body.is-loading .empty-command { display: none }
 @keyframes hero-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
 
 .hero-inner { width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 14px }
@@ -295,6 +310,11 @@ body[data-state="empty"] #emptyHero { display: flex; animation: hero-in .22s eas
   color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; transition: background .12s;
 }
 .hero-submit:hover { background: var(--accent-d) }
+.hero-submit:disabled,
+.hero-chip:disabled,
+.hero-form.is-disabled {
+  opacity: .55; cursor: not-allowed;
+}
 .hero-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center }
 .hero-chip {
   height: 30px; padding: 0 12px; border-radius: 999px;
@@ -823,7 +843,24 @@ details.adv > summary:hover { color: var(--ink) }
     <input id="fname" type="text" value="Untitled" aria-label="파일명" spellcheck="false" maxlength="60"/>
   </div>
 
-  <div class="hd-prompt-wrap">
+  <div class="import-wrap">
+    <button class="hd-btn ghost" id="importBtn" aria-haspopup="menu" aria-controls="importMenu" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>불러오기</span>
+    </button>
+    <div class="import-menu" id="importMenu" role="menu">
+      <button class="import-menu-item" id="importImageBtn" role="menuitem">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        이미지 불러오기
+      </button>
+      <button class="import-menu-item" id="importTactileBtn" role="menuitem">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        촉각 파일 불러오기
+      </button>
+    </div>
+  </div>
+
+  <div class="hd-prompt-wrap header-command">
     <form class="hd-prompt" id="promptForm" role="search">
       <svg viewBox="0 0 24 24"><path d="M12 2l1.6 4.6L18 8l-4.4 1.4L12 14l-1.6-4.6L6 8l4.4-1.4z"/><circle cx="18" cy="17" r="2.5"/></svg>
       <input id="promptInput" type="text" placeholder="명령으로 변환하기 — 최적화 / 외곽선만 / 단순하게…" autocomplete="off" aria-label="AI 명령어" aria-expanded="false" aria-controls="promptSuggest"/>
@@ -839,22 +876,6 @@ details.adv > summary:hover { color: var(--ink) }
     </div>
     <div class="hd-conn" id="bbDot" title="Dot Pad 연결 상태"></div>
     <span class="sr-only" id="bbStatus">Dot Pad 연결 안 됨</span>
-    <div class="import-wrap">
-      <button class="hd-btn ghost" id="importBtn" aria-haspopup="menu" aria-controls="importMenu" aria-expanded="false">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <span>불러오기</span>
-      </button>
-      <div class="import-menu" id="importMenu" role="menu">
-        <button class="import-menu-item" id="importImageBtn" role="menuitem">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          이미지 불러오기
-        </button>
-        <button class="import-menu-item" id="importTactileBtn" role="menuitem">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          촉각 파일 불러오기
-        </button>
-      </div>
-    </div>
     <button class="hd-btn ghost" id="saveBtn" title="저장 (⌘S)">
       <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
       <span>저장</span>
@@ -910,7 +931,7 @@ details.adv > summary:hover { color: var(--ink) }
   id="canvasAreaEl">
 
   <!-- ── Empty Hero — command-first landing ─────────────── -->
-  <div id="emptyHero" role="region" aria-label="시작 안내">
+  <div id="emptyHero" class="empty-command" role="region" aria-label="시작 안내">
     <div class="hero-inner">
       <p class="hero-heading">무엇을 촉각그래픽으로 만들까요?</p>
       <form class="hero-form" id="heroPromptForm" autocomplete="off">
@@ -921,7 +942,7 @@ details.adv > summary:hover { color: var(--ink) }
         <input id="heroPromptInput" type="text"
                placeholder="하트 그려줘 / y=sin(x) / 나비 그려줘 / 외곽선만 / 점자로 안녕하세요…"
                aria-label="명령어 입력"/>
-        <button type="submit" class="hero-submit">생성</button>
+        <button type="submit" class="hero-submit" id="heroPromptSubmit">생성</button>
       </form>
       <div class="hero-chips" role="group" aria-label="예시 명령어">
         <button class="hero-chip" data-cmd="Dot Pad에 맞게 최적화" type="button">✦ 최적화</button>

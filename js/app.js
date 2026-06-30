@@ -121,10 +121,35 @@ function drawCanvas() {
 }
 
 // ─── App Phase ────────────────────────────────────────────────
+function syncCommandUI() {
+  const isEmpty = appState.phase === 'empty';
+  const isReady = appState.phase === 'ready';
+  const isBusy = appState.phase === 'analyzing' || appState.phase === 'loading';
+  const headerPrompt = ge('promptInput');
+  const heroPrompt = ge('heroPromptInput');
+  const headerForm = ge('promptForm');
+  const heroForm = ge('heroPromptForm');
+
+  document.body.classList.toggle('is-empty', isEmpty);
+  document.body.classList.toggle('is-ready', isReady);
+  document.body.classList.toggle('is-loading', isBusy);
+
+  if (headerPrompt) headerPrompt.disabled = !isReady;
+  if (heroPrompt) heroPrompt.disabled = !isEmpty || isBusy;
+  headerForm?.setAttribute('aria-disabled', String(!isReady));
+  heroForm?.setAttribute('aria-disabled', String(!isEmpty || isBusy));
+  heroForm?.classList.toggle('is-disabled', !isEmpty || isBusy);
+  ge('heroPromptSubmit')?.toggleAttribute('disabled', !isEmpty || isBusy);
+  qsa('.hero-chip').forEach(btn => btn.toggleAttribute('disabled', !isEmpty || isBusy));
+  qsa('.hero-secondary button').forEach(btn => btn.toggleAttribute('disabled', !isEmpty || isBusy));
+  if (!isReady) hidePromptSuggestions();
+}
+
 function setPhase(phase) {
   const prev = appState.phase;
   appState.phase = phase;
   document.body.dataset.state = phase;
+  syncCommandUI();
   syncBottomBar();
   if (phase === 'ready') {
     const badge = qs('.ai-done-badge');
@@ -880,7 +905,11 @@ function renderPromptSuggestions() {
     parseCommand(b.dataset.cmd);
   }));
 }
-function showPromptSuggestions() { const b = ge('promptSuggest'); if (b) { renderPromptSuggestions(); b.classList.add('show'); } }
+function showPromptSuggestions() {
+  if (appState.phase !== 'ready') return;
+  const b = ge('promptSuggest');
+  if (b) { renderPromptSuggestions(); b.classList.add('show'); }
+}
 function hidePromptSuggestions() { const b = ge('promptSuggest'); if (b) b.classList.remove('show'); }
 
 /** Surface a generated description in the AI feedback card + screen-reader live region. */
@@ -996,11 +1025,15 @@ function wireFullMode() {
   ge('heroPromptForm')?.addEventListener('submit', e => {
     e.preventDefault();
     const inp = ge('heroPromptInput');
+    if (!inp || inp.disabled) return;
     const text = inp?.value.trim(); if (!text) return;
     parseCommand(text); if (inp) inp.value = '';
   });
   document.querySelectorAll('.hero-chip').forEach(btn => {
-    btn.addEventListener('click', function() { parseCommand(this.dataset.cmd || this.textContent.trim()); });
+    btn.addEventListener('click', function() {
+      if (this.disabled) return;
+      parseCommand(this.dataset.cmd || this.textContent.trim());
+    });
   });
   ge('heroAddImgBtn')?.addEventListener('click', () => ge('imgFileInput')?.click());
   ge('heroOpenDtmsBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
@@ -1048,11 +1081,14 @@ function wireFullMode() {
   ge('promptForm')?.addEventListener('submit', e => {
     e.preventDefault();
     const inp = ge('promptInput'); if (!inp?.value.trim()) return;
+    if (inp.disabled) return;
     hidePromptSuggestions();
     parseCommand(inp.value); inp.value = '';
   });
   const promptInp = ge('promptInput');
-  promptInp?.addEventListener('focus', showPromptSuggestions);
+  promptInp?.addEventListener('focus', () => {
+    if (!promptInp.disabled && appState.phase === 'ready') showPromptSuggestions();
+  });
   promptInp?.addEventListener('blur', () => setTimeout(hidePromptSuggestions, 120));
 
   // threshold slider
