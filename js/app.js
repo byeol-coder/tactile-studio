@@ -35,6 +35,7 @@ import {
 
 import { exportDtms, exportPng, exportJson, copyHexToClipboard, parseDtms } from './export.js';
 import { t } from './i18n.js';
+import { openImageCropModal } from './crop.js';
 
 // ─── DOM helpers ──────────────────────────────────────────────
 const ge  = id => document.getElementById(id);
@@ -42,23 +43,32 @@ const qs  = s  => document.querySelector(s);
 const qsa = s  => [...document.querySelectorAll(s)];
 
 // ─── Toast ────────────────────────────────────────────────────
+// #toast is purely visual (aria-hidden) — the ONE screen-reader channel is
+// #liveRegion via announce(). This avoids the double-announcement that
+// happens when a visible status element AND a hidden live region both
+// carry aria-live for the same message.
 let _toastTimer = null;
 function toast(msg, kind = '') {
   const el = ge('toast');
-  if (!el) return;
-  el.textContent = msg;
-  el.className = 'show' + (kind ? ' ' + kind : '');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
-  announce(msg);   // mirror status to the screen-reader live region
+  if (el) {
+    el.textContent = msg;
+    el.className = 'show' + (kind ? ' ' + kind : '');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+  // Errors/disconnects interrupt (assertive); routine info/success is polite.
+  announce(msg, kind === 'err' ? 'assertive' : 'polite');
 }
 
-/** Push a message to the screen-reader live region (no visual UI).
+/** Push a message to the sole screen-reader live region (no visual UI).
  * Clear-then-set forces re-announcement of repeated text. Uses setTimeout
  * (not rAF) so it still fires in a backgrounded tab / hidden iframe. */
-function announce(text) {
+function announce(text, priority = 'polite') {
   const live = ge('liveRegion');
-  if (live && text) { live.textContent = ''; setTimeout(() => { live.textContent = text; }, 40); }
+  if (!live || !text) return;
+  if (live.getAttribute('aria-live') !== priority) live.setAttribute('aria-live', priority);
+  live.textContent = '';
+  setTimeout(() => { live.textContent = text; }, 40);
 }
 
 // ─── Canvas elements ──────────────────────────────────────────
@@ -172,10 +182,47 @@ async function loadImageFile(file) {
   const img = new Image();
   img.onload = () => {
     URL.revokeObjectURL(src);
-    startAnalyze(img, file.name.replace(/\.[^.]+$/, ''));
+    const name = file.name.replace(/\.[^.]+$/, '');
+    openImageCropModal({
+      image: img,
+      fileName: name,
+      onConfirm: async croppedImg => {
+        const page = pagesState.activePage;
+        if (page) page.originalImage = img;
+        startAnalyze(croppedImg, name);
+      },
+      onUseOriginal: () => {
+        const page = pagesState.activePage;
+        if (page) page.originalImage = img;
+        startAnalyze(img, name);
+      },
+    });
   };
-  img.onerror = () => { URL.revokeObjectURL(src); toast('이미지를 불러올 수 없어요'); };
+  img.onerror = () => { URL.revokeObjectURL(src); toast('이미지를 불러올 수 없어요', 'err'); };
   img.src = src;
+}
+
+/** Re-open the crop modal on the already-loaded original image. */
+function reCrop() {
+  const page = pagesState.activePage;
+  const img = page?.originalImage || page?.sourceImage;
+  if (!img) return;
+  openImageCropModal({
+    image: img,
+    fileName: appState.fileName,
+    onConfirm: async croppedImg => { startAnalyze(croppedImg, appState.fileName); },
+    onUseOriginal: () => { startAnalyze(img, appState.fileName); },
+  });
+}
+
+/** Show "다시 자르기" only once an image source exists on the active page —
+ * replaces the old body[data-kind="image"] CSS gate, which depended on the
+ * sourceKind system that no longer exists. */
+function syncRecropVisibility() {
+  const row = ge('recropRow');
+  if (!row) return;
+  const page = pagesState.activePage;
+  row.hidden = !(page?.originalImage || page?.sourceImage);
 }
 
 function startAnalyze(img, name) {
@@ -214,6 +261,7 @@ function finishAnalyze() {
   drawCanvas();
   syncQuality();
   syncConvUI();
+  syncRecropVisibility();
   syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
   toast(t('toast_converted', appState.language), 'ok');
   // Accessibility: announce a one-line tactile summary to the live region so
@@ -249,7 +297,7 @@ function loadTactileFile(file) {
       syncPageUI(); fitCanvas();
       toast(fileName + ' 불러왔어요 ✓', 'ok');
     } catch {
-      toast('파일을 읽을 수 없어요');
+      toast('파일을 읽을 수 없어요', 'err');
     }
   };
   reader.readAsText(file);
@@ -377,6 +425,7 @@ function resetQuality() {
   const card = ge('aiFeedbackCard'); if (card) card.style.display = 'none';
   const empty = ge('aiFeedbackEmpty'); if (empty) { empty.style.display = ''; empty.textContent = t('ai_empty', appState.language); }
   const chips = ge('aiChips'); if (chips) chips.style.display = 'none';
+  syncRecropVisibility();
   syncBtns(false);
 }
 
@@ -471,6 +520,7 @@ function syncPageUI() {
   const next = ge('pageNext'); if (next) next.disabled = cur === total - 1;
   const del = ge('pageDelete'); if (del) del.disabled = total <= 1;
   renderPageChips();
+  syncRecropVisibility();
 }
 
 function renderPageChips() {
@@ -701,7 +751,7 @@ async function parseCommand(text) {
   // ── Math: plot an expression as a tactile graph (no image needed) ──
   if (intent.action === 'math' && intent.mathExpr) {
     const { data, error } = renderMathGraph(cols, rows, intent.mathExpr);
-    if (error) { toast((lang === 'ko' ? '수식 오류: ' : 'Math error: ') + error); return; }
+    if (error) { toast((lang === 'ko' ? '수식 오류: ' : 'Math error: ') + error, 'err'); return; }
     placeGeneratedGrid(data);
     toast(`y = ${intent.mathExpr}`, 'ok');
     return;
@@ -854,7 +904,7 @@ function showDescription(text) {
   if (txt) txt.textContent = text;
   if (card) card.style.display = 'block';
   if (empty) empty.style.display = 'none';
-  const live = ge('liveRegion'); if (live) live.textContent = text;
+  announce(text);
 }
 
 // ─── Language toggle ──────────────────────────────────────────
@@ -952,6 +1002,7 @@ function wireFullMode() {
     e.target.value = '';
   });
   ge('emptyDropZone')?.addEventListener('click', () => ge('imgFileInput')?.click());
+  ge('recropBtn')?.addEventListener('click', reCrop);
 
   // drag-over visual
   const area = qs('.canvas-area');
@@ -1089,7 +1140,7 @@ function wireFullMode() {
   // DotPad
   initDotPad(
     () => { syncConn(); if (dotPadState.livePreviewEnabled) syncLivePreview(canvasState.data, canvasState.width, canvasState.height); toast('Dot Pad 연결됐어요 ✓', 'ok'); },
-    () => { syncConn(); toast('Dot Pad 연결이 끊어졌어요'); }
+    () => { syncConn(); toast('Dot Pad 연결이 끊어졌어요', 'err'); }
   );
   ge('bleBtn')?.addEventListener('click', async () => {
     if (dotPadState.connected) { disconnectDotPad(); } else { await connectBle(); }

@@ -85,8 +85,30 @@ export async function copyHexToClipboard(canvasData, cols, rows) {
 }
 
 /**
+ * Infer [cols, rows] from a hex string's length for known Dot Pad grids.
+ * Each cell is 2×4 pins = 1 byte = 2 hex chars, so hexLen = (cols/2)*(rows/4)*2.
+ * Returns null if the length doesn't match a known resolution — callers
+ * should then fall back to the current canvas size rather than silently
+ * mis-decoding a file authored at a different resolution.
+ */
+const KNOWN_RESOLUTIONS = [[28, 40], [60, 40], [96, 64]];
+function inferResolutionFromHexLength(hexLen) {
+  for (const [cols, rows] of KNOWN_RESOLUTIONS) {
+    const expected = (cols / 2) * (rows / 4) * 2;
+    if (hexLen === expected) return { cols, rows };
+  }
+  return null;
+}
+
+/**
  * Parse a .dtms (multi-page JSON) or .dtm (single-page JSON / raw hex) file.
  * Returns { fileName, pages[], cols?, rows? }.
+ *
+ * cols/rows are the resolution the hex was authored at. When the source
+ * doesn't declare it explicitly (raw hex, or a .dtm without `resolution`),
+ * we infer it from hex length among known Dot Pad grids (28×40 / 60×40 /
+ * 96×64) instead of leaving it null — importing at the wrong resolution
+ * truncates/misaligns the pin data without any visible error.
  */
 export function parseDtms(text) {
   const trimmed = text.trim();
@@ -94,9 +116,12 @@ export function parseDtms(text) {
   // Raw hex string — no JSON wrapper (some .dtm exports from DotPad Studio)
   if (/^[0-9a-fA-F\s]+$/.test(trimmed) && trimmed.length >= 2) {
     const hex = trimmed.replace(/\s/g, '');
+    const res = inferResolutionFromHexLength(hex.length);
     return {
       fileName: 'Untitled',
       pages: [{ title: 'Page', hex, altText: '' }],
+      cols: res?.cols ?? null,
+      rows: res?.rows ?? null,
     };
   }
 
@@ -104,30 +129,43 @@ export function parseDtms(text) {
 
   // .dtms — multi-page bundle: { title, resolution, items[] }
   if (Array.isArray(obj.items)) {
-    const cols = obj.resolution?.cols || null;
-    const rows = obj.resolution?.rows || null;
+    let cols = obj.resolution?.cols || null;
+    let rows = obj.resolution?.rows || null;
     const pages = obj.items.map(item => ({
       title: item.title || 'Page',
       hex: item.graphic?.data || '',
       altText: item.text?.plain || item.text?.data || '',
     }));
+    if (!cols || !rows) {
+      // Infer from the first page's hex length when resolution wasn't declared.
+      const res = pages[0] && inferResolutionFromHexLength((pages[0].hex || '').length);
+      if (res) { cols = res.cols; rows = res.rows; }
+    }
     return { fileName: obj.title || 'Untitled', pages, cols, rows };
   }
 
   // .dtm — single graphic: { title?, graphic: { data } } or { graphic: { data } }
   if (obj.graphic?.data) {
+    const res = obj.resolution?.cols
+      ? { cols: obj.resolution.cols, rows: obj.resolution.rows }
+      : inferResolutionFromHexLength(obj.graphic.data.length);
     return {
       fileName: obj.title || 'Untitled',
       pages: [{ title: obj.title || 'Page', hex: obj.graphic.data, altText: obj.text?.plain || '' }],
+      cols: res?.cols ?? null,
+      rows: res?.rows ?? null,
     };
   }
 
   // Fallback: wrapped in a single item at root level
   const hex = obj.data || obj.hex || '';
   if (hex) {
+    const res = inferResolutionFromHexLength(hex.length);
     return {
       fileName: obj.title || 'Untitled',
       pages: [{ title: obj.title || 'Page', hex, altText: '' }],
+      cols: res?.cols ?? null,
+      rows: res?.rows ?? null,
     };
   }
 
