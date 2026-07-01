@@ -91,7 +91,7 @@ export async function copyHexToClipboard(canvasData, cols, rows) {
  * should then fall back to the current canvas size rather than silently
  * mis-decoding a file authored at a different resolution.
  */
-const KNOWN_RESOLUTIONS = [[28, 40], [60, 40], [96, 64]];
+export const KNOWN_RESOLUTIONS = [[28, 40], [60, 40], [96, 64]];
 function inferResolutionFromHexLength(hexLen) {
   for (const [cols, rows] of KNOWN_RESOLUTIONS) {
     const expected = (cols / 2) * (rows / 4) * 2;
