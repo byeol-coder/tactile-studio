@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzFBMUExQSIvPgogIDxjaXJjbGUgY3g9IjkiIGN5PSI5IiByPSIyLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iMTYiIGN5PSI5IiByPSIyLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iMjMiIGN5PSI5IiByPSIyLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iOSIgY3k9IjE2IiByPSIyLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjQiLz4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIyLjUiIGZpbGw9IiNGRjREMDAiLz4KICA8Y2lyY2xlIGN4PSIyMyIgY3k9IjE2IiByPSIyLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjQiLz4KICA8Y2lyY2xlIGN4PSI5IiBjeT0iMjMiIHI9IjIuNSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuMiIvPgogIDxjaXJjbGUgY3g9IjE2IiBjeT0iMjMiIHI9IjIuNSIgZmlsbD0id2hpdGUiLz4KICA8Y2lyY2xlIGN4PSIyMyIgY3k9IjIzIiByPSIyLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjIiLz4KPC9zdmc+"/>
 <title>Dot Canvas — AI 촉각그래픽</title>
+<!-- PWA: 설치형 + 오프라인 -->
+<meta name="theme-color" content="#111111"/>
+<link rel="manifest" href="manifest.webmanifest"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
@@ -18,27 +21,11 @@
   --border2:  #D1D1D6;
   --ink:      #1C1C1E;
   --text:     #3A3A3C;
-  --sub:      #56565C;
-  --hint:     #6E6E73;
-  /* accent scale */
-  --accent:    #C94400;
-  --accent-d:  #A73700;
-  --accent-50: #FFF3ED;
-  --accent-100:#FFE0D0;
-  --accent-200:#F4B69B;
-  --accent-500:#C94400;
-  --accent-600:#A73700;
-  --accent-700:#7F2900;
-  --accent-bg: #FFF3ED;
-  /* gray scale */
-  --gray-50:  #F7F7F8;
-  --gray-100: #F1F1F3;
-  --gray-200: #E5E5EA;
-  --gray-300: #D1D1D6;
-  --gray-500: #8E8E93;
-  --gray-600: #6C6C70;
-  --gray-700: #3A3A3C;
-  --gray-900: #1C1C1E;
+  --sub:      #6C6C70;
+  --hint:     #AEAEB2;
+  --accent:   #FF4D00;
+  --accent-d: #E34400;
+  --accent-bg:#FFF3EE;
   --green:    #30D158;
   --green-d:  #25A244;
   --green-bg: #F0FBF3;
@@ -120,7 +107,7 @@ svg { display: block; flex-shrink: 0 }
   padding: 0 8px 0 10px; gap: 8px; height: 32px; min-width: 0;
   transition: border-color .15s, box-shadow .15s;
 }
-.hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px var(--accent-100) }
+.hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
 .hd-prompt svg { width: 14px; height: 14px; stroke: var(--accent); fill: none;
   stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
 .hd-prompt input {
@@ -132,17 +119,7 @@ svg { display: block; flex-shrink: 0 }
   border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; flex-shrink: 0;
   font-family: var(--font);
 }
-.hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: var(--accent-200) }
-body[data-state="empty"] .header-command { display: none }
-body.is-empty .header-command { display: none }
-body[data-state="analyzing"] .header-command,
-body.is-loading .header-command {
-  display: flex; opacity: .58;
-}
-body[data-state="analyzing"] .hd-prompt,
-body.is-loading .hd-prompt {
-  pointer-events: none;
-}
+.hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: rgba(255,77,0,.3) }
 
 /* suggestion dropdown */
 .prompt-suggest {
@@ -187,29 +164,10 @@ body.is-loading .hd-prompt {
 }
 .hd-btn.ghost { border: 1px solid var(--border); background: var(--surface); color: var(--text) }
 .hd-btn.ghost:hover { background: var(--surface2) }
-.hd-btn.accent { background: var(--surface); border: 1px solid var(--gray-200); color: var(--gray-600) }
-.hd-btn.accent:hover { background: var(--gray-100); color: var(--gray-700) }
-body[data-state="ready"] .hd-btn.accent { background: var(--accent-500); border-color: var(--accent-500); color: #fff }
-body[data-state="ready"] .hd-btn.accent:hover { background: var(--accent-600); border-color: var(--accent-600) }
+.hd-btn.accent { background: var(--accent); color: #fff; border: 1px solid transparent }
+.hd-btn.accent:hover { background: var(--accent-d) }
 .hd-btn:disabled { opacity: .38; cursor: not-allowed }
 .hd-btn svg { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
-
-/* import dropdown */
-.import-wrap { position: relative; flex-shrink: 0 }
-.import-menu {
-  position: absolute; top: calc(100% + 6px); right: 0;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r8); box-shadow: 0 4px 16px rgba(0,0,0,.14);
-  min-width: 168px; padding: 4px; z-index: 200; display: none;
-}
-.import-menu.open { display: block }
-.import-menu-item {
-  display: flex; align-items: center; gap: 8px;
-  width: 100%; padding: 8px 10px; border-radius: 6px;
-  font-size: 12px; font-weight: 500; color: var(--text); text-align: left; white-space: nowrap;
-}
-.import-menu-item:hover { background: var(--surface2) }
-.import-menu-item svg { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
 
 /* conn dot in header */
 .hd-conn { width: 7px; height: 7px; border-radius: 50%; background: var(--hint); flex-shrink: 0; transition: .2s }
@@ -231,8 +189,8 @@ body[data-state="ready"] .hd-btn.accent:hover { background: var(--accent-600); b
 }
 .rail-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none;
   stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.75 }
-.rail-btn:hover:not(:disabled) { background: var(--gray-100); color: var(--gray-700) }
-.rail-btn.active { background: var(--accent-50); color: var(--accent-600); border: 1px solid var(--accent-200) }
+.rail-btn:hover:not(:disabled) { background: var(--surface2); color: var(--ink) }
+.rail-btn.active { background: var(--accent); color: #fff }
 .rail-btn:disabled { opacity: .3; cursor: not-allowed }
 .rail-btn[title]:hover::after {
   content: attr(title); position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%);
@@ -247,7 +205,7 @@ body[data-state="ready"] .hd-btn.accent:hover { background: var(--accent-600); b
   color: var(--hint); border: 1px solid transparent;
 }
 .sz-btn:hover { background: var(--surface2); color: var(--text) }
-.sz-btn.active { background: var(--accent-50); color: var(--accent-600); border-color: var(--accent-200) }
+.sz-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(255,77,0,.25) }
 
 /* ── Canvas Area ──────────────────────────────────────────── */
 .canvas-area {
@@ -255,7 +213,7 @@ body[data-state="ready"] .hd-btn.accent:hover { background: var(--accent-600); b
   align-items: center; justify-content: center;
   background: var(--bg); padding: 16px 20px; position: relative; overflow: hidden;
 }
-.canvas-area.drag-over { background: var(--gray-50) }
+.canvas-area.drag-over { background: var(--accent-bg) }
 .canvas-area.drag-over .canvas-wrap { outline: 2px dashed var(--accent) }
 
 /* info strip above canvas */
@@ -280,62 +238,18 @@ body[data-state="ready"] .hd-btn.accent:hover { background: var(--accent-600); b
 .canvas-wrap.rebuilding { opacity: .65 }
 #pad { display: block; touch-action: none; border-radius: var(--r6) }
 
-/* ── Empty Hero (command-first landing) ───────────────────── */
-#emptyHero {
-  position: absolute; inset: 0; z-index: 15;
-  display: none; flex-direction: column; align-items: center; justify-content: center;
-  padding: 24px 28px; background: var(--bg);
-}
-body[data-state="empty"] #emptyHero,
-body.is-empty .empty-command { display: flex; animation: hero-in .22s ease }
-body[data-state="ready"] #emptyHero,
-body.is-ready .empty-command,
-body[data-state="analyzing"] #emptyHero,
-body.is-loading .empty-command { display: none }
-@keyframes hero-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
-
-.hero-inner { width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 14px }
-.hero-heading { font-size: 17px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); text-align: center }
-.hero-form {
-  width: 100%; display: flex; align-items: center; gap: 8px;
-  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r12);
-  padding: 0 8px 0 14px; height: 50px; box-shadow: var(--shadow-sm); transition: border-color .15s, box-shadow .15s;
-}
-.hero-form:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-100) }
-.hero-form svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.75; flex-shrink: 0 }
-.hero-form input { flex: 1; background: none; border: none; font-size: 13px; color: var(--ink); min-width: 0 }
-.hero-form input::placeholder { color: var(--hint) }
-.hero-submit {
-  height: 36px; padding: 0 16px; border-radius: var(--r8); background: var(--accent);
-  color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; transition: background .12s;
-}
-.hero-submit:hover { background: var(--accent-d) }
-.hero-submit:disabled,
-.hero-chip:disabled,
-.hero-form.is-disabled {
-  opacity: .55; cursor: not-allowed;
-}
-.hero-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center }
-.hero-chip {
-  height: 30px; padding: 0 12px; border-radius: 999px;
-  border: 1px solid var(--border); background: var(--surface);
-  font-size: 11px; font-weight: 600; color: var(--text); transition: .12s; white-space: nowrap;
-}
-.hero-chip:hover { border-color: var(--gray-300); color: var(--gray-700); background: var(--gray-100) }
-.hero-secondary { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 2px }
-
-/* canvas fade-in when result first appears */
-@keyframes canvas-fadein { from { opacity: 0; transform: scale(.97) } to { opacity: 1; transform: scale(1) } }
-.canvas-wrap.fadein { animation: canvas-fadein .28s ease forwards }
-
 /* ── Overlays ─────────────────────────────────────────────── */
 .ov {
   position: absolute; inset: 0; display: none; flex-direction: column;
   align-items: center; justify-content: center; gap: 10px;
   text-align: center; padding: 28px; z-index: 10; border-radius: var(--r16);
 }
+#emptyOv {
+  background: rgba(238,235,224,.92); backdrop-filter: blur(4px);
+}
 #analyzeOv { background: transparent; pointer-events: none }
 
+body[data-state="empty"] #emptyOv    { display: flex }
 body[data-state="analyzing"] #analyzeOv { display: flex }
 
 .ov-icon {
@@ -350,7 +264,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 .ov-ctas { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px }
 .ov-btn {
   height: 34px; padding: 0 16px; border-radius: var(--r10);
-  font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
   transition: all .12s;
 }
 .ov-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
@@ -432,7 +346,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 /* AI card */
 .ai-card {
   background: linear-gradient(135deg, #FFF5F0 0%, #FFF0E8 100%);
-  border: 1px solid var(--accent-100); border-radius: var(--r10); padding: 12px;
+  border: 1px solid rgba(255,77,0,.15); border-radius: var(--r10); padding: 12px;
   display: none;
 }
 .ai-badge {
@@ -445,10 +359,10 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 .ai-text { font-size: 12px; color: #6B4530; line-height: 1.75 }
 .ai-chips { display: none; flex-wrap: wrap; gap: 5px; margin-top: 8px }
 .ai-ch {
-  height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--accent-200);
+  height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid rgba(255,77,0,.25);
   background: #fff; font-size: 11px; font-weight: 600; color: var(--accent); transition: .12s;
 }
-.ai-ch:hover { background: var(--gray-100); color: var(--gray-700) }
+.ai-ch:hover { background: var(--accent); color: #fff }
 .ai-empty {
   font-size: 12px; color: var(--sub); line-height: 1.75;
   background: var(--surface2); border-radius: var(--r8); padding: 10px;
@@ -456,61 +370,6 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 
 /* ── Density / Threshold ──────────────────────────────────── */
 .th-section { display: flex; flex-direction: column; gap: 10px }
-.sensitivity-controls { display: flex; flex-direction: column; gap: 10px }
-.th-label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px }
-.mode-chip {
-  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px;
-  border: 1px solid var(--border); background: var(--surface2);
-  color: var(--sub); font-size: 10px; font-weight: 700; white-space: nowrap;
-}
-.th-helper {
-  display: none; margin-top: 4px; color: var(--hint);
-  font-size: 11px; line-height: 1.55;
-}
-.dot-edit-panel {
-  display: none; flex-direction: column; gap: 10px;
-  padding: 10px; border: 1px solid var(--border); border-radius: var(--r10);
-  background: var(--surface2);
-}
-.dot-edit-panel p {
-  margin: 0; color: var(--sub); font-size: 11px; line-height: 1.6;
-}
-.dot-edit-head { display: flex; align-items: center; justify-content: space-between; gap: 8px }
-.dot-edit-title { font-size: 12px; font-weight: 700; color: var(--ink) }
-.dot-edit-actions { display: grid; gap: 6px; grid-template-columns: repeat(3, 1fr) }
-.dot-size-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px }
-.dot-tool-btn,
-.dot-size-btn,
-.dot-edit-action {
-  min-width: 0; height: 32px; border-radius: var(--r8);
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text); font-size: 11px; font-weight: 700;
-  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-}
-.dot-tool-btn:hover,
-.dot-size-btn:hover,
-.dot-edit-action:hover { background: var(--gray-100); color: var(--gray-700) }
-.dot-tool-btn.active,
-.dot-size-btn.active {
-  background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700);
-}
-.th-cta {
-  width: 100%; height: 32px; padding: 0 10px; border-radius: var(--r8);
-  border: 1px solid var(--border2); background: var(--surface);
-  color: var(--text); font-size: 11px; font-weight: 700;
-}
-.th-cta:hover { background: var(--gray-100); color: var(--gray-700) }
-body[data-control-mode="dot"] .sensitivity-controls { display: none }
-body[data-control-mode="dot"] .dot-edit-panel { display: flex }
-body[data-control-mode="image"] .dot-edit-panel,
-body[data-control-mode="generated"] .dot-edit-panel,
-body[data-control-mode="empty"] .dot-edit-panel { display: none }
-body[data-control-mode="empty"] .sensitivity-controls { display: flex; opacity: .72 }
-body[data-control-mode="empty"] .th-slider-wrap,
-body[data-control-mode="empty"] .th-foot { opacity: .58; pointer-events: none }
-body[data-control-mode="image"] .th-helper,
-body[data-control-mode="generated"] .th-helper,
-body[data-control-mode="empty"] .th-helper { display: block }
 .th-method-row { display: flex; gap: 3px }
 .th-method-btn {
   flex: 1; height: 26px; border-radius: var(--r6); font-size: 10px; font-weight: 700;
@@ -518,7 +377,7 @@ body[data-control-mode="empty"] .th-helper { display: block }
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   transition: .12s;
 }
-.th-method-btn.active { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
+.th-method-btn.active { background: var(--accent); border-color: var(--accent); color: #fff }
 .th-method-btn:hover:not(.active) { background: var(--surface); color: var(--text) }
 
 .th-slider-wrap { position: relative; height: 26px }
@@ -549,10 +408,6 @@ body[data-control-mode="empty"] .th-helper { display: block }
 }
 .th-btn:hover { background: var(--surface); color: var(--text) }
 .th-btn.acc { background: var(--accent); border-color: var(--accent); color: #fff }
-.th-btn:disabled,
-.th-step:disabled {
-  opacity: .55; cursor: not-allowed;
-}
 .th-step { width: 24px; height: 24px; border-radius: 6px; font-size: 14px; font-weight: 700;
   border: 1px solid var(--border); background: var(--surface2); color: var(--sub);
   display: grid; place-items: center; }
@@ -569,7 +424,7 @@ body[data-control-mode="empty"] .th-helper { display: block }
   border: 1px solid var(--border); background: var(--surface2); color: var(--sub); transition: .12s;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
 }
-.outline-btn.active, .proc-btn.active { background: var(--accent-50); color: var(--accent-700); border-color: var(--accent-200) }
+.outline-btn.active, .proc-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(255,77,0,.35) }
 .outline-btn:hover:not(.active), .proc-btn:hover:not(.active) { background: var(--surface); color: var(--text) }
 
 /* advanced disclosure */
@@ -609,10 +464,10 @@ details.adv > summary:hover { color: var(--ink) }
   background: var(--surface2); transition: .12s; cursor: pointer;
 }
 .preset-btn:hover { background: var(--surface); border-color: var(--border2) }
-.preset-btn.active { background: var(--accent-50); border-color: var(--accent-200) }
+.preset-btn.active { background: var(--accent-bg); border-color: rgba(255,77,0,.35) }
 .preset-name { font-size: 11px; font-weight: 700; color: var(--ink) }
 .preset-desc { font-size: 10px; color: var(--hint) }
-.preset-btn.active .preset-name { color: var(--accent-700) }
+.preset-btn.active .preset-name { color: var(--accent) }
 /* active-preset summary chip */
 .sec-hd-row { display: flex; align-items: center; justify-content: space-between; gap: 8px }
 .preset-chip {
@@ -620,24 +475,7 @@ details.adv > summary:hover { color: var(--ink) }
   padding: 2px 9px; border-radius: 999px;
   background: var(--surface2); color: var(--hint); white-space: nowrap;
 }
-.preset-chip.is-active { background: var(--accent-50); color: var(--accent-700) }
-
-/* sourceKind-based panel switching */
-body[data-kind="generated"] .image-ctrl { display: none !important }
-body[data-kind="tactile"]   .image-ctrl { display: none !important }
-body[data-has-source-image="false"] .image-ctrl { display: none !important }
-body:not([data-kind="generated"]) #genStyleRow { display: none }
-body[data-kind="generated"] .preset-grid { opacity: .38; pointer-events: none }
-body[data-kind="tactile"]   .preset-grid { opacity: .38; pointer-events: none }
-body[data-has-source-image="false"] .preset-grid { opacity: .38; pointer-events: none }
-/* style buttons for generated */
-.gen-style-btns { display: flex; gap: 4px }
-.gen-style-btn {
-  flex: 1; height: 30px; border-radius: var(--r8); border: 1px solid var(--border);
-  background: var(--surface2); font-size: 12px; color: var(--text); cursor: pointer; transition: all .12s;
-}
-.gen-style-btn.active { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
-.gen-style-btn:hover:not(.active) { background: var(--gray-100) }
+.preset-chip.is-active { background: var(--accent-bg); color: var(--accent) }
 
 /* DotPad section */
 .dp-status {
@@ -689,7 +527,7 @@ body[data-has-source-image="false"] .preset-grid { opacity: .38; pointer-events:
 }
 .panel :where(.dp-btn, .pin-btn, .exp-btn).active,
 .panel :where(.dp-btn, .pin-btn, .exp-btn)[aria-pressed="true"] {
-  background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700);
+  background: var(--accent-bg); border-color: rgba(255,77,0,.38); color: var(--accent);
 }
 .panel :where(.dp-btn, .pin-btn, .exp-btn):disabled {
   background: #F7F7F8; border-color: var(--border); color: #8E8E93;
@@ -735,7 +573,7 @@ body[data-has-source-image="false"] .preset-grid { opacity: .38; pointer-events:
   background: var(--surface2); color: var(--hint); font-size: 10px; font-weight: 700;
   display: grid; place-items: center;
 }
-.page-chip.active { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
+.page-chip.active { background: var(--accent); border-color: var(--accent); color: #fff }
 .page-chip:hover:not(.active) { background: var(--surface); color: var(--text) }
 .page-nav-btn {
   width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border);
@@ -749,7 +587,7 @@ body[data-has-source-image="false"] .preset-grid { opacity: .38; pointer-events:
   background: var(--surface2); color: var(--hint); font-size: 15px; font-weight: 400;
   display: grid; place-items: center; line-height: 1;
 }
-.page-add-btn:hover { background: var(--surface); color: var(--gray-700) }
+.page-add-btn:hover { background: var(--surface); color: var(--accent) }
 .page-lbl { font-size: 10px; color: var(--hint); font-weight: 600; min-width: 28px; text-align: center }
 
 /* zoom */
@@ -778,141 +616,6 @@ body[data-has-source-image="false"] .preset-grid { opacity: .38; pointer-events:
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
 #toast.ok { background: var(--green-d) }
 
-/* ── Floating Help ───────────────────────────────────────── */
-.help-fab {
-  position: fixed;
-  right: 24px;
-  bottom: 72px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 24px rgba(0,0,0,.12);
-  color: var(--text);
-  font-size: 18px;
-  font-weight: 700;
-  z-index: 300;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .12s, box-shadow .12s, transform .12s;
-}
-.help-fab:hover {
-  background: var(--gray-50);
-  box-shadow: 0 10px 28px rgba(0,0,0,.14);
-}
-.help-fab:active { transform: translateY(1px) }
-.help-panel {
-  position: fixed;
-  right: 24px;
-  bottom: 124px;
-  width: 320px;
-  max-width: calc(100vw - 32px);
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 16px 48px rgba(0,0,0,.16);
-  z-index: 310;
-  padding: 16px;
-}
-.help-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.help-head strong {
-  font-size: 14px;
-  font-weight: 700;
-}
-.help-head p {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--sub);
-  line-height: 1.5;
-}
-.help-head button {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: var(--hint);
-  font-size: 20px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-.help-head button:hover { background: var(--gray-100); color: var(--gray-700) }
-.help-step {
-  display: flex;
-  gap: 10px;
-  padding: 10px 0;
-  border-top: 1px solid var(--border);
-}
-.help-step:first-child {
-  border-top: 0;
-}
-.help-step span {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-50);
-  color: var(--accent-700);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.help-step strong {
-  font-size: 13px;
-  font-weight: 700;
-}
-.help-step p {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--sub);
-  line-height: 1.5;
-}
-.help-nudge {
-  position: fixed;
-  right: 78px;
-  bottom: 78px;
-  display: none;
-  max-width: min(280px, calc(100vw - 96px));
-  padding: 9px 12px;
-  background: var(--ink);
-  color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 28px rgba(0,0,0,.18);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.5;
-  z-index: 305;
-}
-.help-nudge::after {
-  content: '';
-  position: absolute;
-  right: -6px;
-  bottom: 15px;
-  width: 12px;
-  height: 12px;
-  background: var(--ink);
-  transform: rotate(45deg);
-}
-body.show-help-nudge .help-nudge { display: block }
-@media (max-width: 520px) {
-  .help-fab { right: 16px; bottom: 64px }
-  .help-panel { left: 16px; right: 16px; bottom: 116px; width: auto; max-width: none }
-  .help-nudge {
-    right: 16px;
-    bottom: 116px;
-    max-width: calc(100vw - 32px);
-  }
-  body.show-help-nudge .help-nudge { display: none }
-  .help-nudge::after { right: 16px; bottom: -6px }
-}
-
 /* ── Guard Modal ─────────────────────────────────────────── */
 .modal-bg {
   position: fixed; inset: 0; background: rgba(28,28,30,.5); backdrop-filter: blur(4px);
@@ -938,211 +641,87 @@ body.show-help-nudge .help-nudge { display: block }
   background: var(--bg);
 }
 .mini-hd {
-  min-height: 52px; background: var(--surface); border-bottom: 1px solid var(--border);
+  height: 46px; background: var(--surface); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; padding: 0 14px; gap: 10px; flex-shrink: 0;
 }
-.mini-title { font-size: 13px; font-weight: 800; letter-spacing: 0; white-space: nowrap }
-.mini-hd-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; min-width: 0 }
-.mini-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px }
+.mini-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px }
 
 /* prompt card */
 .mini-prompt-card {
   background: var(--surface); border-radius: var(--r12); border: 1px solid var(--border);
   padding: 12px; display: flex; flex-direction: column; gap: 8px;
 }
-.mini-intro { font-size: 13px; font-weight: 800; color: var(--ink); margin: 0 }
+.mini-intro { font-size: 12px; font-weight: 700; color: var(--ink); margin: 0 }
 .mini-prompt-form {
   display: flex; align-items: center; gap: 6px;
   background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--r10);
-  padding: 0 7px 0 12px; min-height: 42px; transition: border-color .15s;
+  padding: 0 6px 0 10px; height: 36px; transition: border-color .15s;
 }
 .mini-prompt-form:focus-within { border-color: var(--accent); background: var(--surface) }
 .mini-prompt-form input {
-  flex: 1; background: none; border: none; font-size: 13px; color: var(--ink); min-width: 0;
+  flex: 1; background: none; border: none; font-size: 12px; color: var(--ink); min-width: 0;
 }
 .mini-prompt-form input::placeholder { color: var(--hint) }
 .mini-prompt-submit {
-  height: 30px; min-width: 34px; border-radius: 8px; background: var(--accent);
+  height: 24px; min-width: 24px; border-radius: 6px; background: var(--accent);
   color: #fff; font-size: 13px; font-weight: 700; border: none; display: grid;
   place-items: center; flex-shrink: 0; cursor: pointer;
 }
 .mini-prompt-submit:disabled { opacity: .4; cursor: not-allowed }
-.mini-suggest {
-  display: none; flex-direction: column; gap: 2px; margin: 0 -4px;
-}
-.mini-suggest.show { display: flex }
-.mini-suggest-item {
-  display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: var(--r8);
-  font-size: 12px; font-weight: 500; color: var(--text); text-align: left;
-  background: none; border: none; cursor: pointer; width: 100%; transition: background .1s;
-}
-.mini-suggest-item:hover { background: var(--surface2) }
-.mini-suggest-item .ps-icon { color: var(--accent) }
-.mini-suggest-label { flex: 1; text-align: left; font-size: 12px }
-.mini-suggest-tag { font-size: 10px; color: var(--hint) }
-.mini-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
-.mini-import-grid {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%;
-}
+.mini-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
 .mini-img-btn {
-  height: 38px; min-width: 0; padding: 0 10px; border-radius: var(--r10); border: 1.5px solid var(--border);
-  background: var(--surface); font-size: 12px; font-weight: 700; color: var(--text); transition: .12s;
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; cursor: pointer;
-  white-space: nowrap;
+  height: 28px; padding: 0 10px; border-radius: var(--r8); border: 1.5px solid var(--border);
+  background: var(--surface); font-size: 11px; font-weight: 600; color: var(--text); transition: .12s;
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; cursor: pointer;
 }
-.mini-img-btn:hover { border-color: var(--gray-300); color: var(--gray-700) }
-.mini-res-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; width: 100% }
+.mini-img-btn:hover { border-color: var(--accent); color: var(--accent) }
+.mini-res-chips { display: flex; gap: 4px }
 .mini-res-chip {
-  height: 36px; padding: 0 8px; border-radius: var(--r10); border: 1.5px solid var(--border);
-  background: var(--surface); font-size: 12px; font-weight: 800; color: var(--sub); cursor: pointer; transition: .12s;
+  height: 28px; padding: 0 9px; border-radius: var(--r8); border: 1.5px solid var(--border);
+  background: var(--surface); font-size: 11px; font-weight: 700; color: var(--sub); cursor: pointer; transition: .12s;
 }
 .mini-res-chip.active { background: var(--ink); border-color: var(--ink); color: #fff }
 .mini-res-chip:hover:not(.active) { border-color: var(--ink); color: var(--ink) }
 
 .mini-canvas-card {
   background: var(--surface); border-radius: var(--r12); border: 1px solid var(--border);
-  padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
 .mini-drop-zone {
-  width: 100%; min-height: 48px; border: 2px dashed var(--border); border-radius: var(--r10);
+  width: 100%; height: 56px; border: 2px dashed var(--border); border-radius: var(--r8);
   display: flex; align-items: center; justify-content: center; cursor: pointer;
   font-size: 12px; color: var(--hint); transition: .15s;
 }
-.mini-drop-zone:hover, .mini-drop-zone.drag-over { border-color: var(--gray-300); color: var(--gray-700); background: var(--gray-50) }
-.mini-mode-row {
-  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-}
-.mini-mode-title { font-size: 12px; font-weight: 800; color: var(--ink) }
-.mini-mode-chip {
-  height: 22px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 999px;
-  background: var(--surface2); border: 1px solid var(--border); color: var(--hint); font-size: 10px; font-weight: 800;
-}
-.mini-mode-help { display: none; width: 100%; font-size: 11px; color: var(--hint); line-height: 1.6 }
+.mini-drop-zone:hover, .mini-drop-zone.drag-over { border-color: var(--accent); color: var(--accent); background: var(--accent-bg) }
 .mini-th-row { width: 100%; display: flex; align-items: center; gap: 8px }
-.mini-th-row label { font-size: 12px; font-weight: 700; color: var(--sub); flex-shrink: 0 }
+.mini-th-row label { font-size: 11px; font-weight: 600; color: var(--sub); flex-shrink: 0 }
 .mini-th-row input[type=range] { flex: 1; accent-color: var(--accent) }
 .mini-th-row span { font-size: 11px; font-weight: 700; color: var(--accent); width: 32px; text-align: right }
-.mini-dot-edit-panel {
-  display: none; width: 100%; flex-direction: column; gap: 8px;
-  padding: 10px; border-radius: var(--r10); background: var(--surface2); border: 1px solid var(--border);
-}
-.mini-dot-edit-panel p { margin: 0; font-size: 11px; color: var(--sub); line-height: 1.6 }
-.mini-dot-tools,
-.mini-dot-actions { display: grid; gap: 6px; width: 100% }
-.mini-dot-tools { grid-template-columns: repeat(4, minmax(0, 1fr)) }
-.mini-dot-actions { grid-template-columns: repeat(3, minmax(0, 1fr)) }
 
 /* quick adjustment chips */
 .mini-quick-row { display: flex; gap: 5px; width: 100%; flex-wrap: wrap }
 .mini-quick-btn {
-  flex: 1; min-width: 64px; height: 34px; border-radius: var(--r10);
+  flex: 1; min-width: 56px; height: 28px; border-radius: var(--r8);
   border: 1.5px solid var(--border); background: var(--surface2);
-  font-size: 12px; font-weight: 700; color: var(--text); cursor: pointer; transition: .12s; white-space: nowrap;
+  font-size: 11px; font-weight: 600; color: var(--text); cursor: pointer; transition: .12s; white-space: nowrap;
 }
-.mini-quick-btn:hover { border-color: var(--gray-300); color: var(--gray-700); background: var(--gray-50) }
-.mini-quick-btn.accent { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
+.mini-quick-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg) }
+.mini-quick-btn.accent { background: var(--accent-bg); border-color: rgba(255,77,0,.3); color: var(--accent) }
 .mini-quick-btn:disabled { opacity: .35; cursor: not-allowed }
 
 .mini-actions { display: flex; gap: 6px }
 .mini-btn {
-  flex: 1; height: 42px; border-radius: var(--r10); font-size: 12px; font-weight: 800;
+  flex: 1; height: 34px; border-radius: var(--r8); font-size: 12px; font-weight: 600;
   border: 1px solid var(--border); background: var(--surface2); color: var(--text); transition: .12s;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
 }
 .mini-btn:hover { background: var(--surface); border-color: var(--border2) }
 .mini-btn.acc { background: var(--accent); border-color: var(--accent); color: #fff }
 .mini-btn:disabled { opacity: .35; cursor: not-allowed }
-body.is-empty #app-mini .mini-canvas-card,
-body.is-empty #app-mini .mini-actions { display: none }
-body.is-empty #app-mini .mini-body { justify-content: center; padding-bottom: 96px }
-body.is-ready #app-mini .mini-intro { display: none }
-body.is-ready #app-mini .mini-drop-zone { display: none }
-body[data-control-mode="dot"] #app-mini .mini-th-row,
-body[data-control-mode="dot"] #app-mini .mini-quick-row { display: none }
-body[data-control-mode="dot"] #app-mini .mini-dot-edit-panel,
-body[data-control-mode="image"] #app-mini .mini-mode-help,
-body[data-control-mode="generated"] #app-mini .mini-mode-help,
-body[data-control-mode="empty"] #app-mini .mini-mode-help { display: flex }
-body[data-control-mode="empty"] #app-mini .mini-th-row { opacity: .5; pointer-events: none }
-@media (max-width: 420px) {
-  .mini-body { padding: 10px }
-  .mini-import-grid { grid-template-columns: 1fr 1fr }
-  .mini-dot-tools { grid-template-columns: repeat(2, minmax(0, 1fr)) }
-}
 
 /* ── Accessibility ───────────────────────────────────────── */
-.sr-only {
-  position: absolute; width: 1px; height: 1px; overflow: hidden;
-  clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap;
-}
-
-/* ── Crop Modal ──────────────────────────────────────────── */
-.crop-inner {
-  background: var(--surface); border-radius: var(--r16);
-  width: min(90vw, 680px); max-height: 90vh;
-  display: flex; flex-direction: column; overflow: hidden;
-  box-shadow: var(--shadow-md);
-}
-.crop-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.crop-title { font-size: 15px; font-weight: 600 }
-.crop-close {
-  width: 28px; height: 28px; border-radius: var(--r6);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; color: var(--hint); transition: .12s;
-}
-.crop-close:hover { background: var(--surface2) }
-.crop-canvas-area {
-  flex: 1; min-height: 200px;
-  display: flex; align-items: center; justify-content: center;
-  padding: 16px; background: #111; overflow: hidden;
-}
-#cropCanvas { display: block; max-width: 100%; max-height: 100% }
-.crop-ratio-row {
-  display: flex; gap: 6px; padding: 12px 20px;
-  border-top: 1px solid var(--border); flex-shrink: 0;
-}
-.crop-ratio-btn {
-  flex: 1; height: 30px; border-radius: var(--r8);
-  font-size: 12px; font-weight: 500;
-  border: 1.5px solid var(--border); background: var(--surface2); color: var(--text);
-  transition: .12s; cursor: pointer;
-}
-.crop-ratio-btn:hover { border-color: var(--border2) }
-.crop-ratio-btn.active { background: var(--accent-50); border-color: var(--accent-200); color: var(--accent-700) }
-.crop-foot {
-  display: flex; gap: 8px; padding: 12px 20px;
-  border-top: 1px solid var(--border); flex-shrink: 0;
-}
-.crop-btn-cancel {
-  height: 36px; padding: 0 14px; border-radius: var(--r8);
-  border: 1.5px solid var(--border); background: var(--surface2);
-  font-size: 13px; font-weight: 500; color: var(--text); transition: .12s; white-space: nowrap;
-}
-.crop-btn-cancel:hover { border-color: var(--border2) }
-.crop-btn-orig {
-  flex: 1; height: 36px; border-radius: var(--r8);
-  border: 1.5px solid var(--border); background: var(--surface2);
-  font-size: 13px; font-weight: 500; color: var(--text); transition: .12s;
-}
-.crop-btn-orig:hover { border-color: var(--border2) }
-.crop-btn-confirm {
-  flex: 1; height: 36px; border-radius: var(--r8);
-  border: none; background: var(--accent); color: #fff;
-  font-size: 13px; font-weight: 600; transition: .12s;
-}
-.crop-btn-confirm:hover { background: var(--accent-d) }
-#recropRow { display: none; margin-top: 10px }
-body[data-kind="image"] #recropRow { display: block }
-.recrop-btn {
-  width: 100%; height: 32px; border-radius: var(--r8);
-  border: 1.5px solid var(--border); background: var(--surface2);
-  font-size: 12px; font-weight: 500; color: var(--text); transition: .12s;
-}
-.recrop-btn:hover { border-color: var(--border2); background: var(--surface) }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0) }
+[aria-live] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0) }
 </style>
 </head>
 <body data-state="empty">
@@ -1176,24 +755,7 @@ body[data-kind="image"] #recropRow { display: block }
     <input id="fname" type="text" value="Untitled" aria-label="파일명" spellcheck="false" maxlength="60"/>
   </div>
 
-  <div class="import-wrap">
-    <button class="hd-btn ghost" id="importBtn" aria-haspopup="menu" aria-controls="importMenu" aria-expanded="false">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <span data-i18n="btn_import">불러오기</span>
-    </button>
-    <div class="import-menu" id="importMenu" role="menu">
-      <button class="import-menu-item" id="importImageBtn" role="menuitem">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span data-i18n="btn_import_image">이미지 불러오기</span>
-      </button>
-      <button class="import-menu-item" id="importTactileBtn" role="menuitem">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span data-i18n="btn_import_tactile">촉각 파일 불러오기</span>
-      </button>
-    </div>
-  </div>
-
-  <div class="hd-prompt-wrap header-command">
+  <div class="hd-prompt-wrap">
     <form class="hd-prompt" id="promptForm" role="search">
       <svg viewBox="0 0 24 24"><path d="M12 2l1.6 4.6L18 8l-4.4 1.4L12 14l-1.6-4.6L6 8l4.4-1.4z"/><circle cx="18" cy="17" r="2.5"/></svg>
       <input id="promptInput" type="text" placeholder="명령으로 변환하기 — 최적화 / 외곽선만 / 단순하게…" autocomplete="off" aria-label="AI 명령어" aria-expanded="false" aria-controls="promptSuggest"/>
@@ -1211,7 +773,7 @@ body[data-kind="image"] #recropRow { display: block }
     <span class="sr-only" id="bbStatus">Dot Pad 연결 안 됨</span>
     <button class="hd-btn ghost" id="saveBtn" title="저장 (⌘S)">
       <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      <span data-i18n="btn_save">저장</span>
+      <span>저장</span>
     </button>
     <button class="hd-btn accent" id="dotpadBtn" disabled>
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></svg>
@@ -1225,16 +787,16 @@ body[data-kind="image"] #recropRow { display: block }
 
 <!-- Tool Rail -->
 <nav class="rail" role="toolbar" aria-label="편집 도구">
-  <button class="rail-btn active" data-tool="move" aria-label="이동 도구 (V)" aria-pressed="true" title="이동 (V)">
+  <button class="rail-btn active" data-tool="move" aria-pressed="true" title="이동 (V)">
     <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
   </button>
-  <button class="rail-btn" data-tool="pen" aria-label="펜 도구 (P)" aria-pressed="false" title="펜 (P)">
+  <button class="rail-btn" data-tool="pen" title="펜 (P)">
     <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
   </button>
-  <button class="rail-btn" data-tool="eraser" aria-label="지우개 도구 (E)" aria-pressed="false" title="지우개 (E)">
+  <button class="rail-btn" data-tool="eraser" title="지우개 (E)">
     <svg viewBox="0 0 24 24"><path d="M20 20H7L3 16l11.5-11.5a2 2 0 0 1 2.83 0l2.12 2.12a2 2 0 0 1 0 2.83L8 20"/><path d="M6.25 18.25l-3-3"/></svg>
   </button>
-  <button class="rail-btn" data-tool="select" aria-label="선택 영역 도구" aria-pressed="false" title="선택 영역">
+  <button class="rail-btn" data-tool="select" title="선택 영역">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
   </button>
 
@@ -1248,13 +810,13 @@ body[data-kind="image"] #recropRow { display: block }
 
   <div class="rail-sep" aria-hidden="true"></div>
 
-  <button class="rail-btn" id="undoBtn" aria-label="되돌리기 (Command Z)" title="되돌리기 (⌘Z)">
+  <button class="rail-btn" id="undoBtn" title="되돌리기 (⌘Z)">
     <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.07"/></svg>
   </button>
-  <button class="rail-btn" id="redoBtn" aria-label="다시하기 (Command Shift Z)" title="다시하기 (⌘⇧Z)">
+  <button class="rail-btn" id="redoBtn" title="다시하기 (⌘⇧Z)">
     <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.07"/></svg>
   </button>
-  <button class="rail-btn" id="clearBtn" aria-label="전체 지우기" title="전체 지우기">
+  <button class="rail-btn" id="clearBtn" title="전체 지우기">
     <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
   </button>
 </nav>
@@ -1262,43 +824,6 @@ body[data-kind="image"] #recropRow { display: block }
 <!-- Canvas Area -->
 <main class="canvas-area" role="main" aria-label="캔버스 작업 영역"
   id="canvasAreaEl">
-
-  <!-- ── Empty Hero — command-first landing ─────────────── -->
-  <div id="emptyHero" class="empty-command" role="region" aria-label="시작 안내">
-    <div class="hero-inner">
-      <p class="hero-heading" data-i18n="hero_heading">무엇을 촉각그래픽으로 만들까요?</p>
-      <form class="hero-form" id="heroPromptForm" autocomplete="off">
-        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/>
-          <path d="M19 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2L16 18l2.2-.8z"/>
-        </svg>
-        <input id="heroPromptInput" type="text"
-               placeholder="하트 그려줘 / y=sin(x) / 나비 그려줘 / 외곽선만 / 점자로 안녕하세요…"
-               aria-label="명령어 입력"/>
-        <button type="submit" class="hero-submit" id="heroPromptSubmit" data-i18n="hero_submit">생성</button>
-      </form>
-      <div class="hero-chips" role="group" aria-label="예시 명령어">
-        <button class="hero-chip" data-cmd="Dot Pad에 맞게 최적화" type="button" data-i18n="hero_chip_optimize">✦ 최적화</button>
-        <button class="hero-chip" data-cmd="하트 그려줘" type="button" data-i18n="hero_chip_heart">하트 그려줘</button>
-        <button class="hero-chip" data-cmd="나비 그려줘" type="button" data-i18n="hero_chip_butterfly">나비 그려줘</button>
-        <button class="hero-chip" data-cmd="y=sin(x)" type="button">y=sin(x)</button>
-        <button class="hero-chip" data-cmd="별 그려줘" type="button" data-i18n="hero_chip_star">별 그려줘</button>
-        <button class="hero-chip" data-cmd="외곽선만 남기기" type="button" data-i18n="hero_chip_outline">외곽선만</button>
-        <button class="hero-chip" data-cmd="점자로 안녕하세요" type="button" data-i18n="hero_chip_braille">점자로 안녕하세요</button>
-        <button class="hero-chip" data-cmd="y=x*x-4" type="button">y=x²−4</button>
-      </div>
-      <div class="hero-secondary">
-        <button type="button" id="heroAddImgBtn" class="ov-btn outline">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span data-i18n="empty_import">이미지 가져오기</span>
-        </button>
-        <button type="button" id="heroOpenDtmsBtn" class="ov-btn outline">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span data-i18n="open_dtms">.dtms 열기</span>
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- meta strip -->
   <div class="canvas-meta" aria-live="polite">
@@ -1310,6 +835,30 @@ body[data-kind="image"] #recropRow { display: block }
   <!-- canvas wrapper -->
   <div class="canvas-wrap" id="dotGridWrap">
     <canvas id="pad" aria-label="촉각그래픽 캔버스" role="img"></canvas>
+
+    <!-- empty overlay -->
+    <div class="ov" id="emptyOv" role="region" aria-label="시작 안내">
+      <div class="ov-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <p class="ov-title" data-i18n="empty_title">촉각그래픽을 만들어보세요</p>
+      <p class="ov-sub" data-i18n="empty_sub">AI가 Dot Pad에 맞게
+촉각그래픽으로 자동 변환해드려요</p>
+      <div class="ov-ctas">
+        <div id="emptyDropZone" class="ov-btn fill" role="button" tabindex="0"
+             aria-label="이미지 선택" style="cursor:pointer">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="empty_import">이미지 가져오기</span>
+        </div>
+        <label class="ov-btn outline" for="tactileFileInput" style="cursor:pointer">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span data-i18n="empty_dtms">.dtms 열기</span>
+        </label>
+      </div>
+      <p class="ov-drag" data-i18n="empty_drag">클릭하거나 파일을 드래그하세요</p>
+    </div>
 
     <!-- analyzing overlay -->
     <div class="ov" id="analyzeOv" role="status" aria-live="polite">
@@ -1338,15 +887,15 @@ body[data-kind="image"] #recropRow { display: block }
         <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
           <div class="qual-row" style="border:none;padding:0;gap:8px;flex-direction:column;align-items:flex-end">
             <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <span style="font-size:10px;color:var(--hint)" data-i18n="q_clarity_lbl">판독성</span>
+              <span style="font-size:10px;color:var(--hint)">판독성</span>
               <span class="pill pill-n" id="qClarity">—</span>
             </div>
             <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <span style="font-size:10px;color:var(--hint)" data-i18n="q_density_lbl">밀도</span>
+              <span style="font-size:10px;color:var(--hint)">밀도</span>
               <span class="pill pill-n" id="qDensity">—</span>
             </div>
             <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <span style="font-size:10px;color:var(--hint)" data-i18n="q_structure_lbl">구조</span>
+              <span style="font-size:10px;color:var(--hint)">구조</span>
               <span class="pill pill-n" id="qStructure">—</span>
             </div>
           </div>
@@ -1366,105 +915,67 @@ body[data-kind="image"] #recropRow { display: block }
     <!-- ② 변환 설정 (Presets + Threshold) -->
     <div>
       <div class="sec-hd sec-hd-row">
-        <span id="convPanelTitle">변환 설정</span>
+        <span>변환 설정</span>
         <span class="preset-chip" id="presetChip" data-i18n="preset_none">사용자 지정</span>
       </div>
 
       <!-- Presets -->
       <div class="preset-grid" style="margin-bottom:10px">
-        <button class="preset-btn" data-preset="braille" aria-pressed="false">
-          <span class="preset-name" data-i18n="preset_braille_name">점자</span>
-          <span class="preset-desc" data-i18n="preset_braille_desc">세밀한 윤곽</span>
+        <button class="preset-btn" data-preset="braille">
+          <span class="preset-name">점자</span>
+          <span class="preset-desc">세밀한 윤곽</span>
         </button>
-        <button class="preset-btn" data-preset="tactile" aria-pressed="false">
-          <span class="preset-name" data-i18n="preset_tactile_name">촉각</span>
-          <span class="preset-desc" data-i18n="preset_tactile_desc">표준 점 밀도</span>
+        <button class="preset-btn" data-preset="tactile">
+          <span class="preset-name">촉각</span>
+          <span class="preset-desc">표준 점 밀도</span>
         </button>
-        <button class="preset-btn" data-preset="learning" aria-pressed="false">
-          <span class="preset-name" data-i18n="preset_learning_name">학습용</span>
-          <span class="preset-desc" data-i18n="preset_learning_desc">굵고 단순하게</span>
+        <button class="preset-btn" data-preset="learning">
+          <span class="preset-name">학습용</span>
+          <span class="preset-desc">굵고 단순하게</span>
         </button>
-        <button class="preset-btn" data-preset="detail" aria-pressed="false">
-          <span class="preset-name" data-i18n="preset_detail_name">세밀</span>
-          <span class="preset-desc" data-i18n="preset_detail_desc">최대 해상도</span>
+        <button class="preset-btn" data-preset="detail">
+          <span class="preset-name">세밀</span>
+          <span class="preset-desc">최대 해상도</span>
         </button>
       </div>
 
       <!-- Threshold slider -->
-      <div class="th-section" id="thSection">
-        <div class="sensitivity-controls" id="sensitivityControls">
-          <div>
-            <div class="th-label-row">
-              <div class="ctrl-lbl" id="thLabel" style="margin-bottom:0">이미지 감도</div>
-              <span class="mode-chip" id="sourceModeChip">이미지 변환 모드</span>
-            </div>
-            <div class="th-helper" id="thHelperText">슬라이더를 조정하면 변환 결과에 바로 반영돼요</div>
-          </div>
-          <div class="th-slider-wrap">
-            <div class="th-track"><div class="th-fill" id="thFill"></div></div>
-            <div class="th-thumb" id="thThumb"></div>
-            <input type="range" id="thSlider" min="20" max="240" value="128" aria-label="이미지 감도"/>
-          </div>
-          <div class="th-foot">
-            <div class="th-btns">
-              <button class="th-step" id="thMinus" aria-label="이미지 감도 낮추기">−</button>
-              <button class="th-step" id="thPlus"  aria-label="이미지 감도 높이기">+</button>
-            </div>
-            <span class="th-val" id="thValDisplay">50%</span>
-            <button class="th-btn image-ctrl" id="thAuto" data-i18n="btn_auto">자동</button>
-          </div>
+      <div class="th-section">
+        <div class="th-slider-wrap">
+          <div class="th-track"><div class="th-fill" id="thFill"></div></div>
+          <div class="th-thumb" id="thThumb"></div>
+          <input type="range" id="thSlider" min="20" max="240" value="128" aria-label="임계값"/>
         </div>
-        <div class="dot-edit-panel" id="dotEditPanel" aria-labelledby="dotEditTitle">
-          <div class="dot-edit-head">
-            <span class="dot-edit-title" id="dotEditTitle" data-i18n="dot_edit_title">점 편집 모드</span>
-            <span class="mode-chip" data-i18n="conv_chip_dot">원본 이미지 없음</span>
+        <div class="th-foot">
+          <div class="th-btns">
+            <button class="th-step" id="thMinus" aria-label="임계값 낮추기">−</button>
+            <button class="th-step" id="thPlus"  aria-label="임계값 높이기">+</button>
           </div>
-          <p id="dotEditHelp">현재 그래픽은 점 편집 모드예요. 펜과 지우개로 점을 직접 편집할 수 있고, 이미지를 다시 불러오면 감도를 조정할 수 있어요.</p>
-          <div class="dot-edit-actions" role="group" aria-label="전체 핀 편집">
-            <button type="button" class="dot-edit-action" data-dot-action="up" data-i18n="pin_up">전체 올리기</button>
-            <button type="button" class="dot-edit-action" data-dot-action="down" data-i18n="pin_down">전체 내리기</button>
-            <button type="button" class="dot-edit-action" data-dot-action="invert" data-i18n="pin_invert">반전</button>
-          </div>
-          <button type="button" class="th-cta" id="dotEditImportImageBtn" data-i18n="btn_import_image">이미지 불러오기</button>
+          <span class="th-val" id="thValDisplay">50%</span>
+          <button class="th-btn" id="thAuto" data-i18n="btn_auto">자동</button>
         </div>
       </div>
 
-      <!-- Style row: only for generated graphics -->
-      <div id="genStyleRow">
-        <div class="ctrl-lbl" style="margin-top:12px;margin-bottom:6px" data-i18n="gen_style_label">스타일</div>
-        <div class="gen-style-btns">
-          <button class="gen-style-btn" data-density="60" data-i18n="gen_style_thin">얇게</button>
-          <button class="gen-style-btn active" data-density="128" data-i18n="gen_style_normal">기본</button>
-          <button class="gen-style-btn" data-density="200" data-i18n="gen_style_thick">굵게</button>
-        </div>
-      </div>
-
-      <!-- Re-crop: only for image sourceKind -->
-      <div id="recropRow">
-        <button type="button" id="recropBtn" class="recrop-btn" data-i18n="recrop_btn">다시 자르기</button>
-      </div>
-
-      <!-- Image-only controls (hidden for generated/tactile) -->
       <!-- Outline -->
-      <div class="image-ctrl" style="margin-top:12px">
+      <div style="margin-top:12px">
         <div class="ctrl-lbl" data-i18n="outline_title">윤곽선</div>
         <div class="outline-row" role="group" aria-label="윤곽선 모드">
-          <button class="outline-btn active" data-outline="0" aria-pressed="true" data-i18n="outline_none">없음</button>
-          <button class="outline-btn" data-outline="1" aria-pressed="false" data-i18n="outline_1_btn">1줄</button>
-          <button class="outline-btn" data-outline="2" aria-pressed="false" data-i18n="outline_2_btn">2줄</button>
+          <button class="outline-btn active" data-outline="0" data-i18n="outline_none">없음</button>
+          <button class="outline-btn" data-outline="1">1줄</button>
+          <button class="outline-btn" data-outline="2">2줄</button>
         </div>
       </div>
 
       <!-- Advanced (collapsed by default) -->
-      <details class="adv image-ctrl">
+      <details class="adv">
         <summary data-i18n="adv_settings">고급 설정</summary>
         <div class="adv-body">
           <div class="ctrl-lbl" data-i18n="method_title">이진화 방식</div>
           <div class="th-method-row" role="group" aria-label="이진화 방식">
-            <button class="th-method-btn active" data-method="global" aria-pressed="true" title="수동 임계값" data-i18n="method_global_short">수동</button>
-            <button class="th-method-btn" data-method="otsu" aria-pressed="false" title="자동 Otsu">Otsu</button>
-            <button class="th-method-btn" data-method="adaptive" aria-pressed="false" title="적응형" data-i18n="method_adaptive">적응형</button>
-            <button class="th-method-btn" data-method="alpha" aria-pressed="false" title="투명도 기반">Alpha</button>
+            <button class="th-method-btn active" data-method="global" title="수동 임계값">수동</button>
+            <button class="th-method-btn" data-method="otsu"   title="자동 Otsu">Otsu</button>
+            <button class="th-method-btn" data-method="adaptive" title="적응형">적응형</button>
+            <button class="th-method-btn" data-method="alpha"  title="투명도 기반">Alpha</button>
           </div>
 
           <div class="ctrl-lbl" style="margin-top:10px" data-i18n="proc_title">처리</div>
@@ -1476,8 +987,8 @@ body[data-kind="image"] #recropRow { display: block }
           </div>
 
           <div class="toggle-row" style="margin-top:10px">
-            <span class="toggle-lbl" id="invertToggleLabel" data-i18n="tone_invert">명암 반전</span>
-            <button class="sw" id="invertToggle" role="switch" aria-checked="false" aria-labelledby="invertToggleLabel"></button>
+            <span class="toggle-lbl" data-i18n="tone_invert">명암 반전</span>
+            <button class="sw" id="invertToggle" role="switch" aria-checked="false"></button>
           </div>
         </div>
       </details>
@@ -1495,8 +1006,8 @@ body[data-kind="image"] #recropRow { display: block }
         <button class="dp-btn" id="usbBtn" data-i18n="conn_btn_usb">USB 연결</button>
       </div>
       <div class="live-row">
-        <span class="live-lbl" id="liveSwitchLabel" data-i18n="live_label">라이브 미리보기</span>
-        <button class="sw" id="liveSwitch" role="switch" aria-checked="false" aria-labelledby="liveSwitchLabel" disabled></button>
+        <span class="live-lbl" data-i18n="live_label">라이브 미리보기</span>
+        <button class="sw" id="liveSwitch" role="switch" aria-checked="false" disabled></button>
       </div>
 
       <div class="panel-subsection">
@@ -1529,17 +1040,17 @@ body[data-kind="image"] #recropRow { display: block }
         </div>
         <button class="exp-btn exp-wide" id="jsonBtn">
           <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          <span data-i18n="btn_json_export">JSON 내보내기</span>
+          JSON 내보내기
         </button>
       </div>
     </div>
 
     <!-- Resolution selector (hidden but accessible) -->
     <div class="panel-section">
-      <div class="sec-hd" data-i18n="panel_resolution">해상도</div>
+      <div class="sec-hd">해상도</div>
       <div class="res-row control-grid cols-2">
-        <button class="exp-btn res-btn active" data-res="60x40" aria-pressed="true">60×40</button>
-        <button class="exp-btn res-btn" data-res="96x64" aria-pressed="false">96×64</button>
+        <button class="exp-btn res-btn active" data-res="60x40">60×40</button>
+        <button class="exp-btn res-btn" data-res="96x64">96×64</button>
       </div>
     </div>
 
@@ -1599,8 +1110,8 @@ body[data-kind="image"] #recropRow { display: block }
       <circle cx="7" cy="11.5" r="1.8" fill="white"/>
     </svg>
   </div>
-  <span class="mini-title">Dot Canvas</span>
-  <div class="mini-hd-actions">
+  <span style="font-size:12px;font-weight:700">Dot Canvas</span>
+  <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
     <div class="dp-dot" id="miniConnDot"></div>
     <button class="dp-btn" id="miniConnBtn">BLE 연결</button>
   </div>
@@ -1610,84 +1121,50 @@ body[data-kind="image"] #recropRow { display: block }
 
   <!-- ① Command prompt card -->
   <div class="mini-prompt-card">
-    <p class="mini-intro" data-i18n="mini_intro">무엇을 촉각그래픽으로 만들까요?</p>
+    <p class="mini-intro">무엇을 촉각그래픽으로 만들까요?</p>
     <form class="mini-prompt-form" id="miniPromptForm" autocomplete="off">
       <input type="text" id="miniPromptInput" placeholder="꽃 모양 테두리를 60×40으로 단순하게 만들어줘" aria-label="명령어 입력"/>
       <button type="submit" class="mini-prompt-submit" id="miniPromptSubmit" aria-label="생성">↵</button>
     </form>
-    <div id="miniSuggest" class="mini-suggest" role="listbox"></div>
-    <div class="mini-import-grid">
+    <div class="mini-row">
       <button class="mini-img-btn" id="miniAddImgBtn" type="button">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
           <polyline points="21 15 16 10 5 21"/>
         </svg>
-        <span data-i18n="empty_import">이미지</span>
+        이미지 추가
       </button>
-      <button class="mini-img-btn" id="miniOpenTactileBtn" type="button">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <path d="M14 2v6h6"/>
-        </svg>
-        <span data-i18n="open_dtms">촉각 파일</span>
-      </button>
-    </div>
-    <div class="mini-row">
       <div class="mini-res-chips" role="group" aria-label="해상도 선택">
-        <button class="mini-res-chip active" data-mini-res="60x40" type="button" aria-pressed="true">60×40</button>
-        <button class="mini-res-chip" data-mini-res="96x64" type="button" aria-pressed="false">96×64</button>
-        <button class="mini-res-chip" data-mini-res="28x40" type="button" aria-pressed="false">28×40</button>
+        <button class="mini-res-chip active" data-mini-res="60x40" type="button">60×40</button>
+        <button class="mini-res-chip" data-mini-res="96x64" type="button">96×64</button>
+        <button class="mini-res-chip" data-mini-res="28x40" type="button">28×40</button>
       </div>
     </div>
   </div>
 
   <!-- ② Canvas + density -->
   <div class="mini-canvas-card">
-    <button id="miniDropZone" class="mini-drop-zone" type="button" aria-label="이미지를 여기에 드래그하거나 클릭해서 선택" data-i18n="mini_drop_zone">
+    <div id="miniDropZone" class="mini-drop-zone" role="button" tabindex="0" aria-label="이미지를 여기에 드래그하거나 클릭해서 선택">
       이미지를 드래그하거나 클릭해서 가져오기
-    </button>
-    <canvas id="pad-mini" aria-label="촉각그래픽 캔버스" role="img" style="border-radius:6px"></canvas>
-    <div class="mini-mode-row">
-      <span class="mini-mode-title" id="miniModeTitle">이미지 감도</span>
-      <span class="mini-mode-chip" id="miniModeChip">이미지 없음</span>
     </div>
-    <p class="mini-mode-help" id="miniModeHelp">이미지를 불러오면 감도를 조정할 수 있어요.</p>
+    <canvas id="pad-mini" aria-label="촉각그래픽 캔버스" role="img" style="border-radius:6px"></canvas>
     <div class="mini-th-row">
-      <label for="miniThSlider" id="miniThLabel" data-i18n="mini_density">농도</label>
+      <label for="miniThSlider">농도</label>
       <input type="range" id="miniThSlider" min="20" max="240" value="128" aria-label="점 농도"/>
       <span id="miniThVal">50%</span>
     </div>
-    <div class="mini-dot-edit-panel" id="miniDotEditPanel" aria-labelledby="miniModeTitle">
-      <p id="miniDotEditHelp" data-i18n="dot_edit_help">현재 그래픽은 점 편집 모드예요. 펜과 지우개로 점을 직접 편집할 수 있어요.</p>
-      <div class="mini-dot-tools" role="group" aria-label="점 편집 도구">
-        <button type="button" class="dot-tool-btn" data-dot-tool="move" aria-pressed="true" data-i18n="tool_move">이동</button>
-        <button type="button" class="dot-tool-btn" data-dot-tool="pen" aria-pressed="false" data-i18n="tool_pen">펜</button>
-        <button type="button" class="dot-tool-btn" data-dot-tool="eraser" aria-pressed="false" data-i18n="tool_eraser">지우개</button>
-        <button type="button" class="dot-tool-btn" data-dot-tool="select" aria-pressed="false" data-i18n="tool_select">선택</button>
-      </div>
-      <div class="dot-size-row" role="group" aria-label="브러시 크기">
-        <button type="button" class="dot-size-btn" data-dot-size="1" aria-pressed="true">1×</button>
-        <button type="button" class="dot-size-btn" data-dot-size="2" aria-pressed="false">2×</button>
-        <button type="button" class="dot-size-btn" data-dot-size="3" aria-pressed="false">3×</button>
-      </div>
-      <div class="mini-dot-actions" role="group" aria-label="전체 핀 편집">
-        <button type="button" class="dot-edit-action" data-dot-action="up" data-i18n="pin_up">전체 올리기</button>
-        <button type="button" class="dot-edit-action" data-dot-action="down" data-i18n="pin_down">전체 내리기</button>
-        <button type="button" class="dot-edit-action" data-dot-action="invert" data-i18n="pin_invert">반전</button>
-      </div>
-    </div>
     <!-- ③ Quick adjustment chips -->
     <div class="mini-quick-row" id="miniQuickRow">
-      <button class="mini-quick-btn" data-cmd="단순하게" type="button" disabled data-i18n="mini_quick_simpler">단순하게</button>
-      <button class="mini-quick-btn" data-cmd="또렷하게" type="button" disabled data-i18n="mini_quick_sharper">또렷하게</button>
-      <button class="mini-quick-btn" data-cmd="점 정리" type="button" disabled data-i18n="mini_quick_clean">점 정리</button>
-      <button class="mini-quick-btn accent" data-cmd="Dot Pad에 맞게 최적화" type="button" disabled data-i18n="mini_quick_optimize">최적화</button>
+      <button class="mini-quick-btn" data-cmd="단순하게" type="button" disabled>단순하게</button>
+      <button class="mini-quick-btn" data-cmd="또렷하게" type="button" disabled>또렷하게</button>
+      <button class="mini-quick-btn" data-cmd="점 정리" type="button" disabled>점 정리</button>
+      <button class="mini-quick-btn accent" data-cmd="Dot Pad에 맞게 최적화" type="button" disabled>최적화</button>
     </div>
   </div>
 
   <!-- ④ Output actions -->
   <div class="mini-actions">
-    <button class="mini-btn acc" id="miniSendBtn" disabled data-i18n="mini_send">Dot Pad 전송</button>
+    <button class="mini-btn acc" id="miniSendBtn" disabled>Dot Pad 전송</button>
     <button class="mini-btn" id="miniDtmsBtn" disabled>DTMS</button>
     <button class="mini-btn" id="miniPngBtn" disabled>PNG</button>
   </div>
@@ -1707,103 +1184,6 @@ body[data-kind="image"] #recropRow { display: block }
 <!-- Toast -->
 <div id="toast" role="status" aria-live="polite"></div>
 
-<!-- Floating Help -->
-<button id="helpFab" class="help-fab" type="button" aria-label="도움말 열기" aria-controls="helpPanel" aria-expanded="false">
-  ?
-</button>
-
-<div id="helpNudge" class="help-nudge" aria-hidden="true" data-i18n="help_nudge">
-  처음이신가요? ? 버튼에서 기본 사용법을 볼 수 있어요.
-</div>
-
-<div id="helpPanel" class="help-panel" role="dialog" aria-modal="false" aria-labelledby="helpTitle" aria-describedby="helpIntro" hidden>
-  <div class="help-head">
-    <div>
-      <strong id="helpTitle" data-i18n="help_title">처음 사용하시나요?</strong>
-      <p id="helpIntro" data-i18n="help_intro">Dot Canvas 기본 흐름을 안내해드릴게요.</p>
-    </div>
-    <button id="helpClose" type="button" aria-label="도움말 닫기">×</button>
-  </div>
-
-  <div class="help-steps">
-    <div class="help-step">
-      <span>1</span>
-      <div>
-        <strong data-i18n="help_step1_title">명령어로 만들기</strong>
-        <p data-i18n="help_step1_body">"별 그려줘", "하트 그려줘"처럼 입력하면 촉각그래픽을 만들 수 있어요.</p>
-      </div>
-    </div>
-
-    <div class="help-step">
-      <span>2</span>
-      <div>
-        <strong data-i18n="help_step2_title">이미지 불러오기</strong>
-        <p data-i18n="help_step2_body">이미지나 .dtms/.dtm 파일을 불러올 수 있어요.</p>
-      </div>
-    </div>
-
-    <div class="help-step">
-      <span>3</span>
-      <div>
-        <strong data-i18n="help_step3_title">필요한 부분 자르기</strong>
-        <p data-i18n="help_step3_body">이미지를 불러온 뒤 필요한 영역만 간단히 잘라 변환할 수 있어요.</p>
-      </div>
-    </div>
-
-    <div class="help-step">
-      <span>4</span>
-      <div>
-        <strong data-i18n="help_step4_title">읽기 쉽게 조정</strong>
-        <p data-i18n="help_step4_body">이미지는 임계값과 윤곽선, 명령어 그래픽은 점 밀도 중심으로 조정해요.</p>
-      </div>
-    </div>
-
-    <div class="help-step">
-      <span>5</span>
-      <div>
-        <strong data-i18n="help_step5_title">Dot Pad로 보내기</strong>
-        <p data-i18n="help_step5_body">완성된 촉각그래픽을 Dot Pad로 출력해요.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Crop Modal -->
-<div class="modal-bg" id="cropModal" role="dialog" aria-modal="true" aria-label="이미지 자르기">
-  <div class="crop-inner">
-    <div class="crop-head">
-      <span class="crop-title" data-i18n="crop_title">이미지 자르기</span>
-      <button id="cropCloseBtn" type="button" class="crop-close" aria-label="닫기">×</button>
-    </div>
-    <div class="crop-canvas-area">
-      <canvas id="cropCanvas"></canvas>
-    </div>
-    <div class="crop-ratio-row">
-      <button class="crop-ratio-btn" data-ratio="full" data-i18n="crop_full">전체 이미지</button>
-      <button class="crop-ratio-btn active" data-ratio="3:2" data-i18n="crop_ratio_3_2">60×40 비율</button>
-      <button class="crop-ratio-btn" data-ratio="free" data-i18n="crop_ratio_free">자유 비율</button>
-    </div>
-    <div class="crop-foot">
-      <button id="cropCancelBtn" type="button" class="crop-btn-cancel" data-i18n="crop_cancel">취소</button>
-      <button id="cropOriginalBtn" type="button" class="crop-btn-orig" data-i18n="crop_use_original">그대로 변환</button>
-      <button id="cropConfirmBtn" type="button" class="crop-btn-confirm" data-i18n="crop_confirm">자르고 변환</button>
-    </div>
-  </div>
-</div>
-
-<!-- Resolution Change Modal -->
-<div class="modal-bg" id="resChangeModal" role="dialog" aria-modal="true" aria-labelledby="resChangeTitle">
-  <div class="modal">
-    <h2 id="resChangeTitle" data-i18n="res_change_title">해상도 변경</h2>
-    <p id="resChangeDesc"></p>
-    <div class="modal-btns">
-      <button id="resChangeConfirm" class="acc">이미지 기준 재변환</button>
-      <button id="resChangeAlt">점 데이터 맞춤 변환</button>
-      <button id="resChangeCancel" data-i18n="guard_cancel">취소</button>
-    </div>
-  </div>
-</div>
-
 <!-- Guard Modal -->
 <div class="modal-bg" id="guardModal" role="dialog" aria-modal="true" aria-labelledby="guardTitle">
   <div class="modal">
@@ -1821,5 +1201,8 @@ body[data-kind="image"] #recropRow { display: block }
 <div aria-live="polite" aria-atomic="true" class="sr-only" id="liveRegion"></div>
 
 <script type="module" src="js/app.js"></script>
+<!-- 무료 백엔드(Supabase) 연동 + PWA — app.js 다음에 로드 -->
+<script type="module" src="js/cloud-integration.js"></script>
+<script type="module" src="js/pwa-register.js"></script>
 </body>
 </html>
