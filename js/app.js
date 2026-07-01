@@ -19,7 +19,7 @@ import {
 
 import { interpretCommand, QUICK_COMMANDS } from './commands.js';
 import { drawPrimitive, renderBrailleGrid, describeTactile } from './generate.js';
-import { initBank, loadSymbol, searchSymbols, loadSymbolById } from './bank.js';
+import { initBank, loadSymbol } from './bank.js';
 import { svgIcon } from './icons.js';
 import { renderMathGraph } from './mathgraph.js';
 
@@ -35,17 +35,11 @@ import {
 
 import { exportDtms, exportPng, exportJson, copyHexToClipboard, parseDtms } from './export.js';
 import { t } from './i18n.js';
-import { openImageCropModal } from './crop.js';
 
 // ─── DOM helpers ──────────────────────────────────────────────
 const ge  = id => document.getElementById(id);
 const qs  = s  => document.querySelector(s);
 const qsa = s  => [...document.querySelectorAll(s)];
-const MOBILE_MODE_QUERY = '(max-width: 720px)';
-
-function setPressed(el, active) {
-  if (el) el.setAttribute('aria-pressed', String(active));
-}
 
 // ─── Toast ────────────────────────────────────────────────────
 let _toastTimer = null;
@@ -67,65 +61,6 @@ function announce(text) {
   if (live && text) { live.textContent = ''; setTimeout(() => { live.textContent = text; }, 40); }
 }
 
-// ─── Floating Help ────────────────────────────────────────────
-const HELP_SEEN_KEY = 'dotcanvas_help_seen';
-
-function initHelp() {
-  const helpFab = ge('helpFab');
-  const helpPanel = ge('helpPanel');
-  const helpClose = ge('helpClose');
-  if (!helpFab || !helpPanel || helpFab.dataset.ready === 'true') return;
-
-  helpFab.dataset.ready = 'true';
-
-  try {
-    if (!localStorage.getItem(HELP_SEEN_KEY)) {
-      document.body.classList.add('show-help-nudge');
-    }
-  } catch {
-    document.body.classList.add('show-help-nudge');
-  }
-
-  const markHelpSeen = () => {
-    try { localStorage.setItem(HELP_SEEN_KEY, '1'); } catch {}
-    document.body.classList.remove('show-help-nudge');
-  };
-
-  const openHelp = () => {
-    markHelpSeen();
-    helpPanel.hidden = false;
-    helpFab.setAttribute('aria-expanded', 'true');
-    helpClose?.focus();
-  };
-
-  const closeHelp = () => {
-    helpPanel.hidden = true;
-    helpFab.setAttribute('aria-expanded', 'false');
-    helpFab.focus();
-  };
-
-  helpFab.addEventListener('click', () => {
-    if (helpPanel.hidden) openHelp();
-    else closeHelp();
-  });
-
-  helpClose?.addEventListener('click', closeHelp);
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !helpPanel.hidden) closeHelp();
-  });
-
-  document.addEventListener('click', e => {
-    if (
-      !helpPanel.hidden &&
-      !helpPanel.contains(e.target) &&
-      !helpFab.contains(e.target)
-    ) {
-      closeHelp();
-    }
-  });
-}
-
 // ─── Canvas elements ──────────────────────────────────────────
 let padEl, ctx, layout;
 let bankReady = false;   // symbol bank loaded (see initBank in init())
@@ -140,9 +75,7 @@ function initCanvas() {
 }
 
 function fitCanvas() {
-  const area = appState.mode === 'mini'
-    ? qs('.mini-canvas-card')
-    : qs('.canvas-area') || qs('.mini-canvas-card');
+  const area = qs('.canvas-area') || qs('.mini-canvas-card');
   if (!area || !padEl) return;
   const aw = Math.max(240, area.clientWidth  - 24);
   const ah = Math.max(160, area.clientHeight - 24);
@@ -183,50 +116,13 @@ function drawCanvas() {
 }
 
 // ─── App Phase ────────────────────────────────────────────────
-function syncCommandUI() {
-  const isEmpty = appState.phase === 'empty';
-  const isReady = appState.phase === 'ready';
-  const isBusy = appState.phase === 'analyzing' || appState.phase === 'loading';
-  const headerPrompt = ge('promptInput');
-  const heroPrompt = ge('heroPromptInput');
-  const headerForm = ge('promptForm');
-  const heroForm = ge('heroPromptForm');
-
-  document.body.classList.toggle('is-empty', isEmpty);
-  document.body.classList.toggle('is-ready', isReady);
-  document.body.classList.toggle('is-loading', isBusy);
-
-  if (headerPrompt) headerPrompt.disabled = !isReady;
-  if (heroPrompt) heroPrompt.disabled = !isEmpty || isBusy;
-  headerForm?.setAttribute('aria-disabled', String(!isReady));
-  heroForm?.setAttribute('aria-disabled', String(!isEmpty || isBusy));
-  heroForm?.classList.toggle('is-disabled', !isEmpty || isBusy);
-  ge('heroPromptSubmit')?.toggleAttribute('disabled', !isEmpty || isBusy);
-  qsa('.hero-chip').forEach(btn => btn.toggleAttribute('disabled', !isEmpty || isBusy));
-  qsa('.hero-secondary button').forEach(btn => btn.toggleAttribute('disabled', !isEmpty || isBusy));
-  if (!isReady) hidePromptSuggestions();
-}
-
 function setPhase(phase) {
-  const prev = appState.phase;
   appState.phase = phase;
   document.body.dataset.state = phase;
-  syncCommandUI();
   syncBottomBar();
-  syncConvPanel();
   if (phase === 'ready') {
     const badge = qs('.ai-done-badge');
     if (badge) badge.style.display = '';
-    // fade-in canvas when transitioning from empty or analyzing
-    if (prev !== 'ready') {
-      const wrap = ge('dotGridWrap');
-      if (wrap) {
-        wrap.classList.remove('fadein');
-        void wrap.offsetWidth;
-        wrap.classList.add('fadein');
-        setTimeout(() => wrap.classList.remove('fadein'), 350);
-      }
-    }
   }
 }
 
@@ -257,7 +153,6 @@ function redo() {
 
 function afterChange() {
   appState.isDirty = true;
-  if (appState.phase !== 'ready' && canvasState.data.some(v => v)) setPhase('ready');
   saveCurrentPageState();
   drawCanvas();
   syncQuality();
@@ -277,36 +172,10 @@ async function loadImageFile(file) {
   const img = new Image();
   img.onload = () => {
     URL.revokeObjectURL(src);
-    const name = file.name.replace(/\.[^.]+$/, '');
-    openImageCropModal({
-      image: img,
-      fileName: name,
-      onConfirm: async croppedImg => {
-        const page = pagesState.activePage;
-        if (page) page.originalImage = img;
-        startAnalyze(croppedImg, name);
-      },
-      onUseOriginal: () => {
-        const page = pagesState.activePage;
-        if (page) page.originalImage = img;
-        startAnalyze(img, name);
-      },
-    });
+    startAnalyze(img, file.name.replace(/\.[^.]+$/, ''));
   };
-  img.onerror = () => { URL.revokeObjectURL(src); toast(t('toast_img_err', appState.language)); };
+  img.onerror = () => { URL.revokeObjectURL(src); toast('이미지를 불러올 수 없어요'); };
   img.src = src;
-}
-
-function reCrop() {
-  const page = pagesState.activePage;
-  const img = page?.originalImage || page?.sourceImage;
-  if (!img) return;
-  openImageCropModal({
-    image: img,
-    fileName: appState.fileName,
-    onConfirm: async croppedImg => { startAnalyze(croppedImg, appState.fileName); },
-    onUseOriginal: () => { startAnalyze(img, appState.fileName); },
-  });
 }
 
 function startAnalyze(img, name) {
@@ -324,7 +193,6 @@ function startAnalyze(img, name) {
     const sourceState = createSourceImageState(img, canvasState.width, canvasState.height);
     const meta = analyzeImageType(sourceState.grayBuf, sourceState.alphaBuf, canvasState.width, canvasState.height);
     setActivePageSourceImage(sourceState, meta, img);
-    { const pg = pagesState.activePage; if (pg) pg.sourceKind = 'image'; }
 
     const bestParams = autoSelectParams(sourceState, canvasState.width, canvasState.height);
     Object.assign(conversionState, bestParams);
@@ -346,7 +214,6 @@ function finishAnalyze() {
   drawCanvas();
   syncQuality();
   syncConvUI();
-  syncConvPanel();
   syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
   toast(t('toast_converted', appState.language), 'ok');
   // Accessibility: announce a one-line tactile summary to the live region so
@@ -354,22 +221,15 @@ function finishAnalyze() {
   announce(describeTactile(canvasState.data, canvasState.width, canvasState.height, appState.language));
 }
 
-async function loadTactileFile(file) {
-  if (!file) return;
-  if (appState.isDirty && appState.phase === 'ready') {
-    const proceed = await guardUnsavedChanges();
-    if (!proceed) return;
-  }
+function loadTactileFile(file) {
   const reader = new FileReader();
   reader.onload = async e => {
     try {
       const { parseDtms } = await import('./export.js');
-      const { fileName: parsedFileName, pages: items, cols, rows } = parseDtms(e.target.result);
+      const { fileName, pages: items, cols, rows } = parseDtms(e.target.result);
       if (!items.length) return;
-      const importedFileName = (file.name || '').replace(/\.[^.]+$/, '').trim();
-      const displayFileName = importedFileName || parsedFileName || 'Untitled';
-      appState.fileName = displayFileName;
-      const inp = ge('fname'); if (inp) inp.value = displayFileName;
+      appState.fileName = fileName;
+      const inp = ge('fname'); if (inp) inp.value = fileName;
 
       // Use file's own resolution if present, otherwise keep current canvas size
       const w = cols || canvasState.width;
@@ -378,35 +238,21 @@ async function loadTactileFile(file) {
       pagesState.pages = items.map(item => {
         const page = createBlankPage(w, h);
         page.title = item.title;
-        page.sourceKind = 'tactile';
         page.canvasData = hexToGrid(item.hex, w, h);
         page.activeDots = page.canvasData.reduce((s, v) => s + v, 0);
         page.altText = item.altText;
         return page;
       });
       canvasState.width = w; canvasState.height = h;
-      loadPageState(0, { saveCurrent: false });
-      setPhase(canvasState.activeDots > 0 ? 'ready' : 'empty');
-      toolState.undoStack = [];
-      toolState.redoStack = [];
-      appState.isDirty = false;
+      loadPageState(0);
       drawCanvas(); syncQuality();
-      syncPageUI(); syncConvUI(); syncConvPanel(); fitCanvas();
-      syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
-      toast(displayFileName + ' ' + t('toast_file_loaded', appState.language), 'ok');
-      announce(describeTactile(canvasState.data, canvasState.width, canvasState.height, appState.language));
-    } catch (err) {
-      console.error('[dtms] load failed:', err);
-      toast(t('toast_file_err', appState.language));
+      syncPageUI(); fitCanvas();
+      toast(fileName + ' 불러왔어요 ✓', 'ok');
+    } catch {
+      toast('파일을 읽을 수 없어요');
     }
   };
-  reader.onerror = () => toast(t('toast_file_err', appState.language));
   reader.readAsText(file);
-}
-
-function isTactileFile(file) {
-  const name = (file?.name || '').toLowerCase();
-  return name.endsWith('.dtms') || name.endsWith('.dtm') || name.endsWith('.json');
 }
 
 // ─── Conversion Rebuild ───────────────────────────────────────
@@ -433,61 +279,6 @@ function doRebuild(page) {
   syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
 }
 
-// ─── Morphology utilities (for generated graphics) ────────────
-function dilateGrid(src, cols, rows) {
-  const out = new Uint8Array(src);
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (!src[y * cols + x]) continue;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const nx = x + dx, ny = y + dy;
-          if (nx >= 0 && ny >= 0 && nx < cols && ny < rows) out[ny * cols + nx] = 1;
-        }
-      }
-    }
-  }
-  return out;
-}
-
-function erodeGrid(src, cols, rows) {
-  const out = new Uint8Array(src);
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const i = y * cols + x;
-      if (!src[i]) continue;
-      let keep = true;
-      outer: for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const nx = x + dx, ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= cols || ny >= rows || !src[ny * cols + nx]) { keep = false; break outer; }
-        }
-      }
-      out[i] = keep ? 1 : 0;
-    }
-  }
-  return out;
-}
-
-function applyGeneratedDensity(value) {
-  const page = pagesState.activePage;
-  if (!page || page.sourceKind !== 'generated' || !page.generatedBaseData) return false;
-  const cols = canvasState.width, rows = canvasState.height;
-  let next = new Uint8Array(page.generatedBaseData);
-  const diff = value - 128;
-  const steps = Math.min(4, Math.round(Math.abs(diff) / 28));
-  if (diff > 0) {
-    for (let i = 0; i < steps; i++) next = dilateGrid(next, cols, rows);
-  } else if (diff < 0) {
-    for (let i = 0; i < steps; i++) next = erodeGrid(next, cols, rows);
-  }
-  canvasState.data = next;
-  page.canvasData = new Uint8Array(next);
-  drawCanvas(); syncQuality();
-  syncLivePreview(canvasState.data, cols, rows);
-  return true;
-}
-
 // ─── Threshold slider ─────────────────────────────────────────
 function paintSlider(v) {
   const pct = Math.round((v - 20) / 220 * 100);
@@ -504,39 +295,13 @@ function paintSlider(v) {
   const mval = ge('miniThVal'); if (mval) mval.textContent = pct + '%';
 }
 
-function updateThresholdOrDensity(value, delay = 120) {
-  const page = pagesState.activePage;
-  if (page?.sourceKind === 'generated') {
-    const v = Math.max(20, Math.min(240, value));
-    conversionState.threshold = v;
-    const sl = ge('thSlider');
-    if (sl) sl.value = v;
-    paintSlider(v);
-    qsa('.gen-style-btn').forEach(b => b.classList.toggle('active', +b.dataset.density === v));
-    applyGeneratedDensity(v);
-    return;
-  }
-  if (!page?.sourceImageState) {
-    syncConvPanel();
-    return;
-  }
-  const v = Math.max(20, Math.min(240, value));
-  conversionState.threshold = v;
-  const sl = ge('thSlider');
-  if (sl) sl.value = v;
-  paintSlider(v);
-  conversionState.method = 'global';
-  rebuild(delay);
-  syncConvUI();
-}
-
 // ─── Quality Panel ────────────────────────────────────────────
-const AI_MSG_KEYS = {
-  transparent: 'ai_msg_transparent',
-  lineart:     'ai_msg_lineart',
-  lowcontrast: 'ai_msg_lowcontrast',
-  photo:       'ai_msg_photo',
-  default:     'ai_msg_default',
+const AI_MSGS = {
+  transparent: '배경을 제거하고 주요 윤곽을 남겼어요. 손끝으로 형태를 구분하기 좋아요.',
+  lineart:     '선화를 감지했어요. 주요 윤곽선을 핀으로 직접 변환했어요.',
+  lowcontrast: '대비가 낮은 이미지예요. 핵심 구조를 찾아 변환했어요.',
+  photo:       '사진을 감지했어요. 주요 윤곽과 핵심 구조를 중심으로 단순화했어요.',
+  default:     'AI가 주요 윤곽과 핵심 구조를 분석해 손가락으로 읽기 쉬운 형태로 정리했어요.',
 };
 
 function pill(el, txt, kind) {
@@ -545,28 +310,15 @@ function pill(el, txt, kind) {
   el.className = 'pill pill-' + kind;
 }
 
-function syncCanvasMeta(cols, rows, pins, fill, hasContent) {
-  const lang = appState.language;
-  const resText = `${cols}×${rows}`;
-  const dotText = `${pins.toLocaleString()} ${t('pin_unit', lang)} · ${fill}%`;
-  const dotCls = fill < 10 ? 'chip chip-w' : fill < 45 ? 'chip chip-ok' : 'chip chip-w';
-  const btmDotCls = fill < 10 ? 'chip-w' : fill < 45 ? 'chip-ok' : 'chip-w';
-  const resCh = ge('resChip'); if (resCh) resCh.textContent = resText;
-  const dotCh = ge('dotChip'); if (dotCh) { dotCh.textContent = dotText; dotCh.className = dotCls; }
-  const resCh2 = ge('resChipBtm'); if (resCh2) resCh2.textContent = resText;
-  const dotCh2 = ge('dotChipBtm'); if (dotCh2) { dotCh2.textContent = dotText; dotCh2.className = 'dot-chip ' + btmDotCls; }
-  syncBtns(hasContent);
-}
-
 function syncQuality() {
   const lang = appState.language;
   if (appState.phase !== 'ready') { resetQuality(); return; }
   const { data: g, width: cols, height: rows } = canvasState;
   const n = cols * rows;
   const pins = g.reduce((s, v) => s + v, 0);
-  const fill = n ? Math.round(pins / n * 100) : 0;
+  const fill = Math.round(pins / n * 100);
 
-  if (pins === 0) { resetQuality({ cols, rows, pins, fill }); return; }
+  if (pins === 0) { resetQuality(); return; }
 
   const page = pagesState.activePage;
   const meta = page?.sourceImageMeta;
@@ -579,7 +331,7 @@ function syncQuality() {
   const df = ge('densityFill');
   if (df) {
     df.style.width = Math.min(100, fill) + '%';
-    df.style.background = fill < 15 ? '#15803D' : fill < 40 ? '#FF9500' : '#DC2626';
+    df.style.background = fill < 15 ? '#10B981' : fill < 40 ? '#FBBF24' : '#FB7185';
   }
 
   const fillState = fill < 10 ? t('state_low', lang)
@@ -596,10 +348,10 @@ function syncQuality() {
 
   // AI feedback
   if (meta) {
-    const base = t(AI_MSG_KEYS[meta.type] || AI_MSG_KEYS.default, lang);
-    let extra = fill >= 50 ? t('ai_extra_dense', lang)
-      : fill < 10 ? t('ai_extra_sparse', lang)
-      : t('ai_extra_ok', lang);
+    const base = AI_MSGS[meta.type] || AI_MSGS.default;
+    let extra = fill >= 50 ? ' 점 밀도가 높아요. 윤곽 중심으로 단순화해보세요.'
+      : fill < 10 ? ' 점이 너무 적어요. 점 밀도를 조금 높여보세요.'
+      : ' 현재 점 밀도는 Dot Pad에서 읽기에 적정해요.';
     const aiTxt = ge('aiFeedbackText');
     if (aiTxt) aiTxt.textContent = base + extra;
     const card = ge('aiFeedbackCard'); if (card) card.style.display = 'block';
@@ -608,25 +360,24 @@ function syncQuality() {
   }
 
   // canvas meta strip + bottom bar chips
-  syncCanvasMeta(cols, rows, pins, fill, true);
+  const resText = `${cols}×${rows}`;
+  const dotText = `${pins.toLocaleString()} 핀 · ${fill}%`;
+  const dotCls  = fill < 10 ? 'chip chip-w' : fill < 45 ? 'chip chip-ok' : 'chip chip-w';
+  const resCh = ge('resChip'); if (resCh) resCh.textContent = resText;
+  const dotCh = ge('dotChip'); if (dotCh) { dotCh.textContent = dotText; dotCh.className = dotCls; }
+  const resCh2 = ge('resChipBtm'); if (resCh2) resCh2.textContent = resText;
+  const dotCh2 = ge('dotChipBtm'); if (dotCh2) { dotCh2.textContent = dotText; dotCh2.className = 'dot-chip ' + (fill < 10 ? 'chip-w' : fill < 45 ? 'chip-ok' : 'chip-w'); }
+  syncBtns(true);
 }
 
-function resetQuality(meta) {
+function resetQuality() {
   ['qClarity','qDensity','qReadability','qStructure'].forEach(id => {
     const el = ge(id); if (el) { el.textContent = '—'; el.className = 'pill pill-neutral'; }
   });
-  const qd = ge('qDotCount'); if (qd) qd.textContent = meta ? meta.pins.toLocaleString() : '0';
-  const qs2 = ge('qDotSub'); if (qs2) qs2.textContent = meta ? `/ ${(meta.cols * meta.rows).toLocaleString()} · ${meta.fill}%` : '/ 0 · 0%';
-  const df = ge('densityFill');
-  if (df) {
-    df.style.width = meta ? Math.min(100, meta.fill) + '%' : '0%';
-    df.style.background = '#15803D';
-  }
   const card = ge('aiFeedbackCard'); if (card) card.style.display = 'none';
   const empty = ge('aiFeedbackEmpty'); if (empty) { empty.style.display = ''; empty.textContent = t('ai_empty', appState.language); }
   const chips = ge('aiChips'); if (chips) chips.style.display = 'none';
-  if (meta) syncCanvasMeta(meta.cols, meta.rows, meta.pins, meta.fill, false);
-  else syncBtns(false);
+  syncBtns(false);
 }
 
 function renderAiChips(fill, sc) {
@@ -635,10 +386,9 @@ function renderAiChips(fill, sc) {
   if (fill >= 50) cmds = ['simpler', 'denoise'];
   else if (fill < 10) cmds = ['auto', 'boost'];
   else cmds = ['simpler', 'outline'];
-  const lang = appState.language;
   const labels = {
-    simpler: t('ai_chip_simpler', lang), denoise: t('ai_chip_denoise', lang),
-    auto: t('ai_chip_auto', lang), boost: t('ai_chip_boost', lang), outline: t('ai_chip_outline', lang),
+    simpler: '윤곽 중심으로 변환', denoise: '점 밀도 낮추기',
+    auto: '윤곽 다시 감지', boost: '점 밀도 높이기', outline: '외곽선 1줄',
   };
   el.style.display = 'flex';
   el.innerHTML = cmds.map(cmd => `<button class="ai-ch" data-cmd="${cmd}">${labels[cmd]}</button>`).join('');
@@ -660,17 +410,9 @@ function applyAiCmd(cmd) {
 // ─── Sync conversion UI ───────────────────────────────────────
 function syncConvUI() {
   // method tabs
-  qsa('.th-method-btn').forEach(b => {
-    const active = b.dataset.method === conversionState.method;
-    b.classList.toggle('active', active);
-    setPressed(b, active);
-  });
+  qsa('.th-method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === conversionState.method));
   // outline buttons
-  qsa('.outline-btn').forEach(b => {
-    const active = +b.dataset.outline === conversionState.outline;
-    b.classList.toggle('active', active);
-    setPressed(b, active);
-  });
+  qsa('.outline-btn').forEach(b => b.classList.toggle('active', +b.dataset.outline === conversionState.outline));
   // invert toggle
   const inv = ge('invertToggle');
   if (inv) inv.setAttribute('aria-checked', String(conversionState.invert));
@@ -689,84 +431,8 @@ function syncConvUI() {
     edgeEl.setAttribute('aria-pressed', String(isOn));
   }
   // a manual control change means we're no longer on a named preset
-  qsa('.preset-btn').forEach(b => {
-    b.classList.remove('active');
-    setPressed(b, false);
-  });
+  qsa('.preset-btn').forEach(b => b.classList.remove('active'));
   updatePresetChip();
-}
-
-function syncConvPanel() {
-  const page = pagesState.activePage;
-  const kind = page?.sourceKind || 'drawn';
-  const hasSourceImage = !!page?.sourceImageState;
-  const isGeneratedMode = kind === 'generated' && appState.phase === 'ready';
-  const isDotEditMode = !hasSourceImage && !isGeneratedMode && appState.phase === 'ready';
-  const canAdjustSlider = hasSourceImage || isGeneratedMode;
-  document.body.dataset.kind = kind;
-  document.body.dataset.hasSourceImage = String(hasSourceImage);
-  document.body.dataset.controlMode = hasSourceImage ? 'image' : isGeneratedMode ? 'generated' : isDotEditMode ? 'dot' : 'empty';
-  const thLabel = ge('thLabel');
-  const convTitle = ge('convPanelTitle');
-  const modeChip = ge('sourceModeChip');
-  const helper = ge('thHelperText');
-  const miniTitle = ge('miniModeTitle');
-  const miniChip = ge('miniModeChip');
-  const miniHelp = ge('miniModeHelp');
-  const miniLabel = ge('miniThLabel');
-  const controls = ['thSlider', 'thMinus', 'thPlus', 'thAuto'];
-
-  const lang = appState.language;
-  if (hasSourceImage) {
-    if (thLabel) thLabel.textContent = t('conv_label_sensitivity', lang);
-    if (convTitle) convTitle.textContent = t('conv_title_image', lang);
-    if (modeChip) modeChip.textContent = t('conv_chip_image', lang);
-    if (helper) helper.textContent = t('conv_helper_image', lang);
-    if (miniTitle) miniTitle.textContent = t('conv_label_sensitivity', lang);
-    if (miniChip) miniChip.textContent = t('conv_chip_image', lang);
-    if (miniHelp) miniHelp.textContent = t('conv_helper_image', lang);
-    if (miniLabel) miniLabel.textContent = t('conv_label_sensitivity', lang);
-  } else if (isGeneratedMode) {
-    if (thLabel) thLabel.textContent = t('conv_label_density', lang);
-    if (convTitle) convTitle.textContent = t('conv_title_generated', lang);
-    if (modeChip) modeChip.textContent = t('conv_chip_generated', lang);
-    if (helper) helper.textContent = t('conv_helper_generated', lang);
-    if (miniTitle) miniTitle.textContent = t('conv_label_density', lang);
-    if (miniChip) miniChip.textContent = t('conv_chip_generated', lang);
-    if (miniHelp) miniHelp.textContent = t('conv_helper_generated', lang);
-    if (miniLabel) miniLabel.textContent = t('conv_label_density', lang);
-  } else if (isDotEditMode) {
-    if (convTitle) convTitle.textContent = t('conv_title_dot', lang);
-    if (modeChip) modeChip.textContent = t('conv_chip_dot', lang);
-    if (helper) helper.textContent = t('conv_helper_dot', lang);
-    if (miniTitle) miniTitle.textContent = t('conv_title_dot', lang);
-    if (miniChip) miniChip.textContent = t('conv_chip_dot', lang);
-    if (miniHelp) miniHelp.textContent = t('dot_edit_help', lang);
-    if (miniLabel) miniLabel.textContent = t('conv_title_dot', lang);
-  } else {
-    if (thLabel) thLabel.textContent = t('conv_label_sensitivity', lang);
-    if (convTitle) convTitle.textContent = t('conv_title_image', lang);
-    if (modeChip) modeChip.textContent = t('conv_chip_empty', lang);
-    if (helper) helper.textContent = t('conv_helper_empty', lang);
-    if (miniTitle) miniTitle.textContent = t('conv_label_sensitivity', lang);
-    if (miniChip) miniChip.textContent = t('conv_chip_empty', lang);
-    if (miniHelp) miniHelp.textContent = t('conv_helper_empty', lang);
-    if (miniLabel) miniLabel.textContent = t('conv_label_sensitivity', lang);
-  }
-  controls.forEach(id => {
-    const el = ge(id);
-    if (el) el.disabled = id === 'thAuto' ? !hasSourceImage : !canAdjustSlider;
-  });
-  const miniSlider = ge('miniThSlider');
-  if (miniSlider) miniSlider.disabled = !canAdjustSlider;
-  syncDotEditUI();
-}
-
-function noImageMsg(lang) {
-  const kind = pagesState.activePage?.sourceKind;
-  if (kind === 'generated') return t('toast_no_img_generated', lang);
-  if (kind === 'tactile') return t('toast_no_img_tactile', lang);
-  return t('toast_need_image', lang);
 }
 
 // ─── Sync helpers ─────────────────────────────────────────────
@@ -790,15 +456,11 @@ function syncConn() {
   // panel dot
   const dot2 = ge('dpDot'); if (dot2) dot2.className = 'dp-dot' + (on ? ' on' : '');
   const lbl = ge('dpLbl'); if (lbl) lbl.textContent = on ? t('bb_connected', lang) : t('conn_off', lang);
-  const liveSw = ge('liveSwitch');
-  if (liveSw) {
-    liveSw.disabled = !on;
-    liveSw.setAttribute('aria-checked', String(on && dotPadState.livePreviewEnabled));
-  }
-  const bleBtn = ge('bleBtn'); if (bleBtn) bleBtn.textContent = on ? t('conn_disconnect', lang) : t('conn_btn_ble', lang);
+  const liveSw = ge('liveSwitch'); if (liveSw) liveSw.disabled = !on;
+  const bleBtn = ge('bleBtn'); if (bleBtn) bleBtn.textContent = on ? '연결 끊기' : t('conn_btn_ble', lang);
   // mini mode
   const miniDot = ge('miniConnDot'); if (miniDot) miniDot.className = 'dp-dot' + (on ? ' on' : '');
-  const miniBtn = ge('miniConnBtn'); if (miniBtn) miniBtn.textContent = on ? t('conn_disconnect', lang) : t('conn_btn_ble', lang);
+  const miniBtn = ge('miniConnBtn'); if (miniBtn) miniBtn.textContent = on ? '연결 끊기' : 'BLE 연결';
 }
 
 function syncPageUI() {
@@ -809,8 +471,6 @@ function syncPageUI() {
   const next = ge('pageNext'); if (next) next.disabled = cur === total - 1;
   const del = ge('pageDelete'); if (del) del.disabled = total <= 1;
   renderPageChips();
-  syncConvPanel();
-  syncResBtns();
 }
 
 function renderPageChips() {
@@ -818,7 +478,7 @@ function renderPageChips() {
   const total = pagesState.pages.length;
   const cur = pagesState.activePageIndex;
   bar.innerHTML = pagesState.pages.map((p, i) =>
-    `<button class="page-chip${i === cur ? ' active' : ''}" role="tab" data-idx="${i}" aria-selected="${i === cur}" aria-label="${t('page_label', appState.language)} ${i + 1}">${i + 1}</button>`
+    `<button class="page-chip${i === cur ? ' active' : ''}" data-idx="${i}" aria-pressed="${i === cur}">${i + 1}</button>`
   ).join('');
   bar.querySelectorAll('.page-chip').forEach(b =>
     b.addEventListener('click', () => switchPage(+b.dataset.idx))
@@ -846,11 +506,6 @@ function selectTool(name) {
     b.classList.toggle('active', b.dataset.tool === name);
     b.setAttribute('aria-pressed', String(b.dataset.tool === name));
   });
-  qsa('.dot-tool-btn[data-dot-tool]').forEach(b => {
-    const active = b.dataset.dotTool === name;
-    b.classList.toggle('active', active);
-    b.setAttribute('aria-pressed', String(active));
-  });
   if (padEl) padEl.style.cursor = name === 'move' ? 'grab' : 'crosshair';
   drawCanvas();
 }
@@ -861,39 +516,6 @@ function setSize(s) {
     b.classList.toggle('active', +b.dataset.size === s);
     b.setAttribute('aria-pressed', String(+b.dataset.size === s));
   });
-  qsa('.dot-size-btn[data-dot-size]').forEach(b => {
-    const active = +b.dataset.dotSize === s;
-    b.classList.toggle('active', active);
-    b.setAttribute('aria-pressed', String(active));
-  });
-}
-
-function syncDotEditUI() {
-  qsa('.dot-tool-btn[data-dot-tool]').forEach(b => {
-    const active = b.dataset.dotTool === toolState.currentTool;
-    b.classList.toggle('active', active);
-    b.setAttribute('aria-pressed', String(active));
-  });
-  qsa('.dot-size-btn[data-dot-size]').forEach(b => {
-    const active = +b.dataset.dotSize === toolState.brushSize;
-    b.classList.toggle('active', active);
-    b.setAttribute('aria-pressed', String(active));
-  });
-}
-
-function fillAllPins(value) {
-  pushUndo();
-  canvasState.data.fill(value);
-  afterChange();
-  toast(value ? t('toast_pin_up', appState.language) : t('toast_pin_down', appState.language));
-}
-
-function invertAllPins() {
-  pushUndo();
-  const d = canvasState.data;
-  for (let i = 0; i < d.length; i++) d[i] ^= 1;
-  afterChange();
-  toast(t('toast_pin_inv', appState.language));
 }
 
 // ─── Pointer events ───────────────────────────────────────────
@@ -1061,19 +683,12 @@ function guardUnsavedChanges() {
 function placeGeneratedGrid(data, altText) {
   pushUndo();
   canvasState.data = data;
+  setActivePageSourceImage(null, null);
   const page = pagesState.activePage;
-  if (page) {
-    page.sourceKind = 'generated';
-    page.generatedBaseData = new Uint8Array(data);
-    page.sourceImageState = null;
-    page.sourceImageMeta = null;
-    page.sourceImage = null;
-    if (altText) { page.altText = altText; page.brailleText = altText; }
-  }
+  if (page && altText) { page.altText = altText; page.brailleText = altText; }
   if (appState.phase !== 'ready') setPhase('ready');
   appState.isDirty = true;
   afterChange();
-  syncConvPanel();
 }
 
 // ─── Command bar (Figma-mini prompt brain) ───────────────────
@@ -1102,7 +717,7 @@ async function parseCommand(text) {
       const sym = await loadSymbol(text, cols, rows);
       if (sym.source !== 'none' && sym.data) {
         placeGeneratedGrid(sym.data, sym.altText || sym.label);
-        toast(`${sym.label} ${t('toast_drew', appState.language)}`, 'ok');
+        toast(`${sym.label} 그렸어요`, 'ok');
         return;
       }
     } catch (err) { console.warn('[bank] resolve failed:', err.message); }
@@ -1139,7 +754,7 @@ async function parseCommand(text) {
     canvasState.data = autoThinDots(canvasState.data, cols, rows);
     const after = canvasState.data.reduce((s, v) => s + v, 0);
     afterChange();
-    toast(`${intent.reply} (${before}→${after} ${t('pin_unit', lang)})`, 'ok');
+    toast(`${intent.reply} (${before}→${after}핀)`, 'ok');
     return;
   }
 
@@ -1171,7 +786,7 @@ async function parseCommand(text) {
   }
 
   // Everything below needs a converted image.
-  if (!page?.sourceImageState) { toast(noImageMsg(lang)); return; }
+  if (!page?.sourceImageState) { toast(t('toast_need_image', lang)); return; }
   if (!intent.matched) { toast(intent.reply); return; }
 
   pushUndo();
@@ -1182,8 +797,8 @@ async function parseCommand(text) {
     paintSlider(conversionState.threshold);
     syncConvUI();
     rebuild();
-    const gradeTxt = ['', t('state_poor', lang), t('state_warning', lang), t('state_good', lang), t('grade_great', lang)][best.grade] || '';
-    toast(`${intent.reply} · ${t('quality_label', lang)} ${gradeTxt}`.trim(), 'ok');
+    const gradeTxt = ['', '다시 확인', '주의', '좋음', '아주 좋음'][best.grade] || '';
+    toast(`${intent.reply} · 품질 ${gradeTxt}`.trim(), 'ok');
     return;
   }
 
@@ -1228,40 +843,8 @@ function renderPromptSuggestions() {
     parseCommand(b.dataset.cmd);
   }));
 }
-function showPromptSuggestions() {
-  if (appState.phase !== 'ready') return;
-  const b = ge('promptSuggest');
-  if (b) { renderPromptSuggestions(); b.classList.add('show'); }
-}
+function showPromptSuggestions() { const b = ge('promptSuggest'); if (b) { renderPromptSuggestions(); b.classList.add('show'); } }
 function hidePromptSuggestions() { const b = ge('promptSuggest'); if (b) b.classList.remove('show'); }
-
-// ─── Mini bank-search suggest dropdown ────────────────────────
-function _renderBankHits(hits) {
-  const box = ge('miniSuggest'); if (!box) return;
-  if (!hits.length) { box.innerHTML = ''; box.classList.remove('show'); return; }
-  box.innerHTML = hits.slice(0, 8).map(e =>
-    `<button class="mini-suggest-item" role="option" data-bank-id="${e.id}">
-       <span class="ps-icon">${svgIcon(e.icon || 'shapes')}</span>
-       <span class="mini-suggest-label">${e.label}</span>
-     </button>`
-  ).join('');
-  box.querySelectorAll('.mini-suggest-item').forEach(btn => {
-    btn.addEventListener('mousedown', async ev => {
-      ev.preventDefault();
-      const inp = ge('miniPromptInput'); if (inp) inp.value = '';
-      box.innerHTML = ''; box.classList.remove('show');
-      const { width: cols, height: rows } = canvasState;
-      try {
-        const sym = await loadSymbolById(btn.dataset.bankId, cols, rows);
-        if (sym.data) {
-          placeGeneratedGrid(sym.data, sym.altText || sym.label);
-          toast(`${sym.label} ${t('toast_drew', appState.language)}`, 'ok');
-        }
-      } catch (err) { console.warn('[bank] hit load failed:', err.message); }
-    });
-  });
-  box.classList.add('show');
-}
 
 /** Surface a generated description in the AI feedback card + screen-reader live region. */
 function showDescription(text) {
@@ -1279,11 +862,7 @@ function setLanguage(lang) {
   appState.language = lang;
   document.documentElement.lang = lang === 'ko' ? 'ko' : 'en';
   applyI18n();
-  qsa('.lang-btn').forEach(b => {
-    const active = b.dataset.lang === lang;
-    b.classList.toggle('active', active);
-    setPressed(b, active);
-  });
+  qsa('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
 }
 
 function applyI18n() {
@@ -1293,10 +872,7 @@ function applyI18n() {
     const v = t(key, lang); if (v) el.textContent = v;
   });
   const ph = ge('promptInput'); if (ph) ph.placeholder = t('prompt_ph', lang);
-  const heroPh = ge('heroPromptInput'); if (heroPh) heroPh.placeholder = t('hero_ph', lang);
-  const miniPh = ge('miniPromptInput'); if (miniPh) miniPh.placeholder = t('mini_ph', lang);
-  const dotHelp = ge('dotEditHelp'); if (dotHelp) dotHelp.textContent = t('dot_edit_help', lang);
-  syncQuality(); syncConn(); syncConvPanel();
+  syncQuality(); syncConn();
   updatePresetChip();
 }
 
@@ -1314,160 +890,25 @@ function updatePresetChip() {
 }
 
 // ─── Resolution change ────────────────────────────────────────
-
-/** Nearest-neighbor scale of a dot grid to a new resolution. */
-function resampleDots(src, srcCols, srcRows, dstCols, dstRows) {
-  const dst = new Uint8Array(dstCols * dstRows);
-  for (let dy = 0; dy < dstRows; dy++) {
-    for (let dx = 0; dx < dstCols; dx++) {
-      const sx = Math.min(Math.round(dx * srcCols / dstCols), srcCols - 1);
-      const sy = Math.min(Math.round(dy * srcRows / dstRows), srcRows - 1);
-      dst[dy * dstCols + dx] = src[sy * srcCols + sx];
-    }
-  }
-  return dst;
-}
-
-/** Sync resolution button active states to current canvas size. */
-function syncResBtns() {
-  const key = `${canvasState.width}x${canvasState.height}`;
-  qsa('.res-btn[data-res]').forEach(b => {
-    const active = b.dataset.res === key;
-    b.classList.toggle('active', active);
-    setPressed(b, active);
-  });
-  qsa('[data-mini-res]').forEach(b => {
-    const active = b.dataset.miniRes === key;
-    b.classList.toggle('active', active);
-    setPressed(b, active);
-  });
-}
-
-/** Show resolution-change confirmation dialog.
- *  mode 'manual_edit' → reconvert warning.
- *  mode 'no_source'   → resample / blank choice.
- *  Returns: 'reconvert' | 'resample' | 'blank' | null (cancel).
- */
-function showResChangeDialog(mode) {
-  return new Promise(resolve => {
-    const modal = ge('resChangeModal');
-    if (!modal) return resolve(mode === 'manual_edit' ? 'reconvert' : null);
-    const lang = appState.language;
-    const desc        = ge('resChangeDesc');
-    const confirmBtn  = ge('resChangeConfirm');
-    const altBtn      = ge('resChangeAlt');
-    const cancelBtn   = ge('resChangeCancel');
-    if (desc) desc.textContent = t(
-      mode === 'manual_edit' ? 'res_change_warn_manual' : 'res_change_no_src', lang);
-    if (confirmBtn) confirmBtn.textContent = t(
-      mode === 'manual_edit' ? 'res_change_reconvert' : 'res_change_resample', lang);
-    if (altBtn) {
-      altBtn.textContent = t('res_change_blank', lang);
-      altBtn.style.display = mode === 'no_source' ? '' : 'none';
-    }
-    modal.style.display = 'flex';
-    const close = r => { modal.style.display = 'none'; resolve(r); };
-    confirmBtn?.addEventListener('click', () => close(mode === 'manual_edit' ? 'reconvert' : 'resample'), { once: true });
-    altBtn?.addEventListener('click',    () => close('blank'),   { once: true });
-    cancelBtn?.addEventListener('click', () => close(null),      { once: true });
-  });
-}
-
-let _resChangeBusy = false;
-
-async function setResolution(cols, rows) {
-  if (_resChangeBusy) return;
+function setResolution(cols, rows) {
   if (canvasState.width === cols && canvasState.height === rows) return;
-
-  _resChangeBusy = true;
-  try {
-    const page    = pagesState.activePage;
-    const srcImg  = page?.sourceImage || page?.originalImage;
-    const hasContent = canvasState.data.some(v => v);
-
-    if (srcImg) {
-      // Source image available — reconvert at new resolution.
-      // Warn first if the user has manually edited since last conversion.
-      if (toolState.undoStack.length > 0) {
-        const choice = await showResChangeDialog('manual_edit');
-        if (!choice) return;
-      }
-      _doResolutionWithImage(srcImg, cols, rows);
-      return;
-    }
-
-    // Generated content (shape/graph/symbol via command) — auto-resample silently.
-    if (page?.sourceKind === 'generated') {
-      _doResolutionResample(cols, rows);
-      return;
-    }
-
-    if (hasContent) {
-      // No source image but canvas has content — ask what to do.
-      const choice = await showResChangeDialog('no_source');
-      if (!choice) return;
-      if (choice === 'resample') _doResolutionResample(cols, rows);
-      else                       _doResolutionBlank(cols, rows);
-      return;
-    }
-
-    // Empty canvas — just resize silently.
-    _doResolutionBlank(cols, rows);
-  } finally {
-    _resChangeBusy = false;
-  }
-}
-
-function _doResolutionWithImage(srcImg, cols, rows) {
   const page = pagesState.activePage;
-  const sourceState = createSourceImageState(srcImg, cols, rows);
-  const meta = analyzeImageType(sourceState.grayBuf, sourceState.alphaBuf, cols, rows);
-  canvasState.width = cols; canvasState.height = rows;
-  if (page) { page.width = cols; page.height = rows; }
-  toolState.undoStack = []; toolState.redoStack = [];
-  setActivePageSourceImage(sourceState, meta, srcImg);
-  canvasState.data = convertToDots(sourceState, conversionState, cols, rows);
-  saveCurrentPageState();
-  setPhase('ready');
-  _afterResolutionChange();
-}
-
-function _doResolutionResample(cols, rows) {
-  const page    = pagesState.activePage;
-  const srcData = new Uint8Array(canvasState.data);
-  const srcC = canvasState.width, srcR = canvasState.height;
-  canvasState.width = cols; canvasState.height = rows;
-  canvasState.data  = resampleDots(srcData, srcC, srcR, cols, rows);
-  if (page) {
-    page.width = cols; page.height = rows;
-    // Keep generatedBaseData in sync so applyGeneratedDensity works at the new resolution.
-    if (page.generatedBaseData) {
-      page.generatedBaseData = resampleDots(page.generatedBaseData, srcC, srcR, cols, rows);
-    }
-  }
-  toolState.undoStack = []; toolState.redoStack = [];
-  saveCurrentPageState();
-  setPhase(canvasState.data.some(v => v) ? 'ready' : 'empty');
-  _afterResolutionChange();
-}
-
-function _doResolutionBlank(cols, rows) {
-  const page = pagesState.activePage;
-  canvasState.width = cols; canvasState.height = rows;
-  canvasState.data  = new Uint8Array(cols * rows);
+  const srcImg = page?.sourceImage;
+  canvasState.width  = cols; canvasState.height = rows;
+  canvasState.data   = new Uint8Array(cols * rows);
   if (page) { page.width = cols; page.height = rows; page.canvasData = new Uint8Array(cols * rows); }
   toolState.undoStack = []; toolState.redoStack = [];
-  saveCurrentPageState();
-  setPhase('empty');
-  _afterResolutionChange();
-}
-
-function _afterResolutionChange() {
-  syncResBtns();
-  fitCanvas();
-  syncQuality();
-  syncPageUI();
-  syncLivePreview(canvasState.data, canvasState.width, canvasState.height);
+  if (srcImg) {
+    const sourceState = createSourceImageState(srcImg, cols, rows);
+    const meta = analyzeImageType(sourceState.grayBuf, sourceState.alphaBuf, cols, rows);
+    setActivePageSourceImage(sourceState, meta, srcImg);
+    canvasState.data = convertToDots(sourceState, conversionState, cols, rows);
+    saveCurrentPageState();
+    appState.phase = 'ready'; setPhase('ready');
+  } else {
+    appState.phase = 'empty'; setPhase('empty');
+  }
+  fitCanvas(); syncQuality(); syncPageUI();
 }
 
 // ─── Full Mode wiring ─────────────────────────────────────────
@@ -1481,7 +922,7 @@ function wireFullMode() {
     pushUndo();
     canvasState.data.fill(0);
     afterChange();
-    toast(t('toast_cleared', appState.language));
+    toast('전체 지웠어요');
   });
   ge('brushSizeGroup')?.addEventListener('click', e => {
     const b = e.target.closest('.sz-btn[data-size]'); if (!b) return;
@@ -1497,7 +938,7 @@ function wireFullMode() {
   padEl.addEventListener('drop', e => {
     e.preventDefault();
     const file = e.dataTransfer.files[0]; if (!file) return;
-    if (isTactileFile(file)) loadTactileFile(file);
+    if (file.name.endsWith('.dtms') || file.name.endsWith('.dtm') || file.name.endsWith('.json')) loadTactileFile(file);
     else loadImageFile(file);
   });
 
@@ -1510,53 +951,7 @@ function wireFullMode() {
     const f = e.target.files[0]; if (f) loadTactileFile(f);
     e.target.value = '';
   });
-  // hero prompt (empty-state command card)
-  ge('heroPromptForm')?.addEventListener('submit', e => {
-    e.preventDefault();
-    const inp = ge('heroPromptInput');
-    if (!inp || inp.disabled) return;
-    const text = inp?.value.trim(); if (!text) return;
-    parseCommand(text); if (inp) inp.value = '';
-  });
-  document.querySelectorAll('.hero-chip').forEach(btn => {
-    btn.addEventListener('click', function() {
-      if (this.disabled) return;
-      parseCommand(this.dataset.cmd || this.textContent.trim());
-    });
-  });
-  ge('heroAddImgBtn')?.addEventListener('click', () => ge('imgFileInput')?.click());
-  ge('heroOpenDtmsBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
-
-  // header import dropdown
-  const importBtn = ge('importBtn');
-  const importMenu = ge('importMenu');
-  const closeImportMenu = () => {
-    importMenu?.classList.remove('open');
-    importBtn?.setAttribute('aria-expanded', 'false');
-  };
-  importBtn?.addEventListener('click', e => {
-    e.stopPropagation();
-    if (!importMenu) return;
-    const open = importMenu.classList.toggle('open');
-    importBtn.setAttribute('aria-expanded', String(open));
-    if (open) ge('importImageBtn')?.focus();
-  });
-  importMenu?.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      closeImportMenu();
-      importBtn?.focus();
-    }
-  });
-  document.addEventListener('click', closeImportMenu);
-  importMenu?.addEventListener('click', e => e.stopPropagation());
-  ge('importImageBtn')?.addEventListener('click', () => {
-    closeImportMenu();
-    ge('imgFileInput')?.click();
-  });
-  ge('importTactileBtn')?.addEventListener('click', () => {
-    closeImportMenu();
-    ge('tactileFileInput')?.click();
-  });
+  ge('emptyDropZone')?.addEventListener('click', () => ge('imgFileInput')?.click());
 
   // drag-over visual
   const area = qs('.canvas-area');
@@ -1570,31 +965,36 @@ function wireFullMode() {
   ge('promptForm')?.addEventListener('submit', e => {
     e.preventDefault();
     const inp = ge('promptInput'); if (!inp?.value.trim()) return;
-    if (inp.disabled) return;
     hidePromptSuggestions();
     parseCommand(inp.value); inp.value = '';
   });
   const promptInp = ge('promptInput');
-  promptInp?.addEventListener('focus', () => {
-    if (!promptInp.disabled && appState.phase === 'ready') showPromptSuggestions();
-  });
+  promptInp?.addEventListener('focus', showPromptSuggestions);
   promptInp?.addEventListener('blur', () => setTimeout(hidePromptSuggestions, 120));
 
   // threshold slider
   ge('thSlider')?.addEventListener('input', function() {
-    updateThresholdOrDensity(+this.value, 120);
+    const v = Math.max(20, Math.min(240, +this.value));
+    conversionState.threshold = v; conversionState.method = 'global';
+    paintSlider(v);
+    rebuild(120);                       // live — no separate "적용" step
+    syncConvUI();            // reflect method→수동 on the chip
   });
   ge('thMinus')?.addEventListener('click', () => {
     const sl = ge('thSlider'); if (!sl) return;
-    updateThresholdOrDensity(+sl.value - 1, 80);
+    const v = Math.max(20, +sl.value - 1);
+    sl.value = v; conversionState.threshold = v; conversionState.method = 'global';
+    paintSlider(v); rebuild(80);
   });
   ge('thPlus')?.addEventListener('click', () => {
     const sl = ge('thSlider'); if (!sl) return;
-    updateThresholdOrDensity(+sl.value + 1, 80);
+    const v = Math.min(240, +sl.value + 1);
+    sl.value = v; conversionState.threshold = v; conversionState.method = 'global';
+    paintSlider(v); rebuild(80);
   });
   ge('thAuto')?.addEventListener('click', () => {
     const page = pagesState.activePage;
-    if (!page?.sourceImageState) { toast(noImageMsg(appState.language)); return; }
+    if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
     const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
     Object.assign(conversionState, p);
     paintSlider(conversionState.threshold);
@@ -1605,13 +1005,9 @@ function wireFullMode() {
   // method selector
   qsa('.th-method-btn').forEach(b => b.addEventListener('click', () => {
     const page = pagesState.activePage;
-    if (!page?.sourceImageState) { toast(noImageMsg(appState.language)); return; }
+    if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
     conversionState.method = b.dataset.method;
-    qsa('.th-method-btn').forEach(x => {
-      const active = x === b;
-      x.classList.toggle('active', active);
-      setPressed(x, active);
-    });
+    qsa('.th-method-btn').forEach(x => x.classList.toggle('active', x === b));
     if (conversionState.method !== 'global') {
       const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
       conversionState.threshold = p.threshold;
@@ -1625,11 +1021,7 @@ function wireFullMode() {
     const page = pagesState.activePage;
     if (!page?.sourceImageState) return;
     conversionState.outline = +b.dataset.outline;
-    qsa('.outline-btn').forEach(x => {
-      const active = x === b;
-      x.classList.toggle('active', active);
-      setPressed(x, active);
-    });
+    qsa('.outline-btn').forEach(x => x.classList.toggle('active', x === b));
     rebuild();
   }));
 
@@ -1652,39 +1044,17 @@ function wireFullMode() {
   };
   qsa('.preset-btn').forEach(b => b.addEventListener('click', () => {
     const page = pagesState.activePage;
-    if (!page?.sourceImageState) { toast(noImageMsg(appState.language)); return; }
+    if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
     const p = PRESETS[b.dataset.preset]; if (!p) return;
     pushUndo();
     Object.assign(conversionState, p);
     paintSlider(conversionState.threshold);
     syncConvUI();   // syncs controls; also clears preset active state
     // re-mark the chosen preset as active AFTER syncConvUI's reset
-    qsa('.preset-btn').forEach(x => {
-      const active = x === b;
-      x.classList.toggle('active', active);
-      setPressed(x, active);
-    });
+    qsa('.preset-btn').forEach(x => x.classList.toggle('active', x === b));
     updatePresetChip();
     rebuild();
   }));
-
-  // dot edit mode controls (shown when there is no source image)
-  qsa('.dot-tool-btn[data-dot-tool]').forEach(b => b.addEventListener('click', () => {
-    selectTool(b.dataset.dotTool);
-  }));
-  qsa('.dot-size-btn[data-dot-size]').forEach(b => b.addEventListener('click', () => {
-    setSize(+b.dataset.dotSize);
-  }));
-  qsa('.dot-edit-action[data-dot-action]').forEach(b => b.addEventListener('click', () => {
-    const action = b.dataset.dotAction;
-    if (action === 'up') fillAllPins(1);
-    else if (action === 'down') fillAllPins(0);
-    else if (action === 'invert') invertAllPins();
-  }));
-  ge('dotEditImportImageBtn')?.addEventListener('click', () => {
-    ge('imgFileInput')?.click();
-  });
-  ge('recropBtn')?.addEventListener('click', reCrop);
 
   // processing toggles (dilate / erode / denoise / edge)
   qsa('[data-proc]').forEach(b => b.addEventListener('click', () => {
@@ -1700,17 +1070,6 @@ function wireFullMode() {
     rebuild(80);
   }));
 
-  // style buttons for generated graphics (얇게 / 기본 / 굵게)
-  qsa('.gen-style-btn').forEach(b => b.addEventListener('click', () => {
-    const v = +b.dataset.density;
-    conversionState.threshold = v;
-    const sl = ge('thSlider');
-    if (sl) sl.value = v;
-    paintSlider(v);
-    applyGeneratedDensity(v);
-    qsa('.gen-style-btn').forEach(x => x.classList.toggle('active', x === b));
-  }));
-
   // save btn
   ge('saveBtn')?.addEventListener('click', () => {
     exportDtms(pagesState.pages, appState.fileName, canvasState.width, canvasState.height);
@@ -1718,14 +1077,19 @@ function wireFullMode() {
   });
 
   // pin control
-  ge('pinUpBtn')?.addEventListener('click',   () => fillAllPins(1));
-  ge('pinDownBtn')?.addEventListener('click', () => fillAllPins(0));
-  ge('pinInvBtn')?.addEventListener('click',  invertAllPins);
+  ge('pinUpBtn')?.addEventListener('click',   () => { pushUndo(); canvasState.data.fill(1); afterChange(); toast(t('toast_pin_up', appState.language)); });
+  ge('pinDownBtn')?.addEventListener('click', () => { pushUndo(); canvasState.data.fill(0); afterChange(); toast(t('toast_pin_down', appState.language)); });
+  ge('pinInvBtn')?.addEventListener('click',  () => {
+    pushUndo();
+    const d = canvasState.data;
+    for (let i = 0; i < d.length; i++) d[i] ^= 1;
+    afterChange(); toast(t('toast_pin_inv', appState.language));
+  });
 
   // DotPad
   initDotPad(
-    () => { syncConn(); if (dotPadState.livePreviewEnabled) syncLivePreview(canvasState.data, canvasState.width, canvasState.height); toast(t('toast_ble_on', appState.language), 'ok'); },
-    () => { syncConn(); toast(t('toast_ble_off', appState.language)); }
+    () => { syncConn(); if (dotPadState.livePreviewEnabled) syncLivePreview(canvasState.data, canvasState.width, canvasState.height); toast('Dot Pad 연결됐어요 ✓', 'ok'); },
+    () => { syncConn(); toast('Dot Pad 연결이 끊어졌어요'); }
   );
   ge('bleBtn')?.addEventListener('click', async () => {
     if (dotPadState.connected) { disconnectDotPad(); } else { await connectBle(); }
@@ -1765,7 +1129,7 @@ function wireFullMode() {
   ge('pagePrev')?.addEventListener('click', () => switchPage(pagesState.activePageIndex - 1));
   ge('pageNext')?.addEventListener('click', () => switchPage(pagesState.activePageIndex + 1));
   ge('pageAdd')?.addEventListener('click', () => { addPage(); drawCanvas(); syncQuality(); syncPageUI(); toast(t('toast_page_added', appState.language)); });
-  ge('pageDup')?.addEventListener('click', () => { duplicatePage(); drawCanvas(); syncQuality(); syncPageUI(); toast(t('toast_page_dup', appState.language)); });
+  ge('pageDup')?.addEventListener('click', () => { duplicatePage(); drawCanvas(); syncQuality(); syncPageUI(); toast('페이지를 복제했어요'); });
   ge('pageDelete')?.addEventListener('click', () => {
     if (pagesState.pages.length <= 1) return;
     deletePage(); drawCanvas(); syncQuality(); syncPageUI();
@@ -1784,6 +1148,7 @@ function wireFullMode() {
   qsa('.res-btn').forEach(b => b.addEventListener('click', () => {
     const [c, r] = b.dataset.res.split('x').map(Number);
     setResolution(c, r);
+    qsa('.res-btn').forEach(x => x.classList.toggle('active', x === b));
   }));
 
   // File name
@@ -1810,14 +1175,9 @@ function wireMiniMode() {
     const f = e.target.files[0]; if (f) loadImageFile(f);
     e.target.value = '';
   });
-  ge('tactileFileInput')?.addEventListener('change', e => {
-    const f = e.target.files[0]; if (f) loadTactileFile(f);
-    e.target.value = '';
-  });
 
   // "이미지 추가" button routes to the same hidden input
   ge('miniAddImgBtn')?.addEventListener('click', () => ge('miniImgInput')?.click());
-  ge('miniOpenTactileBtn')?.addEventListener('click', () => ge('tactileFileInput')?.click());
 
   // drop zone — click + drag-and-drop
   const dz = ge('miniDropZone');
@@ -1827,33 +1187,24 @@ function wireMiniMode() {
     dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
     dz.addEventListener('drop', e => {
       e.preventDefault(); dz.classList.remove('drag-over');
-      const f = e.dataTransfer?.files[0];
-      if (!f) return;
-      if (isTactileFile(f)) loadTactileFile(f);
-      else if (f.type.startsWith('image/')) loadImageFile(f);
+      const f = e.dataTransfer?.files[0]; if (f && f.type.startsWith('image/')) loadImageFile(f);
     });
   }
 
   // command prompt form
   ge('miniPromptForm')?.addEventListener('submit', e => {
     e.preventDefault();
-    const box = ge('miniSuggest'); if (box) { box.innerHTML = ''; box.classList.remove('show'); }
     const inp = ge('miniPromptInput');
     const text = inp?.value.trim(); if (!text) return;
     parseCommand(text);
     if (inp) inp.value = '';
   });
 
-  // live bank-search as user types
-  ge('miniPromptInput')?.addEventListener('input', function() {
-    if (!bankReady) return;
-    const hits = searchSymbols(this.value);
-    _renderBankHits(hits);
-  });
-
   // resolution chips
   document.querySelectorAll('[data-mini-res]').forEach(btn => {
     btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-mini-res]').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
       const [c, r] = this.dataset.miniRes.split('x').map(Number);
       setResolution(c, r);
     });
@@ -1868,22 +1219,10 @@ function wireMiniMode() {
 
   // density slider
   ge('miniThSlider')?.addEventListener('input', function() {
-    updateThresholdOrDensity(+this.value, 120);
+    const v = Math.max(20, Math.min(240, +this.value));
+    conversionState.threshold = v; conversionState.method = 'global';
+    paintSlider(v); rebuild(120);
   });
-
-  // direct dot editing controls for imported tactile files
-  qsa('.dot-tool-btn[data-dot-tool]').forEach(b => b.addEventListener('click', () => {
-    selectTool(b.dataset.dotTool);
-  }));
-  qsa('.dot-size-btn[data-dot-size]').forEach(b => b.addEventListener('click', () => {
-    setSize(+b.dataset.dotSize);
-  }));
-  qsa('.dot-edit-action[data-dot-action]').forEach(b => b.addEventListener('click', () => {
-    const action = b.dataset.dotAction;
-    if (action === 'up') fillAllPins(1);
-    else if (action === 'down') fillAllPins(0);
-    else if (action === 'invert') invertAllPins();
-  }));
 
   // output actions
   ge('miniSendBtn')?.addEventListener('click', () => {
@@ -1913,10 +1252,8 @@ function wireMiniMode() {
 // ─── Detect mode ──────────────────────────────────────────────
 function detectMode() {
   const params = new URLSearchParams(location.search);
-  if (params.get('mode') === 'full') return 'full';
   if (params.has('mini') || params.get('mode') === 'mini') return 'mini';
   if (window.self !== window.top) return 'embed';
-  if (window.matchMedia?.(MOBILE_MODE_QUERY).matches) return 'mini';
   return 'full';
 }
 
@@ -1947,7 +1284,6 @@ export function init() {
   syncConn();
   syncPageUI();
   applyI18n();
-  initHelp();
 
   window.addEventListener('resize', fitCanvas);
   document.fonts?.ready?.then(fitCanvas);

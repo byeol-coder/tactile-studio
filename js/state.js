@@ -134,10 +134,10 @@ export function saveCurrentPageState() {
 }
 
 /** Load page data → canvasState + conversionState */
-export function loadPageState(idx, { saveCurrent = true } = {}) {
+export function loadPageState(idx) {
   const page = pagesState.pages[idx];
   if (!page) return;
-  if (saveCurrent) saveCurrentPageState();
+  saveCurrentPageState();
   pagesState.activePageIndex = idx;
   canvasState.data = new Uint8Array(page.canvasData);
   canvasState.width = page.width;

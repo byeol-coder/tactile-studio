@@ -63,52 +63,6 @@ export function listSymbols() {
   return Object.entries(MANIFEST.symbols).map(([id, e]) => ({ id, ...e }));
 }
 
-/** Return all entries whose keywords match the prompt (exact first, then partial). */
-export function searchSymbols(prompt) {
-  const s = String(prompt || '').toLowerCase().trim();
-  if (!s || !MANIFEST) return [];
-  const exact = [], partial = [];
-  for (const k of KEY_INDEX) {
-    if (k.keywords.some(w => w === s)) exact.push({ id: k.id, ...MANIFEST.symbols[k.id] });
-    else if (k.keywords.some(w => w.includes(s) || s.includes(w))) partial.push({ id: k.id, ...MANIFEST.symbols[k.id] });
-  }
-  return [...exact, ...partial];
-}
-
-/** Load a symbol entry by its manifest id (no prompt matching). */
-export async function loadSymbolById(id, cols = 60, rows = 40) {
-  if (!MANIFEST) return none();
-  const e = MANIFEST.symbols[id];
-  if (!e) return none(id, 'id not found');
-  try {
-    if (e.kind === 'proc') {
-      return {
-        source: 'proc', id, data: renderSymbol(e.proc, cols, rows),
-        label: e.label, emoji: e.emoji, altText: '', reviewed: !!e.reviewed,
-      };
-    }
-    if (e.kind === 'dtms') {
-      const json = await loadDtmsFile(e.file);
-      const items = json.items || [];
-      const item = items[(e.page || 1) - 1];
-      if (!item || !item.graphic?.data) throw new Error(`page ${e.page} missing in ${e.file}`);
-      const [sc, sr] = e.res || json.resolution && [json.resolution.cols, json.resolution.rows] || MANIFEST.defaultRes || [60, 40];
-      let grid = hexToGrid(item.graphic.data, sc, sr);
-      if (sc !== cols || sr !== rows) grid = scaleGrid(grid, sc, sr, cols, rows);
-      return {
-        source: 'dtms', id, data: grid,
-        label: e.label, emoji: e.emoji,
-        altText: item.text?.data || item.text?.plain || e.label,
-        reviewed: !!e.reviewed,
-      };
-    }
-    return none(id, `unknown kind: ${e.kind}`);
-  } catch (err) {
-    console.warn('[bank] loadById failed →', err.message);
-    return none(id, err.message);
-  }
-}
-
 /**
  * Resolve a prompt to a ready-to-place pin grid.
  * @param {string} prompt
