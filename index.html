@@ -897,23 +897,6 @@ details.adv > summary:hover { color: var(--ink) }
 @media (max-width: 1100px) { :root { --w-panel-left: 220px } }
 @media (max-width: 860px) { .panel-left { display: none } }
 
-/* ── Workflow Stepper ────────────────────────────────────────── */
-.stepper {
-  display: flex; align-items: center; gap: 6px; padding: 8px 16px;
-  background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
-.step-item { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; color: var(--hint); white-space: nowrap }
-.step-num {
-  width: 18px; height: 18px; border-radius: 50%; background: var(--surface2); color: var(--hint);
-  display: grid; place-items: center; font-size: 10px; font-weight: 800; flex-shrink: 0; transition: .15s;
-}
-.step-item.done .step-num { background: var(--green-bg); color: var(--green-d) }
-.step-item.active .step-num { background: var(--accent); color: #fff }
-.step-item.active { color: var(--ink) }
-.step-item.done { color: var(--sub) }
-.step-sep { width: 20px; height: 1px; background: var(--border); flex-shrink: 0 }
-@media (max-width: 760px) { .step-item span.step-label { display: none } }
-
 /* ── Import section (left panel) ────────────────────────────── */
 .import-stack { display: flex; flex-direction: column; gap: var(--control-gap) }
 
@@ -1094,25 +1077,6 @@ body.presenting .present-exit { display: inline-flex }
 </header>
 
 <!-- Workspace -->
-<!-- Workflow Stepper -->
-<div class="stepper" id="workflowStepper" role="group" aria-label="작업 흐름">
-  <div class="step-item" data-step="import">
-    <span class="step-num">1</span><span class="step-label" data-i18n="step_import">가져오기</span>
-  </div>
-  <div class="step-sep" aria-hidden="true"></div>
-  <div class="step-item" data-step="convert">
-    <span class="step-num">2</span><span class="step-label" data-i18n="step_convert">촉각그래픽 변환</span>
-  </div>
-  <div class="step-sep" aria-hidden="true"></div>
-  <div class="step-item" data-step="check">
-    <span class="step-num">3</span><span class="step-label" data-i18n="step_check">촉각 품질 검사</span>
-  </div>
-  <div class="step-sep" aria-hidden="true"></div>
-  <div class="step-item" data-step="send">
-    <span class="step-num">4</span><span class="step-label" data-i18n="step_send">전송 / 저장 / 내보내기</span>
-  </div>
-</div>
-
 <div class="ws">
 
 <!-- Tool Rail -->
