@@ -1,472 +1,398 @@
-// ============================================================
-// tactile-library.js — Tactile World Library MVP
-// Accessible tactile-graphics archive UI with local saved DTMS items.
-// ============================================================
-import { dotCloud } from "./dot-cloud.js";
+// Tactile Drive picker modal for the main tactile_agent workspace.
+// The picker reuses the Tactile Drive data model and shared UI fragments,
+// but trims the flow to "find a resource -> select it for the current work".
 
-const SAVED_KEY = "tactile-library:saved:v1";
-const HISTORY_KEY = "tactile-library:history:v1";
-const AGENT_ACTIONS = [
-  "Simplify for 60×40 DotPad",
-  "Generate tactile description",
-  "Convert to classroom worksheet",
-  "Reduce visual clutter",
-  "Create braille/voice explanation",
-  "Check tactile readability",
-  "Generate alternate version for blind children",
-  "Generate low-complexity version",
-];
+import { dotCloud } from './dot-cloud.js';
+import { CATEGORIES, CAT_BY_ID, COMPLEXITY, FEATURED, SEED_ASSETS } from './drive-data.js';
+import { dotMatrixSvg } from './drive-dot.js';
+import { svgIcon } from './icons.js';
+import {
+  assetGridHtml,
+  badge,
+  categoryChipsHtml,
+  categoryTileHtml,
+  complexityBadge,
+  dotPadReadyBadge,
+  esc,
+  filterPanelHtml,
+  readabilityBadge,
+  readinessBadge,
+  sourceBadge,
+  verifiedStateBadge,
+} from './drive-ui-shared.js';
 
-const CATEGORIES = ["Education", "Science", "Math", "Maps", "Culture", "Games", "Daily Life", "Art", "Tactile Agent", "DotPad Ready"];
-const COLLECTIONS = ["Recently Added", "DotPad 60×40 Ready", "Teacher Resources", "Tactile Agent Generated", "Verified Tactile Graphics"];
-const FOLDERS = ["Class Materials", "DotPad Tests", "Game Assets", "Tactile Studio Drafts", "Verified Graphics"];
+const SAVED_KEY = 'tactile-drive-picker:saved:v1';
+const HISTORY_KEY = 'tactile-drive-picker:history:v1';
 
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
 function readJson(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
 function writeJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 function savedIds() { return new Set(readJson(SAVED_KEY, [])); }
 function setSavedIds(ids) { writeJson(SAVED_KEY, [...ids]); }
-function history() { return readJson(HISTORY_KEY, { recent: [], sent: [], downloads: [] }); }
-function pushHistory(kind, item) {
-  const h = history();
-  const arr = h[kind] || [];
-  h[kind] = [{ id: item.id, title: item.title, at: Date.now() }, ...arr.filter((x) => x.id !== item.id)].slice(0, 12);
-  writeJson(HISTORY_KEY, h);
+function pushRecent(asset) {
+  const h = readJson(HISTORY_KEY, []);
+  writeJson(HISTORY_KEY, [{ id: asset.id, title: asset.title, at: Date.now() }, ...h.filter((x) => x.id !== asset.id)].slice(0, 16));
 }
+
 function announce(text) {
-  const live = document.getElementById("liveRegion");
-  if (!live) return;
-  live.textContent = "";
+  const live = document.getElementById('liveRegion');
+  if (!live || !text) return;
+  live.textContent = '';
   setTimeout(() => { live.textContent = text; }, 40);
 }
-function toast(text) {
-  const t = document.getElementById("toast");
+
+function toast(text, kind = 'ok') {
+  const t = document.getElementById('toast');
   if (t) {
     t.textContent = text;
-    t.classList.add("show", "ok");
-    setTimeout(() => t.classList.remove("show", "ok"), 1800);
+    t.classList.add('show', kind);
+    setTimeout(() => t.classList.remove('show', kind), 1800);
   }
   announce(text);
 }
-function svgUrl(title, category, kind = "visual") {
-  const bg = kind === "tactile" ? "#fff8ec" : "#f7f3eb";
-  const ink = kind === "tactile" ? "#1c1c1e" : "#3a3a3c";
-  const accent = kind === "tactile" ? "#ff4d00" : "#0a84ff";
-  const dots = Array.from({ length: 54 }, (_, i) => {
-    const x = 22 + (i % 9) * 24;
-    const y = 34 + Math.floor(i / 9) * 22;
-    const on = (i + title.length + category.length) % 4 !== 0;
-    return `<circle cx="${x}" cy="${y}" r="${on ? 4 : 2}" fill="${on ? ink : "#d8d1c3"}" opacity="${on ? 0.92 : 0.55}"/>`;
-  }).join("");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 170">
-    <rect width="260" height="170" rx="14" fill="${bg}"/>
-    <rect x="12" y="12" width="236" height="146" rx="10" fill="#fff" stroke="#e5ded0"/>
-    ${kind === "tactile" ? dots : `<path d="M34 122c26-46 42-58 63-35 18 19 26 12 43-25 17-38 42-28 70 20" fill="none" stroke="${ink}" stroke-width="8" stroke-linecap="round"/><circle cx="80" cy="68" r="18" fill="${accent}" opacity=".9"/><rect x="142" y="42" width="54" height="42" rx="8" fill="${ink}" opacity=".86"/>`}
-    <text x="22" y="146" font-family="Inter,Arial" font-size="13" font-weight="700" fill="${ink}">${esc(title).slice(0, 26)}</text>
-    <text x="22" y="28" font-family="Inter,Arial" font-size="10" font-weight="700" fill="${accent}">${esc(kind === "tactile" ? "TACTILE PREVIEW" : category.toUpperCase())}</text>
-  </svg>`;
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-}
+
 function patternHex(cols, rows, seed = 1) {
-  const bytes = (cols / 2) * (rows / 4);
-  let out = "";
-  for (let i = 0; i < bytes; i++) out += (((i * 37 + seed * 19) % 255) & 0xff).toString(16).padStart(2, "0");
+  const bytes = Math.ceil((cols * rows) / 8);
+  let out = '';
+  for (let i = 0; i < bytes; i += 1) out += (((i * 37 + seed * 19) % 255) & 0xff).toString(16).padStart(2, '0');
   return out;
 }
+
 function dtmsFor(asset) {
-  const [cols, rows] = asset.resolutionSupport.includes("60×40") ? [60, 40] : [96, 64];
+  const [cols, rows] = asset.resolutionSupport?.includes('60x40') ? [60, 40] : [96, 64];
   return JSON.stringify({
     title: asset.title,
     resolution: { cols, rows },
     items: [{
       title: asset.title,
       graphic: { data: patternHex(cols, rows, asset.id.length) },
-      text: { plain: asset.screenReaderSummary },
+      text: { plain: asset.screenReaderDesc || asset.description },
+      meta: {
+        source: asset.source,
+        category: CAT_BY_ID[asset.category]?.ko || asset.category,
+        tactileGuide: asset.tactileGuide,
+        landmarks: asset.landmarks,
+      },
     }],
   }, null, 2);
 }
-
-const ASSETS = [
-  ["world-map-60", "World Continents Map", "Maps", ["continents", "geography", "classroom"], "Tactile World", "Good", "60×40", true, "Low"],
-  ["cell-diagram", "Plant Cell Diagram", "Science", ["cell", "biology", "worksheet"], "Tactile World", "Good", "96×64", true, "Medium"],
-  ["fraction-bars", "Fraction Bars Set", "Math", ["fractions", "numbers", "teacher"], "Tactile Agent", "Good", "60×40", true, "Low"],
-  ["solar-system", "Solar System Orbits", "Science", ["space", "orbits", "planets"], "Tactile World", "Complex", "96×64", false, "High"],
-  ["braille-maze", "Braille Maze Game", "Games", ["maze", "braille", "children"], "Tactile Agent", "Good", "60×40", true, "Low"],
-  ["korean-palace", "Korean Palace Layout", "Culture", ["heritage", "architecture", "history"], "Tactile World", "Needs Review", "96×64", false, "Medium"],
-  ["daily-route", "Daily Route Map", "Daily Life", ["mobility", "orientation", "route"], "Tactile Agent", "Good", "60×40", true, "Low"],
-  ["coordinate-plane", "Coordinate Plane", "Math", ["graph", "x-axis", "y-axis"], "Tactile World", "Good", "60×40", true, "Low"],
-  ["animal-tracks", "Animal Tracks Comparison", "Education", ["animals", "comparison", "science"], "Tactile Agent", "Needs Review", "60×40", false, "Medium"],
-  ["water-cycle", "Water Cycle", "Science", ["weather", "cycle", "arrows"], "Tactile World", "Good", "96×64", true, "Medium"],
-  ["art-patterns", "Raised Pattern Sampler", "Art", ["texture", "pattern", "design"], "Tactile Agent", "Good", "60×40", true, "Low"],
-  ["clock-face", "Analog Clock Face", "Education", ["time", "clock", "daily life"], "Tactile World", "Good", "60×40", true, "Low"],
-  ["city-block", "City Block Mobility Map", "Maps", ["streets", "crosswalk", "mobility"], "Tactile World", "Needs Review", "96×64", true, "Medium"],
-  ["music-notes", "Music Notes Primer", "Art", ["music", "symbols", "education"], "Tactile Agent", "Needs Review", "60×40", false, "Medium"],
-  ["shape-sort", "Shape Sorting Worksheet", "Education", ["shapes", "worksheet", "children"], "Tactile Agent", "Good", "60×40", true, "Low"],
-  ["dinosaur-bone", "Dinosaur Bone Field", "Games", ["dinosaur", "fossil", "exploration"], "Tactile Agent", "Complex", "96×64", false, "High"],
-].map(([id, title, category, tags, source, readinessScore, dotPadResolution, verified, complexity], i) => ({
-  id, title, category, tags, source,
-  thumbnailUrl: svgUrl(title, category, "visual"),
-  tactilePreviewUrl: svgUrl(title, category, "tactile"),
-  description: `${title} is a tactile-ready resource for ${category.toLowerCase()} learning, designed with clear outlines and structured exploration.`,
-  tactileGuide: "Start at the top-left anchor, trace the outer boundary, then move through the raised landmarks in reading order.",
-  landmarks: tags.concat(category, dotPadResolution).slice(0, 6),
-  resolutionSupport: dotPadResolution === "96×64" ? ["60×40", "96×64"] : ["60×40"],
-  formats: i % 4 === 0 ? ["SVG", "PNG", "PDF", "DOTPAD", "STL"] : i % 3 === 0 ? ["SVG", "PNG", "PDF"] : ["PNG", "DOTPAD"],
-  complexity,
-  readinessScore,
-  verified,
-  createdBy: source === "Tactile Agent" ? "Tactile Agent" : "Tactile World Studio",
-  updatedAt: `2026-06-${String(10 + i).padStart(2, "0")}`,
-  recommendedUse: i % 2 ? "Small group lesson and DotPad preview." : "Classroom demonstration and independent tactile reading.",
-  ageLevel: i % 3 === 0 ? "Grades 3-5" : i % 3 === 1 ? "Grades 6-8" : "All ages",
-  license: verified ? "Shareable for education" : "Review before redistribution",
-  saved: false,
-  dotPadTested: verified,
-  altText: `${title}, ${category} tactile graphic with ${tags.slice(0, 3).join(", ")} landmarks.`,
-  screenReaderSummary: `${title}. Source ${source}. ${readinessScore} tactile readiness. DotPad ${dotPadResolution}.`,
-  folder: FOLDERS[i % FOLDERS.length],
-}));
 
 let _styleInjected = false;
 function injectStyles() {
   if (_styleInjected) return;
   _styleInjected = true;
-  const s = document.createElement("style");
+  const s = document.createElement('style');
   s.textContent = `
-  .tl-bg{position:fixed;inset:0;background:rgba(28,28,30,.52);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:410;padding:18px}
-  .tl-panel{width:min(1180px,100%);height:min(88vh,780px);background:var(--surface,#fff);border-radius:18px;box-shadow:0 16px 58px rgba(0,0,0,.24);display:flex;flex-direction:column;overflow:hidden;color:var(--ink,#1c1c1e)}
-  .tl-top{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--border,#e5e5ea)}
-  .tl-mark{width:34px;height:34px;border-radius:10px;background:var(--ink,#1c1c1e);display:grid;place-items:center;color:#fff}
-  .tl-title h2{font-size:18px;line-height:1.1;margin:0}.tl-title p{font-size:12px;color:var(--sub,#6c6c70);margin-top:3px}
-  .tl-close{margin-left:auto;width:34px;height:34px;border-radius:9px;border:1px solid var(--border,#e5e5ea);background:var(--surface,#fff);display:grid;place-items:center}
-  .tl-close:hover{background:var(--surface2,#f2f2f4)}
-  .tl-body{display:grid;grid-template-columns:230px minmax(0,1fr) 292px;min-height:0;flex:1;background:#fbfaf7}
-  .tl-side{border-right:1px solid #e6dfd3;background:#fffdf8;padding:14px;overflow:auto}
-  .tl-main{min-width:0;overflow:auto;padding:16px}
-  .tl-agent{border-left:1px solid #e6dfd3;background:#fff;padding:14px;overflow:auto}
-  .tl-tabs{display:grid;gap:6px;margin-bottom:14px}.tl-tab{height:34px;text-align:left;padding:0 10px;border-radius:8px;font-size:12px;font-weight:800;color:var(--text,#3a3a3c);border:1px solid transparent}
-  .tl-tab.active{background:var(--accent-bg,#fff3ee);border-color:rgba(255,77,0,.25);color:var(--accent,#ff4d00)}
-  .tl-filter-title{font-size:11px;font-weight:900;color:var(--sub,#6c6c70);letter-spacing:.04em;text-transform:uppercase;margin:13px 0 7px}
-  .tl-select{width:100%;height:34px;border:1px solid #e2dacd;border-radius:8px;background:#fff;padding:0 9px;font-size:12px;color:var(--text,#3a3a3c)}
-  .tl-folder{display:flex;justify-content:space-between;gap:8px;width:100%;min-height:32px;border-radius:8px;padding:7px 8px;text-align:left;color:var(--text,#3a3a3c);font-size:12px}
-  .tl-folder:hover,.tl-folder.active{background:#f4efe6}.tl-folder span:last-child{color:var(--hint,#aeaeb2);font-weight:800}
-  .tl-hero{background:#fff;border:1px solid #e6dfd3;border-radius:12px;padding:16px;margin-bottom:12px}
-  .tl-hero h1{font-size:24px;line-height:1.1;margin-bottom:5px}.tl-hero p{font-size:13px;color:var(--sub,#6c6c70);max-width:720px}
-  .tl-search{display:flex;align-items:center;gap:8px;margin-top:14px;height:42px;border:1px solid #ded6c8;border-radius:10px;background:#fff;padding:0 12px}
-  .tl-search input{border:0;background:transparent;flex:1;min-width:0;font-size:14px;color:var(--ink,#1c1c1e)}
-  .tl-chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.tl-chip,.tl-collection{min-height:30px;border-radius:999px;border:1px solid #e2dacd;background:#fff;padding:5px 10px;font-size:12px;font-weight:800;color:var(--text,#3a3a3c)}
-  .tl-chip.active,.tl-collection.active{border-color:rgba(255,77,0,.36);background:var(--accent-bg,#fff3ee);color:var(--accent,#ff4d00)}
-  .tl-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 10px}.tl-section-head h3{font-size:14px}.tl-count{font-size:12px;color:var(--sub,#6c6c70)}
-  .tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(214px,1fr));gap:12px}
-  .tl-card{background:#fff;border:1px solid #e6dfd3;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-  .tl-card:focus-within,.tl-card:hover{border-color:rgba(255,77,0,.45);box-shadow:0 5px 18px rgba(70,42,15,.08)}
-  .tl-previews{display:grid;grid-template-columns:1fr 96px;gap:1px;background:#e6dfd3}.tl-previews img{width:100%;height:126px;object-fit:cover;background:#fff}.tl-previews img:last-child{height:126px;object-fit:cover}
-  .tl-card-body{padding:10px}.tl-card-title{font-size:13px;font-weight:900;line-height:1.25;margin-bottom:7px}
-  .tl-badges{display:flex;flex-wrap:wrap;gap:5px}.tl-badge{border-radius:999px;background:#f5f1e9;color:#5b5448;padding:2px 7px;font-size:10px;font-weight:900}.tl-badge.ok{background:#edf8ef;color:#27723a}.tl-badge.warn{background:#fff8ec;color:#9b6100}.tl-badge.hot{background:#fff3ee;color:#d24100}
-  .tl-actions{display:grid;grid-template-columns:1fr 1fr;gap:1px;border-top:1px solid #e6dfd3;background:#e6dfd3;margin-top:auto}.tl-actions button{height:34px;background:#fff;font-size:11px;font-weight:900;color:var(--text,#3a3a3c)}.tl-actions button:hover{background:#f7f3eb}.tl-actions .primary{color:var(--accent,#ff4d00)}
-  .tl-empty,.tl-loading,.tl-error{display:grid;place-items:center;text-align:center;min-height:220px;color:var(--sub,#6c6c70);line-height:1.8;background:#fff;border:1px solid #e6dfd3;border-radius:10px;padding:24px}
-  .tl-spin{width:24px;height:24px;border-radius:50%;border:3px solid #e6dfd3;border-top-color:var(--accent,#ff4d00);animation:tl-spin .75s linear infinite;margin:0 auto 10px}@keyframes tl-spin{to{transform:rotate(360deg)}}
-  .tl-detail{display:grid;gap:12px}.tl-detail-hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.8fr);gap:12px}.tl-box{background:#fff;border:1px solid #e6dfd3;border-radius:10px;padding:12px}.tl-box h3{font-size:13px;margin-bottom:8px}.tl-box p,.tl-box li{font-size:12px;color:var(--text,#3a3a3c)}.tl-box ul{padding-left:18px}
-  .tl-big-preview{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:8px;border:1px solid #e6dfd3;background:#fff}.tl-preview-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.tl-preview-row img{width:100%;aspect-ratio:3/2;object-fit:cover;border:1px solid #e6dfd3;border-radius:8px}
-  .tl-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tl-meta div{background:#faf7f0;border:1px solid #ede5d8;border-radius:8px;padding:7px}.tl-meta b{display:block;font-size:10px;color:var(--sub,#6c6c70);text-transform:uppercase}.tl-meta span{font-size:12px;font-weight:800}
-  .tl-detail-actions{display:flex;flex-wrap:wrap;gap:7px}.tl-btn{min-height:34px;border-radius:8px;border:1px solid #e2dacd;background:#fff;padding:7px 10px;font-size:12px;font-weight:900;color:var(--text,#3a3a3c)}.tl-btn.primary{background:var(--accent,#ff4d00);border-color:var(--accent,#ff4d00);color:#fff}.tl-btn:hover{filter:brightness(.98)}
-  .tl-agent h3{font-size:14px;margin-bottom:8px}.tl-agent p{font-size:12px;color:var(--sub,#6c6c70);margin-bottom:10px}.tl-agent-list{display:grid;gap:6px}.tl-agent-list button{min-height:34px;text-align:left;border:1px solid #e2dacd;border-radius:8px;background:#fff;padding:7px 9px;font-size:12px;font-weight:800}
-  .tl-agent-list button:hover,.tl-agent-list button.active{background:var(--accent-bg,#fff3ee);border-color:rgba(255,77,0,.35);color:var(--accent,#ff4d00)}
-  .tl-agent-result{margin-top:12px;border:1px solid #e6dfd3;border-radius:10px;padding:10px;background:#fffdf8}.tl-agent-result h4{font-size:12px;margin-bottom:7px}.tl-before-after{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}.tl-before-after div{background:#fff;border:1px solid #ede5d8;border-radius:8px;padding:7px;font-size:11px;color:var(--text,#3a3a3c)}
-  .tl-local-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e6dfd3;border-radius:10px;padding:10px;margin-bottom:8px}.tl-local-row img{width:74px;height:50px;object-fit:contain;background:#f7f3eb;border-radius:7px}.tl-local-row div{min-width:0;flex:1}.tl-local-row b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tl-local-row span{font-size:11px;color:var(--sub,#6c6c70)}
-  @media (max-width:980px){.tl-body{grid-template-columns:1fr}.tl-side,.tl-agent{border:0;border-bottom:1px solid #e6dfd3}.tl-agent{display:none}.tl-detail-hero{grid-template-columns:1fr}.tl-panel{height:94vh}.tl-previews{grid-template-columns:1fr 84px}}
+  .tl-bg{position:fixed;inset:0;background:rgba(28,28,30,.52);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:410;padding:18px}
+  .tl-panel{width:min(1180px,100%);height:min(90vh,820px);background:var(--bg,#F5F5F7);border-radius:20px;box-shadow:0 18px 64px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden;color:var(--ink,#1C1C1E);font-family:var(--font,'Inter','Noto Sans KR',system-ui,-apple-system,sans-serif)}
+  .tl-panel *{box-sizing:border-box}.tl-panel button,.tl-panel input{font-family:inherit}.tl-panel svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+  .tl-top{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border,#E5E5EA);background:rgba(255,255,255,.96)}
+  .tl-logo{width:34px;height:34px;border-radius:10px;background:var(--ink,#1C1C1E);display:grid;place-items:center;color:#fff;flex-shrink:0}.tl-logo svg{width:18px;height:18px}
+  .tl-title h2{font-size:16px;font-weight:800;line-height:1.2;margin:0}.tl-title p{font-size:12px;color:var(--sub,#6C6C70);margin:2px 0 0}
+  .tl-close{margin-left:auto;width:36px;height:36px;border-radius:10px;border:none;background:transparent;color:var(--sub,#6C6C70);display:grid;place-items:center;cursor:pointer}.tl-close:hover{background:var(--surface2,#F2F2F4)}
+  .tl-close svg{width:17px;height:17px}.tl-content{min-height:0;flex:1;overflow:auto;padding:20px}.tl-view-tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+  .tl-mini-tab{height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--border,#E5E5EA);background:var(--surface,#fff);font-size:12.5px;font-weight:700;color:var(--ink,#1C1C1E);cursor:pointer;display:inline-flex;align-items:center;gap:6px}.tl-mini-tab svg{width:14px;height:14px}.tl-mini-tab[aria-pressed=true]{background:var(--accent,#FF4D00);border-color:var(--accent,#FF4D00);color:#fff}
+  .td-hero{background:var(--surface,#fff);border:1px solid var(--border,#E5E5EA);border-radius:20px;padding:28px;margin-bottom:18px}.td-hero h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:0}.td-hero p{margin:0 0 18px;font-size:14px;color:var(--sub,#6C6C70);max-width:640px}.td-hero .td-search.lg{max-width:540px;margin-bottom:18px}
+  .td-search{position:relative;width:100%}.td-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--hint,#AEAEB2);pointer-events:none}.td-search input{width:100%;height:42px;border-radius:16px;border:1px solid var(--border,#E5E5EA);background:var(--surface,#fff);padding:0 14px 0 40px;font-size:13.5px;color:var(--ink,#1C1C1E)}.td-search input:focus{border-color:var(--accent,#FF4D00);box-shadow:0 0 0 3px rgba(255,77,0,.12);outline:none}.td-search.lg svg{width:20px;height:20px;left:18px}.td-search.lg input{height:54px;border-radius:20px;padding-left:50px;font-size:15px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:12px;font-size:13.5px;font-weight:600;border:1px solid transparent;cursor:pointer;transition:background .12s,border-color .12s,filter .12s;white-space:nowrap}.btn svg{width:15px;height:15px;flex-shrink:0}.btn.sm{height:32px;padding:0 11px;font-size:12.5px}.btn.sm svg{width:14px;height:14px}.btn.icon-only{width:36px;padding:0}.btn.sm.icon-only{width:32px}.btn-primary{background:var(--accent,#FF4D00);color:#fff}.btn-primary:hover{filter:brightness(.95)}.btn-secondary{background:var(--surface,#fff);color:var(--ink,#1C1C1E);border-color:var(--border,#E5E5EA)}.btn-secondary:hover{background:var(--surface2,#F2F2F4)}.btn-ghost{background:transparent;color:var(--ink,#1C1C1E)}.btn-ghost:hover{background:var(--surface2,#F2F2F4)}
+  .badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;line-height:1;white-space:nowrap}.badge svg{width:11px;height:11px}.badge.neutral{background:var(--surface2,#F2F2F4);color:var(--sub,#6C6C70)}.badge.accent{background:var(--accent-bg,#FFF3EE);color:var(--accent-d,#E34400)}.badge.good{background:var(--green-bg,#F0FBF3);color:var(--green-d,#25A244)}.badge.warn{background:var(--amber-bg,#FFF8EC);color:var(--amber-d,#B4790A)}.badge.bad{background:var(--red-bg,#FFF2F1);color:var(--red-d,#C23B22)}.badge.verified{background:var(--blue-bg,#EAF3FF);color:var(--blue,#0A84FF)}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px}.cat-chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border,#E5E5EA);background:var(--surface,#fff);color:var(--ink,#1C1C1E);font-size:12.5px;font-weight:700;cursor:pointer}.cat-chip[aria-pressed=true]{background:var(--accent,#FF4D00);color:#fff;border-color:var(--accent,#FF4D00)}.featured-row{display:flex;gap:8px;overflow-x:auto;margin:18px 0;padding-bottom:2px}.featured-pill{flex-shrink:0;border:1px solid var(--border,#E5E5EA);background:var(--surface,#fff);color:var(--ink,#1C1C1E);border-radius:12px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer}.featured-pill[aria-pressed=true]{background:var(--accent,#FF4D00);border-color:var(--accent,#FF4D00);color:#fff}
+  .td-body{display:flex;gap:24px;align-items:flex-start}.td-filter{width:256px;flex-shrink:0}.td-grid{flex:1;min-width:0}.filter-card{background:var(--surface,#fff);border:1px solid var(--border,#E5E5EA);border-radius:16px;padding:16px}.filter-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}.filter-head h2{font-size:14px;font-weight:800;margin:0}.filter-reset{background:none;border:none;color:var(--accent-d,#E34400);font-size:12.5px;font-weight:700;text-decoration:underline;cursor:pointer;padding:2px}.filter-count{font-size:12px;color:var(--sub,#6C6C70);margin:0 0 4px}.filter-section{border-bottom:1px solid var(--border,#E5E5EA);padding:14px 0}.filter-section:first-of-type{padding-top:0}.filter-section:last-of-type{border-bottom:none;padding-bottom:0}.filter-section-title{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--sub,#6C6C70);margin:0 0 8px}.filter-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13.5px;cursor:pointer}.filter-row input{accent-color:var(--accent,#FF4D00);width:16px;height:16px}.filter-help{margin:8px 0 0;color:var(--sub,#6C6C70);font-size:12px;line-height:1.45}
+  .asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}.asset-card{background:var(--surface,#fff);border:1px solid var(--border,#E5E5EA);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}.asset-card:focus-within{box-shadow:0 0 0 2px var(--accent,#FF4D00)}.card-thumb{position:relative;height:128px;background:var(--surface2,#F2F2F4);border:none;width:100%;padding:0;cursor:pointer;display:block}.card-thumb-icon{width:100%;height:100%;display:flex;align-items:center;justify-content:center}.card-thumb-icon svg{width:32px;height:32px;color:var(--accent-d,#E34400)}.card-dotpreview{position:absolute;top:8px;right:8px;width:64px;height:44px;border-radius:8px;overflow:hidden;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}.card-verified{position:absolute;top:8px;left:8px}.card-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}.card-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.card-title{background:none;border:none;padding:0;text-align:left;font-size:14px;font-weight:700;color:var(--ink,#1C1C1E);cursor:pointer;line-height:1.35}.card-title:hover{text-decoration:underline}.save-btn{background:none;border:none;width:30px;height:30px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--hint,#AEAEB2)}.save-btn svg{width:18px;height:18px}.save-btn[aria-pressed=true]{color:var(--accent-d,#E34400)}.badge-row{display:flex;flex-wrap:wrap;gap:6px}.card-actions{display:flex;gap:6px;padding-top:10px;margin-top:auto;border-top:1px solid var(--border,#E5E5EA)}.card-actions .btn:first-child{flex:1}
+  .empty-state,.tl-draft-empty{ text-align:center;padding:56px 24px;border:1px solid var(--border,#E5E5EA);border-radius:16px;background:var(--surface,#fff)}.empty-state .empty-dots{width:96px;height:64px;margin:0 auto 16px;border-radius:10px;overflow:hidden;opacity:.7}.empty-state h3,.tl-draft-empty h3{margin:0 0 6px;font-size:15px;font-weight:800}.empty-state p,.tl-draft-empty p{margin:0 0 16px;font-size:13px;color:var(--sub,#6C6C70)}
+  .detail-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}.detail-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-bottom:14px}.detail-head h1{margin:0 0 8px;font-size:22px;font-weight:800;line-height:1.25}.detail-visual{border:1px solid var(--border,#E5E5EA);border-radius:16px;height:190px;overflow:hidden;margin-bottom:14px;background:var(--surface2,#F2F2F4)}.report-visual-lbl{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--sub,#6C6C70);margin:0 0 6px}.detail-tactile{border:1px solid var(--border,#E5E5EA);border-radius:16px;height:190px;overflow:hidden;margin-bottom:16px}.panel-block{border:1px solid var(--border,#E5E5EA);border-radius:16px;padding:16px;background:var(--surface,#fff);margin-bottom:16px}.panel-block h2{font-size:15px;font-weight:800;margin:0 0 12px}.a11y-dl dt{font-weight:700;color:var(--sub,#6C6C70);font-size:12.5px;margin-bottom:2px}.a11y-dl dd{margin:0 0 12px;font-size:13.5px;line-height:1.55}.a11y-dl ul{margin:0;padding-left:18px}.side-col{display:flex;flex-direction:column;gap:16px}.meta-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border,#E5E5EA)}.meta-row:last-child{border-bottom:none}.meta-row dt{color:var(--sub,#6C6C70)}.meta-row dd{margin:0;font-weight:700;text-align:right}.action-stack{display:flex;flex-direction:column;gap:8px}.action-stack .btn{width:100%}.review-pending{font-size:13px;color:var(--sub,#6C6C70);font-style:italic;margin:0}
+  .tl-draft-list{display:grid;gap:12px}.tl-draft-row{display:flex;align-items:center;gap:12px;background:var(--surface,#fff);border:1px solid var(--border,#E5E5EA);border-radius:16px;padding:12px}.tl-draft-thumb{width:86px;height:58px;border-radius:10px;overflow:hidden;background:var(--surface2,#F2F2F4);flex-shrink:0}.tl-draft-row b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tl-draft-row span{font-size:12px;color:var(--sub,#6C6C70)}.tl-draft-row .btn{margin-left:auto}
+  .skeleton-card{border:1px solid var(--border,#E5E5EA);border-radius:16px;overflow:hidden;background:var(--surface,#fff);animation:pulse 1.4s ease-in-out infinite}.skeleton-card .sk-thumb{height:128px;background:var(--surface2,#F2F2F4)}.skeleton-card .sk-body{padding:14px;display:flex;flex-direction:column;gap:8px}.skeleton-card .sk-line{height:12px;border-radius:6px;background:var(--surface2,#F2F2F4)}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  @media(max-width:900px){.tl-content{padding:14px}.td-body{flex-direction:column}.td-filter{width:100%;order:2}.td-grid{order:1}.detail-grid{grid-template-columns:1fr}.tl-panel{height:94vh}.td-hero{padding:20px}.tl-draft-row{align-items:flex-start;flex-wrap:wrap}.tl-draft-row .btn{margin-left:0;width:100%}}
   `;
   document.head.appendChild(s);
 }
 
-function iconCloud() {
-  return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
+function libraryLogo() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="7" cy="7" r="1.6" fill="#F2ECDF" stroke="none"/><circle cx="12" cy="7" r="1.6" fill="#F2ECDF" stroke="none"/><circle cx="17" cy="7" r="1.6" fill="#F2ECDF" stroke="none"/>
+    <circle cx="7" cy="12" r="1.6" fill="#F2ECDF" stroke="none" opacity=".4"/><circle cx="12" cy="12" r="1.6" fill="var(--accent,#FF4D00)" stroke="none"/><circle cx="17" cy="12" r="1.6" fill="#F2ECDF" stroke="none" opacity=".4"/>
+    <circle cx="7" cy="17" r="1.6" fill="#F2ECDF" stroke="none" opacity=".2"/><circle cx="12" cy="17" r="1.6" fill="#F2ECDF" stroke="none"/><circle cx="17" cy="17" r="1.6" fill="#F2ECDF" stroke="none" opacity=".2"/>
+  </svg>`;
 }
-function collectionMatch(asset, collection) {
-  if (!collection) return true;
-  if (collection === "Recently Added") return true;
-  if (collection === "DotPad 60×40 Ready") return asset.resolutionSupport.includes("60×40") && asset.readinessScore === "Good";
-  if (collection === "Teacher Resources") return /teacher|worksheet|classroom|lesson/i.test(asset.tags.join(" ") + asset.recommendedUse);
-  if (collection === "Tactile Agent Generated") return asset.source === "Tactile Agent";
-  if (collection === "Verified Tactile Graphics") return asset.verified;
-  return true;
+
+function metaRow(label, value) {
+  if (!value) return '';
+  return `<div class="meta-row"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
 }
-function scoreClass(score) {
-  if (score === "Good") return "ok";
-  if (score === "Needs Review") return "warn";
-  return "hot";
-}
-function formatAsset(asset, ids) {
-  const saved = ids.has(asset.id);
-  return `<article class="tl-card" aria-labelledby="asset-${asset.id}">
-    <div class="tl-previews">
-      <img src="${asset.thumbnailUrl}" alt="${esc(asset.altText)}">
-      <img src="${asset.tactilePreviewUrl}" alt="${esc(asset.title)} 60 by 40 tactile preview thumbnail">
-    </div>
-    <div class="tl-card-body">
-      <div class="tl-card-title" id="asset-${asset.id}">${esc(asset.title)}</div>
-      <div class="tl-badges">
-        <span class="tl-badge">${esc(asset.category)}</span>
-        <span class="tl-badge">${esc(asset.source)}</span>
-        <span class="tl-badge ${scoreClass(asset.readinessScore)}">${esc(asset.readinessScore)}</span>
-        <span class="tl-badge">${asset.resolutionSupport.join(" / ")}</span>
-        ${asset.verified ? `<span class="tl-badge ok">Verified</span>` : ""}
-      </div>
-    </div>
-    <div class="tl-actions">
-      <button class="primary" data-act="detail" data-id="${asset.id}">View Detail</button>
-      <button data-act="save" data-id="${asset.id}">${saved ? "Saved" : "Save"}</button>
-      <button data-act="send" data-id="${asset.id}">Send to DotPad</button>
-      <button data-act="adapt" data-id="${asset.id}">Adapt</button>
-    </div>
-  </article>`;
+
+function checklistHtml(a) {
+  const items = [
+    [a.complexity !== 'high', '명확한 윤곽선'],
+    [a.readinessScore !== 'complex', '낮은 시각적 혼잡도'],
+    [a.dotPadTested, 'DotPad 출력 테스트 완료'],
+    [a.verified, '교사/디자이너 검수 완료'],
+  ];
+  return `<div class="badge-row">${items.map(([ok, label]) => badge(ok ? 'good' : 'neutral', ok ? 'check' : 'clock', label)).join('')}</div>`;
 }
 
 export async function openTactileLibraryUI({ onOpen } = {}) {
   injectStyles();
+  const ids = savedIds();
   const st = {
-    tab: "home", query: "", category: "", source: "", resolution: "", format: "", complexity: "",
-    verified: "", collection: "", folder: "", detailId: "", agentAction: "", agentDone: false,
-    localFiles: [], loading: true, error: "",
+    assets: SEED_ASSETS.map((a) => ({ ...a, saved: ids.has(a.id) })),
+    query: '',
+    category: 'all',
+    featured: 'all',
+    filters: { source: new Set(), resolution: new Set(), format: new Set(), complexity: new Set(), sort: 'recent', savedOnly: false },
+    mode: 'drive',
+    detailId: '',
+    localFiles: [],
+    loading: true,
+    localLoading: false,
+    error: '',
   };
 
-  const bg = document.createElement("div");
-  bg.className = "tl-bg";
+  const bg = document.createElement('div');
+  bg.className = 'tl-bg';
   bg.innerHTML = `
     <section class="tl-panel" role="dialog" aria-modal="true" aria-labelledby="tlTitle">
       <div class="tl-top">
-        <div class="tl-mark">${iconCloud()}</div>
+        <span class="tl-logo">${libraryLogo()}</span>
         <div class="tl-title">
-          <h2 id="tlTitle">Tactile World Library</h2>
-          <p>Browse tactile graphics, AI-generated assets, and DotPad-ready learning materials.</p>
+          <h2 id="tlTitle">텍타일 드라이브 / 자료 선택</h2>
+          <p>라이브러리와 같은 카드, 필터, 검수 상태로 자료를 골라 현재 작업으로 가져옵니다.</p>
         </div>
-        <button class="tl-close" data-act="close" aria-label="Close Tactile World Library">×</button>
+        <button class="tl-close" data-action="close" aria-label="자료 선택 닫기">${svgIcon('x')}</button>
       </div>
-      <div class="tl-body">
-        <aside class="tl-side" aria-label="Library filters"></aside>
-        <main class="tl-main" id="tlMain" tabindex="-1"></main>
-        <aside class="tl-agent" aria-label="Tactile Agent actions"></aside>
-      </div>
+      <div class="tl-content" id="tlContent"></div>
     </section>`;
   document.body.appendChild(bg);
-  const panel = bg.querySelector(".tl-panel");
+
+  const panel = bg.querySelector('.tl-panel');
+  const content = bg.querySelector('#tlContent');
   const close = () => bg.remove();
 
-  async function loadLocalFiles() {
-    st.loading = true; st.error = ""; render();
-    try {
-      const res = await dotCloud.list({ driverKind: "P", parentGroupNo: "ROOT", pageNo: 1, query: "" });
-      st.localFiles = res.items.filter((x) => x.type === "file");
-    } catch {
-      st.error = "My Library items could not be loaded.";
-    } finally {
-      st.loading = false; render();
-    }
-  }
-  function filteredAssets() {
+  function assetById(id) { return st.assets.find((a) => a.id === id); }
+
+  function getFiltered() {
+    let list = st.assets;
+    if (st.category === 'agent') list = list.filter((a) => a.source === 'Tactile Agent');
+    else if (st.category === 'dotpadready') list = list.filter((a) => a.resolutionSupport.length > 0);
+    else if (st.category !== 'all') list = list.filter((a) => a.category === st.category);
+
+    if (st.featured === 'dotpad6040') list = list.filter((a) => a.resolutionSupport.includes('60x40'));
+    else if (st.featured === 'teacher') list = list.filter((a) => a.source !== 'Tactile Agent' && ['education', 'math', 'science'].includes(a.category));
+    else if (st.featured === 'agent') list = list.filter((a) => a.source === 'Tactile Agent');
+    else if (st.featured === 'verified') list = list.filter((a) => a.verified);
+
     const q = st.query.trim().toLowerCase();
-    const ids = savedIds();
-    return ASSETS.filter((a) => {
-      if (st.tab === "saved" && !ids.has(a.id)) return false;
-      if (st.tab === "team" && !(a.verified && a.source === "Tactile World")) return false;
-      if (st.category && a.category !== st.category) return false;
-      if (st.source && a.source !== st.source) return false;
-      if (st.resolution && !a.resolutionSupport.includes(st.resolution)) return false;
-      if (st.format && !a.formats.includes(st.format)) return false;
-      if (st.complexity && a.complexity !== st.complexity) return false;
-      if (st.verified && String(a.verified) !== st.verified) return false;
-      if (st.folder && a.folder !== st.folder) return false;
-      if (!collectionMatch(a, st.collection)) return false;
-      if (!q) return true;
-      const hay = [a.title, a.category, a.source, a.description, a.tactileGuide, a.recommendedUse, a.ageLevel, ...a.tags, ...a.landmarks].join(" ").toLowerCase();
-      return hay.includes(q);
-    });
-  }
-  function assetById(id) { return ASSETS.find((a) => a.id === id); }
-  function renderSide() {
-    const ids = savedIds();
-    const folderCounts = Object.fromEntries(FOLDERS.map((f) => [f, ASSETS.filter((a) => a.folder === f).length]));
-    bg.querySelector(".tl-side").innerHTML = `
-      <div class="tl-tabs">
-        ${[["home", "Library Home"], ["saved", `My Library (${ids.size})`], ["team", "Team Library"], ["history", "History"], ["local", "Studio Drafts"]].map(([k, label]) =>
-          `<button class="tl-tab ${st.tab === k ? "active" : ""}" data-act="tab" data-tab="${k}">${label}</button>`).join("")}
-      </div>
-      <div class="tl-filter-title">Filters</div>
-      ${select("category", "Category", ["", ...CATEGORIES], st.category)}
-      ${select("source", "Source", ["", "Tactile World", "Tactile Agent"], st.source)}
-      ${select("resolution", "DotPad resolution", ["", "60×40", "96×64"], st.resolution)}
-      ${select("format", "Format", ["", "SVG", "PNG", "PDF", "STL", "DOTPAD"], st.format)}
-      ${select("complexity", "Complexity", ["", "Low", "Medium", "High"], st.complexity)}
-      ${select("verified", "Verification", ["", "true", "false"], st.verified, { true: "Verified", false: "Needs verification" })}
-      <div class="tl-filter-title">Folders</div>
-      ${FOLDERS.map((f) => `<button class="tl-folder ${st.folder === f ? "active" : ""}" data-act="folder" data-folder="${esc(f)}"><span>${esc(f)}</span><span>${folderCounts[f]}</span></button>`).join("")}
-    `;
-  }
-  function select(name, label, values, value, labels = {}) {
-    return `<label class="tl-filter-title" for="tl-${name}">${label}</label>
-      <select class="tl-select" id="tl-${name}" data-act="filter" data-filter="${name}">
-        ${values.map((v) => `<option value="${esc(v)}" ${v === value ? "selected" : ""}>${esc(v ? (labels[v] || v) : "All")}</option>`).join("")}
-      </select>`;
-  }
-  function renderMain() {
-    const main = bg.querySelector("#tlMain");
-    if (st.loading) {
-      main.innerHTML = `<div class="tl-loading"><div><span class="tl-spin"></span>Loading Tactile World Library…</div></div>`;
-      return;
+    if (q) {
+      list = list.filter((a) =>
+        a.title.toLowerCase().includes(q) ||
+        a.description.toLowerCase().includes(q) ||
+        a.tags.some((t) => t.toLowerCase().includes(q)) ||
+        a.landmarks.some((l) => l.toLowerCase().includes(q)) ||
+        (CAT_BY_ID[a.category]?.ko || '').includes(q)
+      );
     }
-    if (st.error) {
-      main.innerHTML = `<div class="tl-error">${esc(st.error)}<br><button class="tl-btn" data-act="reload">Retry</button></div>`;
-      return;
-    }
-    if (st.detailId) return renderDetail(main, assetById(st.detailId));
-    if (st.tab === "history") return renderHistory(main);
-    if (st.tab === "local") return renderLocal(main);
-    const list = filteredAssets();
-    announce(`${list.length} tactile library result${list.length === 1 ? "" : "s"} shown.`);
-    main.innerHTML = `
-      <section class="tl-hero">
-        <h1>Tactile World Library</h1>
-        <p>Browse tactile graphics, AI-generated tactile assets, and DotPad-ready learning materials.</p>
-        <label class="tl-search">${iconCloud()}<input id="tlSearch" value="${esc(st.query)}" placeholder="Search maps, science diagrams, games, worksheets, heritage, math…" aria-label="Search tactile library"></label>
-        <div class="tl-chip-row" aria-label="Categories">
-          ${CATEGORIES.map((c) => `<button class="tl-chip ${st.category === c ? "active" : ""}" data-act="chip" data-category="${esc(c)}">${esc(c)}</button>`).join("")}
-        </div>
-      </section>
-      <div class="tl-chip-row" aria-label="Featured collections">
-        ${COLLECTIONS.map((c) => `<button class="tl-collection ${st.collection === c ? "active" : ""}" data-act="collection" data-collection="${esc(c)}">${esc(c)}</button>`).join("")}
-      </div>
-      <div class="tl-section-head"><h3>${st.tab === "saved" ? "My Library" : st.tab === "team" ? "Team Library" : "Library Grid"}</h3><span class="tl-count">${list.length} results</span></div>
-      ${list.length ? `<div class="tl-grid">${list.map((a) => formatAsset(a, savedIds())).join("")}</div>` : `<div class="tl-empty">No tactile graphics match the current filters.<br>Try clearing a filter or searching for another subject.</div>`}
-    `;
-    const input = main.querySelector("#tlSearch");
-    input?.addEventListener("input", (e) => { st.query = e.target.value; render(); });
+    const f = st.filters;
+    if (f.source.size) list = list.filter((a) => f.source.has(a.source) || (f.source.has('Verified') && a.verified));
+    if (f.resolution.size) list = list.filter((a) => a.resolutionSupport.some((r) => f.resolution.has(r)));
+    if (f.format.size) list = list.filter((a) => a.formats.some((fm) => f.format.has(fm)));
+    if (f.complexity.size) list = list.filter((a) => f.complexity.has(a.complexity));
+    if (f.savedOnly) list = list.filter((a) => a.saved);
+
+    list = [...list];
+    if (f.sort === 'used') list.sort((a, b) => (b.dotPadTested ? 1 : 0) - (a.dotPadTested ? 1 : 0));
+    else list.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    return list;
   }
-  function renderHistory(main) {
-    const h = history();
-    main.innerHTML = `<div class="tl-section-head"><h3>Recently Viewed, Download History, and DotPad Sent History</h3></div>
-      ${["recent", "sent", "downloads"].map((kind) => `<section class="tl-box"><h3>${kind === "recent" ? "Recently Viewed" : kind === "sent" ? "DotPad Sent History" : "Download History"}</h3>
-        ${(h[kind] || []).length ? (h[kind] || []).map((x) => `<p><button class="tl-btn" data-act="detail" data-id="${esc(x.id)}">${esc(x.title)}</button></p>`).join("") : "<p>No history yet.</p>"}
-      </section>`).join("")}`;
-  }
-  function renderLocal(main) {
-    main.innerHTML = `<div class="tl-section-head"><h3>Drafts from Tactile Agent</h3><span class="tl-count">${st.localFiles.length} local files</span></div>
-      ${st.localFiles.length ? st.localFiles.map((f) => `<div class="tl-local-row">
-        ${f.thumb ? `<img src="${f.thumb}" alt="">` : `<img src="${svgUrl(f.name, "Draft", "tactile")}" alt="">`}
-        <div><b>${esc(f.name)}</b><span>${f.width ? `${f.width}×${f.height}` : "DTMS"} · Saved in this browser</span></div>
-        <button class="tl-btn primary" data-act="open-local" data-no="${esc(f.no)}" data-name="${esc(f.name)}">Open in Tactile Studio</button>
-      </div>`).join("") : `<div class="tl-empty">No Studio drafts yet.<br>Use the app Save button to add the current canvas to My Library.</div>`}`;
-  }
-  function renderDetail(main, asset) {
-    if (!asset) { st.detailId = ""; render(); return; }
-    pushHistory("recent", asset);
-    main.innerHTML = `<div class="tl-detail">
-      <div class="tl-detail-actions">
-        <button class="tl-btn" data-act="back">Back to results</button>
-        <button class="tl-btn primary" data-act="send" data-id="${asset.id}">Send to DotPad</button>
-        <button class="tl-btn" data-act="open-studio" data-id="${asset.id}">Open in Tactile Studio</button>
-        <button class="tl-btn" data-act="adapt" data-id="${asset.id}">Adapt with Tactile Agent</button>
-        <button class="tl-btn" data-act="download" data-id="${asset.id}">Download</button>
-        <button class="tl-btn" data-act="save" data-id="${asset.id}">${savedIds().has(asset.id) ? "Saved in My Library" : "Add to My Library"}</button>
-        <button class="tl-btn" data-act="share" data-id="${asset.id}">Share with Team</button>
-      </div>
-      <section class="tl-detail-hero">
-        <div class="tl-box">
-          <img class="tl-big-preview" src="${asset.thumbnailUrl}" alt="${esc(asset.altText)}">
-          <div class="tl-preview-row">
-            <img src="${asset.tactilePreviewUrl}" alt="${esc(asset.title)} 60 by 40 tactile preview">
-            <img src="${svgUrl(asset.title, asset.category, "tactile")}" alt="${esc(asset.title)} 96 by 64 tactile preview">
-          </div>
-        </div>
-        <div class="tl-box"><h3>Metadata</h3><div class="tl-meta">
-          ${meta("Title", asset.title)}${meta("Category", asset.category)}${meta("Source", asset.source)}${meta("Created by", asset.createdBy)}
-          ${meta("Last updated", asset.updatedAt)}${meta("Recommended use", asset.recommendedUse)}${meta("Age/grade", asset.ageLevel)}${meta("Complexity", asset.complexity)}
-          ${meta("DotPad", asset.resolutionSupport.join(" / "))}${meta("Formats", asset.formats.join(", "))}${meta("License", asset.license)}${meta("Verified", asset.verified ? "Yes" : "Needs review")}
-        </div></div>
-      </section>
-      <section class="tl-box"><h3>Accessibility Description</h3>
-        <p><b>Short description:</b> ${esc(asset.description)}</p>
-        <p><b>Tactile reading guide:</b> ${esc(asset.tactileGuide)}</p>
-        <p><b>Important tactile landmarks:</b> ${asset.landmarks.map(esc).join(", ")}</p>
-        <p><b>Suggested exploration order:</b> Anchor, outline, major landmark, secondary texture, label region.</p>
-        <p><b>Alt text:</b> ${esc(asset.altText)}</p>
-        <p><b>Screen reader summary:</b> ${esc(asset.screenReaderSummary)}</p>
-      </section>
-      <section class="tl-box"><h3>Quality Checklist</h3><ul>
-        ${["Clear outline", "Low clutter", "Touch-readable spacing", "No unnecessary decorative detail", "DotPad output tested", "Teacher/designer verified"].map((x, i) => `<li>${asset.verified || i < 4 ? "✓" : "Needs review"} ${x}</li>`).join("")}
-      </ul></section>
+
+  function renderTabs() {
+    return `<div class="tl-view-tabs" role="group" aria-label="자료 선택 보기">
+      <button type="button" class="tl-mini-tab" data-action="mode" data-mode="drive" aria-pressed="${st.mode === 'drive'}">${svgIcon('bookmark')}라이브러리</button>
+      <button type="button" class="tl-mini-tab" data-action="mode" data-mode="drafts" aria-pressed="${st.mode === 'drafts'}">${svgIcon('folder')}Studio 초안</button>
     </div>`;
   }
-  function meta(k, v) { return `<div><b>${esc(k)}</b><span>${esc(v)}</span></div>`; }
-  function renderAgent() {
-    const asset = assetById(st.detailId) || filteredAssets()[0];
-    bg.querySelector(".tl-agent").innerHTML = `<h3>Tactile Agent</h3>
-      <p>Select an action to create a DotPad-ready adaptation, description, or classroom version.</p>
-      <div class="tl-agent-list">${AGENT_ACTIONS.map((a) => `<button class="${st.agentAction === a ? "active" : ""}" data-act="agent" data-agent="${esc(a)}">${esc(a)}</button>`).join("")}</div>
-      ${st.agentAction ? `<div class="tl-agent-result">
-        <h4>${esc(st.agentAction)}</h4>
-        ${st.agentDone ? `<div class="tl-before-after"><div><b>Before</b><br>${esc(asset?.readinessScore || "Needs Review")} · ${esc(asset?.complexity || "Medium")}</div><div><b>After</b><br>Good · Low complexity</div></div>
-          <p>Suggested improvements: simplify small decorative marks, preserve outer contour, increase landmark spacing, and keep labels in a separate voice/braille explanation.</p>
-          <button class="tl-btn primary" data-act="agent-save">Save as new library item</button>` : `<div class="tl-loading" style="min-height:90px"><div><span class="tl-spin"></span>Processing before/after preview…</div></div>`}
-      </div>` : ""}`;
-  }
-  function render() { renderSide(); renderMain(); renderAgent(); }
 
-  bg.addEventListener("click", async (e) => {
-    if (e.target === bg) return close();
-    const el = e.target.closest("[data-act]");
+  function renderDrive() {
+    const list = getFiltered();
+    content.innerHTML = `
+      ${renderTabs()}
+      <section class="td-hero">
+        <h1>텍타일 드라이브</h1>
+        <p>촉각 그래픽, AI 생성 자료, DotPad 학습 자료를 같은 라이브러리 경험 안에서 선택하세요.</p>
+        <div class="td-search lg">
+          ${svgIcon('search')}
+          <input type="search" id="tlSearch" aria-label="텍타일 드라이브 자료 검색" placeholder="지도, 과학 도표, 게임, 학습지, 문화, 수학 검색..." value="${esc(st.query)}"/>
+        </div>
+        ${categoryChipsHtml(st)}
+      </section>
+      <div class="featured-row" aria-label="추천 컬렉션">
+        ${FEATURED.map((f) => `<button type="button" class="featured-pill" data-action="featured" data-featured="${f.id}" aria-pressed="${st.featured === f.id}">${esc(f.label)}</button>`).join('')}
+      </div>
+      <div class="td-body">
+        ${filterPanelHtml(st, list.length)}
+        <div class="td-grid">${assetGridHtml(list, st.loading, { mode: 'select', showAdapt: false })}</div>
+      </div>`;
+    content.querySelector('#tlSearch')?.addEventListener('input', (e) => { st.query = e.target.value; renderDrive(); });
+    if (!st.loading) announce(`검색 결과 ${list.length}개`);
+  }
+
+  function renderDetail() {
+    const a = assetById(st.detailId);
+    if (!a) { st.detailId = ''; renderDrive(); return; }
+    const cat = CAT_BY_ID[a.category];
+    content.innerHTML = `
+      ${renderTabs()}
+      <button type="button" class="btn btn-ghost" data-action="back">${svgIcon('arrowLeft')}검색 결과로 돌아가기</button>
+      <div class="detail-grid" style="margin-top:14px">
+        <div>
+          <div class="detail-head">
+            <div>
+              <h1 tabindex="-1">${esc(a.title)}</h1>
+              <div class="badge-row">
+                ${badge('neutral', null, cat?.ko)}${sourceBadge(a.source)}
+                ${verifiedStateBadge(a)}
+                ${readinessBadge(a.readinessScore)}
+                ${readabilityBadge(a.tactileReadability)}
+              </div>
+            </div>
+          </div>
+          <p class="report-visual-lbl">원본 이미지</p>
+          <div class="detail-visual">${categoryTileHtml(a.category)}</div>
+          <p class="report-visual-lbl">촉각그래픽 미리보기</p>
+          <div class="detail-tactile">${dotMatrixSvg(a.id, '60x40', { cell: 8 })}</div>
+          <section class="panel-block" aria-labelledby="tl-report-h">
+            <h2 id="tl-report-h">촉각그래픽 검수 리포트</h2>
+            <dl class="a11y-dl">
+              <dt>간단 설명</dt><dd>${esc(a.description)}</dd>
+              <dt>촉각 탐색 순서</dt><dd>${esc(a.tactileGuide)}</dd>
+              <dt>주요 랜드마크</dt><dd><ul>${a.landmarks.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></dd>
+              <dt>단순화 정도</dt><dd>${esc(a.simplification || '검수 대기')}</dd>
+              <dt>선 굵기/간격 체크</dt><dd>${esc(a.lineSpec || '검수 대기')}</dd>
+              <dt>스크린리더 설명</dt><dd>${esc(a.screenReaderDesc || a.description)}</dd>
+            </dl>
+          </section>
+        </div>
+        <div class="side-col">
+          <div class="panel-block action-stack">
+            <button type="button" class="btn btn-primary" data-action="pick" data-id="${a.id}">${svgIcon('check')}현재 작업으로 가져오기</button>
+            <button type="button" class="btn btn-secondary" data-action="toggle-save" data-id="${a.id}">${svgIcon(a.saved ? 'bookmarkOn' : 'bookmark')}${a.saved ? '저장 해제' : '내 라이브러리에 저장'}</button>
+          </div>
+          <div class="panel-block">
+            <h2>자료 정보</h2>
+            <dl>
+              ${metaRow('제작자', a.createdBy)}
+              ${metaRow('최근 업데이트', a.updatedAt)}
+              ${metaRow('권장 사용처', a.recommendedUse)}
+              ${metaRow('대상 연령', a.ageLevel)}
+              ${metaRow('복잡도', COMPLEXITY[a.complexity])}
+              ${metaRow('DotPad 해상도', a.resolutionSupport.join(', '))}
+              ${metaRow('파일 형식', a.formats.join(', '))}
+              ${metaRow('라이선스', a.license)}
+            </dl>
+          </div>
+          <div class="panel-block">
+            <h2>상태</h2>
+            <div class="badge-row">${dotPadReadyBadge(a.resolutionSupport)}${complexityBadge(a.complexity)}</div>
+            <div style="margin-top:10px">${checklistHtml(a)}</div>
+            ${a.reviewer ? `<p style="font-size:12.5px;color:var(--sub,#6C6C70);line-height:1.55;margin:12px 0 0">${esc(a.reviewer.comment)}</p>` : `<p class="review-pending" style="margin-top:12px">검수자 코멘트 대기</p>`}
+          </div>
+        </div>
+      </div>`;
+    content.querySelector('h1[tabindex="-1"]')?.focus?.();
+  }
+
+  function renderDrafts() {
+    content.innerHTML = `
+      ${renderTabs()}
+      ${st.localLoading ? `<div class="tl-draft-empty"><h3>Studio 초안을 불러오는 중...</h3><p>잠시만 기다려 주세요.</p></div>` :
+        st.error ? `<div class="tl-draft-empty"><h3>초안을 불러오지 못했어요</h3><p>${esc(st.error)}</p><button class="btn btn-primary" data-action="reload-drafts">${svgIcon('refresh')}다시 시도</button></div>` :
+        st.localFiles.length ? `<div class="tl-draft-list">${st.localFiles.map((f) => `<div class="tl-draft-row">
+          <div class="tl-draft-thumb">${f.thumb ? `<img src="${esc(f.thumb)}" alt="" style="width:100%;height:100%;object-fit:contain">` : dotMatrixSvg(f.name || 'draft', '60x40', { cell: 4 })}</div>
+          <div style="min-width:0;flex:1"><b>${esc(f.name)}</b><span>${f.width ? `${f.width} x ${f.height}` : 'DTMS'} · 브라우저에 저장된 초안</span></div>
+          <button class="btn btn-primary" data-action="open-local" data-no="${esc(f.no)}" data-name="${esc(f.name)}">${svgIcon('check')}가져오기</button>
+        </div>`).join('')}</div>` :
+        `<div class="tl-draft-empty"><h3>저장된 Studio 초안이 없어요</h3><p>현재 작업에서 라이브러리에 저장한 뒤 다시 열면 여기에 표시됩니다.</p></div>`}`;
+  }
+
+  function render() {
+    if (st.mode === 'drafts') renderDrafts();
+    else if (st.detailId) renderDetail();
+    else renderDrive();
+  }
+
+  async function loadLocalFiles() {
+    st.localLoading = true; st.error = '';
+    if (st.mode === 'drafts') renderDrafts();
+    try {
+      const res = await dotCloud.list({ driverKind: 'P', parentGroupNo: 'ROOT', pageNo: 1, query: '' });
+      st.localFiles = (res.items || []).filter((x) => x.type === 'file');
+    } catch {
+      st.error = '로컬 라이브러리 저장소에 접근할 수 없습니다.';
+    } finally {
+      st.localLoading = false;
+      if (st.mode === 'drafts') renderDrafts();
+    }
+  }
+
+  function toggleSave(id) {
+    const a = assetById(id);
+    if (!a) return;
+    a.saved = !a.saved;
+    const next = savedIds();
+    a.saved ? next.add(id) : next.delete(id);
+    setSavedIds(next);
+    toast(a.saved ? '내 라이브러리에 저장했어요' : '저장을 해제했어요');
+    render();
+  }
+
+  function pickAsset(id) {
+    const a = assetById(id);
+    if (!a || !onOpen) return;
+    pushRecent(a);
+    close();
+    onOpen(dtmsFor(a), `${a.id}.dtms`);
+  }
+
+  bg.addEventListener('click', async (e) => {
+    if (e.target === bg) { close(); return; }
+    const el = e.target.closest('[data-action]');
     if (!el) return;
-    const act = el.dataset.act;
-    if (act === "close") return close();
-    if (act === "reload") return loadLocalFiles();
-    if (act === "tab") { st.tab = el.dataset.tab; st.detailId = ""; render(); return; }
-    if (act === "filter") { st[el.dataset.filter] = el.value; st.detailId = ""; render(); return; }
-    if (act === "chip") { st.category = st.category === el.dataset.category ? "" : el.dataset.category; st.detailId = ""; render(); return; }
-    if (act === "collection") { st.collection = st.collection === el.dataset.collection ? "" : el.dataset.collection; st.detailId = ""; render(); return; }
-    if (act === "folder") { st.folder = st.folder === el.dataset.folder ? "" : el.dataset.folder; st.detailId = ""; render(); return; }
-    if (act === "back") { st.detailId = ""; st.agentAction = ""; st.agentDone = false; render(); return; }
-    if (act === "detail" || act === "adapt") { st.detailId = el.dataset.id; if (act === "adapt") st.agentAction = AGENT_ACTIONS[0]; st.agentDone = false; render(); if (act === "adapt") setTimeout(() => { st.agentDone = true; render(); }, 900); return; }
-    if (act === "save") {
-      const ids = savedIds(); ids.has(el.dataset.id) ? ids.delete(el.dataset.id) : ids.add(el.dataset.id); setSavedIds(ids);
-      toast(ids.has(el.dataset.id) ? "Added to My Library" : "Removed from My Library"); render(); return;
+    const action = el.dataset.action;
+    if (action === 'close') { close(); return; }
+    if (action === 'mode') { st.mode = el.dataset.mode; st.detailId = ''; render(); if (st.mode === 'drafts' && !st.localFiles.length) loadLocalFiles(); return; }
+    if (action === 'pick') { pickAsset(el.dataset.id); return; }
+    if (action === 'pick-detail') { st.detailId = el.dataset.id; renderDetail(); return; }
+    if (action === 'back') { st.detailId = ''; renderDrive(); return; }
+    if (action === 'toggle-save') { toggleSave(el.dataset.id); return; }
+    if (action === 'category') { st.category = el.dataset.cat; st.detailId = ''; renderDrive(); return; }
+    if (action === 'featured') { st.featured = st.featured === el.dataset.featured ? 'all' : el.dataset.featured; if (st.featured === 'recent') st.filters.sort = 'recent'; renderDrive(); return; }
+    if (action === 'reset-filters') {
+      st.filters = { source: new Set(), resolution: new Set(), format: new Set(), complexity: new Set(), sort: 'recent', savedOnly: false };
+      st.category = 'all'; st.featured = 'all'; st.query = ''; renderDrive(); return;
     }
-    if (act === "send") { const a = assetById(el.dataset.id); if (a) { pushHistory("sent", a); toast(`${a.title} sent to DotPad preview`); } render(); return; }
-    if (act === "share") { toast("Team sharing mock created"); return; }
-    if (act === "download") {
-      const a = assetById(el.dataset.id); if (!a) return;
-      pushHistory("downloads", a);
-      const blob = new Blob([JSON.stringify(a, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a"); link.href = url; link.download = `${a.id}.json`; link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 500); toast("Download started"); render(); return;
+    if (action === 'reload-drafts') { loadLocalFiles(); return; }
+    if (action === 'open-local') {
+      const dtms = await dotCloud.load({ driverKind: 'P', fileNo: el.dataset.no });
+      if (dtms != null && onOpen) { close(); onOpen(dtms, el.dataset.name || 'library-item.dtms'); }
     }
-    if (act === "open-studio") {
-      const a = assetById(el.dataset.id); if (!a || !onOpen) return;
-      close(); onOpen(dtmsFor(a), `${a.id}.dtms`); return;
-    }
-    if (act === "open-local") {
-      const dtms = await dotCloud.load({ driverKind: "P", fileNo: el.dataset.no });
-      if (dtms != null && onOpen) { close(); onOpen(dtms, el.dataset.name || "library-item.dtms"); }
-      return;
-    }
-    if (act === "agent") {
-      st.agentAction = el.dataset.agent; st.agentDone = false; render();
-      setTimeout(() => { st.agentDone = true; render(); }, 900); return;
-    }
-    if (act === "agent-save") { toast("Agent version saved as a new library draft"); return; }
   });
-  bg.addEventListener("change", (e) => {
-    const el = e.target.closest("[data-act='filter']");
+
+  bg.addEventListener('change', (e) => {
+    const el = e.target.closest('[data-filter-group]');
     if (!el) return;
-    st[el.dataset.filter] = el.value; st.detailId = ""; render();
+    const group = el.dataset.filterGroup, value = el.dataset.filterValue;
+    if (group === 'sort') { st.filters.sort = value; renderDrive(); return; }
+    if (group === 'savedOnly') { st.filters.savedOnly = el.checked; renderDrive(); return; }
+    const set = st.filters[group];
+    if (!set) return;
+    el.checked ? set.add(value) : set.delete(value);
+    renderDrive();
   });
-  bg.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { e.preventDefault(); close(); return; }
-    if (e.key !== "Tab") return;
-    const focusable = [...panel.querySelectorAll("button,input,select,[tabindex]:not([tabindex='-1'])")].filter((x) => !x.disabled && x.offsetParent !== null);
+
+  bg.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    const focusable = [...panel.querySelectorAll('button,input,select,[tabindex]:not([tabindex="-1"])')].filter((x) => !x.disabled && x.offsetParent !== null);
     if (!focusable.length) return;
     const first = focusable[0], last = focusable[focusable.length - 1];
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
@@ -474,6 +400,6 @@ export async function openTactileLibraryUI({ onOpen } = {}) {
   });
 
   render();
-  await loadLocalFiles();
-  setTimeout(() => bg.querySelector(".tl-close")?.focus(), 30);
+  loadLocalFiles();
+  setTimeout(() => { st.loading = false; render(); bg.querySelector('.tl-close')?.focus(); }, 450);
 }
