@@ -38,6 +38,9 @@ export function createBlankPage(cols = 60, rows = 40) {
     braillePages: [],
     activeDots: 0,
     viewportState: { zoom: 1, panX: 0, panY: 0 },
+    traceImage: null,      // decoded <img>, in-memory tracing guide (not exported/persisted)
+    traceOpacity: 0.4,
+    traceVisible: true,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -115,10 +118,12 @@ export const viewportState = {
 
 // ── Tool State ────────────────────────────────────────────────
 export const toolState = {
-  currentTool: 'move',   // 'move' | 'pen' | 'eraser' | 'select'
+  currentTool: 'move',   // 'move' | 'pen' | 'eraser' | 'select' | 'line' | 'rect' | 'circle'
   brushSize: 1,
   selection: null,       // { x0, y0, x1, y1 } | null
   selBuffer: null,
+  shapeDrag: null,       // { x0, y0, x1, y1 } | null — in-progress line/rect/circle drag
+  shapePreview: null,    // [x,y][] | null — cells to preview while dragging
   undoStack: [],
   redoStack: [],
 };
@@ -212,6 +217,9 @@ export function duplicatePage() {
     conversionState: { ...src.conversionState },
     braillePages: src.braillePages.map(p => ({ ...p })),
     viewportState: { ...src.viewportState },
+    traceImage: src.traceImage,
+    traceOpacity: src.traceOpacity,
+    traceVisible: src.traceVisible,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
