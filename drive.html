@@ -203,6 +203,7 @@ svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width:
 .detail-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-bottom: 14px }
 .detail-head h1 { margin: 0 0 8px; font-size: 22px; font-weight: 800; line-height: 1.25 }
 .detail-visual { border: 1px solid var(--border); border-radius: var(--r16); height: 220px; overflow: hidden; margin-bottom: 14px; background: var(--surface2) }
+.report-visual-lbl { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--sub); margin: 0 0 6px }
 .res-tabs { display: flex; gap: 8px; margin-bottom: 8px }
 .res-tab { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 12.5px; font-weight: 700; cursor: pointer }
 .res-tab[aria-selected="true"] { background: var(--accent); color: #fff; border-color: var(--accent) }
@@ -229,6 +230,11 @@ svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width:
 .action-stack .btn { width: 100% }
 .conn-warn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--amber-d); margin: -2px 0 2px }
 .conn-warn svg { width: 13px; height: 13px }
+
+/* ── Reviewer comment (검수자 코멘트) ────────────────────────── */
+.review-box { background: var(--amber-bg); border: 1px solid #F5DFAE; border-radius: var(--r12); padding: 13px 15px; font-size: 13.5px; line-height: 1.65; color: var(--amber-d) }
+.review-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-top: 8px }
+.review-pending { font-size: 13px; color: var(--sub); font-style: italic; margin: 0 }
 
 /* ── My Library ──────────────────────────────────────────────── */
 .lib-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px }
