@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"/>
+<title>텍타일 드라이브 — Tactile Drive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── Tokens (identical to index.html, for brand consistency) ───── */
+:root {
+  --bg:       #F5F5F7;
+  --surface:  #FFFFFF;
+  --surface2: #F2F2F4;
+  --border:   #E5E5EA;
+  --border2:  #D1D1D6;
+  --ink:      #1C1C1E;
+  --text:     #3A3A3C;
+  --sub:      #6C6C70;
+  --hint:     #AEAEB2;
+  --accent:   #FF4D00;
+  --accent-d: #E34400;
+  --accent-bg:#FFF3EE;
+  --green:    #30D158;
+  --green-d:  #25A244;
+  --green-bg: #F0FBF3;
+  --amber:    #FF9F0A;
+  --amber-d:  #B4790A;
+  --amber-bg: #FFF8EC;
+  --red:      #FF3B30;
+  --red-d:    #C23B22;
+  --red-bg:   #FFF2F1;
+  --blue:     #0A84FF;
+  --blue-bg:  #EAF3FF;
+  --font: 'Inter','Noto Sans KR',system-ui,-apple-system,sans-serif;
+  --r6:6px; --r8:8px; --r10:10px; --r12:12px; --r16:16px; --r20:20px; --r24:24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.04);
+}
+* { box-sizing: border-box }
+html, body { margin: 0; padding: 0 }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font-family: inherit }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap;
+}
+a.skip-link {
+  position: absolute; left: 12px; top: -60px; z-index: 200;
+  background: var(--ink); color: #fff; padding: 10px 16px; border-radius: var(--r8);
+  font-size: 13px; font-weight: 700; text-decoration: none; transition: top .15s;
+}
+a.skip-link:focus { top: 12px }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
+
+/* ── Layout ──────────────────────────────────────────────────── */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px }
+.td-header {
+  position: sticky; top: 0; z-index: 30; background: rgba(245,245,247,.92);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
+}
+.td-header-row { height: 60px; display: flex; align-items: center; gap: 16px }
+.td-brand { display: flex; align-items: center; gap: 8px; flex-shrink: 0; background: none; border: none; cursor: pointer; padding: 4px; border-radius: var(--r8) }
+.td-logo { width: 34px; height: 34px; border-radius: var(--r10); background: var(--ink); display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
+.td-logo svg { width: 18px; height: 18px }
+.td-name { font-size: 15px; font-weight: 800; letter-spacing: -.01em; white-space: nowrap }
+.td-search-desktop { flex: 1; max-width: 420px; display: none }
+.td-nav { margin-left: auto; display: flex; align-items: center; gap: 8px }
+.td-search-mobile { display: block; padding: 0 20px 12px }
+@media (min-width: 860px) {
+  .td-search-desktop { display: block }
+  .td-search-mobile { display: none }
+}
+
+.td-main { padding: 24px 0 64px }
+
+/* ── Search ──────────────────────────────────────────────────── */
+.td-search { position: relative; width: 100% }
+.td-search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--hint); pointer-events: none }
+.td-search input {
+  width: 100%; height: 42px; border-radius: var(--r16); border: 1px solid var(--border);
+  background: var(--surface); padding: 0 14px 0 40px; font-size: 13.5px; color: var(--ink);
+}
+.td-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
+.td-search.lg svg { width: 20px; height: 20px; left: 18px }
+.td-search.lg input { height: 54px; border-radius: var(--r20); padding-left: 50px; font-size: 15px }
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 14px; border-radius: var(--r12); font-size: 13.5px; font-weight: 600;
+  border: 1px solid transparent; cursor: pointer; transition: background .12s, border-color .12s, filter .12s;
+  white-space: nowrap;
+}
+.btn svg { width: 15px; height: 15px; flex-shrink: 0 }
+.btn.sm { height: 32px; padding: 0 11px; font-size: 12.5px }
+.btn.sm svg { width: 14px; height: 14px }
+.btn.lg { height: 44px; padding: 0 20px; font-size: 14.5px }
+.btn.icon-only { width: 36px; padding: 0 }
+.btn.sm.icon-only { width: 32px }
+.btn-primary { background: var(--accent); color: #fff }
+.btn-primary:hover { filter: brightness(.95) }
+.btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--border) }
+.btn-secondary:hover { background: var(--surface2) }
+.btn-ghost { background: transparent; color: var(--ink) }
+.btn-ghost:hover { background: var(--surface2) }
+.btn:disabled { opacity: .4; cursor: not-allowed }
+.btn[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent) }
+
+/* ── Badge ───────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; border-radius: 999px;
+  padding: 3px 9px; font-size: 11px; font-weight: 700; line-height: 1; white-space: nowrap;
+}
+.badge svg { width: 11px; height: 11px }
+.badge.neutral { background: var(--surface2); color: var(--sub) }
+.badge.accent { background: var(--accent-bg); color: var(--accent-d) }
+.badge.good { background: var(--green-bg); color: var(--green-d) }
+.badge.warn { background: var(--amber-bg); color: var(--amber-d) }
+.badge.bad { background: var(--red-bg); color: var(--red-d) }
+.badge.verified { background: var(--blue-bg); color: var(--blue) }
+
+/* ── Hero ────────────────────────────────────────────────────── */
+.td-hero { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r24); padding: 32px; margin-bottom: 20px }
+.td-hero h1 { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -.01em }
+.td-hero p { margin: 0 0 18px; font-size: 14px; color: var(--sub); max-width: 520px }
+.td-hero .td-search.lg { max-width: 540px; margin-bottom: 20px }
+
+/* ── Chips ───────────────────────────────────────────────────── */
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px }
+.cat-chip {
+  height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink); font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.cat-chip[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent) }
+
+.featured-row { display: flex; gap: 8px; overflow-x: auto; margin: 18px 0; padding-bottom: 2px }
+.featured-pill {
+  flex-shrink: 0; border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  border-radius: var(--r12); padding: 9px 14px; font-size: 12.5px; font-weight: 700;
+}
+
+/* ── Layout: filter + grid ───────────────────────────────────── */
+.td-body { display: flex; gap: 24px; align-items: flex-start }
+.td-filter { width: 256px; flex-shrink: 0 }
+@media (max-width: 900px) { .td-body { flex-direction: column } .td-filter { width: 100% } }
+.filter-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r16); padding: 16px }
+.filter-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px }
+.filter-head h2 { font-size: 14px; font-weight: 800; margin: 0 }
+.filter-reset { background: none; border: none; color: var(--accent-d); font-size: 12.5px; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 2px }
+.filter-count { font-size: 12px; color: var(--sub); margin: 0 0 4px }
+.filter-section { border-bottom: 1px solid var(--border); padding: 14px 0 }
+.filter-section:first-of-type { padding-top: 0 }
+.filter-section:last-of-type { border-bottom: none; padding-bottom: 0 }
+.filter-section-title { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--sub); margin: 0 0 8px }
+.filter-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13.5px; cursor: pointer }
+.filter-row input { accent-color: var(--accent); width: 16px; height: 16px }
+
+.td-grid { flex: 1; min-width: 0 }
+.asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px }
+
+/* ── Card ────────────────────────────────────────────────────── */
+.asset-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r16); overflow: hidden; display: flex; flex-direction: column }
+.asset-card:focus-within { box-shadow: 0 0 0 2px var(--accent) }
+.card-thumb { position: relative; height: 128px; background: var(--surface2); border: none; width: 100%; padding: 0; cursor: pointer; display: block }
+.card-thumb-icon { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center }
+.card-thumb-icon svg { width: 32px; height: 32px; color: var(--accent-d) }
+.card-dotpreview { position: absolute; top: 8px; right: 8px; width: 64px; height: 44px; border-radius: var(--r8); overflow: hidden; border: 2px solid #fff; box-shadow: var(--shadow-sm) }
+.card-verified { position: absolute; top: 8px; left: 8px }
+.card-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1 }
+.card-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px }
+.card-title { background: none; border: none; padding: 0; text-align: left; font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; line-height: 1.35 }
+.card-title:hover { text-decoration: underline }
+.save-btn { background: none; border: none; width: 30px; height: 30px; flex-shrink: 0; border-radius: var(--r8); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--hint) }
+.save-btn svg { width: 18px; height: 18px }
+.save-btn[aria-pressed="true"] { color: var(--accent-d) }
+.badge-row { display: flex; flex-wrap: wrap; gap: 6px }
+.card-actions { display: flex; gap: 6px; padding-top: 10px; margin-top: auto; border-top: 1px solid var(--border) }
+.card-actions .btn:first-child { flex: 1 }
+
+/* ── Skeleton / empty ────────────────────────────────────────── */
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .5 } }
+.skeleton-card { border: 1px solid var(--border); border-radius: var(--r16); overflow: hidden; background: var(--surface); animation: pulse 1.4s ease-in-out infinite }
+.skeleton-card .sk-thumb { height: 128px; background: var(--surface2) }
+.skeleton-card .sk-body { padding: 14px; display: flex; flex-direction: column; gap: 8px }
+.skeleton-card .sk-line { height: 12px; border-radius: 6px; background: var(--surface2) }
+
+.empty-state { text-align: center; padding: 64px 24px; border: 1px solid var(--border); border-radius: var(--r16); background: var(--surface) }
+.empty-state .empty-dots { width: 96px; height: 64px; margin: 0 auto 16px; border-radius: var(--r10); overflow: hidden; opacity: .7 }
+.empty-state h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800 }
+.empty-state p { margin: 0 0 16px; font-size: 13px; color: var(--sub) }
+
+/* ── Detail page ─────────────────────────────────────────────── */
+.back-link { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--sub); font-size: 13.5px; font-weight: 700; cursor: pointer; padding: 4px; margin-bottom: 16px; border-radius: var(--r8) }
+.back-link svg { width: 16px; height: 16px }
+.detail-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start }
+@media (max-width: 980px) { .detail-grid { grid-template-columns: 1fr } }
+.detail-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-bottom: 14px }
+.detail-head h1 { margin: 0 0 8px; font-size: 22px; font-weight: 800; line-height: 1.25 }
+.detail-visual { border: 1px solid var(--border); border-radius: var(--r16); height: 220px; overflow: hidden; margin-bottom: 14px; background: var(--surface2) }
+.res-tabs { display: flex; gap: 8px; margin-bottom: 8px }
+.res-tab { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 12.5px; font-weight: 700; cursor: pointer }
+.res-tab[aria-selected="true"] { background: var(--accent); color: #fff; border-color: var(--accent) }
+.res-tab:disabled { opacity: .35; cursor: not-allowed }
+.detail-tactile { border: 1px solid var(--border); border-radius: var(--r16); height: 200px; overflow: hidden; margin-bottom: 20px }
+.panel-block { border: 1px solid var(--border); border-radius: var(--r16); padding: 16px; background: var(--surface); margin-bottom: 16px }
+.panel-block h2 { font-size: 15px; font-weight: 800; margin: 0 0 12px }
+.a11y-dl dt { font-weight: 700; color: var(--sub); font-size: 12.5px; margin-bottom: 2px }
+.a11y-dl dd { margin: 0 0 12px; font-size: 13.5px; line-height: 1.55 }
+.a11y-dl dd:last-child { margin-bottom: 0 }
+.a11y-dl ul { margin: 0; padding-left: 18px }
+.checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px }
+.checklist li { display: flex; align-items: center; gap: 8px; font-size: 13.5px }
+.check-dot { width: 20px; height: 20px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
+.check-dot svg { width: 12px; height: 12px }
+.check-dot.ok { background: var(--green-bg); color: var(--green-d) }
+.check-dot.no { background: var(--surface2); color: var(--hint) }
+.meta-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border) }
+.meta-row:last-child { border-bottom: none }
+.meta-row dt { color: var(--sub) }
+.meta-row dd { margin: 0; font-weight: 700; text-align: right }
+.side-col { display: flex; flex-direction: column; gap: 16px }
+.action-stack { display: flex; flex-direction: column; gap: 8px }
+.action-stack .btn { width: 100% }
+.conn-warn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--amber-d); margin: -2px 0 2px }
+.conn-warn svg { width: 13px; height: 13px }
+
+/* ── My Library ──────────────────────────────────────────────── */
+.lib-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px }
+.lib-tab { height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px }
+.lib-tab svg { width: 14px; height: 14px }
+.lib-tab[aria-selected="true"] { background: var(--accent); color: #fff; border-color: var(--accent) }
+.folder-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px }
+.folder-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: var(--r10); padding: 7px 11px; font-size: 12px; font-weight: 700; color: var(--sub) }
+.folder-chip svg { width: 13px; height: 13px }
+.lib-empty { border: 1px solid var(--border); border-radius: var(--r16); padding: 40px; text-align: center; background: var(--surface) }
+.lib-empty p:first-child { font-weight: 700; font-size: 13.5px; margin: 0 0 4px }
+.lib-empty p:last-child { margin: 0; font-size: 12.5px; color: var(--sub) }
+
+/* ── Modal / Agent panel ─────────────────────────────────────── */
+.modal-backdrop { position: fixed; inset: 0; z-index: 80; background: rgba(28,28,30,.5); display: flex; align-items: center; justify-content: center; padding: 16px }
+.modal-box { width: 100%; max-width: 620px; max-height: 88vh; overflow-y: auto; background: var(--surface); border-radius: var(--r20); box-shadow: var(--shadow-md) }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border) }
+.modal-header h2 { margin: 0; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px }
+.modal-header h2 svg { width: 18px; height: 18px; color: var(--accent-d) }
+.modal-header p { margin: 2px 0 0; font-size: 12px; color: var(--sub) }
+.modal-close { width: 34px; height: 34px; border-radius: var(--r10); border: none; background: none; color: var(--sub); display: flex; align-items: center; justify-content: center; cursor: pointer }
+.modal-close svg { width: 17px; height: 17px }
+.modal-body { padding: 20px }
+.agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px }
+.agent-action { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: var(--r12); padding: 12px; background: var(--surface); text-align: left; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--ink) }
+.agent-action:hover { background: var(--accent-bg) }
+.agent-icon { width: 32px; height: 32px; border-radius: var(--r8); background: var(--accent-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0 }
+.agent-icon svg { width: 16px; height: 16px; color: var(--accent-d) }
+.agent-processing { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 56px 20px }
+.spin { width: 30px; height: 30px; color: var(--accent-d); animation: spin 0.9s linear infinite; margin-bottom: 12px }
+@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+.agent-processing .a-title { font-size: 13.5px; font-weight: 700; margin: 0 0 4px }
+.agent-processing .a-sub { font-size: 12px; color: var(--sub); margin: 0 }
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px }
+.ba-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; margin: 0 0 6px; color: var(--sub) }
+.ba-label.after { color: var(--accent-d) }
+.ba-preview { border-radius: var(--r12); overflow: hidden; height: 100px; border: 1px solid var(--border) }
+.ba-preview.after { border-color: var(--accent) }
+.agent-note { display: flex; gap: 8px; background: var(--accent-bg); color: var(--accent-d); border-radius: var(--r12); padding: 12px; font-size: 13px; margin-bottom: 16px }
+.agent-note svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px }
+.agent-footer { display: flex; gap: 8px }
+.agent-footer .btn { flex: 1 }
+
+/* ── Toast ───────────────────────────────────────────────────── */
+#td-toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(8px);
+  background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 999px;
+  font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none;
+  transition: opacity .2s, transform .2s; z-index: 100; box-shadow: var(--shadow-md);
+}
+#td-toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
+#td-toast.err { background: var(--red-d) }
+</style>
+</head>
+<body>
+
+<a href="#td-main" class="skip-link">본문으로 건너뛰기</a>
+
+<header class="td-header">
+  <div class="wrap td-header-row">
+    <button type="button" class="td-brand" id="td-brand-btn" aria-label="텍타일 드라이브 홈으로">
+      <span class="td-logo">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="7" cy="7" r="1.6" fill="#F2ECDF" stroke="none"/><circle cx="12" cy="7" r="1.6" fill="#F2ECDF" stroke="none"/><circle cx="17" cy="7" r="1.6" fill="#F2ECDF" stroke="none"/>
+          <circle cx="7" cy="12" r="1.6" fill="#F2ECDF" stroke="none" opacity=".4"/><circle cx="12" cy="12" r="1.6" fill="var(--accent)" stroke="none"/><circle cx="17" cy="12" r="1.6" fill="#F2ECDF" stroke="none" opacity=".4"/>
+          <circle cx="7" cy="17" r="1.6" fill="#F2ECDF" stroke="none" opacity=".2"/><circle cx="12" cy="17" r="1.6" fill="#F2ECDF" stroke="none"/><circle cx="17" cy="17" r="1.6" fill="#F2ECDF" stroke="none" opacity=".2"/>
+        </svg>
+      </span>
+      <span class="td-name">텍타일 드라이브</span>
+    </button>
+
+    <div class="td-search-desktop">
+      <div class="td-search">
+        <span id="td-search-icon-1"></span>
+        <input type="search" id="td-search-desktop-input" aria-label="텍타일 드라이브 자료 검색" placeholder="지도, 과학 도표, 게임, 학습지, 문화, 수학 검색…"/>
+      </div>
+    </div>
+
+    <nav class="td-nav" aria-label="주요 메뉴">
+      <button type="button" class="btn btn-secondary sm" id="td-conn-toggle" aria-pressed="false"></button>
+      <button type="button" class="btn btn-ghost sm" id="td-nav-home">라이브러리</button>
+      <button type="button" class="btn btn-ghost sm" id="td-nav-library"></button>
+    </nav>
+  </div>
+  <div class="td-search-mobile">
+    <div class="td-search">
+      <span id="td-search-icon-2"></span>
+      <input type="search" id="td-search-mobile-input" aria-label="텍타일 드라이브 자료 검색 (모바일)" placeholder="자료 검색…"/>
+    </div>
+  </div>
+</header>
+
+<main id="td-main" class="wrap td-main"></main>
+
+<div id="td-agent-root"></div>
+
+<div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="td-live"></div>
+<div id="td-toast" aria-hidden="true"></div>
+
+<script type="module" src="js/drive-app.js"></script>
+</body>
+</html>
