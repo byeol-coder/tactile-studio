@@ -4,15 +4,14 @@
 // Supabase 로그인·클라우드 저장/열기를 연결합니다.
 //
 // 동작 요약
-//  - 헤더에 [로그인] [Tactile Library] [설치] 버튼을 동적으로 추가
+//  - 헤더에 [로그인] [☁ 클라우드] [설치] 버튼을 동적으로 추가
 //  - DTMS 다운로드(<a download="*.dtms">)를 가로채 로그인 상태면 클라우드에도 업로드
-//  - Library 파일 선택 시 기존 #tactileFileInput 에 주입 → app.js의 열기 로직 재사용
+//  - 클라우드 파일 선택 시 기존 #tactileFileInput 에 주입 → app.js의 열기 로직 재사용
 // ============================================================
 import { getUser, signInWithPassword, signUp, signInWithGoogle, signOut, onAuthChange } from "./auth.js";
 import { saveDtms, listDtms, loadDtms } from "./storage.js";
 import { ENABLE_AUTH_UI, ENABLE_DOT_CLOUD_TEMP } from "./config.js";
 import { dotCloud, grabThumb, grabMeta } from "./dot-cloud.js";
-import { openTactileLibraryUI } from "./tactile-library.js";
 
 // ---- 공통: 토스트(앱의 #toast 재사용, 없으면 alert) ----
 // #toast는 순수 시각 요소(aria-hidden)로 바뀌었으므로, 스크린리더 안내는
@@ -44,17 +43,18 @@ function injectUI() {
   installBtn.textContent = "설치";
   right.insertBefore(installBtn, saveBtn);
 
-  // Tactile Library 버튼 (로그인 불필요): 공개 mock library + 로컬 My Library
+  // 텍타일 드라이브 링크 (로그인 불필요, 별도 페이지로 이동)
+  // 이전에는 여기서 로컬(localStorage) 임시 "닷 클라우드" 모달을 열었지만,
+  // drive.html의 텍타일 드라이브 라이브러리로 대체했다. dot-cloud.js 자체는
+  // 그대로 두어서 필요하면 나중에 다시 연결할 수 있게 했다.
   let driveBtn = null;
   if (ENABLE_DOT_CLOUD_TEMP) {
     driveBtn = document.createElement("button");
     driveBtn.className = "hd-btn ghost";
-    driveBtn.id = "tactileLibraryBtn";
-    driveBtn.title = "Tactile Library 열기";
-    driveBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg><span>Tactile Library</span>';
-    driveBtn.addEventListener("click", () =>
-      openTactileLibraryUI({ onOpen: (text, name) => loadIntoApp(text, name) })
-    );
+    driveBtn.id = "tactileDriveBtn";
+    driveBtn.title = "텍타일 드라이브 열기";
+    driveBtn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>텍타일 드라이브</span>';
+    driveBtn.addEventListener("click", () => window.open("drive.html", "_blank", "noopener"));
     right.insertBefore(driveBtn, saveBtn);
   }
 
@@ -224,7 +224,7 @@ function openAuthModal() {
   setTimeout(() => card.querySelector("#authEmail")?.focus(), 50);
 }
 
-// ---- Supabase 파일 선택 모달 ----
+// ---- 클라우드 파일 선택 모달 ----
 function pickFile(files) {
   return new Promise((resolve) => {
     const bg = document.createElement("div");
@@ -259,7 +259,7 @@ function loadIntoApp(text, name) {
   dt.items.add(file);
   input.files = dt.files;
   input.dispatchEvent(new Event("change", { bubbles: true }));
-  toast("Tactile Library 항목을 불러왔어요");
+  toast("클라우드 파일을 불러왔어요");
 }
 
 // ---- 저장 가로채기 ----
@@ -297,14 +297,14 @@ async function consumeSaveBlob(blobP) {
     const text = await blob.text();
     const name = (document.getElementById("fname")?.value || "무제").trim();
 
-    // 1) My Library(localStorage)에 저장 — 로그인 불필요, 개인 라이브러리 최상위
+    // 1) 임시 닷 클라우드(localStorage)에 저장 — 로그인 불필요, 개인 드라이브 최상위
     if (ENABLE_DOT_CLOUD_TEMP) {
       const meta = grabMeta();
       await dotCloud.saveFile({
         driverKind: "P", parentGroupNo: "ROOT", name,
         dtms: text, thumb: grabThumb(), width: meta.width, height: meta.height, tag: meta.tag,
       });
-      toast("Tactile Library에 저장됨");
+      toast("닷 클라우드에 저장됨");
       return;
     }
     // 2) (선택) Supabase 클라우드 — 로그인 상태일 때만
