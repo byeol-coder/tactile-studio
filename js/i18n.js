@@ -55,7 +55,7 @@ export const I18N = {
     btn_trace_upload: '이미지 삽입',
     trace_visible:    '표시',
     btn_braille_render:'캔버스에 배치',
-    btn_braille_send: 'Dot Pad로 보내기',
+    btn_braille_send: 'DotPad로 보내기',
     panel_math:       '수식 그래프',
     btn_plot:         '그리기',
     btn_print:        '인쇄',
@@ -261,12 +261,6 @@ export const I18N = {
     help_step5_title:    'DotPad로 보내기',
     help_step5_body:     '완성된 촉각그래픽을 DotPad로 출력해요.',
 
-    // ── Redesign: workflow stepper ─────────────────────────────
-    step_import:      '가져오기',
-    step_convert:     '촉각그래픽 변환',
-    step_check:       '촉각 품질 검사',
-    step_send:        '전송 / 저장 / 내보내기',
-
     // ── Redesign: left panel ───────────────────────────────────
     panel_import:       '가져오기',
     btn_import_material:'이미지 불러오기',
@@ -302,11 +296,30 @@ export const I18N = {
     q_complexity_medium: '보통',
     q_complexity_high:   '높음',
     q_dotpad_compat:     'DotPad 호환성',
-    q_compat_ready:      '변환 준비 완료',
-    q_compat_review:     '검토 필요',
+    q_compat_ready:      '지원됨',
+    q_compat_review:     '사용자 지정 해상도',
     q_verification:      '검증 상태',
     verif_ai_checked:    'AI 검사 완료',
     verif_human_review:  'AI 검사 완료 · 사람 검토 필요',
+
+    // ── Redesign: Quality mini-bar + drawer ─────────────────────
+    qb_detail:           '상세 보기',
+    qb_rerender:         '다시 렌더링',
+    qb_ai_improve:       'AI 개선',
+    qb_not_rendered:     '품질 데이터는 계산되었지만 현재 페이지 미리보기가 아직 렌더링되지 않았습니다.',
+    qd_title:            '촉각 품질 상세',
+    qd_score:            '품질 점수',
+    qd_pin_count:        '핀 수',
+    qd_preview_render:   '미리보기 렌더링',
+    qd_render_ok:        '정상 렌더링됨',
+    qd_render_pending:   '아직 렌더링되지 않음',
+    qd_render_failed:    '렌더링 실패',
+    qd_rerender:         '다시 렌더링',
+    qd_recheck:          '품질 재검사',
+    qd_ai_fix:           'AI로 개선',
+    toast_quality_rechecked: '촉각 품질을 다시 검사했어요',
+    preview_error_title: '이 페이지를 표시할 수 없습니다.',
+    preview_error_sub:   '다시 렌더링하거나 다른 페이지로 이동해보세요.',
 
     // ── Redesign: AI suggestions ────────────────────────────────
     ai_apply_fix:        'AI 제안 적용',
@@ -426,7 +439,7 @@ export const I18N = {
     btn_trace_upload: 'Insert Image',
     trace_visible:    'Visible',
     btn_braille_render:'Place on Canvas',
-    btn_braille_send: 'Send to Dot Pad',
+    btn_braille_send: 'Send to DotPad',
     panel_math:       'Math Graph',
     btn_plot:         'Plot',
     btn_print:        'Print',
@@ -632,12 +645,6 @@ export const I18N = {
     help_step5_title:    'Send to DotPad',
     help_step5_body:     'Output the finished tactile graphic to your DotPad.',
 
-    // ── Redesign: workflow stepper ─────────────────────────────
-    step_import:      'Import',
-    step_convert:     'Convert to Tactile Graphic',
-    step_check:       'Check Tactile Quality',
-    step_send:        'Send / Save / Export',
-
     // ── Redesign: left panel ───────────────────────────────────
     panel_import:       'Import',
     btn_import_material:'Import Image',
@@ -673,11 +680,30 @@ export const I18N = {
     q_complexity_medium: 'Medium',
     q_complexity_high:   'High',
     q_dotpad_compat:     'DotPad Compatibility',
-    q_compat_ready:      'Ready for DotPad',
-    q_compat_review:     'Review Needed',
+    q_compat_ready:      'Supported',
+    q_compat_review:     'Custom resolution',
     q_verification:      'Verification',
     verif_ai_checked:    'AI Checked',
     verif_human_review:  'AI Checked · Human Review Needed',
+
+    // ── Redesign: Quality mini-bar + drawer ─────────────────────
+    qb_detail:           'View Details',
+    qb_rerender:         'Re-render',
+    qb_ai_improve:       'Improve with AI',
+    qb_not_rendered:     'Quality data was calculated, but the current page preview has not rendered yet.',
+    qd_title:            'Tactile Quality Details',
+    qd_score:            'Quality Score',
+    qd_pin_count:        'Pin Count',
+    qd_preview_render:   'Preview Rendering',
+    qd_render_ok:        'Rendered successfully',
+    qd_render_pending:   'Not rendered yet',
+    qd_render_failed:    'Render failed',
+    qd_rerender:         'Re-render',
+    qd_recheck:          'Recheck Quality',
+    qd_ai_fix:           'Improve with AI',
+    toast_quality_rechecked: 'Tactile quality re-checked',
+    preview_error_title: 'This page can’t be displayed.',
+    preview_error_sub:   'Try re-rendering or moving to a different page.',
 
     // ── Redesign: AI suggestions ────────────────────────────────
     ai_apply_fix:        'Apply AI Fix',

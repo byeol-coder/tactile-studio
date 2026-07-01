@@ -34,7 +34,7 @@ import {
   sendGraphicData, sendBrailleText, allPinsUp, allPinsDown, syncLivePreview,
 } from './dotpad.js';
 
-import { exportDtms, exportPng, exportJson, copyHexToClipboard, parseDtms } from './export.js';
+import { exportDtms, exportPng, exportJson, copyHexToClipboard, parseDtms, KNOWN_RESOLUTIONS } from './export.js';
 import { t } from './i18n.js';
 import { openImageCropModal } from './crop.js';
 import { openTactileLibraryUI } from './tactile-library.js';
@@ -140,8 +140,8 @@ function ensurePreviewErrorOverlay() {
   el.id = 'previewErrorOv';
   el.setAttribute('role', 'alert');
   el.innerHTML = `
-    <p class="ov-title">이 페이지를 표시할 수 없습니다.</p>
-    <p class="ov-sub">DTMS 페이지 데이터는 불러왔지만 미리보기 렌더링에 실패했습니다.</p>
+    <p class="ov-title" data-i18n="preview_error_title">${t('preview_error_title', appState.language)}</p>
+    <p class="ov-sub" data-i18n="preview_error_sub">${t('preview_error_sub', appState.language)}</p>
     <div class="ov-ctas">
       <button type="button" class="ov-btn fill" data-preview-action="retry">Retry rendering</button>
       <button type="button" class="ov-btn outline" data-preview-action="first">Go to page 1</button>
@@ -293,6 +293,12 @@ function redo() {
 
 function afterChange() {
   appState.isDirty = true;
+  // Any edit that reaches here (pen/shape/undo/generate/braille/…) draws successfully
+  // right below, so the page IS rendered now — without this, isRendered stays stuck at
+  // its createBlankPage() default of false and the quality mini-bar/drawer wrongly
+  // report "preview not rendered yet" for content the user can already see on-canvas.
+  const page = pagesState.activePage;
+  if (page) { page.isRendered = true; page.renderError = null; }
   saveCurrentPageState();
   drawCanvas();
   syncQuality();
@@ -557,6 +563,17 @@ function pill(el, txt, kind) {
   el.className = 'pill pill-' + kind;
 }
 
+/** Drive the canvas-bottom mini status bar. Never receives long AI text —
+ *  that stays in the drawer (see #qualityDrawerModal / renderSuggestions()). */
+function renderQualityBar(hidden, text, primaryLabel, primaryAction) {
+  const bar = ge('qualityBar'); if (!bar) return;
+  bar.hidden = !!hidden;
+  if (hidden) return;
+  const textEl = ge('qbText'); if (textEl) textEl.textContent = text;
+  const btn = ge('qbPrimaryBtn');
+  if (btn) { btn.textContent = primaryLabel; btn.onclick = primaryAction; }
+}
+
 // Pure UI-layer derivation on top of engine.js's real tactileQualityScore()/
 // analyzeDensity() output — does not change any conversion/scoring logic.
 function deriveQualitySummary(sc, fill, cols, rows, lang) {
@@ -565,7 +582,11 @@ function deriveQualitySummary(sc, fill, cols, rows, lang) {
   const m = sc.m || {};
   const complexity = (fill > 40 || (m.count || 0) > 6) ? 'high'
     : (fill < 15 && (m.count || 0) <= 3) ? 'low' : 'medium';
-  const compatKey = grade >= 2 ? 'ready' : 'review';
+  // Compatibility is a resolution question, not a score question — a known DotPad
+  // grid (28×40 / 60×40 / 96×64) is "supported" regardless of how the conversion
+  // happened to turn out; anything else (e.g. a DTMS authored at a custom size) is not.
+  const isKnownRes = KNOWN_RESOLUTIONS.some(([c, r]) => c === cols && r === rows);
+  const compatKey = isKnownRes ? 'ready' : 'review';
   const verifKey = grade >= 3 ? 'ai_checked' : 'human_review';
   return {
     score: Math.round(sc.score ?? 0),
@@ -573,6 +594,7 @@ function deriveQualitySummary(sc, fill, cols, rows, lang) {
     gradeLabel: t('grade_' + gradeKey, lang),
     complexityLabel: t('q_complexity_' + complexity, lang),
     compatLabel: compatKey === 'ready' ? `${cols}×${rows} ${t('q_compat_ready', lang)}` : t('q_compat_review', lang),
+    compatKey,
     verifLabel: t('verif_' + verifKey, lang),
   };
 }
@@ -585,29 +607,35 @@ function syncQuality() {
   const pins = g.reduce((s, v) => s + v, 0);
   const fill = Math.round(pins / n * 100);
   const page = pagesState.activePage;
+  const previewFailed = !!page?.renderError;
+  const renderStatusPill = () => pill(ge('qRenderStatus'),
+    previewFailed ? t('qd_render_failed', lang) : page?.isRendered === false ? t('qd_render_pending', lang) : t('qd_render_ok', lang),
+    previewFailed ? 'bad' : page?.isRendered === false ? 'warn' : 'good');
 
   if (pins === 0) {
     if (!pageHasContent(page)) { resetQuality(); return; }
     const qd = ge('qDotCount'); if (qd) qd.textContent = '0';
-    const qs2 = ge('qDotSub'); if (qs2) qs2.textContent = `/ ${n.toLocaleString()} · 0%`;
-    pill(ge('qClarity'), '—', 'neutral');
+    const qs2 = ge('qDotSub'); if (qs2) qs2.textContent = ` / ${n.toLocaleString()} 핀 · 0%`;
     pill(ge('qDensity'), '빈 페이지', 'warn');
     pill(ge('qReadability'), '—', 'neutral');
     pill(ge('qStructure'), 'DTMS', 'neutral');
+    renderStatusPill();
     const resText = `${cols}×${rows}`;
     const resCh = ge('resChip'); if (resCh) resCh.textContent = resText;
     const dotCh = ge('dotChip'); if (dotCh) { dotCh.textContent = '0 핀 · 0%'; dotCh.className = 'chip chip-w'; }
     const resCh2 = ge('resChipBtm'); if (resCh2) resCh2.textContent = resText;
     const dotCh2 = ge('dotChipBtm'); if (dotCh2) { dotCh2.textContent = '0 핀 · 0%'; dotCh2.className = 'dot-chip chip-w'; }
     syncBtns(true);
+    renderQualityBar(true);
     return;
   }
 
-  if (pageHasContent(page) && page?.isRendered === false) {
-    const card = ge('aiFeedbackCard'); if (card) card.style.display = 'block';
-    const aiTxt = ge('aiFeedbackText');
-    if (aiTxt) aiTxt.textContent = '품질 데이터는 계산되었지만 미리보기가 아직 렌더링되지 않았습니다.';
-  }
+  // Rendering state — drives both the qRenderStatus drawer row and the mini bar below.
+  // A hard render failure is already surfaced full-canvas by #previewErrorOv, so the
+  // mini bar stays out of the way for that case; "not yet rendered" is the only state
+  // the mini bar itself prompts the user to act on.
+  const notYetRendered = pageHasContent(page) && page?.isRendered === false && !previewFailed;
+
   const meta = page?.sourceImageMeta;
   const sc = tactileQualityScore(g, cols, rows, { type: meta?.type, outline: conversionState.outline });
   const grade = Math.min(4, Math.max(1, sc.grade));
@@ -615,7 +643,7 @@ function syncQuality() {
 
   // stat
   const qd = ge('qDotCount'); if (qd) qd.textContent = pins.toLocaleString();
-  const qs2 = ge('qDotSub'); if (qs2) qs2.textContent = `/ ${n.toLocaleString()} · ${fill}%`;
+  const qs2 = ge('qDotSub'); if (qs2) qs2.textContent = ` / ${n.toLocaleString()} 핀 · ${fill}%`;
   const df = ge('densityFill');
   if (df) {
     df.style.width = Math.min(100, fill) + '%';
@@ -633,15 +661,17 @@ function syncQuality() {
     : t('state_high', lang);
   const fillCls = fill < 10 ? 'warn' : fill < 35 ? 'good' : fill < 50 ? 'warn' : 'bad';
 
-  pill(ge('qReadability'), grade >= 3 ? t('state_good', lang) : grade === 2 ? t('state_warning', lang) : t('state_poor', lang), grade >= 3 ? 'good' : grade === 2 ? 'warn' : 'bad');
+  const readabilityLabel = grade >= 3 ? t('state_good', lang) : grade === 2 ? t('state_warning', lang) : t('state_poor', lang);
+  pill(ge('qReadability'), readabilityLabel, grade >= 3 ? 'good' : grade === 2 ? 'warn' : 'bad');
   pill(ge('qDensity'), fillState, fillCls);
   const structVal = fill > 40 ? t('state_filled', lang) : fill > 15 ? t('state_mixed', lang) : t('state_outline', lang);
   pill(ge('qStructure'), structVal, 'neutral');
   pill(ge('qComplexity'), summary.complexityLabel, summary.complexityLabel === t('q_complexity_high', lang) ? 'warn' : 'good');
   pill(ge('qCompat'), summary.compatLabel, summary.compatKey === 'review' ? 'warn' : 'good');
   pill(ge('qVerification'), summary.verifLabel, grade >= 3 ? 'good' : 'warn');
+  renderStatusPill();
 
-  // AI feedback
+  // AI feedback (long-form — lives only in the drawer, never in the mini bar)
   if (meta) {
     const card = ge('aiFeedbackCard'); if (card) card.style.display = 'block';
     const empty = ge('aiFeedbackEmpty'); if (empty) empty.style.display = 'none';
@@ -657,17 +687,35 @@ function syncQuality() {
   const resCh2 = ge('resChipBtm'); if (resCh2) resCh2.textContent = resText;
   const dotCh2 = ge('dotChipBtm'); if (dotCh2) { dotCh2.textContent = dotText; dotCh2.className = 'dot-chip ' + (fill < 10 ? 'chip-w' : fill < 45 ? 'chip-ok' : 'chip-w'); }
   syncBtns(true);
+
+  // canvas-bottom mini status bar
+  if (previewFailed) {
+    renderQualityBar(true);
+  } else if (notYetRendered) {
+    renderQualityBar(false, t('qb_not_rendered', lang), t('qb_rerender', lang), () => renderCurrentPage());
+  } else {
+    const pageLbl = pagesState.pages.length > 1 ? `${pagesState.activePageIndex + 1}/${pagesState.pages.length} · ` : '';
+    const barText = `${pageLbl}${cols}×${rows} · 핀 ${pins.toLocaleString()}/${n.toLocaleString()} · ${fill}% · ${t('q_readability', lang)} ${readabilityLabel} · ${t('q_pin_density', lang)} ${fillState}`;
+    const lowGrade = grade <= 2;
+    renderQualityBar(false, barText,
+      lowGrade ? t('qb_rerender', lang) : t('qb_ai_improve', lang),
+      lowGrade ? () => renderCurrentPage() : () => runAutoImprove());
+  }
 }
 
 function resetQuality() {
-  ['qReadability','qDensity','qStructure','qComplexity','qCompat','qVerification'].forEach(id => {
+  ['qReadability','qDensity','qStructure','qComplexity','qCompat','qVerification','qRenderStatus'].forEach(id => {
     const el = ge(id); if (el) { el.textContent = '—'; el.className = 'pill pill-n'; }
   });
+  const qd = ge('qDotCount'); if (qd) qd.textContent = '0';
+  const qs2 = ge('qDotSub'); if (qs2) qs2.textContent = ` / ${(canvasState.width * canvasState.height).toLocaleString()} 핀`;
   const scoreEl = ge('qScoreNum'); if (scoreEl) scoreEl.textContent = '—';
   const badge = ge('qGradeBadge'); if (badge) { badge.textContent = '—'; badge.className = 'quality-grade-badge pill-n'; }
+  const df = ge('densityFill'); if (df) df.style.width = '0%';
   const card = ge('aiFeedbackCard'); if (card) card.style.display = 'none';
   const empty = ge('aiFeedbackEmpty'); if (empty) { empty.style.display = ''; empty.textContent = t('ai_empty', appState.language); }
   const list = ge('aiSuggestions'); if (list) list.innerHTML = '';
+  renderQualityBar(true);
   syncRecropVisibility();
   syncBtns(false);
 }
@@ -714,6 +762,25 @@ function renderSuggestions(fill, sc, grade, lang) {
 function openAdvancedSettings() {
   const details = ge('advSettings');
   if (details) { details.open = true; details.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+}
+
+/** Open the Tactile Quality detail drawer — reuses the app's existing generic modal
+ *  focus-trap (openModal/closeModal below) rather than a bespoke drawer implementation. */
+function openQualityDrawer() {
+  openModal(ge('qualityDrawerModal'));
+}
+
+/** Auto-pick conversion params for the current source image and rebuild — shared by the
+ *  advanced-settings "자동" button, the quality mini-bar's "AI 개선" action, and the
+ *  quality drawer's "AI로 개선" action so the three surfaces never drift apart. */
+function runAutoImprove() {
+  const page = pagesState.activePage;
+  if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
+  const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
+  Object.assign(conversionState, p);
+  paintSlider(conversionState.threshold);
+  syncConvUI();
+  rebuild(); toast(t('toast_auto_th', appState.language) + ' ' + Math.round((conversionState.threshold - 20) / 220 * 100) + '%');
 }
 
 function applyAiCmd(cmd) {
@@ -856,7 +923,7 @@ function switchPage(idx) {
     syncDescriptionUI();
     return;
   }
-  setLoadingMessage(`Loading page ${safeIdx + 1} of ${total}…`, 'Rendering tactile preview…');
+  setLoadingMessage('DTMS 페이지를 렌더링하고 있습니다.', `${safeIdx + 1} / ${total} 페이지 · 촉각 미리보기를 그리는 중이에요.`);
   loadPageState(safeIdx);
   renderCurrentPage(safeIdx);
   syncPageUI();
@@ -1126,8 +1193,18 @@ function guardUnsavedChanges() {
   });
 }
 
+/** If the active page already has meaningful content, add a fresh page first
+ *  so "generate from scratch" actions (shapes/math/braille) never silently
+ *  destroy an already-loaded/converted image. */
+function ensureFreshTargetPage() {
+  const page = pagesState.activePage;
+  const occupied = canvasState.activeDots > 0 || !!page?.sourceImageState || !!page?.hasDtmsData;
+  if (occupied) addPage();
+}
+
 /** Place a freshly-generated pin grid as the current canvas (no source image). */
 function placeGeneratedGrid(data, altText) {
+  ensureFreshTargetPage();
   pushUndo();
   canvasState.data = data;
   setActivePageSourceImage(null, null);
@@ -1140,10 +1217,12 @@ function placeGeneratedGrid(data, altText) {
   setPhase('ready');
   appState.isDirty = true;
   afterChange();
+  syncPageUI(); syncDescriptionUI();
 }
 
 /** Convert text to braille cells and place it on the canvas (shared by the NL command and the panel input box). */
 function placeBrailleText(text) {
+  ensureFreshTargetPage();
   const { width: cols, height: rows } = canvasState;
   pushUndo();
   const lines = textToBraillePages(text, Math.floor(cols / 3));
@@ -1155,7 +1234,7 @@ function placeBrailleText(text) {
   setPhase('ready');
   appState.isDirty = true;
   afterChange();
-  syncDescriptionUI();
+  syncPageUI(); syncDescriptionUI();
 }
 
 // ─── Command bar (Figma-mini prompt brain) ───────────────────
@@ -1556,15 +1635,7 @@ function wireFullMode() {
     sl.value = v; conversionState.threshold = v; conversionState.method = 'global';
     paintSlider(v); rebuild(80);
   });
-  ge('thAuto')?.addEventListener('click', () => {
-    const page = pagesState.activePage;
-    if (!page?.sourceImageState) { toast(t('toast_need_image', appState.language)); return; }
-    const p = autoSelectParams(page.sourceImageState, canvasState.width, canvasState.height);
-    Object.assign(conversionState, p);
-    paintSlider(conversionState.threshold);
-    syncConvUI();
-    rebuild(); toast(t('toast_auto_th', appState.language) + ' ' + Math.round((conversionState.threshold - 20) / 220 * 100) + '%');
-  });
+  ge('thAuto')?.addEventListener('click', runAutoImprove);
 
   // method selector
   qsa('.th-method-btn').forEach(b => b.addEventListener('click', () => {
@@ -1715,6 +1786,15 @@ function wireFullMode() {
     next.focus();
   });
   ge('libSave')?.addEventListener('click', saveToLibrary);
+
+  // Tactile Quality detail drawer — opened from the canvas mini bar or the compact panel row
+  ge('qbDetailBtn')?.addEventListener('click', openQualityDrawer);
+  ge('qualityPanelDetailBtn')?.addEventListener('click', openQualityDrawer);
+  ge('qdCloseBtn')?.addEventListener('click', () => closeModal(ge('qualityDrawerModal')));
+  ge('qdRerenderBtn')?.addEventListener('click', () => renderCurrentPage());
+  ge('qdRecheckBtn')?.addEventListener('click', () => { syncQuality(); toast(t('toast_quality_rechecked', appState.language), 'ok'); });
+  ge('qdAiFixBtn')?.addEventListener('click', runAutoImprove);
+  ge('qdManualBtn')?.addEventListener('click', () => { closeModal(ge('qualityDrawerModal')); openAdvancedSettings(); ge('thSlider')?.focus(); });
 
   // Page management
   ge('pagePrev')?.addEventListener('click', () => switchPage(pagesState.activePageIndex - 1));
