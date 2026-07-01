@@ -241,22 +241,10 @@ function setPhase(phase) {
   appState.isEmpty = phase === 'empty';
   document.body.dataset.state = phase;
   syncBottomBar();
-  syncStepper();
   if (phase === 'ready') {
     const badge = qs('.ai-done-badge');
     if (badge) badge.style.display = '';
   }
-}
-
-// ─── Workflow stepper ───────────────────────────────────────────
-function syncStepper() {
-  const steps = ['import', 'convert', 'check', 'send'];
-  const activeIdx = appState.phase === 'empty' ? 0 : appState.phase === 'analyzing' ? 1 : 2;
-  qsa('.step-item[data-step]').forEach(el => {
-    const idx = steps.indexOf(el.dataset.step);
-    el.classList.toggle('active', idx === activeIdx);
-    el.classList.toggle('done', idx < activeIdx);
-  });
 }
 
 function setLoadingMessage(title = null, sub = null) {
