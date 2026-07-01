@@ -21,11 +21,12 @@ import { interpretCommand, QUICK_COMMANDS } from './commands.js';
 import { drawPrimitive, renderBrailleGrid, describeTactile } from './generate.js';
 import { initBank, loadSymbol } from './bank.js';
 import { svgIcon } from './icons.js';
-import { renderMathGraph } from './mathgraph.js';
+import { renderMathGraph, normalizeExpr } from './mathgraph.js';
+import { renderTraceLayer } from './tracelayer.js';
 
 import {
   computeCanvasLayout, applyLayout, renderGrid,
-  getPointerCell, getBrushCells, bresenhamLine,
+  getPointerCell, getBrushCells, bresenhamLine, rectCells, ellipseCells,
 } from './canvas.js';
 
 import {
@@ -96,6 +97,7 @@ function fitCanvas() {
   viewportState.panY = 0;
   applyPan();
   drawCanvas();
+  drawTraceLayer();
 }
 
 // Apply the current pan offset as a transform on the canvas wrapper.
@@ -122,6 +124,7 @@ function drawCanvas() {
     hoverCells: toolState.hoverBrush || [],
     hoverKind:  toolState.currentTool,
     selection:  toolState.selection,
+    shapePreview: toolState.shapePreview,
   });
 }
 
@@ -492,6 +495,39 @@ function paintSlider(v) {
   const mval = ge('miniThVal'); if (mval) mval.textContent = pct + '%';
 }
 
+// ─── Image tracing layer ──────────────────────────────────────
+function paintTraceSlider(v) {
+  const fill  = ge('traceFill');
+  const thumb = ge('traceThumb');
+  const disp  = ge('traceOpacityDisplay');
+  if (fill)  fill.style.width = v + '%';
+  if (thumb) thumb.style.left = v + '%';
+  if (disp)  disp.textContent = v + '%';
+}
+
+/** Redraw the tracing-guide overlay canvas to match the active page and current layout. */
+function drawTraceLayer() {
+  const el = ge('traceLayer');
+  if (!el || !layout) return;
+  applyLayout(el, layout);
+  const page = pagesState.activePage;
+  renderTraceLayer(el.getContext('2d'), page?.traceVisible ? page.traceImage : null, layout, page?.traceOpacity ?? 0.4);
+}
+
+/** Sync the description textarea, TTS state, and trace-layer controls to the active page. */
+function syncDescriptionUI() {
+  const page = pagesState.activePage;
+  const descEl = ge('pageAltTextInput');
+  if (descEl && descEl.value !== (page?.altText || '')) descEl.value = page?.altText || '';
+  const opacityPct = Math.round((page?.traceOpacity ?? 0.4) * 100);
+  const slider = ge('traceOpacitySlider');
+  if (slider) slider.value = opacityPct;
+  paintTraceSlider(opacityPct);
+  const toggle = ge('traceVisibleToggle');
+  if (toggle) toggle.setAttribute('aria-checked', String(page?.traceVisible ?? true));
+  drawTraceLayer();
+}
+
 // ─── Quality Panel ────────────────────────────────────────────
 const AI_MSGS = {
   transparent: '배경을 제거하고 주요 윤곽을 남겼어요. 손끝으로 형태를 구분하기 좋아요.',
@@ -714,12 +750,14 @@ function switchPage(idx) {
   if (safeIdx === pagesState.activePageIndex) {
     renderCurrentPage(safeIdx);
     syncPageUI();
+    syncDescriptionUI();
     return;
   }
   setLoadingMessage(`Loading page ${safeIdx + 1} of ${total}…`, 'Rendering tactile preview…');
   loadPageState(safeIdx);
   renderCurrentPage(safeIdx);
   syncPageUI();
+  syncDescriptionUI();
   setLoadingMessage();
 }
 
@@ -734,12 +772,25 @@ function selectTool(name) {
   toolState.currentTool = name;
   toolState.selection = null;
   toolState.hoverBrush = null;
+  toolState.shapeDrag = null;
+  toolState.shapePreview = null;
   qsa('.rail-btn[data-tool]').forEach(b => {
     b.classList.toggle('active', b.dataset.tool === name);
     b.setAttribute('aria-pressed', String(b.dataset.tool === name));
   });
   if (padEl) padEl.style.cursor = name === 'move' ? 'grab' : 'crosshair';
   drawCanvas();
+}
+
+const SHAPE_TOOLS = new Set(['line', 'rect', 'circle']);
+
+/** Cells for the in-progress shape drag, dispatched by tool name. */
+function computeShapePreviewCells(tool, drag) {
+  const { x0, y0, x1, y1 } = drag;
+  if (tool === 'line') return bresenhamLine(x0, y0, x1, y1);
+  if (tool === 'rect') return rectCells(x0, y0, x1, y1);
+  if (tool === 'circle') return ellipseCells(x0, y0, x1, y1);
+  return [];
 }
 
 function setSize(s) {
@@ -777,6 +828,10 @@ function onPointerDown(e) {
   } else if (tool === 'fill') {
     pushUndo();
     floodFill(col, row, canvasState.data[row * canvasState.width + col] ? 0 : 1);
+  } else if (SHAPE_TOOLS.has(tool)) {
+    toolState.shapeDrag = { x0: col, y0: row, x1: col, y1: row };
+    toolState.shapePreview = computeShapePreviewCells(tool, toolState.shapeDrag);
+    drawCanvas();
   }
 }
 
@@ -801,6 +856,11 @@ function onPointerMove(e) {
   } else if (tool === 'select' && _drawing && toolState.selection) {
     toolState.selection.x1 = col;
     toolState.selection.y1 = row;
+    drawCanvas();
+  } else if (SHAPE_TOOLS.has(tool) && _drawing && toolState.shapeDrag) {
+    toolState.shapeDrag.x1 = col;
+    toolState.shapeDrag.y1 = row;
+    toolState.shapePreview = computeShapePreviewCells(tool, toolState.shapeDrag);
     drawCanvas();
   } else {
     toolState.hoverBrush = null;
@@ -828,6 +888,23 @@ function onPointerUp(e) {
       x1: Math.max(s.x0, s.x1), y1: Math.max(s.y0, s.y1),
     };
     drawCanvas();
+  } else if (SHAPE_TOOLS.has(tool) && toolState.shapeDrag) {
+    const outline = toolState.shapePreview || [];
+    toolState.shapeDrag = null;
+    toolState.shapePreview = null;
+    if (outline.length) {
+      pushUndo();
+      const { width: cols, height: rows } = canvasState;
+      for (const [x, y] of outline) {
+        for (const [bx, by] of getBrushCells(x, y, toolState.brushSize)) {
+          if (bx < 0 || by < 0 || bx >= cols || by >= rows) continue;
+          canvasState.data[by * cols + bx] = 1;
+        }
+      }
+      afterChange();
+    } else {
+      drawCanvas();
+    }
   }
 }
 
@@ -866,14 +943,19 @@ function floodFill(startCol, startRow, val) {
 // ─── Keyboard shortcuts ───────────────────────────────────────
 function onKeyDown(e) {
   if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
-  const map = { v: 'move', p: 'pen', e: 'eraser', f: 'fill' };
+  const map = { v: 'move', p: 'pen', e: 'eraser', f: 'fill', l: 'line', r: 'rect', c: 'circle' };
   if (!e.ctrlKey && !e.metaKey && map[e.key]) { selectTool(map[e.key]); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z') { e.preventDefault(); redo(); return; }
   if (e.key === '+' || e.key === '=') { adjustZoom(0.25); return; }
   if (e.key === '-') { adjustZoom(-0.25); return; }
   if (e.key === '0') { viewportState.zoom = 1; fitCanvas(); return; }
-  if (e.key === 'Escape') { toolState.selection = null; drawCanvas(); return; }
+  if (e.key === 'Escape') {
+    toolState.selection = null;
+    toolState.shapeDrag = null;
+    toolState.shapePreview = null;
+    drawCanvas(); return;
+  }
   if ((e.key === 'Delete' || e.key === 'Backspace') && toolState.selection) {
     e.preventDefault(); fillSelection(0); return;
   }
@@ -918,9 +1000,29 @@ function placeGeneratedGrid(data, altText) {
   setActivePageSourceImage(null, null);
   const page = pagesState.activePage;
   if (page && altText) { page.altText = altText; page.brailleText = altText; }
-  if (appState.phase !== 'ready') setPhase('ready');
+  // Always call setPhase (not just when phase looks stale) — setActivePageSourceImage()
+  // already flips appState.phase to 'ready' internally via syncAppContentState(), so the
+  // old "if not ready yet" guard here was always false and skipped setPhase's real job:
+  // updating document.body.dataset.state, which is what actually hides the empty-state overlay.
+  setPhase('ready');
   appState.isDirty = true;
   afterChange();
+}
+
+/** Convert text to braille cells and place it on the canvas (shared by the NL command and the panel input box). */
+function placeBrailleText(text) {
+  const { width: cols, height: rows } = canvasState;
+  pushUndo();
+  const lines = textToBraillePages(text, Math.floor(cols / 3));
+  canvasState.data = renderBrailleGrid(lines, cols, rows);
+  setActivePageSourceImage(null, null);
+  brailleState.brailleText = text;
+  const page = pagesState.activePage;
+  if (page) { page.brailleText = text; page.altText = text; }
+  setPhase('ready');
+  appState.isDirty = true;
+  afterChange();
+  syncDescriptionUI();
 }
 
 // ─── Command bar (Figma-mini prompt brain) ───────────────────
@@ -964,17 +1066,8 @@ async function parseCommand(text) {
 
   // ── Braille text: render typed text as braille cells ──
   if (intent.action === 'brailleText' && intent.brailleText) {
-    import('./engine.js').then(({ textToBraillePages }) => {
-      pushUndo();
-      const lines = textToBraillePages(intent.brailleText, Math.floor(cols / 3));
-      canvasState.data = renderBrailleGrid(lines, cols, rows);
-      brailleState.brailleText = intent.brailleText;
-      if (page) { page.brailleText = intent.brailleText; page.altText = intent.brailleText; }
-      if (appState.phase !== 'ready') setPhase('ready');
-      appState.isDirty = true;
-      afterChange();
-      toast(intent.reply, 'ok');
-    });
+    placeBrailleText(intent.brailleText);
+    toast(intent.reply, 'ok');
     return;
   }
 
@@ -1390,11 +1483,11 @@ function wireFullMode() {
   // Page management
   ge('pagePrev')?.addEventListener('click', () => switchPage(pagesState.activePageIndex - 1));
   ge('pageNext')?.addEventListener('click', () => switchPage(pagesState.activePageIndex + 1));
-  ge('pageAdd')?.addEventListener('click', () => { addPage(); drawCanvas(); syncQuality(); syncPageUI(); toast(t('toast_page_added', appState.language)); });
-  ge('pageDup')?.addEventListener('click', () => { duplicatePage(); drawCanvas(); syncQuality(); syncPageUI(); toast('페이지를 복제했어요'); });
+  ge('pageAdd')?.addEventListener('click', () => { addPage(); drawCanvas(); syncQuality(); syncPageUI(); syncDescriptionUI(); toast(t('toast_page_added', appState.language)); });
+  ge('pageDup')?.addEventListener('click', () => { duplicatePage(); drawCanvas(); syncQuality(); syncPageUI(); syncDescriptionUI(); toast('페이지를 복제했어요'); });
   ge('pageDelete')?.addEventListener('click', () => {
     if (pagesState.pages.length <= 1) return;
-    deletePage(); drawCanvas(); syncQuality(); syncPageUI();
+    deletePage(); drawCanvas(); syncQuality(); syncPageUI(); syncDescriptionUI();
     toast(t('toast_page_del', appState.language));
   });
 
@@ -1424,6 +1517,79 @@ function wireFullMode() {
       exportDtms(pagesState.pages, appState.fileName, canvasState.width, canvasState.height);
       toast(t('toast_dtms', appState.language), 'ok');
     }
+  });
+
+  // Math graph
+  ge('mathPlotBtn')?.addEventListener('click', () => {
+    const raw = ge('mathExprInput')?.value.trim();
+    if (!raw) return;
+    const expr = normalizeExpr(raw);
+    const { data, error } = renderMathGraph(canvasState.width, canvasState.height, expr);
+    const errEl = ge('mathErrorMsg');
+    if (error) { if (errEl) { errEl.textContent = error; errEl.hidden = false; } return; }
+    if (errEl) errEl.hidden = true;
+    placeGeneratedGrid(data, `y = ${expr}`);
+    toast(`y = ${expr}`, 'ok');
+  });
+
+  // Braille text input box
+  ge('brailleRenderBtn')?.addEventListener('click', () => {
+    const text = ge('brailleTextInput')?.value.trim();
+    if (text) placeBrailleText(text);
+  });
+  ge('brailleSendBtn')?.addEventListener('click', () =>
+    sendBrailleText(ge('brailleTextInput')?.value.trim() || ''));
+
+  // Page description + TTS
+  ge('pageAltTextInput')?.addEventListener('input', function() {
+    updateActivePage({ altText: this.value });
+  });
+  ge('ttsPlayBtn')?.addEventListener('click', () => {
+    if (!('speechSynthesis' in window)) { toast('이 브라우저는 TTS를 지원하지 않아요', 'err'); return; }
+    const text = pagesState.activePage?.altText || '';
+    if (!text) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = appState.language === 'ko' ? 'ko-KR' : 'en-US';
+    speechSynthesis.speak(u);
+  });
+
+  // Image tracing layer
+  ge('traceImageInput')?.addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = new Image();
+    img.onload = () => { updateActivePage({ traceImage: img, traceVisible: true }); drawTraceLayer(); };
+    img.src = URL.createObjectURL(f);
+    e.target.value = '';
+  });
+  ge('traceOpacitySlider')?.addEventListener('input', function() {
+    const v = Math.max(0, Math.min(100, +this.value));
+    updateActivePage({ traceOpacity: v / 100 });
+    paintTraceSlider(v);
+    drawTraceLayer();
+  });
+  ge('traceVisibleToggle')?.addEventListener('click', function() {
+    const next = this.getAttribute('aria-checked') !== 'true';
+    this.setAttribute('aria-checked', String(next));
+    updateActivePage({ traceVisible: next });
+    drawTraceLayer();
+  });
+
+  // Print
+  ge('printBtn')?.addEventListener('click', () => window.print());
+
+  // Presentation mode
+  ge('presentBtn')?.addEventListener('click', () => {
+    const area = qs('.canvas-area');
+    if (!document.fullscreenElement) area?.requestFullscreen();
+    else document.exitFullscreen();
+  });
+  ge('presentExitBtn')?.addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+  });
+  document.addEventListener('fullscreenchange', () => {
+    document.body.classList.toggle('presenting', !!document.fullscreenElement);
+    fitCanvas();
   });
 
   // Global keyboard
@@ -1545,6 +1711,7 @@ export function init() {
   syncBtns(false);
   syncConn();
   syncPageUI();
+  syncDescriptionUI();
   applyI18n();
 
   window.addEventListener('resize', fitCanvas);
