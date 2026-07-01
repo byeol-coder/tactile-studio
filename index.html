@@ -615,6 +615,77 @@ details.adv > summary:hover { color: var(--ink) }
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
 #toast.ok { background: var(--green-d) }
+#toast.err { background: var(--red) }
+
+/* ── Crop Modal (restored from 036f2bb) ─────────────────────── */
+.crop-inner {
+  background: var(--surface); border-radius: var(--r16);
+  width: min(90vw, 680px); max-height: 90vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.crop-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.crop-title { font-size: 15px; font-weight: 600 }
+.crop-close {
+  width: 28px; height: 28px; border-radius: var(--r6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--hint); transition: .12s;
+}
+.crop-close:hover { background: var(--surface2) }
+.crop-canvas-area {
+  flex: 1; min-height: 200px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: #111; overflow: hidden;
+}
+#cropCanvas { display: block; max-width: 100%; max-height: 100% }
+.crop-ratio-row {
+  display: flex; gap: 6px; padding: 12px 20px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.crop-ratio-btn {
+  flex: 1; height: 30px; border-radius: var(--r8);
+  font-size: 12px; font-weight: 500;
+  border: 1.5px solid var(--border); background: var(--surface2); color: var(--text);
+  transition: .12s; cursor: pointer;
+}
+.crop-ratio-btn:hover { border-color: var(--border2) }
+.crop-ratio-btn.active { background: var(--accent-bg); border-color: rgba(255,77,0,.35); color: var(--accent) }
+.crop-foot {
+  display: flex; gap: 8px; padding: 12px 20px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.crop-btn-cancel {
+  height: 36px; padding: 0 14px; border-radius: var(--r8);
+  border: 1.5px solid var(--border); background: var(--surface2);
+  font-size: 13px; font-weight: 500; color: var(--text); transition: .12s; white-space: nowrap;
+}
+.crop-btn-cancel:hover { border-color: var(--border2) }
+.crop-btn-orig {
+  flex: 1; height: 36px; border-radius: var(--r8);
+  border: 1.5px solid var(--border); background: var(--surface2);
+  font-size: 13px; font-weight: 500; color: var(--text); transition: .12s;
+}
+.crop-btn-orig:hover { border-color: var(--border2) }
+.crop-btn-confirm {
+  flex: 1; height: 36px; border-radius: var(--r8);
+  border: none; background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 600; transition: .12s;
+}
+.crop-btn-confirm:hover { background: var(--accent-d) }
+/* Shown/hidden via JS (recropBtn.hidden) rather than the old body[data-kind]
+   selector, since the sourceKind/generated-content system it depended on
+   was removed separately and isn't being rebuilt here. */
+#recropRow { margin-top: 10px }
+.recrop-btn {
+  width: 100%; height: 32px; border-radius: var(--r8);
+  border: 1.5px solid var(--border); background: var(--surface2);
+  font-size: 12px; font-weight: 500; color: var(--text); transition: .12s;
+}
+.recrop-btn:hover { border-color: var(--border2); background: var(--surface) }
 
 /* ── Guard Modal ─────────────────────────────────────────── */
 .modal-bg {
@@ -1048,10 +1119,16 @@ details.adv > summary:hover { color: var(--ink) }
     <!-- Resolution selector (hidden but accessible) -->
     <div class="panel-section">
       <div class="sec-hd">해상도</div>
-      <div class="res-row control-grid cols-2">
+      <div class="res-row control-grid cols-3">
         <button class="exp-btn res-btn active" data-res="60x40">60×40</button>
         <button class="exp-btn res-btn" data-res="96x64">96×64</button>
+        <button class="exp-btn res-btn" data-res="28x40">28×40</button>
       </div>
+    </div>
+
+    <!-- Re-crop: hidden by JS (recropBtn.hidden) until an image source exists -->
+    <div id="recropRow" class="panel-section" hidden>
+      <button type="button" id="recropBtn" class="recrop-btn">다시 자르기</button>
     </div>
 
   </div><!-- /panel-scroll -->
@@ -1181,8 +1258,31 @@ details.adv > summary:hover { color: var(--ink) }
 <input type="file" id="tactileFileInput" accept=".dtms,.dtm,.json" style="display:none" aria-hidden="true"/>
 <input type="file" id="miniImgInput" accept="image/*" style="display:none" aria-hidden="true"/>
 
-<!-- Toast -->
-<div id="toast" role="status" aria-live="polite"></div>
+<!-- Toast (visual only — screen readers hear #liveRegion instead, see announce()) -->
+<div id="toast" aria-hidden="true"></div>
+
+<!-- Crop Modal -->
+<div class="modal-bg" id="cropModal" role="dialog" aria-modal="true" aria-label="이미지 자르기">
+  <div class="crop-inner">
+    <div class="crop-head">
+      <span class="crop-title">이미지 자르기</span>
+      <button id="cropCloseBtn" type="button" class="crop-close" aria-label="닫기">×</button>
+    </div>
+    <div class="crop-canvas-area">
+      <canvas id="cropCanvas"></canvas>
+    </div>
+    <div class="crop-ratio-row">
+      <button class="crop-ratio-btn" data-ratio="full">전체 이미지</button>
+      <button class="crop-ratio-btn active" data-ratio="3:2">60×40 비율</button>
+      <button class="crop-ratio-btn" data-ratio="free">자유 비율</button>
+    </div>
+    <div class="crop-foot">
+      <button id="cropCancelBtn" type="button" class="crop-btn-cancel">취소</button>
+      <button id="cropOriginalBtn" type="button" class="crop-btn-orig">그대로 변환</button>
+      <button id="cropConfirmBtn" type="button" class="crop-btn-confirm">자르고 변환</button>
+    </div>
+  </div>
+</div>
 
 <!-- Guard Modal -->
 <div class="modal-bg" id="guardModal" role="dialog" aria-modal="true" aria-labelledby="guardTitle">
