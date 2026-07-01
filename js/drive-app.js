@@ -71,9 +71,23 @@ function readinessBadge(level) {
   const icon = level === 'good' ? 'check' : 'alert';
   return badge(tone, icon, r.label);
 }
-function dotPadBadge(resolutionSupport) {
-  if (!resolutionSupport?.length) return badge('neutral', 'plug', '미최적화');
-  return badge('accent', 'plugZap', resolutionSupport.join(' · '));
+// "DotPad 60×40 Ready" — fixed label per the card quality-signal spec (always shown, not just resolution list)
+function dotPadReadyBadge(resolutionSupport) {
+  if (resolutionSupport?.includes('60x40')) return badge('accent', 'plugZap', 'DotPad 60×40 Ready');
+  if (resolutionSupport?.length) return badge('neutral', 'plug', `${resolutionSupport.join(' · ')} 지원`);
+  return badge('neutral', 'plug', '미최적화');
+}
+function complexityBadge(level) {
+  const tone = level === 'low' ? 'good' : level === 'medium' ? 'warn' : 'bad';
+  return badge(tone, 'layers', `복잡도 ${COMPLEXITY[level] || '—'}`);
+}
+function readabilityBadge(score) {
+  if (score == null) return badge('neutral', 'gauge', '판독성 미측정');
+  const tone = score >= 90 ? 'good' : score >= 78 ? 'accent' : 'warn';
+  return badge(tone, 'gauge', `판독성 ${score}%`);
+}
+function verifiedStateBadge(a) {
+  return a.verified ? badge('verified', 'shieldCheck', 'Verified') : badge('neutral', 'clock', '검수 대기');
 }
 function sourceBadge(source) {
   return source === 'Tactile Agent' ? badge('accent', 'sparkle', source) : badge('neutral', null, source);
@@ -131,8 +145,9 @@ function renderCard(a) {
         </button>
       </div>
       <div class="badge-row">${badge('neutral', null, cat?.ko)}${sourceBadge(a.source)}</div>
+      <div class="badge-row">${verifiedStateBadge(a)}${dotPadReadyBadge(a.resolutionSupport)}</div>
+      <div class="badge-row">${complexityBadge(a.complexity)}${readabilityBadge(a.tactileReadability)}</div>
       <div class="badge-row">${a.formats.map((fm) => badge('neutral', null, fm)).join('')}</div>
-      <div class="badge-row">${readinessBadge(a.readinessScore)}${dotPadBadge(a.resolutionSupport)}</div>
       <div class="card-actions">
         <button type="button" class="btn btn-secondary sm" data-action="open" data-id="${a.id}">${svgIcon('eye')}보기</button>
         <button type="button" class="btn btn-secondary sm icon-only" data-action="send" data-id="${a.id}" aria-label="${esc(a.title)} DotPad로 보내기">${svgIcon('send')}</button>
@@ -271,8 +286,8 @@ function checklistFor(a) {
   return [
     { ok: a.complexity !== 'high', label: '명확한 윤곽선' },
     { ok: a.readinessScore !== 'complex', label: '낮은 시각적 혼잡도' },
-    { ok: true, label: '손으로 읽기 좋은 간격' },
-    { ok: a.readinessScore === 'good', label: '불필요한 장식 요소 없음' },
+    { ok: !!a.lineSpec, label: '선 굵기/간격 체크 완료' },
+    { ok: !!a.decorativeRemoved, label: '불필요한 장식 요소 제거' },
     { ok: a.dotPadTested, label: 'DotPad 출력 테스트 완료' },
     { ok: a.verified, label: '교사/디자이너 검수 완료' },
   ];
@@ -313,30 +328,48 @@ function renderDetail() {
           </button>
         </div>
 
+        <p class="report-visual-lbl">원본 이미지</p>
         <div class="detail-visual">${categoryTileHtml(a.category)}</div>
 
-        <div class="res-tabs" role="tablist" aria-label="촉각 미리보기 해상도">
+        <p class="report-visual-lbl">촉각그래픽 미리보기</p>
+        <div class="detail-visual" style="height:150px">${dotMatrixSvg(a.id + '-tactile', state.detailRes, { cell: 5 })}</div>
+
+        <div class="res-tabs" role="tablist" aria-label="DotPad 미리보기 해상도">
           ${['60x40', '96x64'].map((r) => {
             const disabled = !a.resolutionSupport.includes(r);
-            return `<button type="button" class="res-tab" role="tab" aria-selected="${state.detailRes === r}" data-action="res-tab" data-res="${r}" ${disabled ? 'disabled' : ''}>${r.replace('x', ' × ')} 촉각 미리보기${disabled ? ' (미지원)' : ''}</button>`;
+            return `<button type="button" class="res-tab" role="tab" aria-selected="${state.detailRes === r}" data-action="res-tab" data-res="${r}" ${disabled ? 'disabled' : ''}>DotPad ${r.replace('x', ' × ')} 미리보기${disabled ? ' (미지원)' : ''}</button>`;
           }).join('')}
         </div>
         <div class="detail-tactile">${dotMatrixSvg(a.id, state.detailRes, { cell: 8 })}</div>
 
         <section class="panel-block" aria-labelledby="a11y-desc-h">
-          <h2 id="a11y-desc-h">접근성 설명</h2>
+          <h2 id="a11y-desc-h">📋 촉각그래픽 검수 리포트</h2>
           <dl class="a11y-dl">
             <dt>간단 설명</dt><dd>${esc(a.description)}</dd>
-            <dt>촉각 탐색 가이드</dt><dd>${esc(a.tactileGuide)}</dd>
-            <dt>주요 촉각 랜드마크</dt><dd><ul>${a.landmarks.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></dd>
+            <dt>촉각 탐색 순서</dt><dd>${esc(a.tactileGuide)}</dd>
+            <dt>주요 랜드마크</dt><dd><ul>${a.landmarks.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></dd>
+            <dt>단순화 정도</dt><dd>${esc(a.simplification || '평가 대기 중')}</dd>
+            <dt>선 굵기/간격 체크</dt><dd>${esc(a.lineSpec || '평가 대기 중')}</dd>
+            <dt>장식 요소 제거 여부</dt><dd>
+              <span class="check-dot ${a.decorativeRemoved ? 'ok' : 'no'}" style="display:inline-flex;width:18px;height:18px;vertical-align:middle;margin-right:6px">${svgIcon(a.decorativeRemoved ? 'check' : 'x')}</span>
+              ${a.decorativeRemoved ? '제거 완료' : '미완료 — 추가 정리 필요'}
+            </dd>
             <dt>대체 텍스트 (Alt)</dt><dd>${esc(a.title)} — ${esc(a.description)}</dd>
-            <dt>스크린리더 요약</dt><dd>${esc(cat?.ko)} 카테고리, 복잡도 ${esc(COMPLEXITY[a.complexity])}, 준비 상태 ${esc(READINESS[a.readinessScore].label)}인 촉각 자료입니다.</dd>
+            <dt>스크린리더 설명</dt><dd>${esc(a.screenReaderDesc || `${cat?.ko} 카테고리, 복잡도 ${COMPLEXITY[a.complexity]}, 준비 상태 ${READINESS[a.readinessScore].label}인 촉각 자료입니다.`)}</dd>
           </dl>
         </section>
 
         <section class="panel-block" aria-labelledby="quality-h">
           <h2 id="quality-h">품질 체크리스트</h2>
           ${checklistHtml(a)}
+        </section>
+
+        <section class="panel-block" aria-labelledby="reviewer-h">
+          <h2 id="reviewer-h">검수자 코멘트</h2>
+          ${a.reviewer
+            ? `<div class="review-box">${esc(a.reviewer.comment)}</div>
+               <div class="review-meta"><span>${esc(a.reviewer.name)}</span><span>${esc(a.reviewer.date)}</span></div>`
+            : `<p class="review-pending">검수 대기 중 — 아직 검수자 코멘트가 없어요.</p>`}
         </section>
       </div>
 
