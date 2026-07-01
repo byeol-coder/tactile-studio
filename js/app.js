@@ -601,6 +601,7 @@ function deriveQualitySummary(sc, fill, cols, rows, lang) {
 
 function syncQuality() {
   const lang = appState.language;
+  syncResolutionUI();
   if (appState.phase !== 'ready') { resetQuality(); return; }
   const { data: g, width: cols, height: rows } = canvasState;
   const n = cols * rows;
@@ -704,6 +705,7 @@ function syncQuality() {
 }
 
 function resetQuality() {
+  syncResolutionUI();
   ['qReadability','qDensity','qStructure','qComplexity','qCompat','qVerification','qRenderStatus'].forEach(id => {
     const el = ge(id); if (el) { el.textContent = '—'; el.className = 'pill pill-n'; }
   });
@@ -833,14 +835,69 @@ function syncConvUI() {
 // ─── Sync helpers ─────────────────────────────────────────────
 function syncBtns(hasContent) {
   const ids = ['dtmsBtn','pngBtn','hexBtn','jsonBtn','saveLibraryBtn','miniDtmsBtn','miniPngBtn'];
-  ids.forEach(id => { const el = ge(id); if (el) el.disabled = !hasContent; });
+  ids.forEach(id => {
+    const el = ge(id);
+    if (!el) return;
+    el.disabled = !hasContent;
+    const reason = hasContent ? '' : '변환 결과가 있어야 저장하거나 내보낼 수 있어요.';
+    if (reason) {
+      el.setAttribute('title', reason);
+      el.setAttribute('aria-describedby', 'exportDisabledReason');
+    } else {
+      el.removeAttribute('title');
+      el.removeAttribute('aria-describedby');
+    }
+  });
   // Send-to-DotPad actions need BOTH a converted result AND an active connection.
   const canSend = hasContent && dotPadState.connected;
-  ['dotpadBtn','dpSendBtn','miniSendBtn'].forEach(id => { const el = ge(id); if (el) el.disabled = !canSend; });
+  ['dotpadBtn','dpSendBtn','miniSendBtn'].forEach(id => {
+    const el = ge(id);
+    if (!el) return;
+    el.disabled = !canSend;
+    const reason = !hasContent
+      ? '변환 결과가 있어야 DotPad로 보낼 수 있어요.'
+      : !dotPadState.connected
+        ? 'DotPad를 먼저 연결해야 전송할 수 있어요.'
+        : '';
+    if (reason) el.setAttribute('title', reason);
+    else el.removeAttribute('title');
+  });
   const aiBadge = ge('aiBadge');
   if (aiBadge) aiBadge.style.display = hasContent ? '' : 'none';
   // quick-adjust chips in mini mode
   document.querySelectorAll('.mini-quick-btn').forEach(b => b.disabled = !hasContent);
+}
+
+function syncResolutionUI() {
+  const cols = canvasState.width;
+  const rows = canvasState.height;
+  const resText = `${cols}×${rows}`;
+  const totalPins = (cols * rows).toLocaleString();
+  const activeDots = canvasState.activeDots;
+  const fill = cols && rows ? Math.round(activeDots / (cols * rows) * 100) : 0;
+  qsa('.res-btn').forEach(btn => {
+    const [c, r] = String(btn.dataset.res || '').split('x').map(Number);
+    const active = c === cols && r === rows;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', String(active));
+  });
+  qsa('[data-mini-res]').forEach(btn => {
+    const [c, r] = String(btn.dataset.miniRes || '').split('x').map(Number);
+    const active = c === cols && r === rows;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', String(active));
+  });
+  const resCh = ge('resChip'); if (resCh) resCh.textContent = resText;
+  const resCh2 = ge('resChipBtm'); if (resCh2) resCh2.textContent = resText;
+  const dpRes = ge('dpResVal'); if (dpRes) dpRes.textContent = resText;
+  const qSub = ge('qDotSub');
+  if (qSub) qSub.textContent = ` / ${totalPins} 핀${activeDots ? ` · ${fill}%` : ''}`;
+  if (appState.phase !== 'ready') {
+    const dotCh = ge('dotChip');
+    if (dotCh) { dotCh.textContent = '0 핀'; dotCh.className = 'chip chip-n'; }
+    const dotCh2 = ge('dotChipBtm');
+    if (dotCh2) { dotCh2.textContent = '0 핀'; dotCh2.className = 'dot-chip chip-n'; }
+  }
 }
 
 function syncConn() {
@@ -860,9 +917,9 @@ function syncConn() {
   } else {
     const devLbl = ge('dpDeviceLbl');
     if (devLbl) devLbl.textContent = dotPadState.device?.name || t('dp_device_generic', lang);
-    const resVal = ge('dpResVal'); if (resVal) resVal.textContent = `${canvasState.width}×${canvasState.height}`;
     syncLastSentLabel();
   }
+  syncResolutionUI();
   const liveSw = ge('liveSwitch'); if (liveSw) liveSw.disabled = !on;
   syncBtns(appState.phase === 'ready');
   // mini mode
@@ -1472,11 +1529,7 @@ function setResolution(cols, rows) {
 
 function applyResolution(cols, rows, btn) {
   setResolution(cols, rows);
-  qsa('.res-btn').forEach(x => {
-    const active = x === btn;
-    x.classList.toggle('active', active);
-    x.setAttribute('aria-pressed', String(active));
-  });
+  syncResolutionUI();
 }
 
 /** Resolution-change confirmation modal (section 9: never silently discard the imported image). */
