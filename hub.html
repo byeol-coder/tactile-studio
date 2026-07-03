@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<title>Tactile World · Tactile Agent</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    --bg:#F7F4EF;
+    --surface:#FFFFFF;
+    --ink:#1E1C1A;
+    --sub:#6B6862;
+    --muted:#9C9994;
+    --border:#D8C4B9;
+    --border-soft:#E8DFD6;
+    --accent:#EC5927;
+    --accent-dark:#D64A1C;
+    --accent-darker:#B93E15;
+    --accent-soft:rgba(236,89,39,0.10);
+    --green:#1E8E5A;
+    --shadow-sm:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.1);
+    --shadow-md:0 4px 6px -2px rgba(10,13,18,.05),0 12px 16px -4px rgba(10,13,18,.1);
+    --shadow-lg:0 8px 8px -4px rgba(10,13,18,.04),0 20px 24px -4px rgba(10,13,18,.08);
+    --font:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg)}
+  body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
+  button,input{font-family:inherit}
+  button{cursor:pointer}
+  a{color:inherit;text-decoration:none}
+  @keyframes tsUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .skip-link{position:fixed;left:16px;top:-64px;z-index:100;padding:10px 14px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:700}
+  .skip-link:focus{top:16px}
+
+  header.top{display:flex;align-items:center;gap:40px;height:76px;padding:0 44px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .logo{height:40px;display:block}
+  nav.main{display:flex;gap:28px;font-size:15px;font-weight:600;color:var(--muted)}
+  nav.main a.active{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent);padding-bottom:3px}
+  nav.main button.navlink{border:none;background:none;font:inherit;color:inherit;padding:0}
+  nav.main button.navlink:hover{color:var(--ink)}
+  .head-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+  .lang-group{display:flex;border:1px solid var(--border);border-radius:100px;overflow:hidden}
+  .lang-group button{height:30px;padding:0 14px;border:none;background:transparent;color:var(--muted);font-weight:700;font-size:12px}
+  .lang-group button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .lang-group button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .avatar{width:34px;height:34px;border-radius:100px;background:#E8DFD6;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted)}
+
+  main{max-width:1120px;margin:0 auto;padding:52px 44px 90px}
+  h1.page-title{margin:0;font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1}
+  p.page-sub{margin:12px 0 36px;font-size:16px;color:var(--muted)}
+
+  .hero{display:flex;align-items:center;gap:40px;background:var(--ink);border-radius:20px;padding:42px 46px;color:#fff;box-shadow:inset -51px -65px 191px rgba(58,58,58,.15);animation:tsUp .3s ease-out}
+  .hero-eyebrow{font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+  .hero h2{margin:12px 0 10px;font-size:28px;font-weight:800;letter-spacing:-.6px;line-height:1.15}
+  .hero p{margin:0 0 24px;font-size:15px;color:var(--muted);line-height:1.65;max-width:520px}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#E8DFD6;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:100px;padding:5px 12px;white-space:nowrap}
+  .chip svg{flex:none}
+  .btn-cta{height:44px;padding:0 22px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;font-size:14.5px;display:inline-flex;align-items:center;gap:8px;transition:transform .15s ease,background .15s ease}
+  .btn-cta:hover{background:var(--accent-dark);transform:translateY(-1px)}
+  .btn-cta:active{background:var(--accent-darker);transform:none}
+  .btn-cta:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .hero-illust{flex:none;width:220px;height:150px;border-radius:12px;background:rgba(255,255,255,.04)}
+
+  .output-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border-soft);border-radius:12px}
+  .output-strip .label{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--sub)}
+  .output-strip .sep{width:1px;height:16px;background:#E3D9CE}
+  .output-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink);background:var(--bg);border:1px solid var(--border-soft);border-radius:100px;padding:4px 11px;white-space:nowrap}
+  .output-pill .dot{width:6px;height:6px;border-radius:100px;background:var(--accent);display:inline-block}
+
+  section.recent{margin-top:44px}
+  .recent-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+  .recent-head h3{margin:0;font-size:22px;font-weight:800;letter-spacing:-.4px}
+  .recent-head .title-row{display:flex;align-items:center;gap:9px}
+  .pill-outline{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--sub);border:1px solid var(--border);border-radius:100px;padding:3px 10px}
+  .pill-outline .dot{width:6px;height:6px;border-radius:100px;background:var(--accent);display:inline-block}
+  .recent-helper{margin:8px 0 0;font-size:14px;color:var(--sub);max-width:560px;line-height:1.5}
+  .btn-outline{margin-left:auto;height:40px;padding:0 16px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--ink);font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:8px}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-outline:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:18px}
+  .card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+  .card:hover{box-shadow:var(--shadow-lg);border-color:var(--accent);transform:translateY(-2px)}
+  .card-thumb{position:relative;display:block;width:100%;border:none;padding:16px;background:var(--bg);border-bottom:1px solid var(--border-soft);cursor:pointer}
+  .card-thumb img{width:100%;height:120px;object-fit:contain;border-radius:8px;display:block;background:#fff;border:1px solid var(--border-soft)}
+  .badge-drive{position:absolute;top:12px;left:12px;z-index:1;display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--sub);background:rgba(255,255,255,.92);border:1px solid var(--border-soft);border-radius:100px;padding:2px 8px}
+  .badge-drive .dot{width:5px;height:5px;border-radius:100px;background:var(--accent);display:inline-block}
+  .badge-type{position:absolute;top:12px;right:12px;z-index:1;font-size:10px;font-weight:700;color:#fff;background:rgba(30,28,26,.78);border-radius:100px;padding:2px 8px}
+  .card-body{padding:13px 15px 15px;display:flex;flex-direction:column;gap:9px}
+  .card-name{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
+  .card-meta{font-size:12.5px;color:var(--sub);margin-top:4px}
+  .card-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--green)}
+  .card-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:2px}
+  .btn-edit{height:36px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--ink);font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .btn-edit:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-send{height:36px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .btn-send:hover{background:var(--accent-dark)}
+  .btn-edit:focus-visible,.btn-send:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .import-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:220px;background:transparent;border:2px dashed #C9BBAF;border-radius:14px;color:var(--sub);padding:24px;text-align:center}
+  .import-tile:hover{border-color:var(--accent);color:var(--accent);background:rgba(236,89,39,.03)}
+  .import-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .import-tile .ico{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}
+  .import-tile .t1{font-size:14.5px;font-weight:800;color:var(--ink)}
+  .import-tile .t2{font-size:12px;color:var(--muted);line-height:1.5}
+
+  .empty-state{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:44px 24px;color:var(--sub);text-align:center;background:#fff;border:1px dashed var(--border);border-radius:14px}
+  .empty-state .t1{font-size:15px;font-weight:800;color:var(--ink)}
+  .empty-state .t2{font-size:13px;color:var(--muted)}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:100px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+  .toast.show{opacity:1;transform:translate(-50%,-4px)}
+
+  @media (max-width:760px){
+    header.top{padding:0 20px;gap:20px}
+    nav.main{display:none}
+    main{padding:36px 20px 70px}
+    .hero{flex-direction:column;align-items:flex-start}
+    .hero-illust{width:100%;height:120px}
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+<div style="height:10px;background:var(--accent)"></div>
+
+<header class="top">
+  <div class="logo-wrap">
+    <svg class="logo" viewBox="232 405 126 30" fill="#1E1C1A" role="img" aria-label="Tactile Studio">
+      <polygon points="267.67 417.56 270.36 417.56 270.36 424.37 272.3 424.37 272.3 417.56 274.99 417.56 274.99 415.97 267.67 415.97 267.67 417.56"></polygon>
+      <path d="M278.18,417.82c-.51,0-1.02.07-1.51.2-.5.14-.92.33-1.27.58l.67,1.31c.23-.18.51-.33.85-.44.33-.11.67-.16,1.01-.16.5,0,.88.11,1.12.34.24.22.37.54.37.94h-1.49c-.66,0-1.19.08-1.6.25-.41.16-.71.39-.89.68s-.28.62-.28,1.01.1.7.29,1,.47.53.83.7.79.26,1.3.26c.57,0,1.03-.11,1.39-.32.26-.15.43-.37.58-.63v.86h1.75v-3.68c0-.98-.27-1.71-.82-2.17-.54-.46-1.31-.7-2.29-.7ZM278.88,422.99c-.25.15-.53.22-.84.22-.33,0-.59-.07-.77-.21s-.28-.33-.28-.57c0-.22.08-.4.25-.54.16-.14.47-.22.91-.22h1.28v.66c-.11.29-.29.51-.54.65Z"></path>
+      <path d="M285.28,419.57c.26-.14.54-.22.86-.22.3,0,.57.07.82.22.25.14.46.37.63.67l1.45-.78c-.24-.53-.61-.93-1.12-1.22-.5-.28-1.1-.43-1.78-.43s-1.32.14-1.86.43-.97.68-1.28,1.18c-.31.5-.46,1.07-.46,1.72s.15,1.21.46,1.72c.31.5.73.9,1.28,1.18s1.16.43,1.86.43,1.27-.14,1.78-.43c.5-.28.88-.69,1.12-1.21l-1.45-.79c-.17.31-.38.54-.63.68-.25.14-.53.21-.82.21-.32,0-.61-.07-.86-.22-.26-.14-.46-.35-.61-.61-.15-.26-.22-.58-.22-.96s.07-.7.22-.96c.15-.26.35-.47.61-.61Z"></path>
+      <path d="M293.12,422.98c-.25,0-.44-.07-.59-.22-.14-.15-.22-.36-.22-.63v-2.77h1.61v-1.44h-1.61v-1.43h-1.87v1.43h-1v1.44h1v2.8c0,.77.21,1.35.64,1.73.42.39,1.02.58,1.78.58.29,0,.57-.03.83-.1.27-.07.5-.17.69-.31l-.5-1.32c-.21.16-.46.24-.76.24Z"></path>
+      <rect x="295.44" y="417.92" width="1.87" height="6.46"></rect>
+      <rect x="295.44" y="415.47" width="1.87" height="1.7"></rect>
+      <rect x="343.05" y="415.47" width="1.87" height="1.7"></rect>
+      <rect x="299.05" y="415.47" width="1.87" height="8.9"></rect>
+      <path d="M307.34,418.22c-.51-.27-1.08-.4-1.71-.4s-1.24.14-1.76.43c-.52.28-.93.68-1.23,1.18s-.45,1.07-.45,1.72.15,1.21.46,1.71c.3.5.73.89,1.29,1.18.56.29,1.2.43,1.94.43.58,0,1.1-.09,1.55-.27.45-.18.82-.44,1.12-.77l-1-1.08c-.22.21-.45.36-.71.47-.26.1-.56.16-.91.16-.38,0-.72-.07-1-.21-.28-.14-.5-.34-.66-.61-.08-.15-.14-.3-.18-.47h4.88c0-.08.02-.17.02-.26s.01-.17.01-.25c0-.7-.15-1.29-.44-1.79-.3-.5-.7-.88-1.21-1.15ZM304.79,419.45c.24-.14.53-.21.85-.21s.6.07.84.21.43.33.56.58c.09.16.14.35.17.55h-3.16c.03-.2.08-.38.17-.55.14-.25.33-.45.57-.59Z"></path>
+      <path d="M319.12,420.12c-.29-.18-.61-.32-.95-.42-.35-.1-.7-.2-1.04-.28-.35-.08-.67-.16-.95-.24s-.52-.19-.7-.32c-.18-.13-.26-.31-.26-.52,0-.18.05-.35.16-.49.1-.14.28-.25.52-.34.24-.09.55-.13.92-.13s.76.05,1.15.16c.39.11.78.27,1.18.5l.6-1.48c-.39-.25-.84-.43-1.36-.56-.51-.12-1.03-.19-1.56-.19-.79,0-1.45.12-1.97.35-.52.24-.92.55-1.18.95-.26.4-.39.83-.39,1.31,0,.45.09.82.27,1.1.18.29.41.52.7.7s.61.32.95.43c.35.11.7.21,1.04.28s.67.16.95.24.52.19.7.32c.18.13.26.31.26.53,0,.18-.06.33-.17.47-.11.14-.29.24-.52.32-.24.08-.55.11-.93.11-.5,0-1-.08-1.49-.25-.49-.16-.92-.37-1.28-.63l-.66,1.46c.38.29.87.52,1.49.7.62.18,1.26.27,1.93.27.8,0,1.46-.12,1.99-.36.52-.24.92-.56,1.18-.95.26-.39.4-.82.4-1.3,0-.44-.09-.8-.27-1.09s-.41-.52-.7-.7Z"></path>
+      <path d="M324.19,422.98c-.25,0-.44-.07-.59-.22-.14-.15-.22-.36-.22-.63v-2.77h1.61v-1.44h-1.61v-1.43h-1.87v1.43h-1v1.44h1v2.8c0,.77.21,1.35.64,1.73.42.39,1.02.58,1.78.58.29,0,.57-.03.83-.1.27-.07.5-.17.69-.31l-.5-1.32c-.21.16-.46.24-.76.24Z"></path>
+      <path d="M331.14,421.11c0,.39-.06.72-.19.98-.13.26-.3.45-.53.58-.22.12-.48.19-.77.19-.42,0-.74-.13-.97-.38-.23-.25-.34-.65-.34-1.18v-3.37h-1.87v3.65c0,.66.12,1.21.35,1.64.23.43.56.75.98.95s.9.31,1.43.31c.5,0,.95-.11,1.37-.34.25-.14.45-.32.63-.54v.78h1.78v-6.46h-1.87v3.19Z"></path>
+      <path d="M339.46,418.6c-.15-.16-.31-.31-.5-.42-.41-.24-.88-.36-1.43-.36-.61,0-1.16.14-1.64.41-.49.27-.87.66-1.16,1.15s-.43,1.08-.43,1.76.14,1.26.43,1.75.67.88,1.16,1.16c.49.28,1.04.41,1.64.41.57,0,1.05-.12,1.46-.36.21-.13.4-.29.56-.49v.76h1.79v-8.9h-1.87v3.13ZM339.27,422.1c-.15.27-.35.47-.59.62-.25.14-.52.22-.83.22s-.59-.07-.84-.22c-.25-.14-.45-.35-.59-.62-.15-.27-.22-.59-.22-.95s.07-.7.22-.96c.15-.26.35-.47.59-.61.25-.14.53-.22.84-.22s.58.07.83.22c.25.14.45.35.59.61.15.26.22.58.22.96s-.07.69-.22.95Z"></path>
+      <rect x="343.05" y="417.92" width="1.87" height="6.46"></rect>
+      <path d="M352.82,419.42c-.3-.5-.72-.89-1.26-1.17s-1.14-.43-1.82-.43-1.3.14-1.83.43c-.53.28-.95.68-1.26,1.18-.31.5-.46,1.07-.46,1.72s.15,1.21.46,1.71c.31.5.73.89,1.26,1.18.53.29,1.14.43,1.83.43s1.29-.14,1.82-.43.96-.68,1.26-1.18c.3-.5.46-1.07.46-1.71s-.15-1.23-.46-1.73ZM351.17,422.1c-.14.27-.34.47-.59.62-.25.14-.53.22-.84.22s-.59-.07-.84-.22c-.25-.14-.45-.35-.59-.62-.15-.27-.22-.59-.22-.95s.07-.7.22-.96c.15-.26.35-.47.59-.61.25-.14.53-.22.84-.22s.59.07.84.22c.25.14.44.35.59.61.14.26.22.58.22.96s-.07.69-.22.95Z"></path>
+      <path d="M252.57,417.18h5.96c-.51-1.58-1.39-2.99-2.53-4.13-1.88-1.89-4.49-3.05-7.37-3.05-.87,0-1.72.11-2.53.31v.4c.34,3.4,3.06,6.13,6.47,6.47Z" fill="#EC5927"></path>
+      <path d="M239.85,419.07c-.47-.17-.97-.3-1.48-.36h-2.23v.77h2.11c-.03.31-.05.63-.05.95,0,4.33,2.64,8.04,6.4,9.62v-4.83c-.26-2.83-2.16-5.2-4.75-6.14Z" fill="#EC5927"></path>
+      <path d="M243.84,411.16c-.96.49-1.83,1.13-2.58,1.89-1.13,1.13-1.99,2.5-2.51,4.04,2.22-.42,4.09-1.86,5.09-3.81.39-.75.65-1.59.75-2.47l.02-3.2h-.77v3.55Z" fill="#EC5927"></path>
+      <path d="M257.88,418.68h-5.3c-3.41.34-6.13,3.07-6.47,6.47v7.85h.76v-2.3c.57.09,1.17.15,1.77.15,2.88,0,5.49-1.17,7.37-3.05,1.89-1.89,3.05-4.49,3.05-7.37,0-.33-.01-.65-.05-.98h2.29v-.77h-3.42Z" fill="#EC5927"></path>
+    </svg>
+  </div>
+  <nav class="main" id="mainNav">
+    <a href="hub.html" class="active" data-i18n="hub_nav_home">홈</a>
+    <a href="drive.html" data-i18n="hub_nav_drive">Tactile Drive</a>
+    <a href="drive.html" data-i18n="hub_nav_library">Dot Library</a>
+    <span data-i18n="hub_nav_help" style="cursor:default">도움말 센터</span>
+  </nav>
+  <div class="head-right">
+    <div role="group" class="lang-group" id="langGroup" data-i18n-attr="aria-label:hub_lang_label">
+      <button type="button" data-lang="ko" aria-pressed="true" aria-label="한국어">KO</button>
+      <button type="button" data-lang="en" aria-pressed="false" aria-label="English">EN</button>
+    </div>
+    <div class="avatar" data-i18n-attr="title:hub_avatar_label" role="img">TA</div>
+  </div>
+</header>
+
+<main id="main">
+  <h1 class="page-title" data-i18n="hub_title">촉각 세상에 오신 것을 환영해요</h1>
+  <p class="page-sub" data-i18n="hub_sub">촉각 콘텐츠를 만들고, 저장하고, DotPad로 보내보세요.</p>
+
+  <section class="hero">
+    <div style="flex:1;min-width:0">
+      <div class="hero-eyebrow" data-i18n="hub_eyebrow">Tactile Studio</div>
+      <h2 data-i18n="hub_create">촉각 그래픽 만들기</h2>
+      <p data-i18n="hub_create_sub">이미지를 변환하거나, 명령어로 생성하거나, 템플릿에서 시작해서 촉각 그래픽을 만들고 DotPad로 바로 보내보세요.</p>
+      <div class="chip-row" id="chipRow"></div>
+      <a class="btn-cta" href="index.html">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+        <span data-i18n="hub_new_btn">새 그래픽 만들기</span>
+      </a>
+    </div>
+    <canvas class="hero-illust" id="heroCanvas" width="440" height="300" role="img" aria-label="Tactile pattern illustration"></canvas>
+  </section>
+
+  <div class="output-strip">
+    <span class="label">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path d="M4 5h16v10H4zM8 19h8M12 15v4" fill="none" stroke="#EC5927" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span data-i18n="hub_output_label">지원 출력</span>
+    </span>
+    <span class="sep"></span>
+    <span class="output-pill"><span class="dot"></span><span data-i18n="hub_output_60">60×40 DotPad</span></span>
+    <span class="output-pill"><span class="dot"></span><span data-i18n="hub_output_96">96×64 DotPad</span></span>
+    <span class="output-pill"><span class="dot"></span><span data-i18n="hub_output_28">28×40 컴팩트</span></span>
+    <span class="output-pill"><span class="dot"></span><span data-i18n="hub_output_a4">A4 엠보싱</span></span>
+  </div>
+
+  <section class="recent">
+    <div class="recent-head">
+      <div>
+        <div class="title-row">
+          <h3 data-i18n="hub_recent_title">최근 작업</h3>
+          <span class="pill-outline"><span class="dot"></span><span data-i18n="hub_recent_pill">Tactile Drive</span></span>
+        </div>
+        <p class="recent-helper" data-i18n="hub_recent_helper">최근에 만든 촉각 그래픽을 이어서 편집하거나 DotPad로 보내보세요.</p>
+      </div>
+      <a class="btn-outline" href="drive.html">
+        <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM13 5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zM19 6l1.8.5a1 1 0 0 1 .7 1.2L18.5 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span data-i18n="hub_open_drive">Tactile Drive 열기</span>
+      </a>
+    </div>
+    <div class="card-grid" id="cardGrid"></div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script type="module" src="js/hub-app.js"></script>
+</body>
+</html>
