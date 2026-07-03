@@ -8,27 +8,25 @@
 <!-- PWA: 설치형 + 오프라인 -->
 <meta name="theme-color" content="#111111"/>
 <link rel="manifest" href="manifest.webmanifest"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
 <style>
 /* ── Tokens ──────────────────────────────────────────────── */
 :root {
-  --bg:       #F7F4EE;
+  --bg:       #F7F4EF;
   --surface:  #FFFFFF;
-  --surface2: #F2EFE8;
-  --border:   #E6E1D4;
-  --border2:  #D6CFBD;
-  --ink:      #1C1C1E;
-  --text:     #3A3A3C;
-  --sub:      #6C6C70;
-  --hint:     #AEAEB2;
-  --accent:   #FF4D00;
-  --accent-d: #E34400;
-  --accent-bg:#FFF3EE;
-  --green:    #30D158;
-  --green-d:  #25A244;
-  --green-bg: #F0FBF3;
+  --surface2: #F2ECE3;
+  --border:   #E8DFD6;
+  --border2:  #D8C4B9;
+  --ink:      #1E1C1A;
+  --text:     #3A3733;
+  --sub:      #6B6862;
+  --hint:     #9C9994;
+  --accent:   #EC5927;
+  --accent-d: #D64A1C;
+  --accent-bg:#FDECE4;
+  --green:    #1E8E5A;
+  --green-d:  #156B44;
+  --green-bg: #EAF6F0;
   --amber:    #FF9F0A;
   --amber-bg: #FFF8EC;
   --red:      #FF3B30;
@@ -37,7 +35,7 @@
   --danger-d: #B01F32;
   --danger-bg:#FDEEF0;
   --blue:     #0A84FF;
-  --font: 'Inter','Noto Sans KR',system-ui,-apple-system,sans-serif;
+  --font: 'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --r3:3px; --r6:6px; --r8:8px; --r10:10px; --r12:12px; --r16:16px; --r20:20px;
   --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04);
   --shadow-md: 0 4px 16px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.04);
@@ -111,7 +109,7 @@ svg { display: block; flex-shrink: 0 }
   padding: 0 8px 0 10px; gap: 8px; height: 32px; min-width: 0;
   transition: border-color .15s, box-shadow .15s;
 }
-.hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(255,77,0,.12) }
+.hd-prompt:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(236,89,39,.12) }
 .hd-prompt svg { width: 14px; height: 14px; stroke: var(--accent); fill: none;
   stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0 }
 .hd-prompt input {
@@ -123,7 +121,7 @@ svg { display: block; flex-shrink: 0 }
   border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; flex-shrink: 0;
   font-family: var(--font);
 }
-.hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: rgba(255,77,0,.3) }
+.hd-prompt:focus-within .hd-prompt-kbd { color: var(--accent); border-color: rgba(236,89,39,.3) }
 
 /* suggestion dropdown */
 .prompt-suggest {
@@ -206,7 +204,7 @@ svg { display: block; flex-shrink: 0 }
 .btn-row { display: flex; gap: var(--control-gap) }
 .btn-row > * { flex: 1; min-width: 0 }
 .btn-secondary.active, .btn-secondary[aria-pressed="true"] {
-  background: var(--accent-bg); border-color: rgba(255,77,0,.38); color: var(--accent);
+  background: var(--accent-bg); border-color: rgba(236,89,39,.38); color: var(--accent);
 }
 
 /* conn dot in header */
@@ -245,7 +243,7 @@ svg { display: block; flex-shrink: 0 }
   color: var(--hint); border: 1px solid transparent;
 }
 .sz-btn:hover { background: var(--surface2); color: var(--text) }
-.sz-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(255,77,0,.25) }
+.sz-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(236,89,39,.25) }
 
 /* ── Canvas Area ──────────────────────────────────────────── */
 .canvas-area {
@@ -271,7 +269,7 @@ svg { display: block; flex-shrink: 0 }
 
 /* canvas wrapper */
 .canvas-wrap {
-  background: #EEEBE0; border-radius: var(--r16); padding: 10px;
+  background: #E9DFD3; border-radius: var(--r16); padding: 10px;
   box-shadow: var(--shadow-md); position: relative; transition: opacity .15s;
   outline: 2px solid transparent; outline-offset: 2px; border-radius: var(--r16);
 }
@@ -477,8 +475,8 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 
 /* AI card */
 .ai-card {
-  background: linear-gradient(135deg, #FFF5F0 0%, #FFF0E8 100%);
-  border: 1px solid rgba(255,77,0,.15); border-radius: var(--r10); padding: 12px;
+  background: linear-gradient(135deg, #FDECE4 0%, #FCE3D6 100%);
+  border: 1px solid rgba(236,89,39,.15); border-radius: var(--r10); padding: 12px;
   display: none;
 }
 .ai-badge {
@@ -488,10 +486,10 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
 .ai-badge::before {
   content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
 }
-.ai-text { font-size: 12px; color: #6B4530; line-height: 1.75 }
+.ai-text { font-size: 12px; color: #7A3B1E; line-height: 1.75 }
 .ai-chips { display: none; flex-wrap: wrap; gap: 5px; margin-top: 8px }
 .ai-ch {
-  height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid rgba(255,77,0,.25);
+  height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid rgba(236,89,39,.25);
   background: #fff; font-size: 11px; font-weight: 600; color: var(--accent); transition: .12s;
 }
 .ai-ch:hover { background: var(--accent); color: #fff }
@@ -556,7 +554,7 @@ body[data-state="analyzing"] #analyzeOv { display: flex }
   border: 1px solid var(--border); background: var(--surface2); color: var(--sub); transition: .12s;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
 }
-.outline-btn.active, .proc-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(255,77,0,.35) }
+.outline-btn.active, .proc-btn.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(236,89,39,.35) }
 .outline-btn:hover:not(.active), .proc-btn:hover:not(.active) { background: var(--surface); color: var(--text) }
 
 /* advanced disclosure */
@@ -596,7 +594,7 @@ details.adv > summary:hover { color: var(--ink) }
   background: var(--surface2); transition: .12s; cursor: pointer;
 }
 .preset-btn:hover { background: var(--surface); border-color: var(--border2) }
-.preset-btn.active { background: var(--accent-bg); border-color: rgba(255,77,0,.35) }
+.preset-btn.active { background: var(--accent-bg); border-color: rgba(236,89,39,.35) }
 .preset-name { font-size: 11px; font-weight: 700; color: var(--ink) }
 .preset-desc { font-size: 10px; color: var(--hint) }
 .preset-btn.active .preset-name { color: var(--accent) }
@@ -666,7 +664,7 @@ details.adv > summary:hover { color: var(--ink) }
 }
 .panel :where(.dp-btn, .pin-btn, .exp-btn).active,
 .panel :where(.dp-btn, .pin-btn, .exp-btn)[aria-pressed="true"] {
-  background: var(--accent-bg); border-color: rgba(255,77,0,.38); color: var(--accent);
+  background: var(--accent-bg); border-color: rgba(236,89,39,.38); color: var(--accent);
 }
 .panel :where(.dp-btn, .pin-btn, .exp-btn):disabled {
   background: #F7F7F8; border-color: var(--border); color: #8E8E93;
@@ -792,7 +790,7 @@ details.adv > summary:hover { color: var(--ink) }
   transition: .12s; cursor: pointer;
 }
 .crop-ratio-btn:hover { border-color: var(--border2) }
-.crop-ratio-btn.active { background: var(--accent-bg); border-color: rgba(255,77,0,.35); color: var(--accent) }
+.crop-ratio-btn.active { background: var(--accent-bg); border-color: rgba(236,89,39,.35); color: var(--accent) }
 .crop-foot {
   display: flex; gap: 8px; padding: 12px 20px;
   border-top: 1px solid var(--border); flex-shrink: 0;
@@ -933,7 +931,7 @@ details.adv > summary:hover { color: var(--ink) }
   font-size: 11px; font-weight: 600; color: var(--text); cursor: pointer; transition: .12s; white-space: nowrap;
 }
 .mini-quick-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg) }
-.mini-quick-btn.accent { background: var(--accent-bg); border-color: rgba(255,77,0,.3); color: var(--accent) }
+.mini-quick-btn.accent { background: var(--accent-bg); border-color: rgba(236,89,39,.3); color: var(--accent) }
 .mini-quick-btn:disabled { opacity: .35; cursor: not-allowed }
 
 .mini-actions { display: flex; gap: 6px }
@@ -975,18 +973,18 @@ details.adv > summary:hover { color: var(--ink) }
 /* ── AI suggestion cards ─────────────────────────────────────── */
 .sugg-list { display: flex; flex-direction: column; gap: 8px }
 .sugg-card {
-  background: linear-gradient(135deg, #FFF5F0 0%, #FFF0E8 100%);
-  border: 1px solid rgba(255,77,0,.15); border-radius: var(--r10); padding: 11px;
+  background: linear-gradient(135deg, #FDECE4 0%, #FCE3D6 100%);
+  border: 1px solid rgba(236,89,39,.15); border-radius: var(--r10); padding: 11px;
   display: flex; flex-direction: column; gap: 8px;
 }
-.sugg-text { font-size: 12px; color: #6B4530; line-height: 1.6 }
+.sugg-text { font-size: 12px; color: #7A3B1E; line-height: 1.6 }
 .sugg-actions { display: flex; gap: 6px; flex-wrap: wrap }
 .sugg-btn {
   height: 26px; padding: 0 10px; border-radius: 999px; font-size: 11px; font-weight: 700; transition: .12s;
 }
 .sugg-btn.apply { background: var(--accent); color: #fff; border: 1px solid transparent }
 .sugg-btn.apply:hover { background: var(--accent-d) }
-.sugg-btn.manual { background: #fff; border: 1px solid rgba(255,77,0,.25); color: var(--accent) }
+.sugg-btn.manual { background: #fff; border: 1px solid rgba(236,89,39,.25); color: var(--accent) }
 .sugg-btn.manual:hover { background: var(--accent-bg) }
 .sugg-btn.ignore { background: transparent; border: 1px solid transparent; color: var(--sub) }
 .sugg-btn.ignore:hover { background: rgba(0,0,0,.05); color: var(--text) }
@@ -1028,7 +1026,7 @@ details.dev-export[open] > summary::before { transform: rotate(90deg) }
   font-size: 13px; color: var(--ink); background: var(--surface); transition: .12s; font-family: inherit;
 }
 .field input[type=text]:focus, .field textarea:focus, .field select:focus {
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,77,0,.12); outline: none;
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(236,89,39,.12); outline: none;
 }
 .field textarea { resize: vertical; min-height: 60px }
 .segmented { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--r8); padding: 3px }
@@ -1084,7 +1082,7 @@ body.presenting .present-exit { display: inline-flex }
         <circle cx="7" cy="2.5" r="1.8" fill="white"/>
         <circle cx="11.5" cy="2.5" r="1.8" fill="white"/>
         <circle cx="2.5" cy="7" r="1.8" fill="white" opacity=".35"/>
-        <circle cx="7" cy="7" r="1.8" fill="#FF4D00"/>
+        <circle cx="7" cy="7" r="1.8" fill="#EC5927"/>
         <circle cx="11.5" cy="7" r="1.8" fill="white" opacity=".35"/>
         <circle cx="2.5" cy="11.5" r="1.8" fill="white" opacity=".18"/>
         <circle cx="7" cy="11.5" r="1.8" fill="white"/>
@@ -1601,7 +1599,7 @@ body.presenting .present-exit { display: inline-flex }
       <circle cx="2.5" cy="2.5" r="1.8" fill="white"/>
       <circle cx="7" cy="2.5" r="1.8" fill="white"/>
       <circle cx="11.5" cy="2.5" r="1.8" fill="white"/>
-      <circle cx="7" cy="7" r="1.8" fill="#FF4D00"/>
+      <circle cx="7" cy="7" r="1.8" fill="#EC5927"/>
       <circle cx="7" cy="11.5" r="1.8" fill="white"/>
     </svg>
   </div>

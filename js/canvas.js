@@ -8,7 +8,7 @@ const CELL_LINE  = 'rgba(155,145,135,.42)';
 const AXIS_LINE  = 'rgba(200,175,155,.55)';
 const DOT_ON     = '#1C1C1E';
 const DOT_OFF    = '#DED8CF';
-const HOVER_PEN  = 'rgba(255,77,0,.28)';
+const HOVER_PEN  = 'rgba(236,89,39,.28)';
 const HOVER_ERASE = 'rgba(185,28,28,.25)';
 
 /**
@@ -114,7 +114,7 @@ export function renderGrid(ctx, data, cols, rows, layout, opts = {}) {
   if (opts.hoverCells?.length) {
     const isErase = opts.hoverKind === 'eraser';
     ctx.fillStyle   = isErase ? HOVER_ERASE : HOVER_PEN;
-    ctx.strokeStyle = isErase ? 'rgba(185,28,28,.7)' : 'rgba(255,77,0,.75)';
+    ctx.strokeStyle = isErase ? 'rgba(185,28,28,.7)' : 'rgba(236,89,39,.75)';
     ctx.lineWidth = 1.4;
     for (const [x, y] of opts.hoverCells) {
       if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
@@ -128,7 +128,7 @@ export function renderGrid(ctx, data, cols, rows, layout, opts = {}) {
   // shape-drag preview overlay (line/rect/circle tools) — same treatment as the brush hover
   if (opts.shapePreview?.length) {
     ctx.fillStyle   = HOVER_PEN;
-    ctx.strokeStyle = 'rgba(255,77,0,.75)';
+    ctx.strokeStyle = 'rgba(236,89,39,.75)';
     ctx.lineWidth = 1.4;
     for (const [x, y] of opts.shapePreview) {
       if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
@@ -142,7 +142,7 @@ export function renderGrid(ctx, data, cols, rows, layout, opts = {}) {
   // selection overlay
   if (opts.selection) {
     const { x0, y0, x1, y1 } = opts.selection;
-    ctx.strokeStyle = 'rgba(255,77,0,.9)';
+    ctx.strokeStyle = 'rgba(236,89,39,.9)';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 3]);
     ctx.strokeRect(
