@@ -245,6 +245,7 @@ export const I18N = {
     outline_none:     '없음',
     outline_1:        '외곽선 1줄',
     outline_2:        '외곽선 2줄',
+    outline_3:        '외곽선 3줄',
 
     method_global:    '사용자 임계값',
     method_global_short: '수동',
@@ -254,6 +255,7 @@ export const I18N = {
 
     outline_1_btn:    '1줄',
     outline_2_btn:    '2줄',
+    outline_3_btn:    '3줄',
     btn_json_export:  'JSON 내보내기',
     crop_full:        '전체 이미지',
     crop_ratio_3_2:   '60×40 비율',
@@ -693,6 +695,7 @@ export const I18N = {
     outline_none:     'None',
     outline_1:        '1-line outline',
     outline_2:        '2-line outline',
+    outline_3:        '3-line outline',
 
     method_global:    'Manual threshold',
     method_global_short: 'Manual',
@@ -702,6 +705,7 @@ export const I18N = {
 
     outline_1_btn:    '1-line',
     outline_2_btn:    '2-line',
+    outline_3_btn:    '3-line',
     btn_json_export:  'JSON Export',
     crop_full:        'Full image',
     crop_ratio_3_2:   '60×40 ratio',
