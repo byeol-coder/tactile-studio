@@ -134,6 +134,7 @@ function checklistHtml(a) {
 
 export async function openTactileLibraryUI({ onOpen } = {}) {
   injectStyles();
+  const triggerEl = document.activeElement;
   const ids = savedIds();
   const st = {
     assets: SEED_ASSETS.map((a) => ({ ...a, saved: ids.has(a.id) })),
@@ -167,7 +168,7 @@ export async function openTactileLibraryUI({ onOpen } = {}) {
 
   const panel = bg.querySelector('.tl-panel');
   const content = bg.querySelector('#tlContent');
-  const close = () => bg.remove();
+  const close = () => { bg.remove(); triggerEl?.focus?.(); };
 
   function assetById(id) { return st.assets.find((a) => a.id === id); }
 
