@@ -294,9 +294,24 @@ function outline2(m, cols, rows) {
   return { grid: removeSmall(o2, 2, cols, rows), fellback: false };
 }
 
+function outline3(m, cols, rows) {
+  const o1 = boundary(m, cols, rows);
+  const eroded1 = erode4(m, cols, rows);
+  const ring1 = boundary(eroded1, cols, rows);
+  const eroded2 = erode4(eroded1, cols, rows);
+  const ring2 = boundary(eroded2, cols, rows);
+  let o3 = new Uint8Array(cols * rows);
+  for (let i = 0; i < cols * rows; i++) o3[i] = (o1[i] || ring1[i] || ring2[i]) ? 1 : 0;
+  let c1 = 0, c3 = 0;
+  for (let i = 0; i < cols * rows; i++) { c1 += o1[i]; c3 += o3[i]; }
+  if (c3 < c1 * 1.5) return { grid: outline2(m, cols, rows).grid, fellback: true };
+  return { grid: removeSmall(o3, 2, cols, rows), fellback: false };
+}
+
 function applyOutline(m, mode, cols, rows) {
   if (mode === 1) return outline1(m, cols, rows);
   if (mode === 2) return outline2(m, cols, rows).grid;
+  if (mode === 3) return outline3(m, cols, rows).grid;
   return m;
 }
 
