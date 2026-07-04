@@ -6,6 +6,12 @@ export function openImageCropModal({ image, fileName, onConfirm, onUseOriginal }
   const canvas = document.getElementById('cropCanvas');
   if (!modal || !canvas) { onUseOriginal(); return; }
 
+  const triggerEl = document.activeElement;
+  function focusableInModal() {
+    return [...modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+      .filter(el => !el.disabled && el.offsetParent !== null);
+  }
+
   const ctx = canvas.getContext('2d');
   const IMG_W = image.naturalWidth;
   const IMG_H = image.naturalHeight;
@@ -219,6 +225,14 @@ export function openImageCropModal({ image, fileName, onConfirm, onUseOriginal }
   // ── Keyboard ────────────────────────────────────────────────
   function onKeyDown(e) {
     if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key === 'Tab') {
+      const focusable = focusableInModal();
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      return;
+    }
     if (state.mode === 'full') return;
     const step = e.shiftKey ? 10 : 1;
     const { x, y, w, h } = state.crop;
@@ -275,6 +289,7 @@ export function openImageCropModal({ image, fileName, onConfirm, onUseOriginal }
     originalBtn?.removeEventListener('click', handleOriginal);
     confirmBtn?.removeEventListener('click', handleConfirm);
     closeBtn?.removeEventListener('click', handleCancel);
+    triggerEl?.focus?.();
   }
 
   modal.style.display = 'flex';

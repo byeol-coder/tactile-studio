@@ -101,7 +101,7 @@ function injectAuthStyles() {
   @keyframes auth-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   .auth-title{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;
     color:var(--ink,#1c1c1e);margin-bottom:20px}
-  .auth-title svg{width:22px;height:22px;stroke:var(--accent,#FF4D00);fill:none;stroke-width:2;
+  .auth-title svg{width:22px;height:22px;stroke:var(--accent,#EC5927);fill:none;stroke-width:2;
     stroke-linecap:round;stroke-linejoin:round}
   .auth-google{width:100%;height:48px;border:1px solid var(--border,#e5e5ea);border-radius:12px;
     background:var(--surface,#fff);display:flex;align-items:center;justify-content:center;gap:10px;
@@ -114,15 +114,15 @@ function injectAuthStyles() {
   .auth-field label{display:block;font-size:12px;font-weight:700;color:var(--text,#3a3a3c);margin-bottom:6px}
   .auth-field input{width:100%;height:48px;border:1px solid var(--border,#e5e5ea);border-radius:12px;
     padding:0 14px;font-size:14px;color:var(--ink,#1c1c1e);background:var(--surface,#fff);transition:.12s}
-  .auth-field input:focus{border-color:var(--accent,#FF4D00);box-shadow:0 0 0 3px rgba(255,77,0,.12);outline:none}
-  .auth-submit{width:100%;height:52px;border:none;border-radius:14px;background:var(--accent,#FF4D00);
+  .auth-field input:focus{border-color:var(--accent,#EC5927);box-shadow:0 0 0 3px rgba(236,89,39,.12);outline:none}
+  .auth-submit{width:100%;height:52px;border:none;border-radius:14px;background:var(--accent,#EC5927);
     color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;
     cursor:pointer;transition:.12s;margin-top:4px}
-  .auth-submit:hover{background:var(--accent-d,#E34400)}
+  .auth-submit:hover{background:var(--accent-d,#D64A1C)}
   .auth-submit:disabled{opacity:.5;cursor:not-allowed}
   .auth-submit svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .auth-foot{text-align:center;font-size:13px;color:var(--sub,#6c6c70);margin-top:16px}
-  .auth-foot a{color:var(--accent,#FF4D00);font-weight:800;cursor:pointer;text-decoration:none}
+  .auth-foot a{color:var(--accent,#EC5927);font-weight:800;cursor:pointer;text-decoration:none}
   .auth-close{position:absolute;top:18px;right:20px;font-size:22px;color:var(--hint,#aeaeb2);cursor:pointer;line-height:1}
   .auth-msg{font-size:12px;color:var(--red,#FF3B30);min-height:16px;margin-top:6px;text-align:center}
   `;
