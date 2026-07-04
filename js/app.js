@@ -896,6 +896,7 @@ function syncConn() {
   const txt = ge('bbStatus'); if (txt) txt.textContent = on ? t('bb_connected', lang) : t('bb_disconnected', lang);
   // bottom bar dot
   const btmDot = ge('btmDot'); if (btmDot) btmDot.className = 'btm-dot' + (on ? ' on' : '');
+  const btmTxt = ge('btmStatus'); if (btmTxt) btmTxt.textContent = on ? t('bb_connected', lang) : t('bb_disconnected', lang);
   // unified DotPad status card: swap disconnected/connected views
   const disView = ge('dpDisconnectedView'); if (disView) disView.hidden = on;
   const conView = ge('dpConnectedView'); if (conView) conView.hidden = !on;
@@ -1452,6 +1453,18 @@ function applyI18n() {
   qsa('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const v = t(key, lang); if (v) el.textContent = v;
+  });
+  qsa('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    const v = t(key, lang); if (v) el.title = v;
+  });
+  qsa('[data-i18n-aria]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria');
+    const v = t(key, lang); if (v) el.setAttribute('aria-label', v);
+  });
+  qsa('[data-i18n-ph]').forEach(el => {
+    const key = el.getAttribute('data-i18n-ph');
+    const v = t(key, lang); if (v) el.placeholder = v;
   });
   const ph = ge('promptInput'); if (ph) ph.placeholder = t('prompt_ph', lang);
   syncQuality(); syncConn();

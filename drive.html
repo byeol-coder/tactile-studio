@@ -4,21 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title>Tactile Library Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root {
-  --bg: #f5f5f7;
+  --bg: #F7F4EF;
   --surface: #ffffff;
-  --surface-2: #f0f1f3;
-  --surface-3: #e9eef3;
-  --ink: #1c1c1e;
-  --text: #3a3a3c;
-  --sub: #64666b;
-  --muted: #8a8d93;
-  --border: #dfe1e5;
-  --border-2: #c9ccd2;
-  --accent: #ff4d00;
-  --accent-dark: #df4300;
-  --accent-soft: #fff1eb;
+  --surface-2: #F2ECE3;
+  --surface-3: #EFE6DA;
+  --ink: #1E1C1A;
+  --text: #3A3733;
+  --sub: #6B6862;
+  --muted: #726B63;
+  --border: #E8DFD6;
+  --border-2: #D8C4B9;
+  --accent: #EC5927;
+  --accent-dark: #D64A1C;
+  --accent-soft: #FDECE4;
   --green: #238b45;
   --green-soft: #edf8f0;
   --blue: #1769cf;
@@ -28,7 +29,7 @@
   --red: #b9382c;
   --red-soft: #fff0ee;
   --shadow: 0 10px 30px rgba(15, 23, 42, .08);
-  --font: Inter, "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -200,7 +201,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 }
 .search input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(255, 77, 0, .14);
+  box-shadow: 0 0 0 3px rgba(236, 89, 39, .14);
 }
 .top-actions {
   display: flex;
@@ -325,7 +326,7 @@ h1 {
   background: var(--surface);
 }
 .tab-note[data-active="true"] {
-  border-color: #ffc7ad;
+  border-color: #F0B9A0;
   background: var(--accent-soft);
 }
 .tab-note strong {
@@ -854,7 +855,7 @@ function previewSvg(seed) {
     hash = Math.imul(hash ^ (hash >>> 13), 3266489909);
     const y = Math.abs(hash % 96) + 8;
     const large = Math.abs(hash % 5) === 0;
-    dots.push(`<circle cx="${x}" cy="${y}" r="${large ? 2.4 : 1.5}" fill="${large ? '#ff4d00' : '#1c1c1e'}" opacity="${large ? '.95' : '.42'}"/>`);
+    dots.push(`<circle cx="${x}" cy="${y}" r="${large ? 2.4 : 1.5}" fill="${large ? '#EC5927' : '#1E1C1A'}" opacity="${large ? '.95' : '.42'}"/>`);
   }
   return `<svg class="preview" viewBox="0 0 200 112" role="img" aria-label="DotPad 점 배열 미리보기"><rect width="200" height="112" fill="rgba(255,255,255,.15)"/>${dots.join('')}</svg>`;
 }
@@ -968,7 +969,7 @@ function toast(message) {
   toast.timer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
-document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
+document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); el.setAttribute('aria-hidden', 'true'); });
 updateCounts();
 render();
 
