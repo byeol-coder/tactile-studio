@@ -56,6 +56,30 @@ input[type=range]{accent-color:#EC5927}
 @media (max-width:720px){
   .pin-test-actions{grid-template-columns:repeat(auto-fit,minmax(106px,1fr))}
 }
+.canvas-workspace{flex:1;position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;overflow:auto;padding:16px 20px 20px;background:#F7F4EF}
+.canvas-control-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none;min-width:0}
+.canvas-floating-control{min-height:56px;height:56px;display:inline-flex;align-items:center;gap:8px;padding:8px;border-radius:999px;background:#FFFAF5;border:1px solid #EADFD2;box-shadow:0 8px 24px rgba(37,24,12,0.12);box-sizing:border-box}
+.stroke-width-control{min-width:0;max-width:100%}
+.stroke-width-label{color:#6B6862;font-weight:800;font-size:12.5px;line-height:1;white-space:nowrap;padding:0 8px 0 6px}
+.stroke-segmented-options{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.stroke-width-control .segmented-option{min-height:40px!important;height:40px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;white-space:nowrap!important;line-height:1!important;padding:0 16px!important;border-radius:999px!important;box-sizing:border-box}
+.stroke-width-control .segmented-option svg{width:13px;height:13px;flex:0 0 auto}
+.undo-redo-control{margin-left:auto;gap:4px}
+.canvas-control-icon-button{width:44px!important;height:44px!important;min-width:44px;display:grid!important;place-items:center!important;border-radius:999px!important;box-sizing:border-box}
+.canvas-control-icon-button svg{width:18px;height:18px;display:block}
+.canvas-surface{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:0;min-width:0;overflow:visible}
+.canvas-card{position:relative;background:#fff;border:1px solid #EAE1D7;border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,0.05),0 12px 28px -14px rgba(16,24,40,0.14);padding:12px;box-sizing:border-box;max-width:100%}
+@media (max-width:900px){
+  .canvas-workspace{padding:14px 16px 18px}
+  .canvas-control-row{flex-wrap:wrap;justify-content:center}
+  .undo-redo-control{margin-left:0}
+}
+@media (max-width:520px){
+  .canvas-floating-control{height:auto;min-height:56px}
+  .stroke-width-control{flex-wrap:wrap;justify-content:center;border-radius:24px}
+  .stroke-width-label{width:100%;text-align:center;padding:0}
+  .stroke-segmented-options{width:100%;justify-content:center;flex-wrap:wrap}
+}
 @media (max-width:1180px){
   .ts-topbar{grid-template-columns:minmax(180px,1fr) auto minmax(300px,auto) minmax(170px,.7fr);gap:8px}
   .ts-save-status{display:none!important}
@@ -498,31 +522,34 @@ input[type=range]{accent-color:#EC5927}
       </div>
     </sc-if>
 
-    <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
-      <div role="group" aria-label="{{ t.undoRedoL }}" style="position:absolute;top:16px;right:20px;z-index:20;display:inline-flex;gap:2px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
-        <button onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </button>
-        <button onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </button>
-      </div>
-      <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
-        <div role="group" aria-label="{{ strokeCtlLabel }}" style="position:absolute;top:16px;left:20px;z-index:20;display:inline-flex;align-items:center;gap:10px;background:#F7F4EF;border:1px solid #E3D9CE;border-radius:100px;padding:6px 8px 6px 14px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
-          <span style="color:#6B6862;font-weight:800;font-size:12px;white-space:nowrap;letter-spacing:-0.1px">{{ strokeCtlLabel }}</span>
-          <div style="display:inline-flex;align-items:center;gap:6px">
-            <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
-              <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-                <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}">
-                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </sc-if>
-                {{ s.label }}
-              </button>
-            </sc-for>
+    <div class="canvas-workspace">
+      <div class="canvas-control-row">
+        <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
+          <div class="canvas-floating-control stroke-width-control" role="group" aria-label="{{ strokeCtlLabel }}">
+            <span class="stroke-width-label">{{ strokeCtlLabel }}</span>
+            <div class="stroke-segmented-options">
+              <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
+                <button class="segmented-option" onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+                  <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  </sc-if>
+                  <span>{{ s.label }}</span>
+                </button>
+              </sc-for>
+            </div>
           </div>
+        </sc-if>
+        <div class="canvas-floating-control undo-redo-control" role="group" aria-label="{{ t.undoRedoL }}">
+          <button class="canvas-control-icon-button" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+          <button class="canvas-control-icon-button" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
         </div>
-      </sc-if>
-      <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
+      </div>
+      <div class="canvas-surface">
+        <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
         <div role="status" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
           <span style="width:26px;height:26px;border-radius:8px;background:rgba(236,89,39,0.22);display:grid;place-items:center;color:#EC5927;flex:none">
             <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -533,7 +560,7 @@ input[type=range]{accent-color:#EC5927}
           </button>
         </div>
       </sc-if>
-      <div style="position:relative;background:#fff;border:1px solid #EAE1D7;border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,0.05),0 12px 28px -14px rgba(16,24,40,0.14);padding:12px">
+        <div class="canvas-card">
         <sc-if value="{{ isA4 }}" hint-placeholder-val="{{ false }}">
           <span style="position:absolute;top:-13px;left:12px;z-index:5;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:#6B6862;background:#F7F4EF;border:1px dashed #C9BBAF;border-radius:100px;padding:3px 11px;white-space:nowrap">
             <svg width="11" height="11" viewBox="0 0 24 24"><path d="M7 3h10v6H7zM5 9h14a1 1 0 0 1 1 1v7h-4v4H8v-4H4v-7a1 1 0 0 1 1-1zM8 17h8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg>
@@ -541,6 +568,7 @@ input[type=range]{accent-color:#EC5927}
           </span>
         </sc-if>
         <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="display:block;outline:none;touch-action:none;cursor:crosshair;max-width:100%"></canvas>
+        </div>
       </div>
 
       <sc-if value="{{ showEntry }}" hint-placeholder-val="{{ false }}">
@@ -2872,7 +2900,7 @@ class Component extends DCLogic {
           n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
           aria: (ctlL + ' ' + desc).trim(), title: desc,
           pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
-          style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: 30, padding: active ? '0 11px 0 10px' : '0 12px', borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid #EC5927' : '1px solid #EAE1D7', background: active ? '#EC5927' : '#fff', color: active ? '#fff' : '#6B6862', fontWeight: 700, fontSize: 12 }
+          style: { cursor: 'pointer', border: active ? '1.5px solid #EC5927' : '1px solid #EAE1D7', background: active ? '#EC5927' : '#fff', color: active ? '#fff' : '#6B6862', fontWeight: 800, fontSize: 12.5 }
         };
       }),
       // pages (v1 simple multi-page document)
