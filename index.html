@@ -33,6 +33,7 @@ button{cursor:pointer}
 @keyframes tsFly{from{opacity:0;transform:translateY(-6px) scale(0.98)}to{opacity:1;transform:none}}
 @keyframes tsTip{from{opacity:0}to{opacity:1}}
 input[type=range]{accent-color:#EC5927}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
 
@@ -63,7 +64,7 @@ input[type=range]{accent-color:#EC5927}
         <path d="M257.88,418.68h-5.3c-3.41.34-6.13,3.07-6.47,6.47v7.85h.76v-2.3c.57.09,1.17.15,1.77.15,2.88,0,5.49-1.17,7.37-3.05,1.89-1.89,3.05-4.49,3.05-7.37,0-.33-.01-.65-.05-.98h2.29v-.77h-3.42Z" fill="#EC5927"></path>
       </svg>
     </div>
-    <nav style="display:flex;gap:28px;font-size:15px;font-weight:600;color:#9C9994">
+    <nav style="display:flex;gap:28px;font-size:15px;font-weight:600;color:#6B6862">
       <span style="color:#1E1C1A;box-shadow:inset 0 -2px 0 #EC5927;padding-bottom:3px">{{ t.navHome }}</span>
       <span>Tactile Drive</span>
       <span>Dot Library</span>
@@ -74,12 +75,12 @@ input[type=range]{accent-color:#EC5927}
         <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">KO</button>
         <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">EN</button>
       </div>
-      <div style="width:34px;height:34px;border-radius:100px;background:#E8DFD6;display:grid;place-items:center;font-size:12px;font-weight:700;color:#9C9994">SB</div>
+      <div style="width:34px;height:34px;border-radius:100px;background:#E8DFD6;display:grid;place-items:center;font-size:12px;font-weight:700;color:#6B6862">SB</div>
     </div>
   </header>
   <main style="max-width:1120px;margin:0 auto;padding:52px 44px 90px">
     <h1 style="margin:0;font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1">{{ t.hubTitle }}</h1>
-    <p style="margin:12px 0 36px;font-size:16px;color:#9C9994">{{ t.hubSub }}</p>
+    <p style="margin:12px 0 36px;font-size:16px;color:#6B6862">{{ t.hubSub }}</p>
 
     <sc-if value="{{ hubBanner }}" hint-placeholder-val="{{ true }}">
       <section style="display:flex;align-items:center;gap:40px;background:#1E1C1A;border-radius:20px;padding:42px 46px;color:#fff;box-shadow:inset -51px -65px 191px rgba(58,58,58,0.15)">
@@ -200,7 +201,7 @@ input[type=range]{accent-color:#EC5927}
             <svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.importTitle2 }}</span>
-          <span style="font-size:12px;color:#9C9994;line-height:1.5">{{ t.importSub2 }}</span>
+          <span style="font-size:12px;color:#6B6862;line-height:1.5">{{ t.importSub2 }}</span>
         </button>
       </div>
     </section>
@@ -229,7 +230,7 @@ input[type=range]{accent-color:#EC5927}
   <div style="height:60px;background:#fff;border-bottom:1px solid #EAE1D7;display:flex;align-items:center;gap:12px;padding:0 14px;flex:none;min-width:0">
     <!-- LEFT ZONE: back + identity + document title -->
     <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 0">
-      <button onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#9C9994;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+      <button onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#6B6862;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
       <img src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;display:block;flex:none">
@@ -242,7 +243,7 @@ input[type=range]{accent-color:#EC5927}
 
     <!-- CENTER ZONE: canvas output format -->
     <label style="flex:none;display:inline-flex;align-items:center;gap:9px;height:38px;padding:0 8px 0 14px;border:1px solid #EAE1D7;border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
-      <svg width="15" height="15" viewBox="0 0 24 24" style="color:#9C9994;flex:none" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" style="color:#6B6862;flex:none" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.outputL }}" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 4px;cursor:pointer;height:36px;max-width:184px;border-radius:6px" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
           <option value="{{ o.key }}">{{ o.name }}</option>
@@ -1476,7 +1477,7 @@ class Component extends DCLogic {
       aCmdOk: '명령어로 촉각 그래픽 초안을 만들었습니다.', aCmdFallback: '명령을 정확히 인식하지 못해 기본 초안을 만들었습니다. 편집해서 완성하세요.',
       aTplLoaded: '템플릿을 편집기로 불러왔습니다.', aPresetArmed: '이미지 변환 프리셋이 준비되었습니다.',
       aImgNewPage: (n, tot) => `변환한 이미지를 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aCmdNewPage: (n, tot) => `명령어 초안을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aTplNewPage: (n, tot) => `템플릿을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`,
-      importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', threshold: '임계값', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
+      importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
       impSteps: ['가져오기', '자르기', '변환', '검토', '편집'],
       impImportTitle: '이미지로 촉각 그래픽 만들기', impImportSub: '이미지를 가져오면 주요 윤곽과 구조를 분석해 DotPad용 촉각 그래픽으로 변환합니다.',
       impDrop: '이미지를 끌어다 놓거나 파일을 선택하세요', impDropSecondary: '사진, 도표, 지도, 선화 이미지를 촉각 그래픽으로 변환할 수 있습니다.', impDropOr: '또는', impChooseFile: '파일 선택', impSample: '샘플 이미지로 체험하기',
@@ -1490,7 +1491,7 @@ class Component extends DCLogic {
       impCropHint: '상자를 드래그해 이동하고, 모서리 손잡이로 크기를 조절하세요.',
       impConvertTitle: 'AI 촉각 그래픽 변환', impConvertSub: '이미지의 형태를 촉각으로 인식하기 쉬운 점 패턴으로 변환합니다.',
       impConverting: 'AI가 촉각 그래픽으로 변환하는 중…', impConvertDone: '변환 완료',
-      impReviewTitle: '촉각 변환 미리보기', impReviewSub: '임계값을 조정해 미리보기를 다듬은 뒤 편집기로 불러오세요. 세부 수정은 편집기 도구로 이어서 할 수 있습니다.',
+      impReviewTitle: '촉각 변환 미리보기', impReviewSub: '촉각 디테일 정도를 조정해 미리보기를 다듬은 뒤 편집기로 불러오세요. 세부 수정은 편집기 도구로 이어서 할 수 있습니다.',
       impResult: '촉각 결과', impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impReview: '미리보기 검토', impLoad: '편집기로 불러오기', impReConvert: '다시 변환',
       retouchHintMsg: 'AI 변환 결과입니다. 펜·지우개·채우기 등 도구로 세부를 수정하세요.',
       aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aConverting: 'AI 촉각 변환을 시작했습니다',
@@ -1583,7 +1584,7 @@ class Component extends DCLogic {
       aCmdOk: 'Created a tactile graphic draft from your command.', aCmdFallback: "Couldn't match your command exactly — created a starter draft you can edit.",
       aTplLoaded: 'Template loaded into the editor.', aPresetArmed: 'Image-conversion preset armed.',
       aImgNewPage: (n, tot) => `Converted image added on page ${n}. ${tot} pages total`, aCmdNewPage: (n, tot) => `Command draft added on page ${n}. ${tot} pages total`, aTplNewPage: (n, tot) => `Template added on page ${n}. ${tot} pages total`,
-      importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', threshold: 'Threshold', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
+      importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
       impSteps: ['Import', 'Crop', 'Convert', 'Review', 'Edit'],
       impImportTitle: 'Create Tactile Graphic from Image', impImportSub: 'Import an image and convert its key outlines and structure into a DotPad-ready tactile graphic.',
       impDrop: 'Drop an image here or choose a file', impDropSecondary: 'Convert photos, diagrams, maps, and line drawings into tactile graphics.', impDropOr: 'or', impChooseFile: 'Choose File', impSample: 'Try Sample Image',
@@ -1597,7 +1598,7 @@ class Component extends DCLogic {
       impCropHint: 'Drag the box to move it, and use the corner handle to resize.',
       impConvertTitle: 'AI tactile conversion', impConvertSub: 'Transforms the image into a dot pattern that is easy to read by touch.',
       impConverting: 'Converting to a tactile graphic with AI…', impConvertDone: 'Conversion complete',
-      impReviewTitle: 'Tactile preview', impReviewSub: 'Adjust the threshold to refine the preview, then load it into the editor. You can keep retouching with the editor tools.',
+      impReviewTitle: 'Tactile preview', impReviewSub: 'Adjust the tactile detail level to refine the preview, then load it into the editor. You can keep retouching with the editor tools.',
       impResult: 'Tactile result', impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impReview: 'Review preview', impLoad: 'Load into editor', impReConvert: 'Re-convert',
       retouchHintMsg: 'This is the AI conversion result. Refine details with the Pen, Eraser, Fill and other tools.',
       aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aConverting: 'AI tactile conversion started',
@@ -2855,11 +2856,11 @@ class Component extends DCLogic {
             width: 24, height: 24, borderRadius: 100, display: 'grid', placeItems: 'center', flex: 'none',
             fontSize: 12, fontWeight: 800,
             background: state === 'todo' ? '#fff' : '#EC5927',
-            color: state === 'todo' ? '#9C9994' : '#fff',
+            color: state === 'todo' ? '#6B6862' : '#fff',
             border: state === 'todo' ? '1.5px solid #EAE1D7' : (state === 'current' ? '1.5px solid #EC5927' : '1.5px solid #EC5927'),
             boxShadow: state === 'current' ? '0 0 0 3px rgba(236,89,39,0.18)' : 'none'
           },
-          labelStyle: { fontSize: 12.5, fontWeight: state === 'current' ? 800 : 600, color: state === 'todo' ? '#9C9994' : '#1E1C1A', whiteSpace: 'nowrap' } };
+          labelStyle: { fontSize: 12.5, fontWeight: state === 'current' ? 800 : 600, color: state === 'todo' ? '#6B6862' : '#1E1C1A', whiteSpace: 'nowrap' } };
       }),
       impIsImport: st.impStep === 'import', impIsCrop: st.impStep === 'crop', impIsConvert: st.impStep === 'convert', impIsReview: st.impStep === 'review',
       impHeaderTitle: st.impStep === 'import' ? t.impImportTitle : st.impStep === 'crop' ? t.impCropTitle : st.impStep === 'convert' ? t.impConvertTitle : t.impReviewTitle,
