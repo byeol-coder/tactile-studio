@@ -61,6 +61,7 @@ input[type=range]{accent-color:#EC5927}
 @media (max-width:760px){
   .ts-topbar{grid-template-columns:minmax(110px,1fr) minmax(168px,auto) minmax(96px,auto);padding:0 10px;gap:6px}
   .ts-brand-logo,.ts-left-divider,.ts-export-label,.ts-create-label{display:none!important}
+  .ts-language-switch,.ts-help-button{display:none!important}
   .ts-pill-full{display:none}
   .ts-pill-short{display:inline-block}
   .device-status-pill{max-width:124px;padding-left:10px!important;padding-right:10px!important}
@@ -76,7 +77,6 @@ input[type=range]{accent-color:#EC5927}
   .ts-topbar{grid-template-columns:minmax(74px,1fr) 148px 44px;padding:0 8px;gap:5px}
   .ts-topbar-left{gap:4px}
   .ts-topbar-actions{gap:6px}
-  .ts-language-switch,.ts-help-button{display:none!important}
   .ts-pill-short{display:none}
 }
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
@@ -1714,7 +1714,13 @@ class Component extends DCLogic {
     if (st.menu && st.menu.kind === kind) { this.setState({ menu: null }); return; }
     const r = ev.currentTarget.getBoundingClientRect();
     const vw = (typeof window !== 'undefined' ? window.innerWidth : 1280);
-    this.setState({ menu: { kind, top: r.bottom + 8, left: r.left, right: vw - r.right } });
+    const margin = 8;
+    const menuW = kind === 'create' ? 240 : 216;
+    const maxLeft = Math.max(margin, vw - menuW - margin);
+    const maxRight = Math.max(margin, vw - menuW - margin);
+    const left = Math.max(margin, Math.min(r.left, maxLeft));
+    const right = Math.max(margin, Math.min(vw - r.right, maxRight));
+    this.setState({ menu: { kind, top: r.bottom + 8, left, right } });
   }
   testOutput() {
     const t = this.T();
