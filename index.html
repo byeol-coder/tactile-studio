@@ -33,85 +33,6 @@ button{cursor:pointer}
 @keyframes tsFly{from{opacity:0;transform:translateY(-6px) scale(0.98)}to{opacity:1;transform:none}}
 @keyframes tsTip{from{opacity:0}to{opacity:1}}
 input[type=range]{accent-color:#EC5927}
-.ts-topbar{height:64px;background:#fff;border-bottom:1px solid #EAE1D7;display:grid;grid-template-columns:minmax(220px,1.05fr) auto minmax(340px,auto) minmax(220px,.85fr);align-items:center;gap:10px;padding:0 14px;flex:none;min-width:0;overflow:visible}
-.ts-topbar-left,.ts-topbar-actions,.ts-topbar-device{display:flex;align-items:center;gap:8px;min-width:0}
-.ts-topbar-left{justify-content:flex-start}
-.ts-topbar-actions{justify-content:center}
-.ts-topbar-device{justify-content:flex-end}
-.ts-output-zone{min-width:0}
-.ts-topbar-button,.ts-topbar-action,.device-status-pill{min-height:44px!important;height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center;gap:8px!important;white-space:nowrap;flex:0 0 auto;box-sizing:border-box}
-.ts-topbar-action{border-radius:10px!important;padding-left:14px!important;padding-right:14px!important}
-.device-status-pill{max-width:240px;min-width:0;overflow:hidden}
-.ts-project-name{min-width:0!important;width:clamp(96px,14vw,240px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ts-action-label,.ts-pill-full,.ts-pill-short,.ts-save-text{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ts-pill-short{display:none}
-.ts-save-status{max-width:94px;overflow:hidden}
-.ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px}
-.pin-test-section{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
-.pin-test-title{font-size:12px;font-weight:800;color:#8A857E;line-height:1.4;letter-spacing:0.2px;text-transform:uppercase}
-.pin-test-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(106px,1fr));align-items:center;gap:8px}
-.pin-test-button{min-height:44px!important;height:44px!important;width:100%;min-width:0;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;white-space:nowrap!important;padding:0 11px!important;box-sizing:border-box;line-height:1}
-.pin-test-button svg{width:18px!important;height:18px!important;flex:0 0 auto;display:block}
-.pin-test-button span{line-height:1;white-space:nowrap}
-@media (max-width:720px){
-  .pin-test-actions{grid-template-columns:repeat(auto-fit,minmax(106px,1fr))}
-}
-.canvas-workspace{flex:1;position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;overflow:auto;padding:16px 20px 20px;background:#F7F4EF}
-.canvas-control-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none;min-width:0}
-.canvas-floating-control{min-height:56px;height:56px;display:inline-flex;align-items:center;gap:8px;padding:8px;border-radius:999px;background:#FFFAF5;border:1px solid #EADFD2;box-shadow:0 8px 24px rgba(37,24,12,0.12);box-sizing:border-box}
-.stroke-width-control{min-width:0;max-width:100%}
-.stroke-width-label{color:#6B6862;font-weight:800;font-size:12.5px;line-height:1;white-space:nowrap;padding:0 8px 0 6px}
-.stroke-segmented-options{display:inline-flex;align-items:center;gap:6px;min-width:0}
-.stroke-width-control .segmented-option{min-height:40px!important;height:40px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;white-space:nowrap!important;line-height:1!important;padding:0 16px!important;border-radius:999px!important;box-sizing:border-box}
-.stroke-width-control .segmented-option svg{width:13px;height:13px;flex:0 0 auto}
-.undo-redo-control{margin-left:auto;gap:4px}
-.canvas-control-icon-button{width:44px!important;height:44px!important;min-width:44px;display:grid!important;place-items:center!important;border-radius:999px!important;box-sizing:border-box}
-.canvas-control-icon-button svg{width:18px;height:18px;display:block}
-.canvas-surface{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:0;min-width:0;overflow:visible}
-.canvas-card{position:relative;background:#fff;border:1px solid #EAE1D7;border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,0.05),0 12px 28px -14px rgba(16,24,40,0.14);padding:12px;box-sizing:border-box;max-width:100%}
-@media (max-width:900px){
-  .canvas-workspace{padding:14px 16px 18px}
-  .canvas-control-row{flex-wrap:wrap;justify-content:center}
-  .undo-redo-control{margin-left:0}
-}
-@media (max-width:520px){
-  .canvas-floating-control{height:auto;min-height:56px}
-  .stroke-width-control{flex-wrap:wrap;justify-content:center;border-radius:24px}
-  .stroke-width-label{width:100%;text-align:center;padding:0}
-  .stroke-segmented-options{width:100%;justify-content:center;flex-wrap:wrap}
-}
-@media (max-width:1180px){
-  .ts-topbar{grid-template-columns:minmax(180px,1fr) auto minmax(300px,auto) minmax(170px,.7fr);gap:8px}
-  .ts-save-status{display:none!important}
-  .device-status-pill{max-width:190px}
-}
-@media (max-width:980px){
-  .ts-topbar{grid-template-columns:minmax(160px,1fr) minmax(250px,auto) minmax(150px,auto)}
-  .ts-output-zone{display:none!important}
-  .ts-create-label,.ts-export-label{display:none}
-  .device-status-pill{max-width:160px}
-}
-@media (max-width:760px){
-  .ts-topbar{grid-template-columns:minmax(110px,1fr) minmax(168px,auto) minmax(96px,auto);padding:0 10px;gap:6px}
-  .ts-brand-logo,.ts-left-divider,.ts-export-label,.ts-create-label{display:none!important}
-  .ts-language-switch,.ts-help-button{display:none!important}
-  .ts-pill-full{display:none}
-  .ts-pill-short{display:inline-block}
-  .device-status-pill{max-width:124px;padding-left:10px!important;padding-right:10px!important}
-  .ts-topbar-action{padding-left:12px!important;padding-right:12px!important}
-}
-@media (max-width:620px){
-  .ts-project-name{width:clamp(72px,20vw,120px)!important}
-  .ts-send-label{display:none}
-  .ts-topbar-action,.device-status-pill{width:44px!important;padding-left:0!important;padding-right:0!important}
-  .ts-menu-caret{display:none!important}
-}
-@media (max-width:520px){
-  .ts-topbar{grid-template-columns:minmax(74px,1fr) 148px 44px;padding:0 8px;gap:5px}
-  .ts-topbar-left{gap:4px}
-  .ts-topbar-actions{gap:6px}
-  .ts-pill-short{display:none}
-}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
@@ -306,26 +227,22 @@ input[type=range]{accent-color:#EC5927}
     </div>
   </sc-if>
 
-  <div class="ts-topbar">
+  <div style="height:60px;background:#fff;border-bottom:1px solid #EAE1D7;display:flex;align-items:center;gap:12px;padding:0 14px;flex:none;min-width:0">
     <!-- LEFT ZONE: back + identity + document title -->
-    <div class="ts-topbar-left">
-      <button class="ts-topbar-button" onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#6B6862;width:44px;border-radius:10px;display:grid;place-items:center;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 0">
+      <button onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#6B6862;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
-      <img class="ts-brand-logo" src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;display:block;flex:none">
-      <div class="ts-divider ts-left-divider"></div>
-      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;flex:1 1 auto" style-hover="border:1px solid #EAE1D7" style-focus="border:1px solid #EC5927;outline:none">
+      <img src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;display:block;flex:none">
+      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
+      <input value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;width:158px;min-width:60px;flex:0 1 auto;text-overflow:ellipsis" style-hover="border:1px solid #EAE1D7" style-focus="border:1px solid #EC5927;outline:none">
       <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
         <span style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
       </sc-if>
-      <span class="ts-save-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0B8800;flex:none;white-space:nowrap">
-        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        <span class="ts-save-text">{{ t.savedStatus }}</span>
-      </span>
     </div>
 
-    <!-- OUTPUT ZONE: canvas output format -->
-    <label class="ts-output-zone ts-topbar-button" style="display:inline-flex;align-items:center;gap:9px;padding:0 8px 0 14px;border:1px solid #EAE1D7;border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
+    <!-- CENTER ZONE: canvas output format -->
+    <label style="flex:none;display:inline-flex;align-items:center;gap:9px;height:38px;padding:0 8px 0 14px;border:1px solid #EAE1D7;border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
       <svg width="15" height="15" viewBox="0 0 24 24" style="color:#6B6862;flex:none" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.outputL }}" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 4px;cursor:pointer;height:36px;max-width:184px;border-radius:6px" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
@@ -334,41 +251,46 @@ input[type=range]{accent-color:#EC5927}
       </select>
     </label>
 
-    <!-- CENTER ZONE: primary actions -->
-    <div class="ts-topbar-actions">
-      <button class="ts-topbar-action" onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" title="{{ t.createMenu }}" style="border:1px solid #EAE1D7;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+    <!-- RIGHT ZONE: create / export / device / send / utility -->
+    <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;flex:1 1 0">
+      <button onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
-        <span class="ts-action-label ts-create-label">{{ t.createMenu }}</span>
-        <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {{ t.createMenu }}
+        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
-      <button class="ts-topbar-action ts-send-action" onClick="{{ openSend }}" style="border:none;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        <span class="ts-action-label ts-send-label">{{ t.send }}</span>
-      </button>
+      <span role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0B8800;flex:none;white-space:nowrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {{ t.savedStatus }}
+      </span>
 
-      <button class="ts-topbar-action" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" title="{{ t.export }}" style="border:1px solid #EAE1D7;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+      <button onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        <span class="ts-action-label ts-export-label">{{ t.export }}</span>
-        <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {{ t.export }}
+        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
-    </div>
 
-    <!-- RIGHT ZONE: device status and utilities -->
-    <div class="ts-topbar-device">
-      <button class="device-status-pill" onClick="{{ toggleDevice }}" aria-haspopup="menu" aria-expanded="{{ deviceOpen }}" aria-label="{{ connChipAria }}" title="{{ connChipText }}" style="{{ connStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
+
+      <button onClick="{{ toggleDevice }}" aria-haspopup="menu" aria-expanded="{{ deviceOpen }}" aria-label="{{ connChipAria }}" style="{{ connStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <span style="{{ connDotStyle }}"></span>
         <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle><circle cx="16" cy="12" r="1.2" fill="currentColor"></circle></svg>
-        <span class="ts-pill-full">{{ connChipText }}</span>
-        <span class="ts-pill-short">{{ connChipShortText }}</span>
-        <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {{ connChipText }}
+        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
-      <div class="ts-language-switch" role="group" aria-label="{{ t.langLabel }}" style="display:flex;flex:none;border:1px solid #EAE1D7;border-radius:100px;overflow:hidden">
+      <button onClick="{{ openSend }}" style="height:40px;padding:0 18px;border:none;border-radius:9px;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+        <svg width="15" height="15" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {{ t.send }}
+      </button>
+
+      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
+
+      <div role="group" aria-label="{{ t.langLabel }}" style="display:flex;flex:none;border:1px solid #EAE1D7;border-radius:100px;overflow:hidden">
         <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">KO</button>
         <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">EN</button>
       </div>
-      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid #EAE1D7;border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">?</button>
+      <button onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:34px;height:34px;flex:none;border:1px solid #EAE1D7;border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">?</button>
     </div>
   </div>
 
@@ -522,34 +444,31 @@ input[type=range]{accent-color:#EC5927}
       </div>
     </sc-if>
 
-    <div class="canvas-workspace">
-      <div class="canvas-control-row">
-        <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
-          <div class="canvas-floating-control stroke-width-control" role="group" aria-label="{{ strokeCtlLabel }}">
-            <span class="stroke-width-label">{{ strokeCtlLabel }}</span>
-            <div class="stroke-segmented-options">
-              <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
-                <button class="segmented-option" onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-                  <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                  </sc-if>
-                  <span>{{ s.label }}</span>
-                </button>
-              </sc-for>
-            </div>
-          </div>
-        </sc-if>
-        <div class="canvas-floating-control undo-redo-control" role="group" aria-label="{{ t.undoRedoL }}">
-          <button class="canvas-control-icon-button" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          </button>
-          <button class="canvas-control-icon-button" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          </button>
-        </div>
+    <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
+      <div role="group" aria-label="{{ t.undoRedoL }}" style="position:absolute;top:16px;right:20px;z-index:20;display:inline-flex;gap:2px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
+        <button onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <button onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
       </div>
-      <div class="canvas-surface">
-        <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
+        <div role="group" aria-label="{{ strokeCtlLabel }}" style="position:absolute;top:16px;left:20px;z-index:20;display:inline-flex;align-items:center;gap:10px;background:#F7F4EF;border:1px solid #E3D9CE;border-radius:100px;padding:6px 8px 6px 14px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
+          <span style="color:#6B6862;font-weight:800;font-size:12px;white-space:nowrap;letter-spacing:-0.1px">{{ strokeCtlLabel }}</span>
+          <div style="display:inline-flex;align-items:center;gap:6px">
+            <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
+              <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+                <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </sc-if>
+                {{ s.label }}
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
         <div role="status" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
           <span style="width:26px;height:26px;border-radius:8px;background:rgba(236,89,39,0.22);display:grid;place-items:center;color:#EC5927;flex:none">
             <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -560,7 +479,7 @@ input[type=range]{accent-color:#EC5927}
           </button>
         </div>
       </sc-if>
-        <div class="canvas-card">
+      <div style="position:relative;background:#fff;border:1px solid #EAE1D7;border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,0.05),0 12px 28px -14px rgba(16,24,40,0.14);padding:12px">
         <sc-if value="{{ isA4 }}" hint-placeholder-val="{{ false }}">
           <span style="position:absolute;top:-13px;left:12px;z-index:5;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:#6B6862;background:#F7F4EF;border:1px dashed #C9BBAF;border-radius:100px;padding:3px 11px;white-space:nowrap">
             <svg width="11" height="11" viewBox="0 0 24 24"><path d="M7 3h10v6H7zM5 9h14a1 1 0 0 1 1 1v7h-4v4H8v-4H4v-7a1 1 0 0 1 1-1zM8 17h8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg>
@@ -568,7 +487,6 @@ input[type=range]{accent-color:#EC5927}
           </span>
         </sc-if>
         <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="display:block;outline:none;touch-action:none;cursor:crosshair;max-width:100%"></canvas>
-        </div>
       </div>
 
       <sc-if value="{{ showEntry }}" hint-placeholder-val="{{ false }}">
@@ -714,25 +632,31 @@ input[type=range]{accent-color:#EC5927}
           <div aria-hidden="true" style="margin-top:8px;font-size:11px;font-weight:700;color:#6B6862">{{ t.dpLive }}: <span style="color:#B93E15">{{ liveStateLabel }}</span></div>
         </div>
 
-        <!-- pin test -->
-        <div class="pin-test-section">
-          <div class="pin-test-title">{{ t.dpPins }}</div>
-          <div class="pin-test-actions" role="group" aria-label="{{ t.dpPins }}">
-            <button class="pin-test-button" onClick="{{ pinRaise }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpRaise }}" style="{{ pinRaiseStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0l-5 5m5-5l5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              <span>{{ t.dpRaise }}</span>
+        <!-- advanced device tests (collapsed by default; hardware diagnostics, not editing) -->
+        <div style="padding:12px 16px 14px;border-top:1px solid #F2ECE4">
+          <button onClick="{{ toggleAdv }}" aria-expanded="{{ advOpen }}" style="display:flex;align-items:center;gap:8px;width:100%;min-height:44px;background:transparent;border:none;padding:4px 0;cursor:pointer;text-align:left" style-focus="outline:2px solid #C43D00;outline-offset:2px">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;transition:transform 0.15s ease;transform:rotate({{ advCaret }})"><path d="M9 6l6 6-6 6" fill="none" stroke="#6B6862" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-size:11px;font-weight:800;color:#6B6862;letter-spacing:0.4px;text-transform:uppercase">{{ t.advTests }}</span>
+          </button>
+          <sc-if value="{{ advOpen }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:8px;font-size:11px;color:#6B6862;line-height:1.45">{{ t.advTestsHint }}</div>
+          <div role="group" aria-label="{{ t.dpPins }}" style="display:flex;gap:7px;margin-top:10px">
+            <button onClick="{{ pinRaise }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpRaise }}" style="{{ pinRaiseStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0l-5 5m5-5l5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              {{ t.dpRaise }}
             </button>
-            <button class="pin-test-button" onClick="{{ pinLower }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpLower }}" style="{{ pinLowerStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              <span>{{ t.dpLower }}</span>
+            <button onClick="{{ pinLower }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpLower }}" style="{{ pinLowerStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              {{ t.dpLower }}
             </button>
-            <button class="pin-test-button" onClick="{{ pinInvert }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpInvert }}" style="{{ pinInvertStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
-              <span>{{ t.dpInvert }}</span>
+            <button onClick="{{ pinInvert }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpInvert }}" style="{{ pinInvertStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+              {{ t.dpInvert }}
             </button>
           </div>
           <sc-if value="{{ pinsDisabled }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:9px;font-size:11px;color:#9C9994;line-height:1.4">{{ t.dpConnectHint }}</div>
+            <div style="margin-top:9px;font-size:11px;color:#6B6862;line-height:1.4">{{ t.dpConnectHint }}</div>
+          </sc-if>
           </sc-if>
         </div>
       </aside>
@@ -983,6 +907,17 @@ input[type=range]{accent-color:#EC5927}
             </div>
           </div>
         </div>
+        <div style="margin-top:4px">
+          <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:7px">{{ presetLabel }}</div>
+          <div role="group" aria-label="{{ presetLabel }}" style="display:flex;gap:7px">
+            <sc-for list="{{ convPresets }}" as="pp" hint-placeholder-count="4">
+              <button onClick="{{ pp.setIt }}" aria-pressed="{{ pp.sel }}" style="{{ pp.style }}" style-focus="outline:2px solid #C43D00;outline-offset:2px">
+                <span style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ pp.label }}</span>
+                <span style="font-size:10.5px;color:#6B6862;line-height:1.3">{{ pp.sub }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
         <label style="display:block;margin-top:18px;font-size:12.5px;font-weight:700;color:#1E1C1A">
           <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
           <input type="range" min="10" max="90" step="10" value="{{ threshold }}" onChange="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid #EC5927;outline-offset:4px">
@@ -997,6 +932,15 @@ input[type=range]{accent-color:#EC5927}
             {{ t.invert }} · <b>{{ invState }}</b>
           </button>
         </div>
+        <sc-if value="{{ qAdv }}" hint-placeholder-val="{{ true }}">
+          <div role="status" style="{{ qAdv.box }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 8v5M12 15.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="{{ qAdv.color }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <div>
+              <div style="font-size:12.5px;font-weight:800;color:{{ qAdv.color }}">{{ qAdv.metrics }}</div>
+              <div style="font-size:12px;color:#57534E;line-height:1.45;margin-top:2px">{{ qAdv.msg }}</div>
+            </div>
+          </div>
+        </sc-if>
       </sc-if>
     </div>
 
@@ -1454,7 +1398,7 @@ class Component extends DCLogic {
     confirmKind: 'newdoc',
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
-    entry: true, importOpen: false, threshold: 50, dither: false, invertConv: false,
+    entry: true, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
     impStep: 'import', cropChoice: 'full', converting: false, convertDone: false,
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, retouchHint: false, armedPreset: null,
@@ -1464,7 +1408,7 @@ class Component extends DCLogic {
     connected: true, connType: 'ble', connBusy: '', livePreview: false, inspectorOpen: true, pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     saveOpen: false, savePhase: 'form', saveLoc: 'drive',
-    helpOpen: false, menu: null, railMenu: null, tip: null,
+    helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
     saved: []
@@ -1575,6 +1519,15 @@ class Component extends DCLogic {
       impConverting: 'AI가 촉각 그래픽으로 변환하는 중…', impConvertDone: '변환 완료',
       impReviewTitle: '촉각 변환 미리보기', impReviewSub: '촉각 디테일 정도를 조정해 미리보기를 다듬은 뒤 편집기로 불러오세요. 세부 수정은 편집기 도구로 이어서 할 수 있습니다.',
       impResult: '촉각 결과', impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impReview: '미리보기 검토', impLoad: '편집기로 불러오기', impReConvert: '다시 변환',
+      presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일',
+      presetSubBalanced: '일반 사진·그림용', presetSubOutline: '아이콘·사물·도형용', presetSubDiagram: '차트·지도·선화용', presetSubDetail: '디테일 보존(점 밀도↑)',
+      qSparseMsg: '점이 너무 적어 촉각으로 읽기 어려울 수 있어요. 대상에 더 가깝게 자르거나 고디테일을 사용해 보세요.',
+      qDenseMsg: '점이 너무 많아 촉각으로 뭉쳐 보일 수 있어요. 깔끔한 다이어그램이나 강한 윤곽을 사용해 보세요.',
+      qIsoMsg: '흩어진 점이 많아요. 읽기 쉽도록 작은 점 뭉치를 정리했습니다.',
+      qOkMsg: '촉각으로 읽기 좋은 밀도입니다.',
+      qMetrics: (d, pct) => '점 ' + d + '개 · 밀도 ' + pct + '%',
+      impErrLoad: '이미지를 불러오지 못했어요. 10MB 이하의 PNG 또는 JPG로 다시 시도해 주세요.',
+      advTests: '고급 장치 테스트', advTestsHint: '아래는 DotPad 하드웨어 점검용입니다. 일반 편집에는 필요하지 않습니다.',
       retouchHintMsg: 'AI 변환 결과입니다. 펜·지우개·채우기 등 도구로 세부를 수정하세요.',
       aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aConverting: 'AI 촉각 변환을 시작했습니다',
       preview: 'DotPad 미리보기', sendNow: '지금 전송', sending: 'DotPad로 전송 중…', sent: '전송 완료', sentSub: 'DotPad에서 촉각 그래픽이 출력되고 있습니다.',
@@ -1682,6 +1635,15 @@ class Component extends DCLogic {
       impConverting: 'Converting to a tactile graphic with AI…', impConvertDone: 'Conversion complete',
       impReviewTitle: 'Tactile preview', impReviewSub: 'Adjust the tactile detail level to refine the preview, then load it into the editor. You can keep retouching with the editor tools.',
       impResult: 'Tactile result', impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impReview: 'Review preview', impLoad: 'Load into editor', impReConvert: 'Re-convert',
+      presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail',
+      presetSubBalanced: 'General photos & drawings', presetSubOutline: 'Icons, objects, shapes', presetSubDiagram: 'Charts, maps, line art', presetSubDetail: 'Keeps detail (denser)',
+      qSparseMsg: 'This may be too sparse to read by touch. Crop closer to the subject or try High Detail.',
+      qDenseMsg: 'This may be too dense for touch. Try Clean Diagram or Strong Outline.',
+      qIsoMsg: 'Many isolated dots were cleaned up to improve tactile readability.',
+      qOkMsg: 'Good density for reading by touch.',
+      qMetrics: (d, pct) => d + ' dots · ' + pct + '% density',
+      impErrLoad: 'Couldn\u2019t load this image. Please try a PNG or JPG under 10MB.',
+      advTests: 'Advanced device tests', advTestsHint: 'The controls below are for checking DotPad hardware. They are not needed for normal editing.',
       retouchHintMsg: 'This is the AI conversion result. Refine details with the Pen, Eraser, Fill and other tools.',
       aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aConverting: 'AI tactile conversion started',
       preview: 'DotPad preview', sendNow: 'Send now', sending: 'Sending to DotPad…', sent: 'Sent to DotPad', sentSub: 'Your graphic is now rendering on the DotPad.',
@@ -1751,13 +1713,7 @@ class Component extends DCLogic {
     if (st.menu && st.menu.kind === kind) { this.setState({ menu: null }); return; }
     const r = ev.currentTarget.getBoundingClientRect();
     const vw = (typeof window !== 'undefined' ? window.innerWidth : 1280);
-    const margin = 8;
-    const menuW = kind === 'create' ? 240 : 216;
-    const maxLeft = Math.max(margin, vw - menuW - margin);
-    const maxRight = Math.max(margin, vw - menuW - margin);
-    const left = Math.max(margin, Math.min(r.left, maxLeft));
-    const right = Math.max(margin, Math.min(vw - r.right, maxRight));
-    this.setState({ menu: { kind, top: r.bottom + 8, left, right } });
+    this.setState({ menu: { kind, top: r.bottom + 8, left: r.left, right: vw - r.right } });
   }
   testOutput() {
     const t = this.T();
@@ -1961,6 +1917,116 @@ class Component extends DCLogic {
     g.moveTo(98, 90); g.lineTo(120, 85); g.moveTo(98, 97); g.lineTo(120, 101);
     g.stroke();
   }
+  // ---------- REAL image->tactile conversion core (unit-tested in tactile-convert.test.js) ----------
+  _cvGray(rgba, w, h) {
+    const g = new Float32Array(w * h);
+    for (let i = 0; i < w * h; i++) {
+      const a = rgba[i * 4 + 3] / 255;
+      const R = rgba[i * 4] * a + 255 * (1 - a), G = rgba[i * 4 + 1] * a + 255 * (1 - a), B = rgba[i * 4 + 2] * a + 255 * (1 - a);
+      g[i] = 0.2126 * R + 0.7152 * G + 0.0722 * B; // composite over white so transparent PNG reads as background
+    }
+    return g;
+  }
+  _cvOtsu(gray) {
+    const hist = new Array(256).fill(0);
+    for (let i = 0; i < gray.length; i++) hist[Math.max(0, Math.min(255, gray[i] | 0))]++;
+    const total = gray.length; let sum = 0; for (let t = 0; t < 256; t++) sum += t * hist[t];
+    let sumB = 0, wB = 0, maxVar = -1, first = 127, last = 127;
+    for (let t = 0; t < 256; t++) {
+      wB += hist[t]; if (wB === 0) continue; const wF = total - wB; if (wF === 0) break;
+      sumB += t * hist[t]; const mB = sumB / wB, mF = (sum - sumB) / wF; const v = wB * wF * (mB - mF) * (mB - mF);
+      if (v > maxVar * (1 + 1e-9)) { maxVar = v; first = t; last = t; } else if (v > maxVar * (1 - 1e-9)) { last = t; }
+    }
+    return Math.round((first + last) / 2);
+  }
+  _cvDown(gray, sw, sh, crop, tw, th) {
+    const c = crop || { x: 0, y: 0, w: 1, h: 1 };
+    const cx = Math.max(0, Math.floor(c.x * sw)), cy = Math.max(0, Math.floor(c.y * sh));
+    const cw = Math.max(1, Math.min(sw - cx, Math.round(c.w * sw))), ch = Math.max(1, Math.min(sh - cy, Math.round(c.h * sh)));
+    const scale = Math.min(tw / cw, th / ch), dw = Math.max(1, Math.round(cw * scale)), dh = Math.max(1, Math.round(ch * scale));
+    const ox = Math.floor((tw - dw) / 2), oy = Math.floor((th - dh) / 2), out = new Float32Array(tw * th).fill(255);
+    for (let ty = 0; ty < dh; ty++) for (let tx = 0; tx < dw; tx++) {
+      const x0 = cx + Math.floor(tx * cw / dw), x1 = cx + Math.max(x0 + 1, Math.floor((tx + 1) * cw / dw));
+      const y0 = cy + Math.floor(ty * ch / dh), y1 = cy + Math.max(y0 + 1, Math.floor((ty + 1) * ch / dh));
+      let s = 0, n = 0; for (let yy = y0; yy < y1 && yy < sh; yy++) for (let xx = x0; xx < x1 && xx < sw; xx++) { s += gray[yy * sw + xx]; n++; }
+      out[(oy + ty) * tw + (ox + tx)] = n ? s / n : 255;
+    }
+    return { grid: out, box: { ox, oy, dw, dh } };
+  }
+  _cvSobel(grid, w, h) {
+    const out = new Float32Array(w * h), gx = [-1, 0, 1, -2, 0, 2, -1, 0, 1], gy = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      let sx = 0, sy = 0, k = 0; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) { const v = grid[(y + j) * w + (x + i)]; sx += v * gx[k]; sy += v * gy[k]; k++; }
+      out[y * w + x] = Math.hypot(sx, sy);
+    }
+    return out;
+  }
+  _cvDilate(cells, w, h) {
+    const out = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let on = 0;
+      for (let j = -1; j <= 1 && !on; j++) for (let i = -1; i <= 1; i++) { const nx = x + i, ny = y + j; if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; if (cells[ny * w + nx]) { on = 1; break; } }
+      out[y * w + x] = on; }
+    return out;
+  }
+  _cvRemoveSmall(cells, w, h, minSize) {
+    const seen = new Uint8Array(w * h), out = cells.slice(), stack = []; let removed = 0;
+    for (let s = 0; s < w * h; s++) { if (!cells[s] || seen[s]) continue; stack.length = 0; stack.push(s); seen[s] = 1; const comp = [s];
+      while (stack.length) { const p = stack.pop(), px = p % w, py = (p / w) | 0;
+        const nb = [[px - 1, py], [px + 1, py], [px, py - 1], [px, py + 1]];
+        for (const nn of nb) { const nx = nn[0], ny = nn[1]; if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; const q = ny * w + nx; if (cells[q] && !seen[q]) { seen[q] = 1; stack.push(q); comp.push(q); } } }
+      if (comp.length < minSize) { for (const q of comp) out[q] = 0; removed += comp.length; } }
+    return { cells: out, removed };
+  }
+  CONV_PRESETS() {
+    return {
+      balanced: { mode: 'fill', invert: false, minCluster: 2, dilateOutline: false, edgeBias: 0.00 },
+      outline:  { mode: 'edge', invert: false, minCluster: 2, dilateOutline: true,  edgeBias: 0.10 },
+      diagram:  { mode: 'edge', invert: false, minCluster: 3, dilateOutline: false, edgeBias: 0.18 },
+      detail:   { mode: 'fill', invert: false, minCluster: 1, dilateOutline: false, edgeBias: 0.00 }
+    };
+  }
+  // core: RGBA source -> tactile cells. Reads this._srcData/_srcW/_srcH captured at decode time.
+  imgToCells(w, h, opts, crop) {
+    opts = opts || {};
+    if (!this._srcData) return { cells: this.catPattern(w, h, opts.threshold != null ? opts.threshold : 50, crop), box: null, removedDots: 0 }; // safe fallback: sample/demo path
+    const preset = this.CONV_PRESETS()[opts.preset] || this.CONV_PRESETS().balanced;
+    const gray = this._cvGray(this._srcData, this._srcW, this._srcH);
+    const down = this._cvDown(gray, this._srcW, this._srcH, crop, w, h), grid = down.grid;
+    const useEdge = (opts.edge != null) ? opts.edge : (preset.mode === 'edge');
+    let cells = new Uint8Array(w * h);
+    try {
+      if (useEdge) {
+        const edges = this._cvSobel(grid, w, h); let max = 1; for (let i = 0; i < edges.length; i++) if (edges[i] > max) max = edges[i];
+        const norm = new Float32Array(w * h); for (let i = 0; i < edges.length; i++) norm[i] = 255 - (edges[i] / max) * 255;
+        const base = this._cvOtsu(norm); const thr = base - preset.edgeBias * 255 - ((opts.threshold != null ? (opts.threshold - 50) : 0) * 1.2);
+        for (let i = 0; i < norm.length; i++) cells[i] = norm[i] < thr ? 1 : 0;
+        if (preset.dilateOutline) cells = this._cvDilate(cells, w, h);
+      } else {
+        const T = (opts.threshold != null) ? Math.round((opts.threshold / 100) * 255) : this._cvOtsu(grid);
+        for (let i = 0; i < grid.length; i++) cells[i] = grid[i] < T ? 1 : 0;
+      }
+    } catch (e) { // reliable fallback: plain grayscale + Otsu, never leave a blank canvas
+      const T = this._cvOtsu(grid); for (let i = 0; i < grid.length; i++) cells[i] = grid[i] < T ? 1 : 0;
+    }
+    if (opts.invert || preset.invert) for (let i = 0; i < cells.length; i++) cells[i] ^= 1;
+    const clean = this._cvRemoveSmall(cells, w, h, preset.minCluster);
+    return { cells: clean.cells, box: down.box, removedDots: clean.removed };
+  }
+  convQuality(cells, w, h) {
+    let dots = 0; for (let i = 0; i < cells.length; i++) dots += cells[i];
+    const density = dots / (w * h); let isolated = 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (!cells[y * w + x]) continue; let nb = 0;
+      if (x > 0 && cells[y * w + x - 1]) nb++; if (x < w - 1 && cells[y * w + x + 1]) nb++;
+      if (y > 0 && cells[(y - 1) * w + x]) nb++; if (y < h - 1 && cells[(y + 1) * w + x]) nb++; if (nb === 0) isolated++; }
+    let key = 'readable';
+    if (density < 0.03) key = 'tooSparse'; else if (density > 0.40) key = 'tooDense'; else if (dots > 0 && isolated / dots > 0.25) key = 'manyIsolated';
+    return { dots, density, isolated, key };
+  }
+  presetChipStyle(sel) {
+    return { flex: '1 1 0', minWidth: 0, textAlign: 'left', padding: '9px 11px', borderRadius: 9, cursor: 'pointer',
+      border: sel ? '1.5px solid #C43D00' : '1.5px solid #EAE1D7', background: sel ? 'rgba(196,61,0,0.06)' : '#fff',
+      display: 'flex', flexDirection: 'column', gap: 2, minHeight: 44 };
+  }
   catPattern(w, h, threshold, crop) {
     const cnv = document.createElement('canvas');
     cnv.width = w; cnv.height = h;
@@ -2089,7 +2155,7 @@ class Component extends DCLogic {
     const cv = this.impRef.current;
     if (cv && st.importOpen) {
       const a4 = this.isA4();
-      const w = st.gridW, h = st.gridH, s = 6, pat = this.applyConv(this.catPattern(w, h, st.threshold, crop), w, h);
+      const w = st.gridW, h = st.gridH, s = 6, pat = this.applyConv(this.imgToCells(w, h, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, w, h);
       cv.width = w * s; cv.height = h * s;
       const g = cv.getContext('2d');
       g.fillStyle = a4 ? '#FFFFFF' : '#141210'; g.fillRect(0, 0, cv.width, cv.height);
@@ -2106,10 +2172,7 @@ class Component extends DCLogic {
       oc.width = OW; oc.height = OH;
       const g = oc.getContext('2d');
       g.fillStyle = '#F7F4EF'; g.fillRect(0, 0, OW, OH);
-      g.save();
-      g.setTransform(OW / 150, 0, 0, OH / 130, 0, 0);
-      g.strokeStyle = '#8C857C'; this.drawCat(g, 50);
-      g.restore();
+      if (this._srcCanvas) { g.drawImage(this._srcCanvas, 0, 0, OW, OH); } // fill so crop rect maps 1:1 to source
       g.setTransform(1, 0, 0, 1, 0, 0);
       if (st.cropChoice === 'crop') {
         const r = st.cropRect, rx = r.x * OW, ry = r.y * OH, rw = r.w * OW, rh = r.h * OH;
@@ -2482,7 +2545,16 @@ class Component extends DCLogic {
   }
   resetImport() {
     clearTimeout(this._readT);
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, threshold: 50, dither: false, invertConv: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+    this._srcData = null; this._srcCanvas = null;
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+  }
+  // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
+  _captureSource(bmp, w, h) {
+    const MAX = 1400; // cap longest side for performance on large photos; conversion is grid-bound anyway
+    let cw = w, ch = h; const m = Math.max(w, h); if (m > MAX) { const k = MAX / m; cw = Math.round(w * k); ch = Math.round(h * k); }
+    const cnv = document.createElement('canvas'); cnv.width = cw; cnv.height = ch;
+    const g = cnv.getContext('2d'); g.drawImage(bmp, 0, 0, cw, ch);
+    this._srcData = g.getImageData(0, 0, cw, ch).data; this._srcW = cw; this._srcH = ch; this._srcCanvas = cnv;
   }
   handleFile(file) {
     if (!file) return;
@@ -2493,12 +2565,33 @@ class Component extends DCLogic {
     if (file.size && file.size > 10 * 1024 * 1024) { clearTimeout(this._readT); this.setState({ impErr: 'size', imgReady: false, impLoading: false }); return; }
     clearTimeout(this._readT);
     this.setState({ impErr: '', impLoading: true, imgReady: false, impName: name, fileName: name.replace(/\.[^.]+$/, '') });
-    this._readT = setTimeout(() => this.setState({ impLoading: false, imgReady: true }), 700);
+    const fail = () => { this._srcData = null; this.setState({ impErr: 'load', impLoading: false, imgReady: false }); };
+    const done = (bmp, w, h) => {
+      try { this._captureSource(bmp, w, h); this.setState({ impLoading: false, imgReady: true }); this.drawImp(); }
+      catch (e) { fail(); }
+    };
+    // createImageBitmap handles EXIF orientation (mobile photos) and all supported formats
+    if (window.createImageBitmap && file.type !== 'image/svg+xml') {
+      window.createImageBitmap(file, { imageOrientation: 'from-image' })
+        .then(bmp => done(bmp, bmp.width, bmp.height))
+        .catch(() => this._decodeViaImg(file, done, fail));
+    } else { this._decodeViaImg(file, done, fail); }
+  }
+  _decodeViaImg(file, done, fail) {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => { done(img, img.naturalWidth || img.width, img.naturalHeight || img.height); URL.revokeObjectURL(url); };
+    img.onerror = () => { URL.revokeObjectURL(url); fail(); };
+    img.src = url;
   }
   useSampleImage() {
     clearTimeout(this._readT);
     const t = this.T();
+    // render the built-in sample through the SAME real pipeline (draw to a source canvas, capture pixels)
+    const cnv = document.createElement('canvas'); cnv.width = 150; cnv.height = 130;
+    const g = cnv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 150, 130); g.strokeStyle = '#000'; this.drawCat(g, 50);
+    this._srcData = g.getImageData(0, 0, 150, 130).data; this._srcW = 150; this._srcH = 130; this._srcCanvas = cnv;
     this.setState({ impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName, fileName: this.state.fileName ?? (this.state.lang === 'ko' ? '고양이' : 'Cat') });
+    this.drawImp();
   }
   // guard destructive new-document actions when the canvas has content
   guardNewDoc(fn) {
@@ -2515,7 +2608,10 @@ class Component extends DCLogic {
   applyImport(mode) {
     const st = this.state, t = this.T();
     const crop = st.cropChoice === 'crop' ? st.cropRect : null;
-    const conv = this.applyConv(this.catPattern(st.gridW, st.gridH, st.threshold, crop), st.gridW, st.gridH);
+    const r = this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop);
+    const conv = this.applyConv(r.cells, st.gridW, st.gridH);
+    const q = this.convQuality(conv, st.gridW, st.gridH);
+    if (window.__TS_DEBUG) console.log('[TactileConvert]', { src: this._srcW + 'x' + this._srcH, crop, target: st.gridW + 'x' + st.gridH, preset: st.convPreset, dots: q.dots, density: +(q.density * 100).toFixed(1), isolated: q.isolated, removed: r.removedDots });
     const name = st.fileName ?? (st.lang === 'ko' ? '고양이' : 'Cat');
     if (mode === 'new') {
       const at = st.pageIndex + 1;
@@ -2663,7 +2759,7 @@ class Component extends DCLogic {
     const pill = on => ({ height: 28, padding: '0 12px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : '#6B6862', fontWeight: on ? 800 : 600, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid #EAE1D7', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid #EAE1D7', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
-    const pinBtn = kind => ({ borderRadius: 9, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 800, fontSize: 12.5, border: '1px solid ' + (st.pinFx === kind ? '#EC5927' : '#EAE1D7'), background: st.pinFx === kind ? 'rgba(236,89,39,0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
+    const pinBtn = kind => ({ flex: 1, height: 34, borderRadius: 8, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 11.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? '#EC5927' : '#EAE1D7'), background: st.pinFx === kind ? 'rgba(236,89,39,0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
     const locCard = on => ({ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 4, padding: '14px 16px', borderRadius: 8, cursor: 'pointer', background: on ? 'rgba(236,89,39,0.06)' : '#fff', border: on ? '1px solid #EC5927' : '1px solid #EAE1D7', color: '#1E1C1A' });
     const pill2 = on => ({ height: 34, padding: '0 14px', borderRadius: 8, border: on ? '1px solid #EC5927' : '1px solid #EAE1D7', background: on ? 'rgba(236,89,39,0.08)' : '#fff', color: on ? '#B93E15' : '#6B6862', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 });
     const tplGroups = t.tplGroups.map((label, i) => ({ label, key: ['recommended', 'education', 'diagrams', 'elements', 'conversion', 'museum'][i] }));
@@ -2820,12 +2916,11 @@ class Component extends DCLogic {
       },
       // top toolbar status chip → opens the DotPad Output inspector
       openDpPanel: () => this.setState(s => ({ inspectorOpen: true })),
-      connChipText: st.connBusy ? (t.dpDevice + ' · ' + t.connecting) : (st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + st.gridW + '×' + st.gridH) : t.dpChipDisc),
-      connChipShortText: st.connBusy ? t.connecting : (st.connected ? t.dpConnected : t.dpDisconnected),
-      connChipAria: (st.connBusy ? (t.dpDevice + ' ' + t.connecting) : (st.connected ? (t.dpDevice + ' ' + t.dpConnected) : t.dpDisconnected)) + '. ' + t.dpOpenPanel,
+      connChipText: st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + st.gridW + '×' + st.gridH) : t.dpChipDisc,
+      connChipAria: (st.connected ? (t.dpDevice + ' ' + t.dpConnected) : t.dpDisconnected) + '. ' + t.dpOpenPanel,
       connLabel: st.connected ? t.connOn : t.connOff,
-      connStyle: { height: 36, padding: '0 12px', border: st.connBusy ? '1px solid #D98710' : (st.connected ? '1px solid #EAE1D7' : '1px solid #DA120D'), borderRadius: 100, background: st.connBusy ? 'rgba(217,135,16,0.08)' : (st.connected ? '#fff' : 'rgba(218,18,13,0.06)'), color: st.connBusy ? '#8A5400' : (st.connected ? '#1E1C1A' : '#DA120D'), fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' },
-      connDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', background: st.connBusy ? '#D98710' : (st.connected ? '#0B8800' : '#DA120D'), display: 'inline-block', boxShadow: st.connected && !st.connBusy ? '0 0 0 3px rgba(11,136,0,0.14)' : 'none', animation: st.connected && !st.connBusy ? 'none' : 'tsPulse 1.2s infinite' },
+      connStyle: { height: 36, padding: '0 12px', border: st.connected ? '1px solid #EAE1D7' : '1px solid #DA120D', borderRadius: 100, background: st.connected ? '#fff' : 'rgba(218,18,13,0.06)', color: st.connected ? '#1E1C1A' : '#DA120D', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' },
+      connDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', background: st.connected ? '#0B8800' : '#DA120D', display: 'inline-block', boxShadow: st.connected ? '0 0 0 3px rgba(11,136,0,0.14)' : 'none', animation: st.connected ? 'none' : 'tsPulse 1.2s infinite' },
       showErrBanner: st.screen === 'studio' && !st.connected,
       retryConn: () => this.retryDotpad(),
       // ---- DotPad Output inspector ----
@@ -2900,7 +2995,7 @@ class Component extends DCLogic {
           n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
           aria: (ctlL + ' ' + desc).trim(), title: desc,
           pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
-          style: { cursor: 'pointer', border: active ? '1.5px solid #EC5927' : '1px solid #EAE1D7', background: active ? '#EC5927' : '#fff', color: active ? '#fff' : '#6B6862', fontWeight: 800, fontSize: 12.5 }
+          style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: 30, padding: active ? '0 11px 0 10px' : '0 12px', borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid #EC5927' : '1px solid #EAE1D7', background: active ? '#EC5927' : '#fff', color: active ? '#fff' : '#6B6862', fontWeight: 700, fontSize: 12 }
         };
       }),
       // pages (v1 simple multi-page document)
@@ -2958,7 +3053,29 @@ class Component extends DCLogic {
       // step 1 upload
       fileInputRef: this.fileRef,
       imgReady: st.imgReady, imgNotReady: !st.imgReady, impLoading: st.impLoading, impName: st.impName,
-      impErr: !!st.impErr, impErrMsg: st.impErr === 'type' ? t.impErrType : st.impErr === 'size' ? t.impErrSize : '',
+      impErr: !!st.impErr, impErrMsg: st.impErr === 'type' ? t.impErrType : st.impErr === 'size' ? t.impErrSize : st.impErr === 'load' ? t.impErrLoad : '',
+      convPreset: st.convPreset,
+      presetLabel: t.presetL,
+      convPresets: [
+        { k: 'balanced', label: t.presetBalanced, sub: t.presetSubBalanced },
+        { k: 'outline', label: t.presetOutline, sub: t.presetSubOutline },
+        { k: 'diagram', label: t.presetDiagram, sub: t.presetSubDiagram },
+        { k: 'detail', label: t.presetDetail, sub: t.presetSubDetail }
+      ].map(pp => ({ k: pp.k, label: pp.label, sub: pp.sub, sel: st.convPreset === pp.k, setIt: () => this.setState({ convPreset: pp.k }), style: this.presetChipStyle(st.convPreset === pp.k) })),
+      qAdv: (() => {
+        if (!(st.importOpen && st.impStep === 'review')) return null;
+        const crop = st.cropChoice === 'crop' ? st.cropRect : null;
+        const cells = this.applyConv(this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, st.gridW, st.gridH);
+        const q = this.convQuality(cells, st.gridW, st.gridH);
+        const msg = q.key === 'tooSparse' ? t.qSparseMsg : q.key === 'tooDense' ? t.qDenseMsg : q.key === 'manyIsolated' ? t.qIsoMsg : t.qOkMsg;
+        const good = q.key === 'readable';
+        return { good, msg, metrics: this.callI18n(t.qMetrics, '', q.dots, +(q.density * 100).toFixed(1)),
+          box: { display: 'flex', gap: 9, alignItems: 'flex-start', marginTop: 14, padding: '10px 12px', borderRadius: 9, background: good ? 'rgba(11,136,0,0.07)' : 'rgba(196,61,0,0.07)', border: '1px solid ' + (good ? 'rgba(11,136,0,0.25)' : 'rgba(196,61,0,0.25)') },
+          color: good ? '#0B8800' : '#B93E15' };
+      })(),
+      advOpen: st.advOpen,
+      toggleAdv: () => this.setState(x => ({ advOpen: !x.advOpen })),
+      advCaret: st.advOpen ? '90deg' : '0deg',
       impChooseFile: () => { if (this.fileRef.current) this.fileRef.current.click(); },
       onFilePick: e => { const f = e.target.files && e.target.files[0]; this.handleFile(f); e.target.value = ''; },
       impUseSample: () => this.useSampleImage(),
