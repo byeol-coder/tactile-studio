@@ -7,6 +7,7 @@ Static GitHub Pages build for the Tactile Studio Demo.
 This repository deploys from `main` as a static site:
 
 - Entry: `index.html`
+- Runtime: `support.js`
 - Assets: `assets/`
 - Build step: none
 
