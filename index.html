@@ -33,6 +33,52 @@ button{cursor:pointer}
 @keyframes tsFly{from{opacity:0;transform:translateY(-6px) scale(0.98)}to{opacity:1;transform:none}}
 @keyframes tsTip{from{opacity:0}to{opacity:1}}
 input[type=range]{accent-color:#EC5927}
+.ts-topbar{height:64px;background:#fff;border-bottom:1px solid #EAE1D7;display:grid;grid-template-columns:minmax(220px,1.05fr) auto minmax(340px,auto) minmax(220px,.85fr);align-items:center;gap:10px;padding:0 14px;flex:none;min-width:0;overflow:visible}
+.ts-topbar-left,.ts-topbar-actions,.ts-topbar-device{display:flex;align-items:center;gap:8px;min-width:0}
+.ts-topbar-left{justify-content:flex-start}
+.ts-topbar-actions{justify-content:center}
+.ts-topbar-device{justify-content:flex-end}
+.ts-output-zone{min-width:0}
+.ts-topbar-button,.ts-topbar-action,.device-status-pill{min-height:44px!important;height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center;gap:8px!important;white-space:nowrap;flex:0 0 auto;box-sizing:border-box}
+.ts-topbar-action{border-radius:10px!important;padding-left:14px!important;padding-right:14px!important}
+.device-status-pill{max-width:240px;min-width:0;overflow:hidden}
+.ts-project-name{min-width:0!important;width:clamp(96px,14vw,240px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ts-action-label,.ts-pill-full,.ts-pill-short,.ts-save-text{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ts-pill-short{display:none}
+.ts-save-status{max-width:94px;overflow:hidden}
+.ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px}
+@media (max-width:1180px){
+  .ts-topbar{grid-template-columns:minmax(180px,1fr) auto minmax(300px,auto) minmax(170px,.7fr);gap:8px}
+  .ts-save-status{display:none!important}
+  .device-status-pill{max-width:190px}
+}
+@media (max-width:980px){
+  .ts-topbar{grid-template-columns:minmax(160px,1fr) minmax(250px,auto) minmax(150px,auto)}
+  .ts-output-zone{display:none!important}
+  .ts-create-label,.ts-export-label{display:none}
+  .device-status-pill{max-width:160px}
+}
+@media (max-width:760px){
+  .ts-topbar{grid-template-columns:minmax(110px,1fr) minmax(168px,auto) minmax(96px,auto);padding:0 10px;gap:6px}
+  .ts-brand-logo,.ts-left-divider,.ts-export-label,.ts-create-label{display:none!important}
+  .ts-pill-full{display:none}
+  .ts-pill-short{display:inline-block}
+  .device-status-pill{max-width:124px;padding-left:10px!important;padding-right:10px!important}
+  .ts-topbar-action{padding-left:12px!important;padding-right:12px!important}
+}
+@media (max-width:620px){
+  .ts-project-name{width:clamp(72px,20vw,120px)!important}
+  .ts-send-label{display:none}
+  .ts-topbar-action,.device-status-pill{width:44px!important;padding-left:0!important;padding-right:0!important}
+  .ts-menu-caret{display:none!important}
+}
+@media (max-width:520px){
+  .ts-topbar{grid-template-columns:minmax(74px,1fr) 148px 44px;padding:0 8px;gap:5px}
+  .ts-topbar-left{gap:4px}
+  .ts-topbar-actions{gap:6px}
+  .ts-language-switch,.ts-help-button{display:none!important}
+  .ts-pill-short{display:none}
+}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
@@ -227,22 +273,26 @@ input[type=range]{accent-color:#EC5927}
     </div>
   </sc-if>
 
-  <div style="height:60px;background:#fff;border-bottom:1px solid #EAE1D7;display:flex;align-items:center;gap:12px;padding:0 14px;flex:none;min-width:0">
+  <div class="ts-topbar">
     <!-- LEFT ZONE: back + identity + document title -->
-    <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 0">
-      <button onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#6B6862;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+    <div class="ts-topbar-left">
+      <button class="ts-topbar-button" onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#6B6862;width:44px;border-radius:10px;display:grid;place-items:center;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
-      <img src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;display:block;flex:none">
-      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
-      <input value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;width:158px;min-width:60px;flex:0 1 auto;text-overflow:ellipsis" style-hover="border:1px solid #EAE1D7" style-focus="border:1px solid #EC5927;outline:none">
+      <img class="ts-brand-logo" src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;display:block;flex:none">
+      <div class="ts-divider ts-left-divider"></div>
+      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;flex:1 1 auto" style-hover="border:1px solid #EAE1D7" style-focus="border:1px solid #EC5927;outline:none">
       <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
         <span style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
       </sc-if>
+      <span class="ts-save-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0B8800;flex:none;white-space:nowrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span class="ts-save-text">{{ t.savedStatus }}</span>
+      </span>
     </div>
 
-    <!-- CENTER ZONE: canvas output format -->
-    <label style="flex:none;display:inline-flex;align-items:center;gap:9px;height:38px;padding:0 8px 0 14px;border:1px solid #EAE1D7;border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
+    <!-- OUTPUT ZONE: canvas output format -->
+    <label class="ts-output-zone ts-topbar-button" style="display:inline-flex;align-items:center;gap:9px;padding:0 8px 0 14px;border:1px solid #EAE1D7;border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
       <svg width="15" height="15" viewBox="0 0 24 24" style="color:#6B6862;flex:none" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.outputL }}" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 4px;cursor:pointer;height:36px;max-width:184px;border-radius:6px" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
@@ -251,46 +301,41 @@ input[type=range]{accent-color:#EC5927}
       </select>
     </label>
 
-    <!-- RIGHT ZONE: create / export / device / send / utility -->
-    <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;flex:1 1 0">
-      <button onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+    <!-- CENTER ZONE: primary actions -->
+    <div class="ts-topbar-actions">
+      <button class="ts-topbar-action" onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" title="{{ t.createMenu }}" style="border:1px solid #EAE1D7;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
-        {{ t.createMenu }}
-        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span class="ts-action-label ts-create-label">{{ t.createMenu }}</span>
+        <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
-      <span role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0B8800;flex:none;white-space:nowrap">
-        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        {{ t.savedStatus }}
-      </span>
+      <button class="ts-topbar-action ts-send-action" onClick="{{ openSend }}" style="border:none;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span class="ts-action-label ts-send-label">{{ t.send }}</span>
+      </button>
 
-      <button onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+      <button class="ts-topbar-action" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" title="{{ t.export }}" style="border:1px solid #EAE1D7;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        {{ t.export }}
-        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span class="ts-action-label ts-export-label">{{ t.export }}</span>
+        <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
+    </div>
 
-      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
-
-      <button onClick="{{ toggleDevice }}" aria-haspopup="menu" aria-expanded="{{ deviceOpen }}" aria-label="{{ connChipAria }}" style="{{ connStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+    <!-- RIGHT ZONE: device status and utilities -->
+    <div class="ts-topbar-device">
+      <button class="device-status-pill" onClick="{{ toggleDevice }}" aria-haspopup="menu" aria-expanded="{{ deviceOpen }}" aria-label="{{ connChipAria }}" title="{{ connChipText }}" style="{{ connStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <span style="{{ connDotStyle }}"></span>
         <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle><circle cx="16" cy="12" r="1.2" fill="currentColor"></circle></svg>
-        {{ connChipText }}
-        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span class="ts-pill-full">{{ connChipText }}</span>
+        <span class="ts-pill-short">{{ connChipShortText }}</span>
+        <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
-      <button onClick="{{ openSend }}" style="height:40px;padding:0 18px;border:none;border-radius:9px;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        {{ t.send }}
-      </button>
-
-      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
-
-      <div role="group" aria-label="{{ t.langLabel }}" style="display:flex;flex:none;border:1px solid #EAE1D7;border-radius:100px;overflow:hidden">
+      <div class="ts-language-switch" role="group" aria-label="{{ t.langLabel }}" style="display:flex;flex:none;border:1px solid #EAE1D7;border-radius:100px;overflow:hidden">
         <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">KO</button>
         <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">EN</button>
       </div>
-      <button onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:34px;height:34px;flex:none;border:1px solid #EAE1D7;border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">?</button>
+      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid #EAE1D7;border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">?</button>
     </div>
   </div>
 
@@ -2732,11 +2777,12 @@ class Component extends DCLogic {
       },
       // top toolbar status chip → opens the DotPad Output inspector
       openDpPanel: () => this.setState(s => ({ inspectorOpen: true })),
-      connChipText: st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + st.gridW + '×' + st.gridH) : t.dpChipDisc,
-      connChipAria: (st.connected ? (t.dpDevice + ' ' + t.dpConnected) : t.dpDisconnected) + '. ' + t.dpOpenPanel,
+      connChipText: st.connBusy ? (t.dpDevice + ' · ' + t.connecting) : (st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + st.gridW + '×' + st.gridH) : t.dpChipDisc),
+      connChipShortText: st.connBusy ? t.connecting : (st.connected ? t.dpConnected : t.dpDisconnected),
+      connChipAria: (st.connBusy ? (t.dpDevice + ' ' + t.connecting) : (st.connected ? (t.dpDevice + ' ' + t.dpConnected) : t.dpDisconnected)) + '. ' + t.dpOpenPanel,
       connLabel: st.connected ? t.connOn : t.connOff,
-      connStyle: { height: 36, padding: '0 12px', border: st.connected ? '1px solid #EAE1D7' : '1px solid #DA120D', borderRadius: 100, background: st.connected ? '#fff' : 'rgba(218,18,13,0.06)', color: st.connected ? '#1E1C1A' : '#DA120D', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' },
-      connDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', background: st.connected ? '#0B8800' : '#DA120D', display: 'inline-block', boxShadow: st.connected ? '0 0 0 3px rgba(11,136,0,0.14)' : 'none', animation: st.connected ? 'none' : 'tsPulse 1.2s infinite' },
+      connStyle: { height: 36, padding: '0 12px', border: st.connBusy ? '1px solid #D98710' : (st.connected ? '1px solid #EAE1D7' : '1px solid #DA120D'), borderRadius: 100, background: st.connBusy ? 'rgba(217,135,16,0.08)' : (st.connected ? '#fff' : 'rgba(218,18,13,0.06)'), color: st.connBusy ? '#8A5400' : (st.connected ? '#1E1C1A' : '#DA120D'), fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' },
+      connDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', background: st.connBusy ? '#D98710' : (st.connected ? '#0B8800' : '#DA120D'), display: 'inline-block', boxShadow: st.connected && !st.connBusy ? '0 0 0 3px rgba(11,136,0,0.14)' : 'none', animation: st.connected && !st.connBusy ? 'none' : 'tsPulse 1.2s infinite' },
       showErrBanner: st.screen === 'studio' && !st.connected,
       retryConn: () => this.retryDotpad(),
       // ---- DotPad Output inspector ----
