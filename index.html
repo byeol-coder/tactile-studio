@@ -33,6 +33,45 @@ button{cursor:pointer}
 @keyframes tsFly{from{opacity:0;transform:translateY(-6px) scale(0.98)}to{opacity:1;transform:none}}
 @keyframes tsTip{from{opacity:0}to{opacity:1}}
 input[type=range]{accent-color:#EC5927}
+.ts-topbar{height:60px;background:#fff;border-bottom:1px solid #EAE1D7;display:grid;grid-template-columns:minmax(260px,1fr) auto minmax(360px,auto);align-items:center;gap:12px;padding:0 14px;flex:none;min-width:0}
+.ts-topbar-left,.ts-topbar-center,.ts-topbar-right{display:flex;align-items:center;min-width:0}
+.ts-topbar-left{gap:8px}
+.ts-topbar-center{justify-content:center;gap:8px}
+.ts-topbar-right{justify-content:flex-end;gap:8px}
+.ts-doc-title{min-width:0;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ts-output-pill{min-width:0;max-width:190px;overflow:hidden;white-space:nowrap}
+.ts-output-select{min-width:0;max-width:148px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ts-saved-status,.ts-embed-label,.ts-send-label,.ts-conn-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ts-conn-chip{min-width:0;max-width:210px;overflow:hidden}
+.ts-top-action,.ts-send-btn,.ts-lang-toggle,.ts-help-btn{white-space:nowrap;flex:none}
+@media (max-width:1320px){
+  .ts-saved-status{display:none!important}
+  .ts-conn-chip{max-width:180px!important}
+}
+@media (max-width:1180px){
+  .ts-topbar{grid-template-columns:minmax(180px,1fr) auto minmax(340px,auto);gap:8px;padding:0 10px}
+  .ts-doc-title{max-width:128px}
+  .ts-output-pill{max-width:144px!important;padding-left:10px!important;padding-right:6px!important}
+  .ts-output-select{max-width:106px!important}
+  .ts-conn-chip{max-width:140px!important;padding-left:9px!important;padding-right:9px!important}
+  .ts-send-btn{padding-left:12px!important;padding-right:12px!important}
+  .ts-topbar-center,.ts-topbar-right{gap:6px}
+}
+@media (max-width:1040px){
+  .ts-topbar{grid-template-columns:minmax(150px,1fr) auto minmax(330px,auto)}
+  .ts-studio-logo{height:22px!important;max-width:112px}
+  .ts-embed-label{display:none!important}
+  .ts-output-pill svg{display:none!important}
+  .ts-output-pill{max-width:118px!important}
+  .ts-output-select{max-width:96px!important}
+  .ts-conn-chip{max-width:116px!important}
+}
+@media (max-width:900px){
+  .ts-topbar{grid-template-columns:minmax(120px,1fr) auto auto}
+  .ts-output-pill{display:none!important}
+  .ts-conn-text{display:none!important}
+  .ts-conn-chip{width:38px!important;padding-left:0!important;padding-right:0!important;justify-content:center}
+}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
@@ -227,72 +266,75 @@ input[type=range]{accent-color:#EC5927}
     </div>
   </sc-if>
 
-  <div style="height:60px;background:#fff;border-bottom:1px solid #EAE1D7;display:flex;align-items:center;gap:12px;padding:0 14px;flex:none;min-width:0">
-    <!-- LEFT ZONE: back + identity + document title -->
-    <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 0">
-      <button onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#6B6862;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </button>
-      <img src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;display:block;flex:none">
-      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
-      <input value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;width:158px;min-width:60px;flex:0 1 auto;text-overflow:ellipsis" style-hover="border:1px solid #EAE1D7" style-focus="border:1px solid #EC5927;outline:none">
-      <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
-        <span style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
-      </sc-if>
-    </div>
+	  <div class="ts-topbar">
+	    <!-- LEFT ZONE: back + identity + document title -->
+	    <div class="ts-topbar-left">
+	      <button onClick="{{ backToHub }}" title="{{ t.returnBtn }}" aria-label="{{ t.returnBtn }}" style="border:none;background:transparent;color:#6B6862;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease" style-hover="color:#EC5927;background:#F7F4EF" style-active="transform:scale(0.94)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	      </button>
+	      <img class="ts-studio-logo" src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;display:block;flex:none">
+	      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
+	      <input class="ts-doc-title" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;width:158px;flex:1 1 158px;text-overflow:ellipsis" style-hover="border:1px solid #EAE1D7" style-focus="border:1px solid #EC5927;outline:none">
+	      <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
+	        <span class="ts-embed-label" style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
+	      </sc-if>
+	    </div>
 
-    <!-- CENTER ZONE: canvas output format -->
-    <label style="flex:none;display:inline-flex;align-items:center;gap:9px;height:38px;padding:0 8px 0 14px;border:1px solid #EAE1D7;border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
-      <svg width="15" height="15" viewBox="0 0 24 24" style="color:#6B6862;flex:none" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.outputL }}" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 4px;cursor:pointer;height:36px;max-width:184px;border-radius:6px" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-        <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
-          <option value="{{ o.key }}">{{ o.name }}</option>
-        </sc-for>
-      </select>
-    </label>
+	    <!-- CENTER ZONE: create / output status / export -->
+	    <div class="ts-topbar-center">
+	      <button class="ts-top-action" onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+	        {{ t.createMenu }}
+	        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	      </button>
 
-    <!-- RIGHT ZONE: create / export / device / send / utility -->
-    <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;flex:1 1 0">
-      <button onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
-        {{ t.createMenu }}
-        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </button>
+	      <label class="ts-output-pill" style="flex:0 1 auto;display:inline-flex;align-items:center;gap:9px;height:38px;padding:0 8px 0 14px;border:1px solid #EAE1D7;border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
+	        <svg width="15" height="15" viewBox="0 0 24 24" style="color:#6B6862;flex:none" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	        <select class="ts-output-select" value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.outputL }}" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 4px;cursor:pointer;height:36px;max-width:184px;border-radius:6px" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	        <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
+	          <option value="{{ o.key }}">{{ o.name }}</option>
+	        </sc-for>
+	        </select>
+	      </label>
 
-      <span role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0B8800;flex:none;white-space:nowrap">
-        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        {{ t.savedStatus }}
-      </span>
+	      <span class="ts-saved-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0B8800;flex:0 1 auto;white-space:nowrap">
+	        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	        {{ t.savedStatus }}
+	      </span>
 
-      <button onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        {{ t.export }}
-        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </button>
+	      <button class="ts-top-action" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	        {{ t.export }}
+	        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	      </button>
+	    </div>
 
-      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
+	    <!-- RIGHT ZONE: device / send / utility -->
+	    <div class="ts-topbar-right">
 
-      <button onClick="{{ toggleDevice }}" aria-haspopup="menu" aria-expanded="{{ deviceOpen }}" aria-label="{{ connChipAria }}" style="{{ connStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-        <span style="{{ connDotStyle }}"></span>
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle><circle cx="16" cy="12" r="1.2" fill="currentColor"></circle></svg>
-        {{ connChipText }}
-        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </button>
+	      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
 
-      <button onClick="{{ openSend }}" style="height:40px;padding:0 18px;border:none;border-radius:9px;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        {{ t.send }}
-      </button>
+	      <button class="ts-conn-chip" onClick="{{ toggleDevice }}" aria-haspopup="menu" aria-expanded="{{ deviceOpen }}" aria-label="{{ connChipAria }}" style="{{ connStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	        <span style="{{ connDotStyle }}"></span>
+	        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle><circle cx="16" cy="12" r="1.2" fill="currentColor"></circle></svg>
+	        <span class="ts-conn-text">{{ connChipText }}</span>
+	        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	      </button>
 
-      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
+	      <button class="ts-send-btn" onClick="{{ openSend }}" style="height:40px;padding:0 18px;border:none;border-radius:9px;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+	        <svg width="15" height="15" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	        <span class="ts-send-label">{{ t.send }}</span>
+	      </button>
 
-      <div role="group" aria-label="{{ t.langLabel }}" style="display:flex;flex:none;border:1px solid #EAE1D7;border-radius:100px;overflow:hidden">
-        <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">KO</button>
-        <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">EN</button>
-      </div>
-      <button onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:34px;height:34px;flex:none;border:1px solid #EAE1D7;border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">?</button>
-    </div>
-  </div>
+	      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
+
+	      <div class="ts-lang-toggle" role="group" aria-label="{{ t.langLabel }}" style="display:flex;flex:none;border:1px solid #EAE1D7;border-radius:100px;overflow:hidden">
+	        <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">KO</button>
+	        <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">EN</button>
+	      </div>
+	      <button class="ts-help-btn" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:34px;height:34px;flex:none;border:1px solid #EAE1D7;border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">?</button>
+	    </div>
+	  </div>
 
   <!-- top-bar dropdown menus (fixed so they escape the editor's overflow clip) -->
   <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
@@ -2919,7 +2961,7 @@ class Component extends DCLogic {
       connChipText: st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + st.gridW + '×' + st.gridH) : t.dpChipDisc,
       connChipAria: (st.connected ? (t.dpDevice + ' ' + t.dpConnected) : t.dpDisconnected) + '. ' + t.dpOpenPanel,
       connLabel: st.connected ? t.connOn : t.connOff,
-      connStyle: { height: 36, padding: '0 12px', border: st.connected ? '1px solid #EAE1D7' : '1px solid #DA120D', borderRadius: 100, background: st.connected ? '#fff' : 'rgba(218,18,13,0.06)', color: st.connected ? '#1E1C1A' : '#DA120D', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' },
+      connStyle: { height: 36, padding: '0 12px', border: st.connected ? '1px solid #EAE1D7' : '1px solid #DA120D', borderRadius: 100, background: st.connected ? '#fff' : 'rgba(218,18,13,0.06)', color: st.connected ? '#1E1C1A' : '#DA120D', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none', minWidth: 0, maxWidth: 210, overflow: 'hidden' },
       connDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', background: st.connected ? '#0B8800' : '#DA120D', display: 'inline-block', boxShadow: st.connected ? '0 0 0 3px rgba(11,136,0,0.14)' : 'none', animation: st.connected ? 'none' : 'tsPulse 1.2s infinite' },
       showErrBanner: st.screen === 'studio' && !st.connected,
       retryConn: () => this.retryDotpad(),
