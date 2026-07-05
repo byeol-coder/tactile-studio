@@ -47,6 +47,15 @@ input[type=range]{accent-color:#EC5927}
 .ts-pill-short{display:none}
 .ts-save-status{max-width:94px;overflow:hidden}
 .ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px}
+.pin-test-section{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.pin-test-title{font-size:12px;font-weight:800;color:#8A857E;line-height:1.4;letter-spacing:0.2px;text-transform:uppercase}
+.pin-test-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(106px,1fr));align-items:center;gap:8px}
+.pin-test-button{min-height:44px!important;height:44px!important;width:100%;min-width:0;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;white-space:nowrap!important;padding:0 11px!important;box-sizing:border-box;line-height:1}
+.pin-test-button svg{width:18px!important;height:18px!important;flex:0 0 auto;display:block}
+.pin-test-button span{line-height:1;white-space:nowrap}
+@media (max-width:720px){
+  .pin-test-actions{grid-template-columns:repeat(auto-fit,minmax(106px,1fr))}
+}
 @media (max-width:1180px){
   .ts-topbar{grid-template-columns:minmax(180px,1fr) auto minmax(300px,auto) minmax(170px,.7fr);gap:8px}
   .ts-save-status{display:none!important}
@@ -678,20 +687,20 @@ input[type=range]{accent-color:#EC5927}
         </div>
 
         <!-- pin test -->
-        <div style="padding:14px 16px">
-          <div style="font-size:11px;font-weight:800;color:#9C9994;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:9px">{{ t.dpPins }}</div>
-          <div role="group" aria-label="{{ t.dpPins }}" style="display:flex;gap:7px">
-            <button onClick="{{ pinRaise }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpRaise }}" style="{{ pinRaiseStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0l-5 5m5-5l5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              {{ t.dpRaise }}
+        <div class="pin-test-section">
+          <div class="pin-test-title">{{ t.dpPins }}</div>
+          <div class="pin-test-actions" role="group" aria-label="{{ t.dpPins }}">
+            <button class="pin-test-button" onClick="{{ pinRaise }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpRaise }}" style="{{ pinRaiseStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0l-5 5m5-5l5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>{{ t.dpRaise }}</span>
             </button>
-            <button onClick="{{ pinLower }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpLower }}" style="{{ pinLowerStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              {{ t.dpLower }}
+            <button class="pin-test-button" onClick="{{ pinLower }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpLower }}" style="{{ pinLowerStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>{{ t.dpLower }}</span>
             </button>
-            <button onClick="{{ pinInvert }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpInvert }}" style="{{ pinInvertStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
-              {{ t.dpInvert }}
+            <button class="pin-test-button" onClick="{{ pinInvert }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpInvert }}" style="{{ pinInvertStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+              <span>{{ t.dpInvert }}</span>
             </button>
           </div>
           <sc-if value="{{ pinsDisabled }}" hint-placeholder-val="{{ false }}">
@@ -2626,7 +2635,7 @@ class Component extends DCLogic {
     const pill = on => ({ height: 28, padding: '0 12px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : '#6B6862', fontWeight: on ? 800 : 600, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid #EAE1D7', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid #EAE1D7', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
-    const pinBtn = kind => ({ flex: 1, height: 34, borderRadius: 8, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 11.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? '#EC5927' : '#EAE1D7'), background: st.pinFx === kind ? 'rgba(236,89,39,0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
+    const pinBtn = kind => ({ borderRadius: 9, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 800, fontSize: 12.5, border: '1px solid ' + (st.pinFx === kind ? '#EC5927' : '#EAE1D7'), background: st.pinFx === kind ? 'rgba(236,89,39,0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
     const locCard = on => ({ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 4, padding: '14px 16px', borderRadius: 8, cursor: 'pointer', background: on ? 'rgba(236,89,39,0.06)' : '#fff', border: on ? '1px solid #EC5927' : '1px solid #EAE1D7', color: '#1E1C1A' });
     const pill2 = on => ({ height: 34, padding: '0 14px', borderRadius: 8, border: on ? '1px solid #EC5927' : '1px solid #EAE1D7', background: on ? 'rgba(236,89,39,0.08)' : '#fff', color: on ? '#B93E15' : '#6B6862', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 });
     const tplGroups = t.tplGroups.map((label, i) => ({ label, key: ['recommended', 'education', 'diagrams', 'elements', 'conversion', 'museum'][i] }));
