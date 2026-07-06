@@ -1,0 +1,22 @@
+{
+  "name": "@dot/tactile-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./engine": "./src/engine.js",
+    "./dtms": "./src/dtms.js"
+  },
+  "dependencies": {
+    "@dot/tactile-contract": "0.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check:node": "node scripts/check-node-import.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
