@@ -22,6 +22,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: WCAG contrast gate
+        run: node scripts/check-contrast.mjs
+      - name: Token integrity gate
+        run: node scripts/migrate-tokens.mjs --dry
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
