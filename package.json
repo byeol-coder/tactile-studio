@@ -1,0 +1,17 @@
+{
+  "name": "tactile-agent-core-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/tactile-contract",
+    "packages/tactile-core"
+  ],
+  "scripts": {
+    "test": "npm -w @dot/tactile-core run test",
+    "check:node": "npm -w @dot/tactile-core run check:node",
+    "typecheck": "npm -w @dot/tactile-core run typecheck && npm -w @dot/tactile-contract run typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
