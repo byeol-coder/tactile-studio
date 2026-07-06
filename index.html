@@ -21,6 +21,13 @@ if ('caches' in window) {
 <script src="./support.js"></script>
 <script src="./corpus.js"></script>
 <script src="./corpus-search.js"></script>
+<script type="module">
+  // Real DotPad SDK (vendored, verbatim). Exposed as window.DotPad so the
+  // vanilla component's connect/send methods can delegate to it. Module scripts
+  // are deferred, so window.DotPad is ready before any user interaction.
+  import { DotPadSDK, DotPadScanner, DisplayMode, DataCodes } from './DotPadSDK-3.0.0.js';
+  window.DotPad = { DotPadSDK, DotPadScanner, DisplayMode, DataCodes };
+</script>
 </head>
 <body>
 <x-dc>
@@ -1464,7 +1471,7 @@ class Component extends DCLogic {
     cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false,
     tplOpen: false, tplGroup: 'recommended',
     confirmOpen: false,
-    connected: true, connType: 'ble', connBusy: '', livePreview: false, inspectorOpen: true, pinFx: '',
+    connected: false, connType: 'ble', connBusy: '', livePreview: false, inspectorOpen: true, pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     saveOpen: false, savePhase: 'form', saveLoc: 'drive',
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
@@ -2931,27 +2938,98 @@ class Component extends DCLogic {
       }
     }, 700);
   }
-  retryDotpad() {    this.setState({ sendPhase: 'connecting' });
-    clearTimeout(this._connT);
-    this._connT = setTimeout(() => {
-      this.setState({ connected: true, sendPhase: this.state.dotpadOpen ? 'idle' : this.state.sendPhase });
-      this.say(this.T().aConnOn);
-    }, 1200);
+  // Web Bluetooth/Serial support in this browser + secure context.
+  dotSupported(type) {
+    if (typeof navigator === 'undefined') return false;
+    return type === 'usb' ? !!navigator.serial : !!navigator.bluetooth;
   }
-  connectDot(type) {
-    clearTimeout(this._connBusyT);
-    const t = this.T();
+  // Encode the current cell buffer to DotPad graphic HEX (column-major, 2×4 cell,
+  // bit = lx*4+ly) — the exact format sdk.displayGraphicData expects. Inverse of
+  // corpusCellsFromHex. 60×40 → 600 hex chars.
+  cellsToHex(cells, w, h) {
+    const cols = w, rows = h, cc = (cols / 2) | 0, cr = (rows / 4) | 0;
+    let hex = '';
+    for (let r = 0; r < cr; r++) for (let c = 0; c < cc; c++) {
+      let b = 0;
+      for (let lx = 0; lx < 2; lx++) for (let ly = 0; ly < 4; ly++) {
+        if (cells[(r * 4 + ly) * cols + (c * 2 + lx)]) b |= 1 << (lx * 4 + ly);
+      }
+      hex += b.toString(16).padStart(2, '0').toUpperCase();
+    }
+    return hex;
+  }
+  // Lazily create the shared DotPadSDK; wire disconnect notifications back to UI.
+  dotSdk() {
+    const api = window.DotPad;
+    if (!api) return null;
+    if (!this._dotSdk) {
+      this._dotSdk = new api.DotPadSDK();
+      const disc = (api.DataCodes && api.DataCodes.Disconnected) || 'Disconnected';
+      this._dotSdk.setCallBack((_dev, code) => {
+        if (code === disc) {
+          this._dotDevice = null;
+          this.setState(s => ({ connected: false, connBusy: '', livePreview: false, sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
+          this.say(this.T().aConnOff);
+        }
+      }, () => {});
+    }
+    return this._dotSdk;
+  }
+  retryDotpad() { this.connectDot(this.state.connType || 'ble'); }
+  // Real DotPad connect via the SDK. Called from a click (user gesture): the
+  // native picker (requestDevice/requestPort) is the first await, preserving it.
+  async connectDot(type) {
+    const t = this.T(), api = window.DotPad;
+    if (!api || !this.dotSupported(type)) {
+      this.setState(s => ({ connected: false, connBusy: '', sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
+      const msg = type === 'usb'
+        ? (this.state.lang === 'ko' ? 'USB(Web Serial) 미지원 브라우저입니다. Chrome/Edge에서 사용하세요.' : 'Web Serial not supported. Use Chrome/Edge.')
+        : (this.state.lang === 'ko' ? '블루투스(Web Bluetooth) 미지원 브라우저입니다. Chrome/Edge에서 HTTPS 또는 localhost로 사용하세요.' : 'Web Bluetooth not supported. Use Chrome/Edge over HTTPS or localhost.');
+      this.say(msg); this.toastMsg(msg);
+      return;
+    }
+    let picked;
+    try {
+      const scanner = new api.DotPadScanner();
+      picked = type === 'usb' ? await scanner.startUsbScan() : await scanner.startBleScan();
+    } catch (e) {
+      this.setState({ connBusy: '' });
+      this.toastMsg(String((e && e.message) || e));
+      return;
+    }
+    if (!picked) { this.setState({ connBusy: '' }); return; } // user cancelled the picker
     this.setState({ connBusy: type });
     this.say(type === 'usb' ? t.aConnUsb : t.aConnBle);
-    this._connBusyT = setTimeout(() => {
+    try {
+      const sdk = this.dotSdk();
+      const device = type === 'usb' ? await sdk.connectUsbDevice(picked) : await sdk.connectBleDevice(picked);
+      if (!device) {
+        this.setState(s => ({ connected: false, connBusy: '', sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
+        const m = this.state.lang === 'ko' ? 'DotPad 연결에 실패했습니다.' : 'DotPad connection failed.';
+        this.say(m); this.toastMsg(m);
+        return;
+      }
+      this._dotDevice = device;
       this.setState(s => ({ connected: true, connType: type, connBusy: '', sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
       this.say(t.aConnOn);
-    }, 1200);
+    } catch (e) {
+      this.setState(s => ({ connected: false, connBusy: '', sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
+      this.toastMsg(String((e && e.message) || e));
+    }
   }
   disconnectDot() {
-    clearTimeout(this._connBusyT);
+    const t = this.T();
+    try { if (this._dotSdk && this._dotDevice) this._dotSdk.disconnect(this._dotDevice); } catch (e) { /* ignore */ }
+    this._dotDevice = null;
     this.setState(s => ({ connected: false, connBusy: '', livePreview: false, sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
-    this.say(this.T().aConnOff);
+    this.say(t.aConnOff);
+  }
+  // Push the current graphic to the connected DotPad (shared by Send + live).
+  pushToDot() {
+    if (!this.state.connected || !this._dotDevice || !window.DotPad) return false;
+    const hex = this.cellsToHex(this.cells, this.state.gridW, this.state.gridH);
+    this.dotSdk().displayGraphicData(hex, this._dotDevice);
+    return true;
   }
   toggleLive() {
     const t = this.T();
@@ -2959,12 +3037,23 @@ class Component extends DCLogic {
     const next = !this.state.livePreview;
     this.setState({ livePreview: next });
     this.say(next ? t.aLiveOn : t.aLiveOff);
+    if (next) { try { this.pushToDot(); } catch (e) { /* ignore */ } }
   }
   pinAction(kind) {
     const t = this.T();
-    if (!this.state.connected) { this.say(t.aConnectFirst); return; }
+    if (!this.state.connected || !this._dotDevice || !window.DotPad) { this.say(t.aConnectFirst); return; }
     clearTimeout(this._pinT);
     this.setState({ pinFx: kind });
+    try {
+      const sdk = this.dotSdk();
+      if (kind === 'raise') sdk.displayAllUp(this._dotDevice);
+      else if (kind === 'lower') sdk.displayAllDown(this._dotDevice);
+      else {
+        const inv = new Uint8Array(this.cells.length);
+        for (let i = 0; i < inv.length; i++) inv[i] = this.cells[i] ? 0 : 1;
+        sdk.displayGraphicData(this.cellsToHex(inv, this.state.gridW, this.state.gridH), this._dotDevice);
+      }
+    } catch (e) { this.toastMsg(String((e && e.message) || e)); }
     this.say(kind === 'raise' ? t.aPinRaise : kind === 'lower' ? t.aPinLower : t.aPinInvert);
     this._pinT = setTimeout(() => this.setState({ pinFx: '' }), 900);
   }
@@ -3482,8 +3571,17 @@ class Component extends DCLogic {
       phaseConnecting: phase === 'connecting',
       phaseError: phase === 'error', phaseNotError: phase !== 'error' && phase !== 'incompat',
       doSend: () => {
+        if (!st.connected || !this._dotDevice || !window.DotPad) { this.setState({ sendPhase: 'error' }); this.say(t.aConnectFirst); return; }
         this.setState({ sendPhase: 'sending' });
-        this._sendT = setTimeout(() => { this.setState({ sendPhase: 'done' }); this.say(t.aSent); }, 1500);
+        clearTimeout(this._sendT);
+        try {
+          this.pushToDot();
+          // displayGraphicData streams asynchronously via the SDK; settle the UI shortly after.
+          this._sendT = setTimeout(() => { this.setState({ sendPhase: 'done' }); this.say(t.aSent); }, 800);
+        } catch (e) {
+          this.setState({ sendPhase: 'error' });
+          this.toastMsg(String((e && e.message) || e));
+        }
       },
       // save
       saveOpen: st.saveOpen,
