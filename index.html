@@ -2043,6 +2043,21 @@ class Component extends DCLogic {
     if (index < 0 || index >= pages.length) index = 0;
     return { id: result.id, title: result.title || rec.title || result.id, pages: pages, index: index, query: (this.state.cmdPrompt || '').trim() };
   }
+  // Narrow "load the matched page" gate. A non-confident searchCorpus top hit
+  // whose STRONGEST field is page text (page-label or desc) may load that exact
+  // page — e.g. "만주지역" → page 2 of 삼국시대. Explicitly excludes braille (opaque
+  // hex) and fuzzy/near matches (nearMatches stays suggestion-only and never
+  // reaches this gate). Requires a real id, an in-range integer pageIndex, and a
+  // graphic of exactly 600 hex chars; seedCorpusResult re-validates before drawing.
+  corpusPageLoadable(result) {
+    if (!result || result.confident) return false;                       // confident hits use the primary gate
+    if (result.reason !== 'page-label' && result.reason !== 'desc') return false; // desc/label only — no braille, no near/fuzzy
+    if (!result.id) return false;
+    if (typeof result.pageIndex !== 'number' || !Number.isInteger(result.pageIndex) || result.pageIndex < 0) return false;
+    if (typeof result.pageCount === 'number' && result.pageIndex >= result.pageCount) return false;
+    const g = String(result.graphic == null ? '' : result.graphic).trim();
+    return /^[0-9a-fA-F]{600}$/.test(g);
+  }
   // Navigate the active corpus record to page i (0-based). Each switch validates +
   // decodes that page's DTMS graphic, snapshot()s for undo, then setCells(). Any
   // invalid/missing graphic is rejected safely (toast + no canvas change).
@@ -2859,6 +2874,7 @@ class Component extends DCLogic {
       const search = typeof window.searchCorpus === 'function' ? window.searchCorpus(prompt, { limit: 1 }) : [];
       const corpusHit = search[0];
       if (corpusHit && corpusHit.confident && this.seedCorpusResult(corpusHit, mode)) return;
+      if (corpusHit && this.corpusPageLoadable(corpusHit) && this.seedCorpusResult(corpusHit, mode)) return;
       const intent = this.matchIntent(prompt);
       const kind = intent ? intent.kind : 'coord';
       if (gw !== this.state.gridW || gh !== this.state.gridH) this.setGrid(gw, gh);
