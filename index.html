@@ -57,6 +57,10 @@ input[type=range]{accent-color:#EC5927}
 .ts-save-status{max-width:94px;overflow:hidden}
 .device-status-pill{max-width:240px;min-width:0;overflow:hidden}
 .ts-language-switch{display:flex;flex:none;border:1px solid #EAE1D7;border-radius:100px;overflow:hidden}
+.image-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.image-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.tactile-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.tactile-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 @media (max-width:1180px){
   .ts-topbar{grid-template-columns:minmax(220px,1fr) minmax(300px,auto) minmax(180px,.8fr);gap:10px}
   .ts-save-status{display:none!important}
@@ -762,7 +766,7 @@ input[type=range]{accent-color:#EC5927}
 
 <sc-if value="{{ importOpen }}" hint-placeholder-val="{{ false }}">
 <div onClick="{{ closeImport }}" style="position:fixed;inset:0;background:rgba(30,28,26,0.5);z-index:70;display:flex;align-items:center;justify-content:center">
-  <div role="dialog" aria-modal="true" aria-label="{{ t.importTitle }}" data-screen-label="3b. Image conversion wizard" onClick="{{ stopProp }}" style="width:680px;max-width:94vw;background:#fff;border-radius:14px;box-shadow:0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1);overflow:hidden;animation:tsUp 0.22s ease-out">
+  <div role="dialog" aria-modal="true" aria-label="{{ t.importTitle }}" data-screen-label="3b. Image conversion wizard" onClick="{{ stopProp }}" style="width:680px;max-width:94vw;max-height:94vh;background:#fff;border-radius:14px;box-shadow:0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1);overflow:hidden;display:flex;flex-direction:column;animation:tsUp 0.22s ease-out">
 
     <div style="display:flex;align-items:flex-start;gap:14px;padding:22px 26px 18px;border-bottom:1px solid #E8DFD6">
       <div style="flex:1;min-width:0">
@@ -781,7 +785,7 @@ input[type=range]{accent-color:#EC5927}
 
     <input type="file" ref="{{ fileInputRef }}" onChange="{{ onFilePick }}" accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" tabIndex="-1" aria-hidden="true">
 
-    <div style="padding:24px 26px">
+    <div style="padding:24px 26px;overflow-y:auto;flex:1;min-height:0">
       <!-- STEP 1 · IMPORT -->
       <sc-if value="{{ impIsImport }}" hint-placeholder-val="{{ true }}">
         <sc-if value="{{ armedPreset }}" hint-placeholder-val="{{ false }}">
@@ -838,6 +842,9 @@ input[type=range]{accent-color:#EC5927}
             <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             {{ t.impLoaded }} · <span style="font-weight:600;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ impName }}</span>
           </div>
+          <div class="image-preview-frame" style="margin-top:12px;background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:16/9;padding:14px">
+            <canvas ref="{{ impOrigRef }}" aria-label="{{ t.original }}"></canvas>
+          </div>
         </sc-if>
 
         <!-- what happens next -->
@@ -885,8 +892,8 @@ input[type=range]{accent-color:#EC5927}
             <span style="font-size:12px;color:#6B6862;font-weight:500">{{ t.impFullDesc }}</span>
           </button>
         </div>
-        <div style="display:flex;justify-content:center;background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;padding:14px">
-          <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" aria-label="{{ t.original }}" style="display:block;width:300px;max-width:100%;border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
+        <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:16/9;padding:14px">
+          <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
         </div>
         <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
           <div style="margin-top:10px;font-size:12px;color:#6B6862;display:flex;align-items:center;gap:7px">
@@ -911,13 +918,8 @@ input[type=range]{accent-color:#EC5927}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
           <div>
             <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
-            <div style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;display:grid;place-items:center;overflow:hidden;padding:14px">
-              <svg viewBox="0 0 150 130" aria-hidden="true" style="width:100%;height:100%">
-                <ellipse cx="75" cy="78" rx="44" ry="40" fill="none" stroke="#8C857C" stroke-width="3"></ellipse>
-                <path d="M42 52L34 18l26 20M108 52l8-34-26 20" fill="none" stroke="#8C857C" stroke-width="3" stroke-linejoin="round"></path>
-                <circle cx="59" cy="72" r="5" fill="#8C857C"></circle><circle cx="91" cy="72" r="5" fill="#8C857C"></circle>
-                <path d="M70 88h10l-5 7zM75 95v8M52 90l-22-5M52 97l-22 4M98 90l22-5M98 97l22 4" fill="none" stroke="#8C857C" stroke-width="2.5" stroke-linejoin="round"></path>
-              </svg>
+            <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:14px">
+              <canvas ref="{{ impOrigRef }}" aria-label="{{ t.original }}"></canvas>
             </div>
           </div>
           <div>
@@ -930,8 +932,8 @@ input[type=range]{accent-color:#EC5927}
                 </span>
               </sc-if>
             </div>
-            <div style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;overflow:hidden;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)">
-              <canvas ref="{{ impRef }}" style="display:block;width:100%;height:100%;object-fit:contain"></canvas>
+            <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)">
+              <canvas ref="{{ impRef }}"></canvas>
               <span style="position:absolute;left:10px;bottom:9px;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
               <sc-if value="{{ converting }}" hint-placeholder-val="{{ true }}">
                 <div style="position:absolute;inset:0;background:rgba(20,18,16,0.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:10px">
@@ -950,19 +952,14 @@ input[type=range]{accent-color:#EC5927}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
             <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
-            <div style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;display:grid;place-items:center;overflow:hidden;padding:14px">
-              <svg viewBox="0 0 150 130" aria-hidden="true" style="width:100%;height:100%">
-                <ellipse cx="75" cy="78" rx="44" ry="40" fill="none" stroke="#8C857C" stroke-width="3"></ellipse>
-                <path d="M42 52L34 18l26 20M108 52l8-34-26 20" fill="none" stroke="#8C857C" stroke-width="3" stroke-linejoin="round"></path>
-                <circle cx="59" cy="72" r="5" fill="#8C857C"></circle><circle cx="91" cy="72" r="5" fill="#8C857C"></circle>
-                <path d="M70 88h10l-5 7zM75 95v8M52 90l-22-5M52 97l-22 4M98 90l22-5M98 97l22 4" fill="none" stroke="#8C857C" stroke-width="2.5" stroke-linejoin="round"></path>
-              </svg>
+            <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:14px">
+              <canvas ref="{{ impOrigRef }}" aria-label="{{ t.original }}"></canvas>
             </div>
           </div>
           <div>
             <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.tactilePreview }}</div>
-            <div style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;overflow:hidden;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
-              <canvas ref="{{ impRef }}" style="display:block;width:100%;height:100%;object-fit:contain"></canvas>
+            <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
+              <canvas ref="{{ impRef }}"></canvas>
             </div>
           </div>
         </div>
@@ -1004,7 +1001,7 @@ input[type=range]{accent-color:#EC5927}
     </div>
 
     <!-- footer -->
-    <div style="display:flex;align-items:center;gap:10px;padding:16px 26px;border-top:1px solid #E8DFD6;background:#FCFAF7">
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 26px;border-top:1px solid #E8DFD6;background:#FCFAF7;flex:none">
       <button onClick="{{ impBack }}" style="height:40px;padding:0 16px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:6px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
         <svg width="14" height="14" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         {{ impBackLabel }}
@@ -2407,6 +2404,40 @@ class Component extends DCLogic {
     if (st.dither) for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (pat[y * w + x] && (x + y) % 2) pat[y * w + x] = 0; }
     return pat;
   }
+  sourceFitBox(cw, ch) {
+    const sw = this._srcW || (this._srcCanvas && this._srcCanvas.width) || cw;
+    const sh = this._srcH || (this._srcCanvas && this._srcCanvas.height) || ch;
+    const scale = Math.min(cw / sw, ch / sh);
+    const dw = Math.max(1, Math.round(sw * scale));
+    const dh = Math.max(1, Math.round(sh * scale));
+    return { x: Math.round((cw - dw) / 2), y: Math.round((ch - dh) / 2), w: dw, h: dh };
+  }
+  drawSourcePreview(oc, st, withCrop) {
+    const maxW = 420, maxH = 260;
+    const sw = this._srcW || (this._srcCanvas && this._srcCanvas.width) || 300;
+    const sh = this._srcH || (this._srcCanvas && this._srcCanvas.height) || 200;
+    const scale = Math.min(maxW / sw, maxH / sh);
+    const OW = Math.max(1, Math.round(sw * scale));
+    const OH = Math.max(1, Math.round(sh * scale));
+    oc.width = OW; oc.height = OH;
+    const g = oc.getContext('2d');
+    g.fillStyle = '#F7F4EF'; g.fillRect(0, 0, OW, OH);
+    if (!this._srcCanvas) return;
+    const box = this.sourceFitBox(OW, OH);
+    this._srcFitBox = box;
+    g.drawImage(this._srcCanvas, box.x, box.y, box.w, box.h);
+    if (withCrop && st.cropChoice === 'crop') {
+      const r = st.cropRect;
+      const rx = box.x + r.x * box.w, ry = box.y + r.y * box.h, rw = r.w * box.w, rh = r.h * box.h;
+      g.fillStyle = 'rgba(30,28,26,0.42)';
+      g.fillRect(box.x, box.y, box.w, ry - box.y);
+      g.fillRect(box.x, ry + rh, box.w, box.y + box.h - (ry + rh));
+      g.fillRect(box.x, ry, rx - box.x, rh);
+      g.fillRect(rx + rw, ry, box.x + box.w - (rx + rw), rh);
+      g.strokeStyle = '#EC5927'; g.lineWidth = 2; g.setLineDash([6, 4]);
+      g.strokeRect(rx + 1, ry + 1, rw - 2, rh - 2); g.setLineDash([]);
+    }
+  }
   drawImp() {
     const st = this.state;
     const crop = st.cropChoice === 'crop' ? st.cropRect : null;
@@ -2426,20 +2457,7 @@ class Component extends DCLogic {
     // original image with optional crop overlay
     const oc = this.impOrigRef.current;
     if (oc && st.importOpen) {
-      const OW = 300, OH = 260;
-      oc.width = OW; oc.height = OH;
-      const g = oc.getContext('2d');
-      g.fillStyle = '#F7F4EF'; g.fillRect(0, 0, OW, OH);
-      if (this._srcCanvas) { g.drawImage(this._srcCanvas, 0, 0, OW, OH); } // fill so crop rect maps 1:1 to source
-      g.setTransform(1, 0, 0, 1, 0, 0);
-      if (st.cropChoice === 'crop') {
-        const r = st.cropRect, rx = r.x * OW, ry = r.y * OH, rw = r.w * OW, rh = r.h * OH;
-        g.fillStyle = 'rgba(30,28,26,0.42)';
-        g.fillRect(0, 0, OW, ry); g.fillRect(0, ry + rh, OW, OH - ry - rh);
-        g.fillRect(0, ry, rx, rh); g.fillRect(rx + rw, ry, OW - rx - rw, rh);
-        g.strokeStyle = '#EC5927'; g.lineWidth = 2; g.setLineDash([6, 4]);
-        g.strokeRect(rx + 1, ry + 1, rw - 2, rh - 2); g.setLineDash([]);
-      }
+      this.drawSourcePreview(oc, st, st.impStep === 'crop');
     }
   }
 
@@ -2803,7 +2821,8 @@ class Component extends DCLogic {
   }
   resetImport() {
     clearTimeout(this._readT);
-    this._srcData = null; this._srcCanvas = null;
+    this._uploadSeq = (this._uploadSeq || 0) + 1;
+    this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
     this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
   }
   // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
@@ -2822,10 +2841,18 @@ class Component extends DCLogic {
     if (!(okExt || okType)) { clearTimeout(this._readT); this.setState({ impErr: 'type', imgReady: false, impLoading: false }); return; }
     if (file.size && file.size > 10 * 1024 * 1024) { clearTimeout(this._readT); this.setState({ impErr: 'size', imgReady: false, impLoading: false }); return; }
     clearTimeout(this._readT);
-    this.setState({ impErr: '', impLoading: true, imgReady: false, impName: name, fileName: name.replace(/\.[^.]+$/, '') });
-    const fail = () => { this._srcData = null; this.setState({ impErr: 'load', impLoading: false, imgReady: false }); };
+    const token = (this._uploadSeq || 0) + 1;
+    this._uploadSeq = token;
+    this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name, fileName: name.replace(/\.[^.]+$/, '') });
+    const fail = () => {
+      if (token !== this._uploadSeq) return;
+      this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
+      this.setState({ impErr: 'load', impLoading: false, imgReady: false });
+    };
     const done = (bmp, w, h) => {
-      try { this._captureSource(bmp, w, h); this.setState({ impLoading: false, imgReady: true }); this.drawImp(); }
+      if (token !== this._uploadSeq) { if (bmp && bmp.close) bmp.close(); return; }
+      try { this._captureSource(bmp, w, h); if (bmp && bmp.close) bmp.close(); this.setState({ impLoading: false, imgReady: true }); this.drawImp(); }
       catch (e) { fail(); }
     };
     // createImageBitmap handles EXIF orientation (mobile photos) and all supported formats
@@ -2843,12 +2870,13 @@ class Component extends DCLogic {
   }
   useSampleImage() {
     clearTimeout(this._readT);
+    this._uploadSeq = (this._uploadSeq || 0) + 1;
     const t = this.T();
     // render the built-in sample through the SAME real pipeline (draw to a source canvas, capture pixels)
     const cnv = document.createElement('canvas'); cnv.width = 150; cnv.height = 130;
     const g = cnv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 150, 130); g.strokeStyle = '#000'; this.drawCat(g, 50);
     this._srcData = g.getImageData(0, 0, 150, 130).data; this._srcW = 150; this._srcH = 130; this._srcCanvas = cnv;
-    this.setState({ impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName, fileName: this.state.fileName ?? (this.state.lang === 'ko' ? '고양이' : 'Cat') });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName, fileName: this.state.fileName ?? (this.state.lang === 'ko' ? '고양이' : 'Cat') });
     this.drawImp();
   }
   // guard destructive new-document actions when the canvas has content
@@ -2983,7 +3011,13 @@ class Component extends DCLogic {
   // crop box pointer interaction (over the original-image canvas)
   cropAt(e) {
     const cv = this.impOrigRef.current, r = cv.getBoundingClientRect();
-    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+    const box = this._srcFitBox || { x: 0, y: 0, w: cv.width || 1, h: cv.height || 1 };
+    const sx = (cv.width || 1) / (r.width || 1);
+    const sy = (cv.height || 1) / (r.height || 1);
+    const px = (e.clientX - r.left) * sx;
+    const py = (e.clientY - r.top) * sy;
+    const cl = v => Math.max(0, Math.min(1, v));
+    return { x: cl((px - box.x) / box.w), y: cl((py - box.y) / box.h) };
   }
   cropDown(e) {
     if (this.state.cropChoice !== 'crop') return;
