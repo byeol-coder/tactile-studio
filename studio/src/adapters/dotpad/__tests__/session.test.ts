@@ -60,6 +60,15 @@ describe('dotpad session (hook → adapter bridge)', () => {
     expect(session.pendingChanges(changed)).toEqual([0]);
   });
 
+  it('sendPreview() uses the same connected send path', async () => {
+    await session.connect();
+    const doc = docWithDiagonal();
+
+    await session.sendPreview(doc);
+
+    expect(session.pendingChanges(doc)).toEqual([]);
+  });
+
   it('disconnect() clears the session and emits disconnected', async () => {
     const events: string[] = [];
     await session.connect({ onStatus: (s) => events.push(s) });

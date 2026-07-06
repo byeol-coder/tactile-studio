@@ -7,10 +7,8 @@ import { recordOutputSuccess } from '../analytics/activation';
  * Send-to-DotPad hook.
  *
  * Flow: current TactileDocument → DotPadAdapter.encode() (via the session) →
- * mock transport line-diff send → clear success/error UI state. All encoding
- * lives in the adapter; this hook only gates on connection/document and maps
- * the async result onto send status. Shared by DotPadSendButton and the
- * Command Launcher.
+ * SDK-backed DotPad displayGraphicData send → clear success/error UI state.
+ * Shared by DotPadSendButton and the Command Launcher.
  */
 export function useDotPadSend() {
   const { state, dispatch } = useAppStore();
@@ -37,5 +35,14 @@ export function useDotPadSend() {
     return true;
   }, [dispatch, state.dotpadStatus, state.document, state.sendStatus]);
 
-  return { canSend, send };
+  const sendPreview = useCallback((): boolean => {
+    const doc = state.document;
+    if (state.dotpadStatus !== 'connected' || doc === null || state.sendStatus === 'sending') {
+      return false;
+    }
+    dotPadSession.sendPreview(doc).catch(() => dispatch({ type: 'send/status', status: 'error' }));
+    return true;
+  }, [dispatch, state.dotpadStatus, state.document, state.sendStatus]);
+
+  return { canSend, send, sendPreview };
 }

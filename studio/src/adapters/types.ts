@@ -37,6 +37,11 @@ export interface DeviceEvents {
   onStatus?: (status: 'connecting' | 'connected' | 'disconnected' | 'error', detail?: string) => void;
 }
 
+/** Transport requested when opening a physical device connection. */
+export interface DeviceConnectOptions {
+  transport?: 'auto' | 'ble' | 'usb';
+}
+
 /** A live handle to a connected device. */
 export interface DeviceHandle {
   readonly name: string;
@@ -61,8 +66,8 @@ export interface DeviceAdapter {
   encode(doc: TactileDocument): EncodedFrame;
   /** Flat cell indices (`y*width+x`) that differ between two frames. */
   diff(prev: EncodedFrame | null, next: EncodedFrame): number[];
-  /** Open a transport (may be mocked); resolves to a live handle. */
-  connect(events?: DeviceEvents): Promise<DeviceHandle>;
+  /** Open a transport; falls back to a mock only when the browser cannot support real DotPad I/O. */
+  connect(events?: DeviceEvents, options?: DeviceConnectOptions): Promise<DeviceHandle>;
 }
 
 /**

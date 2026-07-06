@@ -3,7 +3,7 @@ import { useDotPadSend } from '../../hooks/useDotPadSend';
 import { Button } from '../ui/Button';
 
 /**
- * Sends the converted document to DotPad (mocked). Disabled until a converted
+ * Sends the converted document to DotPad. Disabled until a converted
  * document exists AND the device is connected. Shares logic with the command
  * launcher via useDotPadSend.
  */
@@ -15,7 +15,7 @@ export function DotPadSendButton({ fullWidth = false }: { fullWidth?: boolean })
     state.sendStatus === 'sending' ? '전송 중…' : state.sendStatus === 'sent' ? '다시 전송' : 'Dot Pad로 보내기';
 
   let hint = '';
-  if (state.dotpadStatus !== 'connected') hint = 'Dot Pad를 먼저 연결하세요';
+  if (state.dotpadStatus !== 'connected') hint = 'Chromium 브라우저의 HTTPS 또는 localhost에서 Dot Pad를 먼저 연결하세요';
   else if (!state.document) hint = '변환 후 전송할 수 있습니다';
 
   return (

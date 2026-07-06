@@ -1,6 +1,7 @@
 import type { TactileDocument, TactileResolution } from '../../types/tactile';
 import { docToFrame, frameToHex } from '../../model/frame';
-import type { DeviceAdapter, DeviceEvents, DeviceHandle, EncodedFrame } from '../types';
+import type { DeviceAdapter, DeviceConnectOptions, DeviceEvents, DeviceHandle, EncodedFrame } from '../types';
+import { connectDotPadSdkLink, describeDotPadSupport, isDotPadTransportSupported } from './sdkLink';
 
 /** Convert a HEX string to its backing byte array. */
 function hexToBytes(hex: string): Uint8Array {
@@ -42,9 +43,8 @@ export function buildDtmsContainer(doc: TactileDocument): string {
 }
 
 /**
- * Mock BLE handle used in v0. It exercises the full send/diff surface so the UI
- * and streaming logic are built against the real interface; swapping in the
- * DotPadSDK-3.0.0 transport later means replacing only `connect()`.
+ * Mock fallback used only when the browser cannot expose real DotPad I/O.
+ * Encoding and send/diff surfaces stay identical to the SDK-backed handle.
  */
 class MockDotPadHandle implements DeviceHandle {
   constructor(
@@ -54,14 +54,14 @@ class MockDotPadHandle implements DeviceHandle {
   ) {}
 
   async send(frame: EncodedFrame): Promise<void> {
-    // Simulate a full-frame write; a real transport would push `frame.bytes`.
+    // Simulate a full-frame write in unsupported browsers/test environments.
     void frame;
     await this.tick();
   }
 
   async sendDiff(prev: EncodedFrame | null, next: EncodedFrame): Promise<void> {
     const changed = this.adapter.diff(prev, next);
-    // A real transport would address only `changed` cells; here we just settle.
+    // Keep the diff surface exercised even when the SDK path is unavailable.
     void changed;
     await this.tick();
   }
@@ -75,7 +75,7 @@ class MockDotPadHandle implements DeviceHandle {
   }
 }
 
-/** DotPad refreshable-display adapter. Encoding real; transport mocked in v0. */
+/** DotPad refreshable-display adapter. Encoding is pure; transport uses DotPadSDK when available. */
 export class DotPadAdapter implements DeviceAdapter {
   readonly id = 'dotpad';
   readonly label = 'DotPad';
@@ -107,11 +107,19 @@ export class DotPadAdapter implements DeviceAdapter {
     return changed;
   }
 
-  async connect(events?: DeviceEvents): Promise<DeviceHandle> {
+  async connect(events?: DeviceEvents, options: DeviceConnectOptions = {}): Promise<DeviceHandle> {
+    const transport = options.transport ?? 'auto';
     events?.onStatus?.('connecting');
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    events?.onStatus?.('connected', 'DotPad-320 (mock)');
-    return new MockDotPadHandle('DotPad-320 (mock)', this, events);
+    if (isDotPadTransportSupported(transport)) {
+      const handle = await connectDotPadSdkLink(transport, events);
+      events?.onStatus?.('connected', handle.name);
+      return handle;
+    }
+
+    const fallbackName = describeDotPadSupport();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    events?.onStatus?.('connected', fallbackName);
+    return new MockDotPadHandle(fallbackName, this, events);
   }
 }
 

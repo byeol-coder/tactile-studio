@@ -1,6 +1,6 @@
 import type { TactileDocument } from '../../types/tactile';
 import { dotPadAdapter } from './DotPadAdapter';
-import type { DeviceEvents, DeviceHandle, EncodedFrame } from '../types';
+import type { DeviceConnectOptions, DeviceEvents, DeviceHandle, EncodedFrame } from '../types';
 
 /**
  * DotPad connection session — the single owner of the live device handle.
@@ -12,8 +12,8 @@ import type { DeviceEvents, DeviceHandle, EncodedFrame } from '../types';
  * `onStatus` events (not fabricated in the UI), and sends go through the
  * adapter's encode + line-diff path.
  *
- * Phase 3 swaps only `dotPadAdapter.connect()` for the real DotPadSDK
- * transport; this module and the hooks above it stay unchanged.
+ * The adapter opens the real DotPadSDK BLE/USB transport when the browser can
+ * support it, and falls back to a mock handle only in unsupported runtimes.
  */
 let handle: DeviceHandle | null = null;
 let lastSentFrame: EncodedFrame | null = null;
@@ -23,12 +23,12 @@ export function isConnected(): boolean {
 }
 
 /** Open a connection (idempotent). Status flows via `events.onStatus`. */
-export async function connect(events?: DeviceEvents): Promise<void> {
+export async function connect(events?: DeviceEvents, options?: DeviceConnectOptions): Promise<void> {
   if (handle) {
     events?.onStatus?.('connected', handle.name);
     return;
   }
-  handle = await dotPadAdapter.connect(events);
+  handle = await dotPadAdapter.connect(events, options);
   lastSentFrame = null;
 }
 
@@ -50,6 +50,11 @@ export async function sendDocument(doc: TactileDocument): Promise<void> {
   const next = dotPadAdapter.encode(doc);
   await handle.sendDiff(lastSentFrame, next);
   lastSentFrame = next;
+}
+
+/** Stream the current preview frame through the same SDK-backed path. */
+export async function sendPreview(doc: TactileDocument): Promise<void> {
+  await sendDocument(doc);
 }
 
 /** Cells (`y*width+x`) that the next send of `doc` would update on the device. */
