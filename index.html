@@ -34,6 +34,12 @@ if ('caches' in window) {
   caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
 }
 </script>
+<!-- Vendored React/ReactDOM (18.3.1 UMD). Loaded before the runtime so
+     loadReactUmd() finds window.React/ReactDOM and skips the unpkg CDN entirely.
+     Makes the app boot offline, behind firewalls, on file://, and when unpkg is
+     down. This app declares no JSX x-import, so @babel/standalone is never needed. -->
+<script src="./vendor/react.production.min.js"></script>
+<script src="./vendor/react-dom.production.min.js"></script>
 <script src="./support.js"></script>
 <script src="./corpus.js"></script>
 <script src="./corpus-search.js"></script>
