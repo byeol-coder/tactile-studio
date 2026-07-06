@@ -19,6 +19,8 @@ if ('caches' in window) {
 }
 </script>
 <script src="./support.js"></script>
+<script src="./corpus.js"></script>
+<script src="./corpus-search.js"></script>
 </head>
 <body>
 <x-dc>
@@ -499,6 +501,17 @@ input[type=range]{accent-color:#EC5927}
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
       </div>
+      <sc-if value="{{ corpusNavOn }}" hint-placeholder-val="{{ false }}">
+        <div role="group" aria-label="{{ corpusNavGroupLabel }}" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px 6px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
+          <button onClick="{{ corpusPrev }}" data-corpus-nav="prev" aria-label="{{ corpusPrevLabel }}" title="{{ corpusPrevLabel }}" disabled="{{ corpusPrevDisabled }}" style="{{ corpusPrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+          <span style="font-weight:700;font-size:12px;color:#57534E;white-space:nowrap;padding:0 2px">{{ corpusPageText }}</span>
+          <button onClick="{{ corpusNext }}" data-corpus-nav="next" aria-label="{{ corpusNextLabel }}" title="{{ corpusNextLabel }}" disabled="{{ corpusNextDisabled }}" style="{{ corpusNextStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+        </div>
+      </sc-if>
       <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
         <div role="group" aria-label="{{ strokeCtlLabel }}" style="position:absolute;top:16px;left:20px;z-index:20;display:inline-flex;align-items:center;gap:10px;background:#F7F4EF;border:1px solid #E3D9CE;border-radius:100px;padding:6px 8px 6px 14px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
           <span style="color:#6B6862;font-weight:800;font-size:12px;white-space:nowrap;letter-spacing:-0.1px">{{ strokeCtlLabel }}</span>
@@ -1457,6 +1470,7 @@ class Component extends DCLogic {
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
+    corpusCtx: null,
     saved: []
   };
 
@@ -1547,6 +1561,7 @@ class Component extends DCLogic {
       aConnBle: 'BLE로 DotPad에 연결하는 중…', aConnUsb: 'USB로 DotPad에 연결하는 중…', aConnectFirst: '먼저 DotPad를 연결하세요.',
       aLiveOn: '실시간 미리보기를 켰습니다.', aLiveOff: '실시간 미리보기를 껐습니다.', aPinRaise: 'DotPad 핀을 모두 올렸습니다.', aPinLower: 'DotPad 핀을 모두 내렸습니다.', aPinInvert: 'DotPad 핀을 반전했습니다.',
       aCmdOk: '명령어로 촉각 그래픽 초안을 만들었습니다.', aCmdFallback: '명령을 정확히 인식하지 못해 기본 초안을 만들었습니다. 편집해서 완성하세요.',
+      aCmdNoLib: '라이브러리에서 일치하는 항목을 찾지 못해 기본 초안을 만들었습니다. 편집해서 완성하세요.', aCmdNearHint: (names) => `라이브러리에 정확한 항목이 없어 기본 초안을 만들었습니다. 혹시 이걸 찾으셨나요? ${names}`,
       aTplLoaded: '템플릿을 편집기로 불러왔습니다.', aPresetArmed: '이미지 변환 프리셋이 준비되었습니다.',
       aImgNewPage: (n, tot) => `변환한 이미지를 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aCmdNewPage: (n, tot) => `명령어 초안을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aTplNewPage: (n, tot) => `템플릿을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`,
       importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
@@ -1663,6 +1678,7 @@ class Component extends DCLogic {
       aConnBle: 'Connecting to DotPad via BLE…', aConnUsb: 'Connecting to DotPad via USB…', aConnectFirst: 'Connect DotPad first.',
       aLiveOn: 'Live preview enabled.', aLiveOff: 'Live preview disabled.', aPinRaise: 'Raised all DotPad pins.', aPinLower: 'Lowered all DotPad pins.', aPinInvert: 'Inverted DotPad pins.',
       aCmdOk: 'Created a tactile graphic draft from your command.', aCmdFallback: "Couldn't match your command exactly — created a starter draft you can edit.",
+      aCmdNoLib: 'No matching library item — created a starter draft you can edit.', aCmdNearHint: (names) => `No exact library item — created a starter draft. Did you mean: ${names}`,
       aTplLoaded: 'Template loaded into the editor.', aPresetArmed: 'Image-conversion preset armed.',
       aImgNewPage: (n, tot) => `Converted image added on page ${n}. ${tot} pages total`, aCmdNewPage: (n, tot) => `Command draft added on page ${n}. ${tot} pages total`, aTplNewPage: (n, tot) => `Template added on page ${n}. ${tot} pages total`,
       importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
@@ -1945,6 +1961,169 @@ class Component extends DCLogic {
     if (has('순서도', 'flow', 'flowchart', '다이어그램', 'diagram')) return { kind: 'flow', name: '순서도', nameEn: 'Flowchart' };
     if (has('막대', 'bar', '그래프', 'graph', 'chart')) return { kind: 'bar', name: '막대 그래프', nameEn: 'Bar chart' };
     return null;
+  }
+  // Decode a DTMS graphic-layer HEX (600 chars) into a 60×40 cell buffer.
+  // Ported from studio/src/model/frame.ts (hexToFrame) — NOT a new codec: each
+  // byte is a 2×4 cell, bit index = lx*4+ly, cells emitted row-major
+  // (cellRow r outer, cellCol c inner). Returns null on any invalid input
+  // (non-string, length ≠ 600, or non-hex) so callers fall back safely.
+  corpusCellsFromHex(hex) {
+    const src = String(hex == null ? '' : hex).trim();
+    if (!/^[0-9a-fA-F]{600}$/.test(src)) return null;
+    const cols = 60, rows = 40, cc = cols / 2, cr = rows / 4;
+    const cells = new Uint8Array(cols * rows);
+    let idx = 0;
+    for (let r = 0; r < cr; r++) {
+      for (let c = 0; c < cc; c++) {
+        const b = parseInt(src.substr(idx * 2, 2), 16) || 0;
+        idx++;
+        for (let lx = 0; lx < 2; lx++) for (let ly = 0; ly < 4; ly++) {
+          if ((b >> (lx * 4 + ly)) & 1) cells[(r * 4 + ly) * cols + (c * 2 + lx)] = 1;
+        }
+      }
+    }
+    return cells;
+  }
+  corpusLoadMessage(result) {
+    const ko = this.state.lang === 'ko';
+    const title = result?.title || result?.id || (ko ? '코퍼스' : 'Corpus');
+    const label = result?.pageLabel && result.pageLabel !== result.title ? result.pageLabel : '';
+    const multi = result && result.pageCount > 1;
+    if (ko) {
+      let msg = `“${title}” 코퍼스 그래픽을 불러왔습니다.`;
+      if (multi) msg += ` (${result.pageNumber}/${result.pageCount}쪽${label ? ' · ' + label : ''})`;
+      return msg;
+    }
+    let msg = `“${title}” corpus graphic loaded.`;
+    if (multi) msg += ` (page ${result.pageNumber} of ${result.pageCount}${label ? ' · ' + label : ''})`;
+    return msg;
+  }
+  // Seed a confident corpus hit into the editor: validate + decode its DTMS page,
+  // snapshot() for undo, then swap in the 60×40 grid. Returns false (no state
+  // change) when the graphic is missing/invalid, so runCommand falls back.
+  seedCorpusResult(result, mode) {
+    if (!result || !result.graphic) return false;
+    const cells = this.corpusCellsFromHex(result.graphic);
+    if (!cells) return false;
+    const out = (this.OUTPUTS.find(oo => oo.gw === 60 && oo.gh === 40) || this.OUTPUTS[0]).key;
+    const name = result.pageCount > 1 ? `${result.title} · ${result.pageNumber}` : result.title;
+    // Multi-page records get a small navigation context so prev/next can load
+    // sibling pages from the SAME record. Single-page hits clear it (null) so no
+    // stale page controls linger from an earlier corpus command.
+    const ctx = this.corpusCtxFor(result);
+    if (this.state.gridW !== 60 || this.state.gridH !== 40) this.setGrid(60, 40);
+    if (mode === 'new') {
+      const at = this.state.pageIndex + 1;
+      this.pages.splice(at, 0, cells);
+      this.cells = cells; this.undoStack = []; this.redoStack = [];
+      this.setState({ output: out, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: ctx });
+    } else {
+      this.snapshot(); this.setCells(cells);
+      this.setState({ output: out, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: ctx });
+    }
+    this.say(this.corpusLoadMessage(result));
+    return true;
+  }
+  // Look up the full parent corpus record (all pages) by id — read-only access to
+  // the static window.DTMS_CORPUS bundle. Corpus data is never mutated here.
+  corpusRecordById(id) {
+    const c = (typeof window !== 'undefined' && Array.isArray(window.DTMS_CORPUS)) ? window.DTMS_CORPUS : [];
+    for (let i = 0; i < c.length; i++) if (c[i] && c[i].id === id) return c[i];
+    return null;
+  }
+  // Build a lightweight page-navigation context for a confident search result.
+  // Returns null for single-page (or unknown) records so the page controls stay
+  // hidden/inactive. Stored in state.corpusCtx; pages[] is the record's own array.
+  corpusCtxFor(result) {
+    if (!result || !result.id) return null;
+    const rec = this.corpusRecordById(result.id);
+    const pages = rec && Array.isArray(rec.pages) ? rec.pages : null;
+    if (!pages || pages.length <= 1) return null;
+    let index = typeof result.pageIndex === 'number' ? result.pageIndex : 0;
+    if (index < 0 || index >= pages.length) index = 0;
+    return { id: result.id, title: result.title || rec.title || result.id, pages: pages, index: index, query: (this.state.cmdPrompt || '').trim() };
+  }
+  // Narrow "load the matched page" gate. A non-confident searchCorpus top hit
+  // whose STRONGEST field is page text (page-label or desc) may load that exact
+  // page — e.g. "만주지역" → page 2 of 삼국시대. Explicitly excludes braille (opaque
+  // hex) and fuzzy/near matches (nearMatches stays suggestion-only and never
+  // reaches this gate). Requires a real id, an in-range integer pageIndex, and a
+  // graphic of exactly 600 hex chars; seedCorpusResult re-validates before drawing.
+  corpusPageLoadable(result) {
+    if (!result || result.confident) return false;                       // confident hits use the primary gate
+    if (result.reason !== 'page-label' && result.reason !== 'desc') return false; // desc/label only — no braille, no near/fuzzy
+    if (!result.id) return false;
+    if (typeof result.pageIndex !== 'number' || !Number.isInteger(result.pageIndex) || result.pageIndex < 0) return false;
+    if (typeof result.pageCount === 'number' && result.pageIndex >= result.pageCount) return false;
+    const g = String(result.graphic == null ? '' : result.graphic).trim();
+    return /^[0-9a-fA-F]{600}$/.test(g);
+  }
+  // Navigate the active corpus record to page i (0-based). Each switch validates +
+  // decodes that page's DTMS graphic, snapshot()s for undo, then setCells(). Any
+  // invalid/missing graphic is rejected safely (toast + no canvas change).
+  corpusGoPage(i) {
+    const st = this.state, ctx = st.corpusCtx;
+    if (!ctx || !Array.isArray(ctx.pages)) return;
+    if (i < 0 || i >= ctx.pages.length || i === ctx.index) return;
+    const page = ctx.pages[i];
+    const hex = page && (page.graphic || page.data);
+    const cells = this.corpusCellsFromHex(hex); // null unless exactly 600 hex → 2400 cells
+    if (!cells) {
+      this.toastMsg(st.lang === 'ko' ? '이 코퍼스 페이지의 그래픽을 불러올 수 없습니다.' : 'This corpus page graphic could not be loaded.');
+      return;
+    }
+    const dir = i > ctx.index ? 'next' : 'prev';
+    this.snapshot();
+    this.setCells(cells);
+    const num = typeof page.page === 'number' ? page.page : i + 1;
+    const name = `${ctx.title} · ${num}`;
+    this.setState({ corpusCtx: { id: ctx.id, title: ctx.title, pages: ctx.pages, index: i, query: ctx.query }, fileName: name, cx: 0, cy: 0, selRect: null });
+    this.say(this.corpusLoadMessage({ title: ctx.title, pageLabel: page.label || '', pageNumber: num, pageCount: ctx.pages.length }));
+    this.focusCorpusNavAfterMove(dir, i, ctx.pages.length);
+  }
+  // Keep keyboard focus after a page change: if the activated prev/next button
+  // becomes disabled at a boundary, move focus to the still-enabled sibling so
+  // focus isn't dropped. Deferred (setTimeout 0) so it runs after re-render; the
+  // page indicator span is NOT a live region, so this adds no extra announcement.
+  focusCorpusNavAfterMove(dir, index, count) {
+    const atBoundary = (dir === 'next' && index >= count - 1) || (dir === 'prev' && index <= 0);
+    if (!atBoundary) return;
+    const target = dir === 'next' ? 'prev' : 'next';
+    clearTimeout(this._corpusFocusT);
+    this._corpusFocusT = setTimeout(() => {
+      try {
+        const el = document.querySelector('[data-corpus-nav="' + target + '"]');
+        if (el && !el.disabled) el.focus();
+      } catch (e) {}
+    }, 0);
+  }
+  // Render-context bindings for the topbar corpus page navigator. Spread into the
+  // main render() context. All values are derived from state.corpusCtx; when no
+  // multi-page corpus is active, corpusNavOn is false and the UI is not shown.
+  corpusNavProps() {
+    const st = this.state, ctx = st.corpusCtx, ko = st.lang === 'ko';
+    const navBtn = en => ({ width: 28, height: 28, border: '1px solid #EAE1D7', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
+    const on = !!(ctx && Array.isArray(ctx.pages) && ctx.pages.length > 1);
+    const idx = on ? ctx.index : 0;
+    const count = on ? ctx.pages.length : 0;
+    const page = on ? ctx.pages[idx] : null;
+    const label = page && page.label && page.label !== ctx.title ? page.label : '';
+    const num = page && typeof page.page === 'number' ? page.page : idx + 1;
+    const canPrev = on && idx > 0;
+    const canNext = on && idx < count - 1;
+    return {
+      corpusNavOn: on,
+      corpusPageText: on ? (num + ' / ' + count + (label ? ' · ' + label : '')) : '',
+      corpusPrev: () => this.corpusGoPage(idx - 1),
+      corpusNext: () => this.corpusGoPage(idx + 1),
+      corpusPrevDisabled: !canPrev,
+      corpusNextDisabled: !canNext,
+      corpusPrevStyle: navBtn(canPrev),
+      corpusNextStyle: navBtn(canNext),
+      corpusPrevLabel: ko ? '이전 코퍼스 페이지' : 'Previous corpus page',
+      corpusNextLabel: ko ? '다음 코퍼스 페이지' : 'Next corpus page',
+      corpusNavGroupLabel: ko ? '코퍼스 페이지 탐색' : 'Corpus page navigation',
+    };
   }
   // draw the source "cat" illustration into ctx g, in a 150×130 coordinate space
   drawCat(g, threshold) {
@@ -2648,7 +2827,7 @@ class Component extends DCLogic {
   loadDoc(cells, name) {
     this.cells = cells; this.resetPages(cells);
     this.undoStack = []; this.redoStack = [];
-    this.setState({ entry: false, importOpen: false, tplOpen: false, cmdOpen: false, confirmOpen: false, fileName: name, sendPhase: 'idle', pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null });
+    this.setState({ entry: false, importOpen: false, tplOpen: false, cmdOpen: false, confirmOpen: false, fileName: name, sendPhase: 'idle', pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, corpusCtx: null });
   }
   // apply an image conversion onto the document per chosen mode
   applyImport(mode) {
@@ -2663,16 +2842,16 @@ class Component extends DCLogic {
       const at = st.pageIndex + 1;
       this.pages.splice(at, 0, conv);
       this.cells = conv; this.undoStack = []; this.redoStack = [];
-      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null });
+      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
       this.say(this.callI18n(t.aImgNewPage, '', at + 1, this.pages.length));
     } else if (mode === 'replace') {
       this.snapshot(); this.setCells(conv);
-      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false });
+      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, corpusCtx: null });
       this.say(t.aRetouchReady);
     } else { // merge into current page
       this.snapshot();
       for (let i = 0; i < conv.length; i++) if (conv[i]) this.cells[i] = 1;
-      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, confirmOpen: false });
+      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, confirmOpen: false, corpusCtx: null });
       this.say(t.aImgMerged);
     }
     clearTimeout(this._hintT);
@@ -2687,6 +2866,15 @@ class Component extends DCLogic {
     const o = this.outputDef(st.cmdGrid), gw = o.gw, gh = o.gh, mode = st.cmdApply || 'current';
     clearTimeout(this._cmdT);
     this._cmdT = setTimeout(() => {
+      // Corpus first: a CONFIDENT hit (title/tag/category match) seeds the real
+      // DTMS graphic. Failing that, Stage 5 lets a STRONG page-content match on the
+      // top deterministic result (page-label / desc / braille, validated) load its
+      // matched page too. Weak/no hits fall through to the existing generator below;
+      // nearMatches stays suggestion-only and never mutates the canvas.
+      const search = typeof window.searchCorpus === 'function' ? window.searchCorpus(prompt, { limit: 1 }) : [];
+      const corpusHit = search[0];
+      if (corpusHit && corpusHit.confident && this.seedCorpusResult(corpusHit, mode)) return;
+      if (corpusHit && this.corpusPageLoadable(corpusHit) && this.seedCorpusResult(corpusHit, mode)) return;
       const intent = this.matchIntent(prompt);
       const kind = intent ? intent.kind : 'coord';
       if (gw !== this.state.gridW || gh !== this.state.gridH) this.setGrid(gw, gh);
@@ -2696,14 +2884,24 @@ class Component extends DCLogic {
         const at = this.state.pageIndex + 1;
         this.pages.splice(at, 0, cells);
         this.cells = cells; this.undoStack = []; this.redoStack = [];
-        this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null });
+        this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
         this.say(this.callI18n(t.aCmdNewPage, '', at + 1, this.pages.length));
       } else {
         this.snapshot(); this.setCells(cells);
-        this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, cx: 0, cy: 0, selRect: null });
+        this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: null });
         this.say(intent ? t.aCmdOk : t.aCmdFallback);
       }
-      if (!intent) this.toastMsg(t.aCmdFallback);
+      if (!intent) {
+        // Optional recall aid: if the corpus has near candidates, suggest them
+        // (visual toast only — does NOT replace the generated draft on canvas).
+        const near = typeof window.nearMatches === 'function' ? window.nearMatches(prompt, { limit: 3 }) : [];
+        if (near.length) {
+          const names = near.map(n => n.title).join(', ');
+          this.toastMsg(this.callI18n(t.aCmdNearHint, t.aCmdFallback, names));
+        } else {
+          this.toastMsg(t.aCmdNoLib);
+        }
+      }
     }, 700);
   }
   retryDotpad() {    this.setState({ sendPhase: 'connecting' });
@@ -2787,7 +2985,7 @@ class Component extends DCLogic {
     this.resetPages(this.cells);
     this.undoStack = []; this.redoStack = [];
     const out = (this.OUTPUTS.find(o => o.gw === gw && o.gh === gh) || this.OUTPUTS[0]).key;
-    this.setState({ screen: 'studio', entry: false, output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle' });
+    this.setState({ screen: 'studio', entry: false, output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle', corpusCtx: null });
     this.say(this.T().aReady);
   }
   sendCard(kind, gw, gh, cells, name) {
@@ -2954,6 +3152,7 @@ class Component extends DCLogic {
       output: st.output,
       outputChange: e => this.setOutput(e.target.value),
       doUndo: () => this.undo(), doRedo: () => this.redo(),
+      ...this.corpusNavProps(),
       undoBtnStyle: iconBtn(this.undoStack.length > 0), redoBtnStyle: iconBtn(this.redoStack.length > 0),
       toggleConn: () => {
         const c = !st.connected;

@@ -1,0 +1,60 @@
+/* Tactile Studio design tokens — clean, professional, light tool UI. */
+:root {
+  /* Brand / accent (orange, used sparingly for the primary creation flow) */
+  --color-accent: #f2662a;
+  --color-accent-hover: #e15618;
+  --color-accent-soft: #fdeee6;
+  --color-on-accent: #ffffff;
+
+  /* Neutrals */
+  --color-bg: #ffffff;
+  --color-canvas: #fafaf9;
+  --color-surface: #ffffff;
+  --color-border: #e6e4e1;
+  --color-border-strong: #d3d0cc;
+  --color-text: #1c1b1a;
+  --color-text-muted: #6b6864;
+  --color-text-subtle: #98948e;
+
+  /* Status */
+  --color-success: #1f9d55;
+  --color-success-soft: #e6f4ec;
+  --color-danger: #d13a2e;
+  --color-danger-soft: #fbeae8;
+  --color-warning: #b8860b;
+
+  /* Focus ring — high-contrast, never color-only */
+  --focus-ring: 0 0 0 2px #ffffff, 0 0 0 4px var(--color-accent);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo',
+    'Malgun Gothic', Roboto, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+
+  /* Elevation (used minimally) */
+  --shadow-sm: 0 1px 2px rgba(28, 27, 26, 0.06);
+  --shadow-md: 0 4px 16px rgba(28, 27, 26, 0.08);
+
+  /* Layout dimensions */
+  --topbar-h: 56px;
+  --leftrail-w: 72px;
+  --logpanel-h: 72px;
+}
