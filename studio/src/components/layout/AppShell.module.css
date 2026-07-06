@@ -1,0 +1,25 @@
+.shell {
+  display: grid;
+  grid-template-columns: var(--leftrail-w) 1fr;
+  grid-template-rows: var(--topbar-h) 1fr auto;
+  grid-template-areas:
+    'topbar topbar'
+    'rail   canvas'
+    'rail   logs';
+  height: 100vh;
+  background: var(--color-bg);
+}
+
+.topbar {
+  grid-area: topbar;
+}
+.rail {
+  grid-area: rail;
+}
+.canvas {
+  grid-area: canvas;
+  min-height: 0;
+}
+.logs {
+  grid-area: logs;
+}
