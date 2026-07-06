@@ -10,6 +10,22 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=2">
 <link rel="manifest" href="assets/site.webmanifest?v=2">
 <meta name="theme-color" content="#C43D00">
+<style>
+/* Boot resilience: hide the raw x-dc template from the very first paint so the
+   uncompiled {{ … }} source never shows. On a successful boot the runtime
+   REPLACES <x-dc> with <div id="dc-root">, so this rule can never hide the
+   mounted app. If the runtime/React fail to load, the timeout below reveals a
+   friendly fallback instead of raw template soup. */
+x-dc{display:none!important}
+#dc-boot-fallback{display:none;position:fixed;inset:0;place-items:center;background:#F7F4EF;
+  font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;color:#1E1C1A;text-align:center;padding:24px}
+#dc-boot-fallback.show{display:grid}
+#dc-boot-fallback h1{font-size:18px;margin:0 0 8px}
+#dc-boot-fallback p{font-size:14px;color:#6B6862;margin:0 0 20px;max-width:340px;line-height:1.6}
+#dc-boot-fallback button{height:44px;padding:0 22px;border:none;border-radius:8px;
+  background:#C43D00;color:#fff;font-weight:700;font-size:14.5px;cursor:pointer}
+#dc-boot-fallback button:focus-visible{outline:2px solid #1E1C1A;outline-offset:2px}
+</style>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(reg => reg.unregister()));
@@ -21,8 +37,36 @@ if ('caches' in window) {
 <script src="./support.js"></script>
 <script src="./corpus.js"></script>
 <script src="./corpus-search.js"></script>
+<script>
+/* Boot watchdog — if the app root has not mounted within the grace window
+   (runtime script 404, React CDN unreachable, SRI failure, offline, …),
+   reveal a readable fallback instead of leaving the user on a blank/raw page.
+   A successful boot creates #dc-root with children, so the check is a no-op. */
+(function () {
+  var GRACE_MS = 9000;
+  function booted() {
+    var r = document.getElementById('dc-root');
+    return !!(r && r.childElementCount > 0);
+  }
+  window.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      if (booted()) return;
+      var fb = document.getElementById('dc-boot-fallback');
+      if (fb) fb.classList.add('show');
+    }, GRACE_MS);
+  });
+})();
+</script>
 </head>
 <body>
+<div id="dc-boot-fallback" role="alert" aria-live="assertive">
+  <div>
+    <h1 lang="ko">에디터를 불러오지 못했습니다</h1>
+    <p lang="ko">네트워크 연결을 확인한 뒤 새로고침해 주세요. 로컬 파일로 직접 열었다면, 로컬 서버(예: <code>npx serve</code>)로 실행해야 정상 동작합니다.</p>
+    <p lang="en" style="margin-top:-8px">Couldn't load the editor. Check your connection and refresh. If you opened the file directly, serve it over a local server (e.g. <code>npx serve</code>).</p>
+    <button onclick="location.reload()" lang="ko">새로고침 / Refresh</button>
+  </div>
+</div>
 <x-dc>
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1">
