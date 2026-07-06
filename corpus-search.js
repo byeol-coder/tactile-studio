@@ -46,6 +46,39 @@
     basic: ['basic', '기타', '게임', 'game', 'etc'],
   };
 
+  // Curated bilingual alias layer (recall aid, NOT ML). Maps a normalized query
+  // term/phrase to canonical tokens that already exist in the corpus (titles/tags/
+  // synonyms), so common KO/EN wordings resolve to the right record without
+  // touching corpus.js. Keys and targets must be pre-normalized (lowercase, no
+  // punctuation; '-' folds to a space, so 'pac-man' is keyed as 'pac man').
+  var QUERY_ALIASES = {
+    '팩맨': ['pacman'], 'pac man': ['pacman'],
+    'planet': ['행성'], 'planets': ['행성'],
+    'space': ['천문'], '우주': ['천문'],
+    'alphabet': ['영어', '발음기호'], 'abc': ['영어', '발음기호'], '알파벳': ['영어', '발음기호'],
+  };
+
+  // Expand a normalized query into an augmented, de-duped token list: the query's
+  // own tokens plus any alias targets whose key appears as a whole word/phrase.
+  // Deterministic (static data, fixed key order).
+  function expandQuery(q, tokens) {
+    var out = tokens.slice();
+    var seen = {};
+    out.forEach(function (t) { seen[t] = 1; });
+    var padded = ' ' + q + ' ';
+    var keys = Object.keys(QUERY_ALIASES);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (padded.indexOf(' ' + key + ' ') === -1) continue;
+      var targets = QUERY_ALIASES[key];
+      for (var j = 0; j < targets.length; j++) {
+        var tk = targets[j];
+        if (!seen[tk]) { seen[tk] = 1; out.push(tk); }
+      }
+    }
+    return out;
+  }
+
   function getCorpus() {
     return (typeof window !== 'undefined' && Array.isArray(window.DTMS_CORPUS)) ? window.DTMS_CORPUS : [];
   }
@@ -53,32 +86,6 @@
   function includesEither(a, b) {
     if (!a || !b) return false;
     return a.indexOf(b) !== -1 || b.indexOf(a) !== -1;
-  }
-
-  function boundedEditDistance(a, b, maxDistance) {
-    if (!a || !b) return maxDistance + 1;
-    if (Math.abs(a.length - b.length) > maxDistance) return maxDistance + 1;
-    var prev = [];
-    var curr = [];
-    for (var j = 0; j <= b.length; j++) prev[j] = j;
-    for (var i = 1; i <= a.length; i++) {
-      curr[0] = i;
-      var rowMin = curr[0];
-      for (j = 1; j <= b.length; j++) {
-        var cost = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
-        curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
-        if (curr[j] < rowMin) rowMin = curr[j];
-      }
-      if (rowMin > maxDistance) return maxDistance + 1;
-      var tmp = prev; prev = curr; curr = tmp;
-    }
-    return prev[b.length];
-  }
-
-  function isNearToken(token, candidate) {
-    if (!token || !candidate || token.length < 3 || candidate.length < 3) return false;
-    var maxDistance = Math.max(token.length, candidate.length) <= 5 ? 1 : 2;
-    return boundedEditDistance(token, candidate, maxDistance) <= maxDistance;
   }
 
   // Priority order for the reported primary matched field (strongest first).
@@ -216,7 +223,7 @@
     var minScore = typeof options.minScore === 'number' ? options.minScore : 1;
     var q = norm(query);
     if (!q) return [];
-    var tokens = tokenize(q);
+    var tokens = expandQuery(q, tokenize(q));
     var corpus = getCorpus();
     var scored = [];
     for (var i = 0; i < corpus.length; i++) {
@@ -246,22 +253,36 @@
     return pre >= 3;
   }
 
-  function scoreLoose(graphic, tokens) {
-    var hay = [norm(graphic.title)]
+  // Tokenized haystack for the near/miss path. Tokenizing (vs. matching raw
+  // strings) avoids incidental substring hits inside long desc text — e.g. a
+  // short query token landing inside an unrelated sentence. `braille` is excluded
+  // (opaque HEX → pure noise). De-duped for determinism.
+  function looseHaystackTokens(graphic) {
+    var strings = [norm(graphic.title)]
       .concat((graphic.tags || []).map(norm))
       .concat((CATEGORY_SYNONYMS[graphic.category] || []).map(norm))
       .concat((graphic.pages || []).map(function (p) { return norm(p.label); }))
       .concat((graphic.pages || []).map(function (p) { return norm(p.desc); }))
-      .concat((graphic.pages || []).map(function (p) { return norm(p.braille); }))
       .filter(Boolean);
+    var seen = {}, out = [];
+    for (var i = 0; i < strings.length; i++) {
+      var parts = tokenize(strings[i]);
+      for (var j = 0; j < parts.length; j++) if (!seen[parts[j]]) { seen[parts[j]] = 1; out.push(parts[j]); }
+    }
+    return out;
+  }
+
+  function scoreLoose(graphic, tokens) {
+    var hay = looseHaystackTokens(graphic);
     var score = 0;
     for (var i = 0; i < tokens.length; i++) {
+      var t = tokens[i];
+      if (t.length < 2) continue;
       for (var j = 0; j < hay.length; j++) {
-        if (includesEither(hay[j], tokens[i])) { score += 4; break; }
-        var parts = tokenize(hay[j]);
-        for (var k = 0; k < parts.length; k++) {
-          if (isNearToken(tokens[i], parts[k])) { score += 2; j = hay.length; break; }
-        }
+        var h = hay[j];
+        if (h === t) { score += 4; break; }                       // whole-token hit
+        if (h.length >= 2 && includesEither(h, t)) { score += 3; break; } // token/substring overlap (both ≥2)
+        if (isNearToken(t, h)) { score += 2; break; }             // light fuzzy
       }
     }
     return score;
@@ -272,7 +293,7 @@
     var limit = typeof options.limit === 'number' ? options.limit : NEAR_LIMIT;
     var q = norm(query);
     if (!q) return [];
-    var tokens = tokenize(q);
+    var tokens = expandQuery(q, tokenize(q));
     // Exclude only CONFIDENT strict hits (title/tag/category). Weak hits that
     // matched page desc/label/braille alone are NOT confident, so they remain
     // eligible as near suggestions — this is the "no confident match" branch.
