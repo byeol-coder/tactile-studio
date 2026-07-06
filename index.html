@@ -1761,9 +1761,36 @@ class Component extends DCLogic {
     return fallback;
   }
   snapshot() {
-    this.undoStack.push(this.cells.slice());
+    this.undoStack.push(this._histEntry());
     if (this.undoStack.length > 60) this.undoStack.shift();
     this.redoStack = [];
+  }
+  // ---- undo/redo history entries carry the active corpus page index (Issue #4) ----
+  // A history entry bundles the cell buffer with the corpus page index at capture
+  // time, so undo/redo can restore the navigator label in sync with the canvas.
+  // corpusIndex is null when no multi-page corpus is active.
+  _histEntry() {
+    const c = this.state.corpusCtx;
+    const corpusIndex = c && Array.isArray(c.pages) && typeof c.index === 'number' ? c.index : null;
+    return { cells: this.cells.slice(), corpusIndex: corpusIndex };
+  }
+  // Restore a history entry's cells and re-sync the corpus navigator label/name to
+  // its captured page index. Only adjusts when a matching multi-page corpus is
+  // active and the index is in range; never emits a live announcement (the caller's
+  // undo/redo message stays the only one — no duplicate live-region output).
+  _restoreHistEntry(entry) {
+    const cells = entry && entry.cells ? entry.cells : entry; // tolerate legacy raw-array entries
+    this.setCells(cells);
+    const idx = entry && typeof entry.corpusIndex === 'number' ? entry.corpusIndex : null;
+    const ctx = this.state.corpusCtx;
+    if (!ctx || !Array.isArray(ctx.pages)) return;
+    if (idx == null || idx < 0 || idx >= ctx.pages.length || idx === ctx.index) return;
+    const page = ctx.pages[idx];
+    const num = page && typeof page.page === 'number' ? page.page : idx + 1;
+    this.setState({
+      corpusCtx: { id: ctx.id, title: ctx.title, pages: ctx.pages, index: idx, query: ctx.query },
+      fileName: `${ctx.title} · ${num}`
+    });
   }
   toastMsg(msg) {
     clearTimeout(this._toastT);
@@ -2696,14 +2723,14 @@ class Component extends DCLogic {
   resetPages(cells) { this.pages = [cells]; }
   undo() {
     if (!this.undoStack.length) return;
-    this.redoStack.push(this.cells.slice());
-    this.setCells(this.undoStack.pop());
+    this.redoStack.push(this._histEntry());
+    this._restoreHistEntry(this.undoStack.pop());
     this.say(this.T().aUndo); this.bump();
   }
   redo() {
     if (!this.redoStack.length) return;
-    this.undoStack.push(this.cells.slice());
-    this.setCells(this.redoStack.pop());
+    this.undoStack.push(this._histEntry());
+    this._restoreHistEntry(this.redoStack.pop());
     this.say(this.T().aRedo); this.bump();
   }
   setGrid(w, h) {
