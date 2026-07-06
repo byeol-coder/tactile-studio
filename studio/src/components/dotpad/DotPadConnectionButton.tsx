@@ -10,7 +10,7 @@ import { Button } from '../ui/Button';
  * Never "연결 새로고침".
  */
 export function DotPadConnectionButton({ size = 'md' }: { size?: 'md' | 'sm' }) {
-  const { status, connect, disconnect, retry } = useDotPadConnection();
+  const { status, connectBle, connectUsb, disconnect, retry } = useDotPadConnection();
 
   if (status === 'connecting') {
     return (
@@ -34,8 +34,13 @@ export function DotPadConnectionButton({ size = 'md' }: { size?: 'md' | 'sm' }) 
     );
   }
   return (
-    <Button size={size} onClick={connect}>
-      Dot Pad 연결
-    </Button>
+    <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+      <Button size={size} onClick={connectBle}>
+        Dot Pad BLE 연결
+      </Button>
+      <Button size={size} variant="quiet" onClick={connectUsb} aria-label="Dot Pad USB 연결">
+        USB
+      </Button>
+    </div>
   );
 }
