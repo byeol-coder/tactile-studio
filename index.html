@@ -87,6 +87,21 @@ input[type=range]{accent-color:#EC5927}
   .ts-topbar-action,.device-status-pill{width:44px!important;padding-left:0!important;padding-right:0!important}
   .ts-pill-short{display:none}
 }
+/* Hub landing — tablet padding tightening */
+@media (max-width:820px){
+  .ts-hub-main{padding:40px 24px 64px!important}
+  .ts-hero-banner{gap:28px!important;padding:34px 30px!important}
+  .ts-hub-header{gap:20px!important;padding:0 24px!important}
+}
+/* Hub landing — phones: stack the hero so the text/CTA aren't crushed by the fixed-width canvas */
+@media (max-width:640px){
+  .ts-hub-main{padding:26px 16px 56px!important}
+  .ts-hero-banner{flex-direction:column!important;align-items:stretch!important;gap:22px!important;padding:26px 22px!important}
+  .ts-hero-canvas{order:-1;flex:none!important;width:100%!important;max-width:300px;height:auto!important;aspect-ratio:22/15;align-self:center;margin:0 auto}
+  .ts-hub-split{grid-template-columns:1fr!important}
+  .ts-hub-header{gap:14px!important;padding:0 16px!important}
+  .ts-hub-nav{display:none!important}
+}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
@@ -94,7 +109,7 @@ input[type=range]{accent-color:#EC5927}
 <sc-if value="{{ isHub }}" hint-placeholder-val="{{ true }}">
 <div data-screen-label="1. Tactile World Hub" style="min-height:100vh;background:#F7F4EF;font-family:'Pretendard Variable',Pretendard,sans-serif;color:#1E1C1A">
   <div style="height:10px;background:#EC5927"></div>
-  <header style="display:flex;align-items:center;gap:40px;height:76px;padding:0 44px;background:#FFFFFF;border-bottom:1px solid #EAE1D7">
+  <header class="ts-hub-header" style="display:flex;align-items:center;gap:40px;height:76px;padding:0 44px;background:#FFFFFF;border-bottom:1px solid #EAE1D7">
     <div style="display:flex;align-items:center">
       <svg viewBox="232 405 126 30" fill="#1E1C1A" role="img" aria-label="Tactile Studio" style="height:40px;display:block">
         <polygon points="267.67 417.56 270.36 417.56 270.36 424.37 272.3 424.37 272.3 417.56 274.99 417.56 274.99 415.97 267.67 415.97 267.67 417.56"></polygon>
@@ -118,7 +133,7 @@ input[type=range]{accent-color:#EC5927}
         <path d="M257.88,418.68h-5.3c-3.41.34-6.13,3.07-6.47,6.47v7.85h.76v-2.3c.57.09,1.17.15,1.77.15,2.88,0,5.49-1.17,7.37-3.05,1.89-1.89,3.05-4.49,3.05-7.37,0-.33-.01-.65-.05-.98h2.29v-.77h-3.42Z" fill="#EC5927"></path>
       </svg>
     </div>
-    <nav style="display:flex;gap:28px;font-size:15px;font-weight:600;color:#6B6862">
+    <nav class="ts-hub-nav" style="display:flex;gap:28px;font-size:15px;font-weight:600;color:#6B6862">
       <span style="color:#1E1C1A;box-shadow:inset 0 -2px 0 #EC5927;padding-bottom:3px">{{ t.navHome }}</span>
       <span>Tactile Drive</span>
       <span>Dot Library</span>
@@ -132,12 +147,12 @@ input[type=range]{accent-color:#EC5927}
       <div style="width:34px;height:34px;border-radius:100px;background:#E8DFD6;display:grid;place-items:center;font-size:12px;font-weight:700;color:#6B6862">SB</div>
     </div>
   </header>
-  <main style="max-width:1120px;margin:0 auto;padding:52px 44px 90px">
+  <main class="ts-hub-main" style="max-width:1120px;margin:0 auto;padding:52px 44px 90px">
     <h1 style="margin:0;font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1">{{ t.hubTitle }}</h1>
     <p style="margin:12px 0 36px;font-size:16px;color:#6B6862">{{ t.hubSub }}</p>
 
     <sc-if value="{{ hubBanner }}" hint-placeholder-val="{{ true }}">
-      <section style="display:flex;align-items:center;gap:40px;background:#1E1C1A;border-radius:20px;padding:42px 46px;color:#fff;box-shadow:inset -51px -65px 191px rgba(58,58,58,0.15)">
+      <section class="ts-hero-banner" style="display:flex;align-items:center;gap:40px;background:#1E1C1A;border-radius:20px;padding:42px 46px;color:#fff;box-shadow:inset -51px -65px 191px rgba(58,58,58,0.15)">
         <div style="flex:1;min-width:0">
           <div style="font-size:12px;font-weight:700;letter-spacing:1.5px;color:#9C9994;text-transform:uppercase">Tactile Studio</div>
           <h2 style="margin:12px 0 10px;font-size:28px;font-weight:800;letter-spacing:-0.6px;line-height:1.15">{{ t.create }}</h2>
@@ -155,12 +170,12 @@ input[type=range]{accent-color:#EC5927}
             {{ t.newBtn }}
           </button>
         </div>
-        <canvas ref="{{ heroRef }}" width="440" height="300" role="img" aria-label="{{ t.heroAria }}" style="flex:none;width:220px;height:150px"></canvas>
+        <canvas class="ts-hero-canvas" ref="{{ heroRef }}" width="440" height="300" role="img" aria-label="{{ t.heroAria }}" style="flex:none;width:220px;height:150px"></canvas>
       </section>
     </sc-if>
 
     <sc-if value="{{ hubSplit }}" hint-placeholder-val="{{ false }}">
-      <section style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <section class="ts-hub-split" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
         <button onClick="{{ goStudioBlank }}" style="text-align:left;background:#fff;border:1px solid #EAE1D7;border-radius:12px;padding:28px;box-shadow:0 4px 6px -2px rgba(10,13,18,0.05),0 12px 16px -4px rgba(10,13,18,0.1);display:flex;flex-direction:column;gap:10px" style-hover="border:1px solid #EC5927">
           <div style="width:44px;height:44px;border-radius:10px;background:rgba(236,89,39,0.10);display:grid;place-items:center;color:#EC5927">
             <svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
