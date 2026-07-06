@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dot-inc.com/schemas/tactile-library-asset.v1.json",
+  "title": "Tactile Library Asset v1",
+  "description": "Global Tactile Content Library 자산 레코드. Studio 코퍼스 레코드(id/title/spec/lang/category/tags/pages)의 상위 호환 — 기존 corpus.js 레코드는 신규 필드가 전부 optional이므로 그대로 유효하다. 정본은 Supabase graphics 테이블, 정적 corpus.js는 sharing='community' AND qa.status='approved' 자산만의 빌드 산출물.",
+  "type": "object",
+  "required": ["id", "title", "spec", "lang", "category", "tags", "pages"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^dtms-[\\w가-힣-]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "titleEn": { "type": "string", "description": "글로벌 검색용 영문 제목 (KO 자산 권장)" },
+    "spec": { "type": "string", "enum": ["60x40", "96x64", "28x40"] },
+    "lang": { "type": "string", "enum": ["ko", "en", "bilingual"] },
+    "category": { "type": "string", "enum": ["science", "language", "geography", "math", "basic"] },
+    "tags": { "type": "array", "items": { "type": "string" }, "minItems": 4 },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["page", "label", "graphic"],
+        "properties": {
+          "page": { "type": "integer", "minimum": 1 },
+          "label": { "type": "string" },
+          "desc": { "type": "string" },
+          "braille": { "type": "string" },
+          "graphic": { "type": "string", "pattern": "^[0-9a-f]+$", "description": "DTMS hex — 60x40은 600 hex chars(300 bytes)" }
+        }
+      }
+    },
+
+    "curriculum": {
+      "type": "object",
+      "description": "교육과정 매핑 — Inquiry 재사용 검색의 핵심 축",
+      "properties": {
+        "country": { "type": "string", "description": "ISO 3166-1 alpha-2 (KR, US, DE …)" },
+        "grade": { "type": "string", "description": "K, 1–12, UG(대학) 등" },
+        "subject": { "type": "string", "description": "math, biology, geography …" },
+        "unit": { "type": "string", "description": "단원/토픽 자유 텍스트" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "출처 — 어떤 학교 요청에서 태어났는가 (재사용률 측정 근거)",
+      "properties": {
+        "inquiryId": { "type": "string", "description": "Content Inquiry ID (예: CI-2026-0031)" },
+        "school": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "derivedFrom": { "type": "string", "description": "부모 자산 id — 수정본도 자산이다" },
+        "sourceType": { "type": "string", "enum": ["command", "image", "document", "template", "blank", "import"] }
+      }
+    },
+    "qa": {
+      "type": "object",
+      "description": "품질 게이트 — approved만 라이브러리 검색·corpus 빌드에 포함",
+      "properties": {
+        "status": { "type": "string", "enum": ["draft", "in_review", "approved", "rejected"], "default": "draft" },
+        "reviewer": { "type": "string" },
+        "reviewedAt": { "type": "string", "format": "date-time" },
+        "qualityScore": { "type": "number", "minimum": 0, "maximum": 100, "description": "Studio tactileQualityScore — 등록 최소 기준선" },
+        "teacherFeedback": { "type": "string" }
+      }
+    },
+    "sharing": {
+      "type": "string",
+      "enum": ["private", "campus", "community"],
+      "default": "private",
+      "description": "요금 티어와 1:1 — Starter=community 열람, Professional/School=campus 라이브러리 생성. 승격(private→campus→community)은 라이선스 확인 필수"
+    },
+    "license": {
+      "type": "object",
+      "properties": {
+        "cleared": { "type": "boolean", "default": false, "description": "community 승격 전 저작권/교과서 라이선스 확인 여부" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}
