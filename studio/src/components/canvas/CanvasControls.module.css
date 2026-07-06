@@ -1,0 +1,44 @@
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+.btn:hover {
+  background: var(--color-canvas);
+}
+.btnActive {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+.btnActive:hover {
+  background: var(--color-accent-hover);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn:disabled:hover {
+  background: transparent;
+}
+.divider {
+  height: 1px;
+  margin: var(--space-1) 2px;
+  background: var(--color-border);
+}
