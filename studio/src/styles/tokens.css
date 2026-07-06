@@ -16,6 +16,16 @@
   --color-text-muted: #6b6864;
   --color-text-subtle: #98948e;
 
+  /* Icons — default/hover/disabled reuse existing neutral text tokens.
+     Active/selected uses the dedicated icon active token. NOTE: this differs
+     from the general brand accent --color-accent (#f2662a); the mismatch is
+     intentional/known and reserved to icon active state only. Reconcile the
+     two oranges if a single brand value is desired. */
+  --color-icon: var(--color-text-muted);
+  --color-icon-hover: var(--color-text);
+  --color-icon-disabled: var(--color-text-subtle);
+  --color-icon-active: #EC5927;
+
   /* Status */
   --color-success: #1f9d55;
   --color-success-soft: #e6f4ec;
