@@ -11,9 +11,9 @@
 <link rel="manifest" href="assets/site.webmanifest?v=2">
 <meta name="theme-color" content="#C43D00">
 <style>
-/* Boot resilience: hide the raw x-dc template from the very first paint so the
+/* Boot resilience: hide the raw template from the very first paint so the
    uncompiled {{ … }} source never shows. On a successful boot the runtime
-   REPLACES <x-dc> with <div id="dc-root">, so this rule can never hide the
+   REPLACES the x-dc element with div#dc-root, so this rule can never hide the
    mounted app. If the runtime/React fail to load, the timeout below reveals a
    friendly fallback instead of raw template soup. */
 x-dc{display:none!important}
