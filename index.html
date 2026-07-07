@@ -78,12 +78,43 @@ input[type=range]{accent-color:#EC5927}
   .ts-output-pill{max-width:118px!important}
   .ts-output-select{max-width:96px!important}
   .ts-conn-chip{max-width:116px!important}
+  .ts-save-label{display:none!important}
 }
 @media (max-width:900px){
   .ts-topbar{grid-template-columns:minmax(120px,1fr) auto auto}
   .ts-output-pill{display:none!important}
   .ts-conn-text{display:none!important}
   .ts-conn-chip{width:38px!important;padding-left:0!important;padding-right:0!important;justify-content:center}
+}
+/* Narrow: shed non-essential chrome (language + help) so the primary
+   Save / Export / Send actions keep room and don't overlap. */
+@media (max-width:820px){
+  .ts-lang-toggle,.ts-help-btn{display:none!important}
+  .ts-topbar-center,.ts-topbar-right{gap:6px}
+}
+/* Narrow: fold Create / Export / device chip into a single "More" overflow so the
+   top bar never overlaps. Save + Send stay as visible buttons. */
+@media (max-width:640px){
+  .ts-create-btn,.ts-export-btn,.ts-conn-chip{display:none!important}
+  .ts-more-btn{display:inline-flex!important}
+  /* Swap the vertical side rail for a horizontal bottom dock — reclaims canvas width. */
+  .ts-rail{display:none!important}
+  .ts-tooldock{display:flex!important}
+  /* Swap the multi-item status bar for a single compact row. */
+  .ts-statusbar-full{display:none!important}
+  .ts-statusbar-compact{display:flex!important}
+}
+@media (max-width:560px){
+  .ts-send-label{display:none!important}
+  .ts-send-btn{padding-left:12px!important;padding-right:12px!important}
+  .ts-top-action{padding-left:9px!important;padding-right:9px!important}
+}
+/* Canvas-first: on tablet/narrow the device inspector floats as a dismissible
+   drawer instead of a side column, so it never squeezes or covers the canvas
+   unless the creator opens it. Desktop keeps the docked side panel. */
+@media (max-width:1024px){
+  .ts-inspector{position:fixed!important;top:0;right:0;bottom:0;width:min(340px,86vw)!important;z-index:41;box-shadow:-8px 0 28px -10px rgba(16,24,40,0.28)}
+  .ts-inspector-scrim{display:block!important}
 }
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
@@ -295,7 +326,7 @@ input[type=range]{accent-color:#EC5927}
 
 	    <!-- CENTER ZONE: create / output status / export -->
 	    <div class="ts-topbar-center">
-	      <button class="ts-top-action" onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	      <button class="ts-top-action ts-create-btn" onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
 	        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
 	        {{ t.createMenu }}
 	        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -310,12 +341,17 @@ input[type=range]{accent-color:#EC5927}
 	        </select>
 	      </label>
 
-	      <span class="ts-saved-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#0B8800;flex:0 1 auto;white-space:nowrap">
-	        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-	        {{ t.savedStatus }}
+	      <span class="ts-saved-status" role="status" aria-live="polite" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:{{ saveChipColor }};flex:0 1 auto;white-space:nowrap">
+	        <span style="{{ saveDotStyle }}" aria-hidden="true"></span>
+	        {{ saveChipLabel }}
 	      </span>
 
-	      <button class="ts-top-action" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	      <button class="ts-top-action ts-save-btn" onClick="{{ saveNow }}" aria-label="{{ saveBtnAria }}" title="{{ saveHint }}" style="{{ saveBtnStyle }}" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h10l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 4v5h7V4M8 20v-6h8v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+	        <span class="ts-save-label">{{ saveBtnLabel }}</span>
+	      </button>
+
+	      <button class="ts-top-action ts-export-btn" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" style="height:38px;padding:0 12px;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
 	        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 	        {{ t.export }}
 	        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -337,6 +373,10 @@ input[type=range]{accent-color:#EC5927}
 	      <button class="ts-send-btn" onClick="{{ openSend }}" style="height:40px;padding:0 18px;border:none;border-radius:9px;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex:none;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
 	        <svg width="15" height="15" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 	        <span class="ts-send-label">{{ t.send }}</span>
+	      </button>
+
+	      <button class="ts-more-btn" onClick="{{ toggleMore }}" aria-haspopup="menu" aria-expanded="{{ moreOpen }}" aria-label="{{ t.moreActions }}" title="{{ t.moreActions }}" style="display:none;width:38px;height:38px;flex:none;border:1px solid #EAE1D7;border-radius:9px;background:#fff;color:#1E1C1A;align-items:center;justify-content:center" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+	        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h.01M12 12h.01M18 12h.01" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
 	      </button>
 
 	      <div style="width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px"></div>
@@ -386,6 +426,16 @@ input[type=range]{accent-color:#EC5927}
       </sc-for>
     </div>
   </sc-if>
+  <sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="menu" aria-label="{{ t.moreActions }}" style="{{ menuStyleRight }}">
+      <sc-for list="{{ moreItems }}" as="m" hint-placeholder-count="5">
+        <button role="menuitem" onClick="{{ m.run }}" style="{{ menuRowStyle }}" style-hover="background:rgba(236,89,39,0.08)" style-focus="outline:2px solid #EC5927;outline-offset:-2px">
+          <span style="{{ menuIconStyle }}"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ m.iconPath }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span style="flex:1;text-align:left;font-size:13px;font-weight:700;color:#1E1C1A">{{ m.label }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
 
   <sc-if value="{{ showErrBanner }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="8. DotPad disconnected" role="alert" style="flex:none;display:flex;align-items:center;gap:10px;background:rgba(218,18,13,0.06);border-bottom:1px solid #DA120D;color:#DA120D;font-size:13px;font-weight:600;padding:9px 18px">
@@ -396,7 +446,7 @@ input[type=range]{accent-color:#EC5927}
   </sc-if>
 
   <div style="flex:1;display:flex;min-height:0">
-    <div role="toolbar" aria-label="Tools" aria-orientation="vertical" style="width:60px;background:#fff;border-right:1px solid #EAE1D7;display:flex;flex-direction:column;align-items:center;padding:10px 0 12px;gap:4px;flex:none">
+    <div class="ts-rail" role="toolbar" aria-label="Tools" aria-orientation="vertical" style="width:60px;background:#fff;border-right:1px solid #EAE1D7;display:flex;flex-direction:column;align-items:center;padding:10px 0 12px;gap:4px;flex:none">
       <sc-for list="{{ primaryTools }}" as="tl" hint-placeholder-count="3">
         <button onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-label="{{ tl.aria }}" style="{{ tl.style }}" style-hover="background:rgba(236,89,39,0.08)" style-active="transform:scale(0.9)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
           <sc-if value="{{ tl.selected }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;left:-8px;top:13px;bottom:13px;width:3px;border-radius:3px;background:#EC5927"></span></sc-if>
@@ -535,12 +585,12 @@ input[type=range]{accent-color:#EC5927}
         </div>
       </sc-if>
       <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
-        <div role="status" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
+        <div role="status" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out;pointer-events:none">
           <span style="width:26px;height:26px;border-radius:8px;background:rgba(236,89,39,0.22);display:grid;place-items:center;color:#EC5927;flex:none">
             <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </span>
           <span style="font-size:12.5px;font-weight:600;line-height:1.45">{{ t.retouchHintMsg }}</span>
-          <button onClick="{{ dismissRetouch }}" aria-label="{{ t.close }}" style="flex:none;width:26px;height:26px;border:none;border-radius:7px;background:rgba(255,255,255,0.12);color:#fff;display:grid;place-items:center" style-hover="background:rgba(255,255,255,0.22)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+          <button onClick="{{ dismissRetouch }}" aria-label="{{ t.close }}" style="flex:none;width:26px;height:26px;border:none;border-radius:7px;background:rgba(255,255,255,0.12);color:#fff;display:grid;place-items:center;pointer-events:auto" style-hover="background:rgba(255,255,255,0.22)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
             <svg width="13" height="13" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
           </button>
         </div>
@@ -624,18 +674,78 @@ input[type=range]{accent-color:#EC5927}
       </sc-if>
     </div>
 
-    <sc-if value="{{ inspectorOpen }}" hint-placeholder-val="{{ true }}">
-      <aside aria-label="{{ t.dpPanelTitle }}" data-screen-label="DotPad Output panel" style="width:256px;flex:none;background:#fff;border-left:1px solid #EAE1D7;display:flex;flex-direction:column;overflow-y:auto">
+    <sc-if value="{{ inspectorOpen }}" hint-placeholder-val="{{ false }}">
+      <button class="ts-inspector-scrim" onClick="{{ toggleInspector }}" aria-label="{{ t.close }}" tabindex="-1" style="display:none;position:fixed;inset:0;z-index:40;background:rgba(16,24,40,0.28);border:none;cursor:default"></button>
+      <aside class="ts-inspector" aria-label="{{ t.inspectorTitle }}" data-screen-label="Inspector panel" style="width:256px;flex:none;background:#fff;border-left:1px solid #EAE1D7;display:flex;flex-direction:column;overflow-y:auto">
         <div style="display:flex;align-items:center;gap:8px;padding:16px 16px 13px;border-bottom:1px solid #F2ECE4">
-          <svg width="16" height="16" viewBox="0 0 24 24" style="color:#EC5927;flex:none" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle><circle cx="16" cy="12" r="1.2" fill="currentColor"></circle></svg>
-          <h2 style="margin:0;font-size:13.5px;font-weight:800;letter-spacing:-0.2px;flex:1">{{ t.dpPanelTitle }}</h2>
+          <svg width="16" height="16" viewBox="0 0 24 24" style="color:#EC5927;flex:none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16M8 4v4M16 10v4M11 16v4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          <h2 style="margin:0;font-size:13.5px;font-weight:800;letter-spacing:-0.2px;flex:1">{{ t.inspectorTitle }}</h2>
           <button onClick="{{ toggleInspector }}" aria-label="{{ t.close }}" title="{{ t.close }}" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:#9C9994;display:grid;place-items:center;flex:none" style-hover="background:#F7F4EF" style-focus="outline:2px solid #EC5927;outline-offset:2px">
             <svg width="14" height="14" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </div>
 
-        <!-- device status -->
+        <!-- Canvas (document settings) — creator context appears before device controls -->
         <div style="padding:14px 16px;border-bottom:1px solid #F2ECE4">
+          <div style="font-size:11px;font-weight:800;color:#9C9994;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:9px">{{ t.insCanvas }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
+            <span style="color:#6B6862;font-weight:600">{{ t.outputL }}</span>
+            <span style="font-weight:800;color:#1E1C1A;font-variant-numeric:tabular-nums">{{ gridLabel }}</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px">
+            <span style="color:#6B6862;font-weight:600">{{ t.insDensity }}</span>
+            <span style="font-weight:800;color:#1E1C1A;font-variant-numeric:tabular-nums">{{ dotCount }} {{ t.dots }}</span>
+          </div>
+          <sc-if value="{{ hasDocTags }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:10px;font-size:11px;font-weight:700;color:#9C9994;margin-bottom:6px">{{ t.insTags }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <sc-for list="{{ docTagList }}" as="g" hint-placeholder-count="4">
+                <span style="border:1px solid #E3D9CE;border-radius:100px;background:#F7F4EF;color:#57534E;font-size:10.5px;font-weight:700;padding:2px 8px">{{ g }}</span>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- Tool Options (contextual to the active tool) -->
+        <div style="padding:14px 16px;border-bottom:1px solid #F2ECE4">
+          <div style="font-size:11px;font-weight:800;color:#9C9994;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:9px">{{ t.insToolOptions }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-bottom:10px">
+            <span style="color:#6B6862;font-weight:600">{{ t.toolLabel }}</span>
+            <span style="font-weight:800;color:#1E1C1A">{{ toolName }}</span>
+          </div>
+          <sc-if value="{{ toolSizeApplies }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:6px">{{ toolSizeLabel }}</div>
+            <div role="group" aria-label="{{ toolSizeLabel }}" style="display:flex;gap:4px;background:#F2ECE4;border-radius:9px;padding:3px;margin-bottom:10px">
+              <sc-for list="{{ toolSizeOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid #EC5927;outline-offset:1px">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="font-size:11.5px;color:#8A857E;line-height:1.45">{{ toolOptHint }}</div>
+        </div>
+
+        <!-- Tactile Cleanup (deterministic, undoable) -->
+        <div style="padding:14px 16px;border-bottom:1px solid #F2ECE4">
+          <div style="font-size:11px;font-weight:800;color:#9C9994;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:9px">{{ t.insCleanup }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-bottom:10px">
+            <span style="color:#6B6862;font-weight:600">{{ t.insDensity }}</span>
+            <span style="font-weight:800;color:#1E1C1A;font-variant-numeric:tabular-nums">{{ dotCount }} {{ t.dots }} · {{ densityPct }}%</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{ cleanupItems }}" as="c" hint-placeholder-count="3">
+              <button onClick="{{ c.run }}" style="display:flex;align-items:center;gap:8px;width:100%;min-height:38px;padding:8px 11px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-size:12.5px;font-weight:700;text-align:left;cursor:pointer" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;color:#EC5927"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                {{ c.label }}
+              </button>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;color:#B7AEA4;line-height:1.45;margin-top:8px">{{ t.cleanNote }}</div>
+        </div>
+
+        <!-- DotPad device section (secondary; advanced test collapsed below) -->
+        <div style="padding:14px 16px 0;font-size:11px;font-weight:800;color:#9C9994;letter-spacing:0.4px;text-transform:uppercase">{{ t.insDevice }}</div>
+        <!-- device status -->
+        <div style="padding:10px 16px 14px;border-bottom:1px solid #F2ECE4">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
             <span style="font-size:13px;font-weight:800;color:#1E1C1A">{{ t.dpDevice }}</span>
             <span role="status" aria-live="polite" style="{{ dpStatusStyle }}">
@@ -729,7 +839,34 @@ input[type=range]{accent-color:#EC5927}
     </sc-if>
   </div>
 
-  <div style="height:40px;background:#fff;border-top:1px solid #EAE1D7;display:flex;align-items:center;gap:14px;padding:0 16px;font-size:11.5px;color:#9C9994;flex:none" data-screen-label="BottomPanel">
+  <!-- Mobile bottom tool dock (≤640px): horizontal quick-access to the core
+       creation tools so the canvas gains the width the 60px side rail used. -->
+  <div class="ts-tooldock" role="toolbar" aria-label="{{ t.toolsLabel }}" style="display:none;flex:none;background:#fff;border-top:1px solid #EAE1D7;align-items:center;justify-content:space-around;gap:2px;padding:6px 6px">
+    <sc-for list="{{ primaryTools }}" as="tl" hint-placeholder-count="3">
+      <button onClick="{{ tl.pick }}" aria-pressed="{{ tl.selected }}" aria-label="{{ tl.aria }}" title="{{ tl.label }}" style="{{ tl.style }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ tl.iconEl }}</button>
+    </sc-for>
+    <button onClick="{{ shapeGroup.toggle }}" aria-haspopup="menu" aria-expanded="{{ shapeMenuOpen }}" aria-label="{{ shapeGroup.aria }}" title="{{ t.shapesGroup }}" style="{{ shapeGroup.style }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ shapeGroup.iconEl }}</button>
+    <button onClick="{{ selectTool.pick }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" title="{{ selectTool.label }}" style="{{ selectTool.style }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ selectTool.iconEl }}</button>
+    <button onClick="{{ textTool.pick }}" aria-pressed="{{ textTool.selected }}" aria-label="{{ textTool.aria }}" title="{{ textTool.label }}" style="{{ textTool.style }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ textTool.iconEl }}</button>
+    <button onClick="{{ dockImport }}" aria-label="{{ t.startImage }}" title="{{ t.startImage }}" style="{{ dockImportStyle }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+      <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+    <button onClick="{{ quickGroup.toggle }}" aria-haspopup="menu" aria-expanded="{{ quickMenuOpen }}" aria-label="{{ quickGroup.aria }}" title="{{ t.quick }}" style="{{ quickGroup.style }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ quickGroup.iconEl }}</button>
+  </div>
+
+  <!-- Compact single-row status bar for narrow widths (≤640px) — keeps the
+       essentials (canvas size · dots · tool · position) without wrapping. -->
+  <div class="ts-statusbar-compact" role="status" aria-live="off" style="display:none;flex:none;height:34px;background:#fff;border-top:1px solid #EAE1D7;align-items:center;gap:7px;padding:0 12px;font-size:11.5px;color:#6B6862;overflow:hidden;white-space:nowrap">
+    <span style="font-weight:800;color:#57534E;font-variant-numeric:tabular-nums">{{ gridLabel }}</span>
+    <span style="color:#D8CCBE">·</span>
+    <span style="font-variant-numeric:tabular-nums">{{ dotCount }} {{ t.dots }}</span>
+    <span style="color:#D8CCBE">·</span>
+    <span>{{ t.toolLabel }} <b style="color:#57534E">{{ toolName }}</b></span>
+    <span style="flex:1;min-width:0"></span>
+    <span style="color:#9C9994;font-variant-numeric:tabular-nums">{{ posLabel }}</span>
+  </div>
+
+  <div class="ts-statusbar-full" style="height:40px;background:#fff;border-top:1px solid #EAE1D7;display:flex;align-items:center;gap:14px;padding:0 16px;font-size:11.5px;color:#9C9994;flex:none" data-screen-label="BottomPanel">
     <span>{{ t.pos }} <b style="color:#57534E;font-variant-numeric:tabular-nums">{{ posLabel }}</b></span>
     <span style="display:inline-flex;align-items:center;gap:6px;color:#6B6862;font-weight:600">
       <sc-if value="{{ cellOn }}" hint-placeholder-val="{{ false }}">
@@ -803,7 +940,7 @@ input[type=range]{accent-color:#EC5927}
           <span style="font-size:12px;font-weight:700;color:#6B6862">{{ t.outputL }}</span>
           <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:#1E1C1A;background:#F7F4EF;border:1px solid #E3D9CE;border-radius:100px;padding:4px 12px">
             <svg width="13" height="13" viewBox="0 0 24 24" style="color:#EC5927" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.3" fill="currentColor"></circle><circle cx="12" cy="12" r="1.3" fill="currentColor"></circle><circle cx="16" cy="12" r="1.3" fill="currentColor"></circle></svg>
-            {{ outName }}
+            {{ impOutName }}
           </span>
         </div>
 
@@ -904,11 +1041,11 @@ input[type=range]{accent-color:#EC5927}
         <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap">
           <span style="font-size:12px;font-weight:700;color:#6B6862">{{ t.outputL }}</span>
           <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid #EAE1D7;border-radius:8px;overflow:hidden">
-            <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
+            <sc-for list="{{ impOutputOpts }}" as="o" hint-placeholder-count="4">
               <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:-2px">{{ o.label }}</button>
             </sc-for>
           </div>
-          <span style="font-size:12px;color:#6B6862">{{ outName }}</span>
+          <span style="font-size:12px;color:#6B6862">{{ impOutName }}</span>
         </div>
       </sc-if>
 
@@ -939,7 +1076,7 @@ input[type=range]{accent-color:#EC5927}
             </div>
             <div style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;overflow:hidden;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)">
               <canvas ref="{{ impRef }}" style="display:block;width:100%;height:100%;object-fit:contain"></canvas>
-              <span style="position:absolute;left:10px;bottom:9px;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
+              <span style="position:absolute;left:10px;bottom:9px;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ impGridLabel }}</span>
               <sc-if value="{{ converting }}" hint-placeholder-val="{{ true }}">
                 <div style="position:absolute;inset:0;background:rgba(20,18,16,0.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:10px">
                   <span style="width:26px;height:26px;border:3px solid rgba(255,255,255,0.25);border-top-color:#EC5927;border-radius:100px;animation:tsSpin 0.8s linear infinite"></span>
@@ -968,7 +1105,7 @@ input[type=range]{accent-color:#EC5927}
           </div>
           <div>
             <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.tactilePreview }}</div>
-            <div style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;overflow:hidden;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
+            <div style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;overflow:hidden;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ impGridLabel }}</span>
               <canvas ref="{{ impRef }}" style="display:block;width:100%;height:100%;object-fit:contain"></canvas>
             </div>
           </div>
@@ -1069,6 +1206,8 @@ input[type=range]{accent-color:#EC5927}
       </button>
     </div>
     <div style="padding:20px 26px 4px">
+      <!-- STEP 1 · PROMPT -->
+      <sc-if value="{{ cmdIsPrompt }}" hint-placeholder-val="{{ true }}">
       <label style="display:block;font-size:12.5px;font-weight:700;color:#1E1C1A;margin-bottom:7px">{{ t.cmdLabel }}</label>
       <textarea value="{{ cmdPrompt }}" onChange="{{ cmdPromptChange }}" placeholder="{{ t.cmdPh }}" aria-label="{{ t.cmdLabel }}" rows="2" style="width:100%;resize:none;border:1px solid #EAE1D7;border-radius:8px;padding:11px 13px;font-size:14px;color:#1E1C1A;line-height:1.5" style-focus="border:1px solid #EC5927;outline:none"></textarea>
       <sc-if value="{{ cmdError }}" hint-placeholder-val="{{ false }}">
@@ -1081,8 +1220,8 @@ input[type=range]{accent-color:#EC5927}
         <div>
           <div style="font-size:12px;font-weight:700;color:#6B6862;margin-bottom:6px">{{ t.outputL }}</div>
           <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid #EAE1D7;border-radius:8px;overflow:hidden">
-            <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
-              <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:-2px">{{ o.label }}</button>
+            <sc-for list="{{ cmdOutputOpts }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" style="{{ o.segStyle }}" style-focus="outline:2px solid #EC5927;outline-offset:-2px">{{ o.label }}</button>
             </sc-for>
           </div>
         </div>
@@ -1103,20 +1242,73 @@ input[type=range]{accent-color:#EC5927}
           </sc-for>
         </div>
       </div>
+      </sc-if>
+
+      <!-- STEP 2 · REVIEW (preview only — live canvas is untouched until Apply) -->
+      <sc-if value="{{ cmdIsReview }}" hint-placeholder-val="{{ false }}">
+      <div role="status" aria-live="polite" style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#B93E15;background:rgba(236,89,39,0.07);border:1px solid rgba(236,89,39,0.25);border-radius:9px;padding:9px 12px;margin-bottom:14px">
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 8v5M12 15.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        {{ t.cmdReviewNote }}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:7px">{{ t.cmdPreviewL }}</div>
+          <div style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;overflow:hidden"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ cmdDraftGridLabel }}</span>
+            <canvas ref="{{ cmdRef }}" role="img" aria-label="{{ t.cmdPreviewL }}" style="display:block;width:100%;height:100%;object-fit:contain"></canvas>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B6862;font-weight:600">{{ t.outputL }}</span><span style="font-weight:800;color:#1E1C1A">{{ cmdDraftGridLabel }}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B6862;font-weight:600">{{ t.cmdDotCount }}</span><span style="font-weight:800;color:#1E1C1A;font-variant-numeric:tabular-nums">{{ cmdDraftDots }}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B6862;font-weight:600">{{ t.cmdDensity }}</span><span style="font-weight:800;color:#1E1C1A;font-variant-numeric:tabular-nums">{{ cmdDraftDensity }}%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#6B6862;font-weight:600">{{ t.cmdMode }}</span><span style="font-weight:700;color:#B93E15">{{ t.cmdModeRule }}</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:11.5px;font-weight:700;color:#6B6862;margin-bottom:6px">{{ t.cmdAutoTags }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ cmdDraftTagList }}" as="g" hint-placeholder-count="5">
+            <span style="border:1px solid #E3D9CE;border-radius:100px;background:#F7F4EF;color:#57534E;font-size:11px;font-weight:700;padding:3px 10px">{{ g }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:11.5px;color:#8A857E;line-height:1.5"><b style="color:#6B6862">{{ t.cmdPromptUsed }}</b> {{ cmdDraftPrompt }}</div>
+      </sc-if>
     </div>
     <div style="display:flex;align-items:center;gap:10px;padding:18px 26px;margin-top:8px;border-top:1px solid #E8DFD6;background:#FCFAF7">
-      <button onClick="{{ closeCmd }}" style="height:40px;padding:0 16px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13.5px" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ t.cancel }}</button>
-      <div style="flex:1"></div>
-      <button onClick="{{ runCommand }}" disabled="{{ cmdGenerating }}" style="{{ cmdGenBtnStyle }}" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-        <sc-if value="{{ cmdGenerating }}" hint-placeholder-val="{{ false }}">
-          <span style="width:15px;height:15px;border:2.4px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:100px;display:inline-block;animation:tsSpin 0.8s linear infinite"></span>
-          {{ t.cmdGening }}
-        </sc-if>
-        <sc-if value="{{ cmdIdle }}" hint-placeholder-val="{{ true }}">
-          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z" fill="currentColor"></path></svg>
-          {{ t.cmdGen }}
-        </sc-if>
-      </button>
+      <!-- PROMPT-step footer -->
+      <sc-if value="{{ cmdIsPrompt }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ closeCmd }}" style="height:40px;padding:0 16px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13.5px" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ t.cancel }}</button>
+        <div style="flex:1"></div>
+        <button onClick="{{ cmdRandom }}" aria-label="{{ t.cmdRandom }}" title="{{ t.cmdRandom }}" style="height:40px;padding:0 14px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:7px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+          <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="9" cy="9" r="1.3" fill="currentColor"></circle><circle cx="15" cy="15" r="1.3" fill="currentColor"></circle><circle cx="15" cy="9" r="1.3" fill="currentColor"></circle><circle cx="9" cy="15" r="1.3" fill="currentColor"></circle></svg>
+          {{ t.cmdRandom }}
+        </button>
+        <button onClick="{{ cmdGenerate }}" disabled="{{ cmdGenerating }}" aria-label="{{ t.cmdGenPreview }}" style="{{ cmdGenBtnStyle }}" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+          <sc-if value="{{ cmdGenerating }}" hint-placeholder-val="{{ false }}">
+            <span style="width:15px;height:15px;border:2.4px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:100px;display:inline-block;animation:tsSpin 0.8s linear infinite"></span>
+            {{ t.cmdGening }}
+          </sc-if>
+          <sc-if value="{{ cmdIdle }}" hint-placeholder-val="{{ true }}">
+            <svg width="15" height="15" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z" fill="currentColor"></path></svg>
+            {{ t.cmdGenPreview }}
+          </sc-if>
+        </button>
+      </sc-if>
+      <!-- REVIEW-step footer -->
+      <sc-if value="{{ cmdIsReview }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ cmdBackStep }}" style="height:40px;padding:0 16px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:6px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          {{ t.impBack }}
+        </button>
+        <div style="flex:1"></div>
+        <button onClick="{{ cmdRandom }}" aria-label="{{ t.cmdRandom }}" title="{{ t.cmdRandom }}" style="height:40px;padding:0 12px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ t.cmdRandom }}</button>
+        <button onClick="{{ cmdRegenerate }}" disabled="{{ cmdGenerating }}" aria-label="{{ t.cmdRegen }}" style="height:40px;padding:0 14px;border:1px solid #EAE1D7;border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13px" style-hover="border:1px solid #EC5927;color:#EC5927" style-focus="outline:2px solid #EC5927;outline-offset:2px">{{ t.cmdRegen }}</button>
+        <button onClick="{{ cmdApplyDraft }}" aria-label="{{ t.cmdApplyEditor }}" style="height:40px;padding:0 18px;border:none;border-radius:8px;background:#EC5927;color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          {{ t.cmdApplyEditor }}
+        </button>
+      </sc-if>
     </div>
   </div>
 </div>
@@ -1466,14 +1658,16 @@ class Component extends DCLogic {
     output: '60', embossOpen: false, embossPhase: 'idle',
     entry: true, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
     impStep: 'import', cropChoice: 'full', converting: false, convertDone: false,
-    imgReady: false, impLoading: false, impErr: '', impName: '',
+    imgReady: false, impLoading: false, impErr: '', impName: '', impFileName: null, impOutput: '60',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, retouchHint: false, armedPreset: null,
-    cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false,
+    cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false, docTags: [],
+    cmdStep: 'prompt', cmdDraftGrid: '60', cmdDraftDots: 0, cmdDraftTags: [], cmdDraftTitle: '', cmdDraftMode: 'rule-based', cmdDraftPrompt: '',
+    docSource: 'manual', docPrompt: '', docGenMode: '',
     tplOpen: false, tplGroup: 'recommended',
     confirmOpen: false,
-    connected: false, connType: 'ble', connBusy: '', livePreview: false, liveStatus: 'idle', inspectorOpen: true, pinFx: '',
+    connected: false, connType: 'ble', connBusy: '', livePreview: false, liveStatus: 'idle', inspectorOpen: false, pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
-    saveOpen: false, savePhase: 'form', saveLoc: 'drive',
+    saveOpen: false, savePhase: 'form', saveLoc: 'drive', dirty: false, saveState: 'saved',
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
@@ -1486,6 +1680,8 @@ class Component extends DCLogic {
     this.canvasRef = React.createRef();
     this.padRef = React.createRef();
     this.impRef = React.createRef();
+    this.cmdRef = React.createRef();
+    this.cmdDraftCells = null; this.cmdDraftCtx = null;
     this.fileRef = React.createRef();
     this.impOrigRef = React.createRef();
     this.cropRef = React.createRef();
@@ -1527,7 +1723,14 @@ class Component extends DCLogic {
       aPage: (n, tot) => `${tot}페이지 중 ${n}페이지`, aPageAdd: (n, tot) => `${n}페이지를 추가했습니다. 총 ${tot}페이지`, aPageDel: (n, tot) => `페이지를 삭제했습니다. 현재 ${n}페이지, 총 ${tot}페이지`,
       strokeDesc: ['정밀한 1줄 선', '표준 2줄 선', '굵은 3줄 선'], eraserDesc: ['작게 지우기', '표준 크기로 지우기', '넓게 지우기'],
       quick: '빠른 작업', qClear: '모두 지우기', qInvert: '반전', qFlipH: '좌우 반전', qFlipV: '상하 반전',
-      createMenu: '만들기', savedStatus: '저장됨', undoRedoL: '실행 취소 / 다시 실행', shapesGroup: '도형',
+      createMenu: '만들기', savedStatus: '저장됨', saveAction: '저장', saveDirty: '저장 안 됨', saveSaving: '저장 중…', saveFailed: '저장 실패', saveLocalHint: '이 브라우저에 저장됩니다', moreActions: '더보기', devControls: '장치 제어', langMenu: '언어 전환', toolsLabel: '도구', inspectorTitle: '속성', insCanvas: '캔버스', insDevice: 'DotPad 장치', insDensity: '점 밀도', insToolOptions: '도구 옵션', insCleanup: '촉각 정리',
+      cleanIsolated: '고립된 점 제거', cleanNoise: '노이즈 줄이기', cleanGaps: '작은 틈 메우기', cleanNone: '정리할 항목이 없습니다', cleanDone: (b, a) => `정리 완료 · ${b} → ${a} 점`, cleanNote: '되돌리기(Ctrl+Z)로 취소할 수 있어요.',
+      toolTextHint: '캔버스를 눌러 텍스트 라벨을 추가하세요.', toolPointerHint: '셀을 눌러 커서를 옮기거나 영역을 선택하세요.', toolRetouchHint: '펜·지우개로 세부를 다듬으세요.',
+      cmdRandom: '랜덤', cmdTagsMsg: tags => `태그: ${tags}`,
+      cmdReviewNote: '미리보기입니다. 아직 캔버스에 적용되지 않았습니다. “편집기에 적용”을 눌러야 편집·저장·내보내기·전송할 수 있어요.',
+      cmdPreviewL: '촉각 미리보기', cmdDotCount: '점 개수', cmdDensity: '밀도', cmdMode: '생성 방식', cmdModeRule: '규칙 기반 초안', cmdAutoTags: '자동 태그', cmdPromptUsed: '명령어:', cmdGenPreview: '미리보기 생성', cmdRegen: '다시 생성', cmdApplyEditor: '편집기에 적용',
+      aCmdReview: n => `미리보기 생성됨 · 점 ${n}개. 검토 후 편집기에 적용하세요.`, aCmdApplied: '명령어 그래픽이 적용되었습니다. 펜이나 지우개로 바로 다듬을 수 있어요.', insTags: '자동 태그',
+      undoRedoL: '실행 취소 / 다시 실행', shapesGroup: '도형',
       devSettings: '장치 설정 열기', devTest: '테스트 출력', devDisconnect: '연결 해제', devConnect: 'DotPad 연결',
       dpTestSent: 'DotPad로 테스트 패턴을 전송했습니다.', saveToLib: '라이브러리에 저장',
       pos: '위치', dotOn: '점 있음', dotOff: '점 없음', toolLabel: '도구', undo: '실행 취소', redo: '다시 실행', dots: '점', helpHint: '단축키 안내',
@@ -1644,7 +1847,14 @@ class Component extends DCLogic {
       aPage: (n, tot) => `Page ${n} of ${tot}`, aPageAdd: (n, tot) => `Page ${n} added. ${tot} pages total`, aPageDel: (n, tot) => `Page deleted. Now on page ${n}, ${tot} pages total`,
       strokeDesc: ['Precise 1-row stroke', 'Standard 2-row stroke', 'Bold 3-row stroke'], eraserDesc: ['Small eraser size', 'Standard eraser size', 'Wide eraser size'],
       quick: 'Quick actions', qClear: 'Clear all', qInvert: 'Invert', qFlipH: 'Flip H', qFlipV: 'Flip V',
-      createMenu: 'Create', savedStatus: 'Saved', undoRedoL: 'Undo / Redo', shapesGroup: 'Shapes',
+      createMenu: 'Create', savedStatus: 'Saved', saveAction: 'Save', saveDirty: 'Unsaved changes', saveSaving: 'Saving…', saveFailed: 'Save failed', saveLocalHint: 'Saved in this browser', moreActions: 'More actions', devControls: 'Device controls', langMenu: 'Switch language', toolsLabel: 'Tools', inspectorTitle: 'Properties', insCanvas: 'Canvas', insDevice: 'DotPad device', insDensity: 'Dot density', insToolOptions: 'Tool options', insCleanup: 'Tactile cleanup',
+      cleanIsolated: 'Remove isolated dots', cleanNoise: 'Reduce noise', cleanGaps: 'Fill small gaps', cleanNone: 'Nothing to clean up', cleanDone: (b, a) => `Cleanup done · ${b} → ${a} dots`, cleanNote: 'Reversible with undo (Ctrl+Z).',
+      toolTextHint: 'Tap the canvas to add a text label.', toolPointerHint: 'Tap cells to move the cursor or select a region.', toolRetouchHint: 'Refine details with the Pen or Eraser.',
+      cmdRandom: 'Random', cmdTagsMsg: tags => `Tags: ${tags}`,
+      cmdReviewNote: 'Preview only — the canvas is not changed yet. Press “Apply to editor” to edit, save, export, or send.',
+      cmdPreviewL: 'Tactile preview', cmdDotCount: 'Dot count', cmdDensity: 'Density', cmdMode: 'Generation mode', cmdModeRule: 'Rule-based draft', cmdAutoTags: 'Auto tags', cmdPromptUsed: 'Prompt:', cmdGenPreview: 'Generate preview', cmdRegen: 'Regenerate', cmdApplyEditor: 'Apply to editor',
+      aCmdReview: n => `Preview generated · ${n} dots. Review, then apply to the editor.`, aCmdApplied: 'Command graphic applied. You can retouch with Pen or Eraser.', insTags: 'Auto tags',
+      undoRedoL: 'Undo / Redo', shapesGroup: 'Shapes',
       devSettings: 'Open device panel', devTest: 'Test output', devDisconnect: 'Disconnect', devConnect: 'Connect DotPad',
       dpTestSent: 'Sent a test pattern to DotPad.', saveToLib: 'Save to library',
       pos: 'Position', dotOn: 'Dot present', dotOff: 'No dot', toolLabel: 'Tool', undo: 'Undo', redo: 'Redo', dots: 'dots', helpHint: 'Shortcuts',
@@ -1759,7 +1969,7 @@ class Component extends DCLogic {
     return (x, y) => { for (const oy of offs) for (const ox of offs) baseCb(x + ox, y + oy); };
   }
   strokeSizeFor(tool) { return tool === 'eraser' ? this.state.eraserSize : this.state.strokeSize; }
-  bump() { this.setState(s => ({ rev: s.rev + 1 })); this.scheduleLive(); }
+  bump() { this.setState(s => ({ rev: s.rev + 1, dirty: true, saveState: 'dirty' })); this.scheduleLive(); }
   say(msg) { this.setState({ announce: msg }); }
   // Safe i18n invoker: locale value may be a function, a string, or missing.
   callI18n(value, fallback, ...args) {
@@ -1771,6 +1981,9 @@ class Component extends DCLogic {
     this.undoStack.push(this._histEntry());
     if (this.undoStack.length > 60) this.undoStack.shift();
     this.redoStack = [];
+    // Any snapshotted edit (incl. a single pen tap that never calls bump) marks
+    // the document unsaved so the Save state stays honest.
+    this.setState({ dirty: true, saveState: 'dirty' });
   }
   // ---- undo/redo history entries carry the active corpus page index (Issue #4) ----
   // A history entry bundles the cell buffer with the corpus page index at capture
@@ -1779,7 +1992,10 @@ class Component extends DCLogic {
   _histEntry() {
     const c = this.state.corpusCtx;
     const corpusIndex = c && Array.isArray(c.pages) && typeof c.index === 'number' ? c.index : null;
-    return { cells: this.cells.slice(), corpusIndex: corpusIndex };
+    // Capture grid size + output so undo/redo can span an apply that resized the
+    // canvas (e.g. importing at a different output target). Same-size edits ignore
+    // these on restore.
+    return { cells: this.cells.slice(), corpusIndex: corpusIndex, gridW: this.state.gridW, gridH: this.state.gridH, output: this.state.output };
   }
   // Restore a history entry's cells and re-sync the corpus navigator label/name to
   // its captured page index. Only adjusts when a matching multi-page corpus is
@@ -1787,7 +2003,22 @@ class Component extends DCLogic {
   // undo/redo message stays the only one — no duplicate live-region output).
   _restoreHistEntry(entry) {
     const cells = entry && entry.cells ? entry.cells : entry; // tolerate legacy raw-array entries
-    this.setCells(cells);
+    const eW = entry && typeof entry.gridW === 'number' ? entry.gridW : null;
+    if (eW && (eW !== this.state.gridW || entry.gridH !== this.state.gridH)) {
+      // Cross-size undo/redo: resample every page to the captured grid so the
+      // document stays uniform, then restore the active page's exact cells.
+      const w = eW, h = entry.gridH, ow = this.state.gridW, oh = this.state.gridH;
+      this.pages = this.pages.map(old => {
+        const nw = new Uint8Array(w * h);
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) nw[y * w + x] = old[Math.floor(y * oh / h) * ow + Math.floor(x * ow / w)];
+        return nw;
+      });
+      this.pages[this.state.pageIndex] = cells;
+      this.cells = cells;
+      this.setState({ gridW: w, gridH: h, output: entry.output || this.state.output, cx: 0, cy: 0, selRect: null });
+    } else {
+      this.setCells(cells);
+    }
     const idx = entry && typeof entry.corpusIndex === 'number' ? entry.corpusIndex : null;
     const ctx = this.state.corpusCtx;
     if (!ctx || !Array.isArray(ctx.pages)) return;
@@ -1817,6 +2048,61 @@ class Component extends DCLogic {
     this.toastMsg(t.dpTestSent); this.say(t.dpTestSent);
   }
   clearAll() { const t = this.T(); this.snapshot(); this.cells.fill(0); this.say(t.aClear); this.bump(); }
+  _countDots(cells) { const c = cells || this.cells; let d = 0; for (let i = 0; i < c.length; i++) d += c[i]; return d; }
+  // Deterministic, conservative tactile cleanup on the current grid. Each action
+  // snapshots for one clean undo step, marks the doc dirty (via bump), keeps grid
+  // size + title, and reports before→after dot counts. Safe after image import
+  // and command-generated graphics alike.
+  tactileCleanup(kind) {
+    const t = this.T(), w = this.state.gridW, h = this.state.gridH, src = this.cells;
+    const at = (x, y) => y * w + x, before = this._countDots(src);
+    let out = src.slice();
+    if (kind === 'isolated') {
+      // remove active cells with no active 8-neighbour (specks)
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        if (!src[at(x, y)]) continue; let nb = 0;
+        for (let dy = -1; dy <= 1 && !nb; dy++) for (let dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue; const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; if (src[at(nx, ny)]) { nb++; break; }
+        }
+        if (!nb) out[at(x, y)] = 0;
+      }
+    } else if (kind === 'noise') {
+      // drop tiny disconnected clusters (4-connected, < 3 cells)
+      out = this._cvRemoveSmall(src, w, h, 3).cells;
+    } else if (kind === 'gaps') {
+      // fill single-cell holes surrounded by ≥3 orthogonal active cells
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        if (src[at(x, y)]) continue; let nb = 0;
+        if (x > 0 && src[at(x - 1, y)]) nb++; if (x < w - 1 && src[at(x + 1, y)]) nb++;
+        if (y > 0 && src[at(x, y - 1)]) nb++; if (y < h - 1 && src[at(x, y + 1)]) nb++;
+        if (nb >= 3) out[at(x, y)] = 1;
+      }
+    } else return;
+    const after = this._countDots(out);
+    if (after === before) { this.toastMsg(t.cleanNone); this.say(t.cleanNone); return; }
+    this.snapshot(); this.setCells(out); this.bump();
+    const msg = this.callI18n(t.cleanDone, t.cleanNone, before, after);
+    this.toastMsg(msg); this.say(msg);
+  }
+  // Auto tags for a generated draft (local-only; persisted with the project via
+  // _recordSave). Pure: density is measured from the passed draft cells.
+  _autoTags(prompt, gw, gh, cells) {
+    const p = (prompt || '').toLowerCase();
+    const tags = ['command-generated', gw + 'x' + gh];
+    if (/\bmap\b|지도|bản đồ/.test(p)) tags.push('map');
+    if (/quiz|퀴즈|문제/.test(p)) tags.push('quiz');
+    if (/diagram|다이어그램|cycle|life\s*cycle|생애|구조|flow/.test(p)) tags.push('diagram');
+    if (/moon|tree|object|사물|물체|아이콘|icon|pikachu|피카츄/.test(p)) tags.push('object');
+    if (/school|classroom|student|교실|학생|교육|education/.test(p)) tags.push('education');
+    if (/culture|heritage|문화|유산/.test(p)) tags.push('culture');
+    const density = this._countDots(cells) / (gw * gh);
+    tags.push(density < 0.15 ? 'low-density' : 'outline');
+    if (/[가-힣]/.test(prompt || '')) tags.push('Korean');
+    else if (/[à-ỹ]/i.test(prompt || '')) tags.push('Vietnamese');
+    else tags.push('English');
+    return tags.filter((v, i, a) => a.indexOf(v) === i);
+  }
   invertAll() { const t = this.T(); this.snapshot(); for (let i = 0; i < this.cells.length; i++) this.cells[i] ^= 1; this.say(t.aInvert); this.bump(); }
   flipHoriz() { const t = this.T(); const { gridW: w, gridH: h } = this.state; this.snapshot(); const n = new Uint8Array(w * h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) n[y * w + x] = this.cells[y * w + (w - 1 - x)]; this.setCells(n); this.say(t.aFlipH); this.bump(); }
   flipVert() { const t = this.T(); const { gridW: w, gridH: h } = this.state; this.snapshot(); const n = new Uint8Array(w * h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) n[y * w + x] = this.cells[(h - 1 - y) * w + x]; this.setCells(n); this.say(t.aFlipV); this.bump(); }
@@ -1882,7 +2168,15 @@ class Component extends DCLogic {
     const st = this.state;
     if (st.railMenu && st.railMenu.kind === kind) { this.setState({ railMenu: null }); return; }
     const r = ev.currentTarget.getBoundingClientRect();
-    this.setState({ railMenu: { kind, top: r.top, left: r.right + 10 } });
+    const vw = (typeof window !== 'undefined' ? window.innerWidth : 1280);
+    const vh = (typeof window !== 'undefined' ? window.innerHeight : 800);
+    // A button near the viewport bottom (e.g. the mobile tool dock) opens its
+    // flyout upward and clamped horizontally; otherwise open to the right (rail).
+    if (r.bottom > vh - 170) {
+      this.setState({ railMenu: { kind, bottom: vh - r.top + 8, left: Math.max(8, Math.min(r.left, vw - 198)) } });
+    } else {
+      this.setState({ railMenu: { kind, top: r.top, left: r.right + 10 } });
+    }
   }
   closeRail() { this.setState({ railMenu: null }); }
 
@@ -2320,6 +2614,9 @@ class Component extends DCLogic {
     const mk = (kind, w, h) => ({ kind, thumb: this.thumbFrom(this.makePattern(kind, w, h), w, h) });
     this.presetFiles = [mk('bar', 60, 40), mk('star', 60, 40), mk('wave', 96, 64)];
     this.bump();
+    // Restore locally-saved projects (this browser) and start on a clean state.
+    const persisted = this._loadSaved();
+    this.setState({ saved: persisted, dirty: false, saveState: 'saved' });
     this._key = (e) => this.onKey(e);
     window.addEventListener('keydown', this._key);
     this.drawAll();
@@ -2335,6 +2632,7 @@ class Component extends DCLogic {
     this.drawMain();
     this.drawPad();
     this.drawImp();
+    this.drawCmdDraft();
     this.drawEmboss();
   }
   drawEmboss() {
@@ -2413,8 +2711,9 @@ class Component extends DCLogic {
     const crop = st.cropChoice === 'crop' ? st.cropRect : null;
     const cv = this.impRef.current;
     if (cv && st.importOpen) {
-      const a4 = this.isA4();
-      const w = st.gridW, h = st.gridH, s = 6, pat = this.applyConv(this.imgToCells(w, h, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, w, h);
+      const dm = this.impDims();
+      const a4 = dm.key === 'a4';
+      const w = dm.w, h = dm.h, s = 6, pat = this.applyConv(this.imgToCells(w, h, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, w, h);
       cv.width = w * s; cv.height = h * s;
       const g = cv.getContext('2d');
       g.fillStyle = a4 ? '#FFFFFF' : '#141210'; g.fillRect(0, 0, cv.width, cv.height);
@@ -2795,17 +3094,38 @@ class Component extends DCLogic {
     this.say(t.aOutput(t.outNames[key]));
   }
   isA4() { return this.state.output === 'a4'; }
+  // Wizard-scoped target dimensions. The import wizard stages its output size in
+  // `impOutput` and NEVER touches the live document grid until apply — so preview,
+  // quality, and conversion all read from here, not state.gridW/gridH.
+  impDims() { const o = this.outputDef(this.state.impOutput || this.state.output); return { w: o.gw, h: o.gh, key: o.key }; }
+  // Resize the live grid to w×h as part of a commit (apply). Unlike setGrid(),
+  // this does NOT clear undo/redo or push its own snapshot — the caller owns the
+  // single undo checkpoint. Existing page cells are resampled so multi-page docs
+  // stay uniform. No-op when the size already matches.
+  _commitOutputSize(w, h) {
+    if (w === this.state.gridW && h === this.state.gridH) return;
+    const ow = this.state.gridW, oh = this.state.gridH;
+    this.pages = this.pages.map(old => {
+      const nw = new Uint8Array(w * h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        nw[y * w + x] = old[Math.floor(y * oh / h) * ow + Math.floor(x * ow / w)];
+      }
+      return nw;
+    });
+    this.cells = this.pages[this.state.pageIndex];
+    this.setState({ gridW: w, gridH: h });
+  }
 
   // ---------- flows ----------
   enterStudio(entry, imp) {
-    this.setState({ screen: 'studio', entry, importOpen: !!imp, sendPhase: 'idle', savePhase: 'form' });
+    this.setState({ screen: 'studio', entry, importOpen: !!imp, sendPhase: 'idle', savePhase: 'form', dirty: false, saveState: 'saved' });
     if (imp) this.resetImport();
     if (!entry) this.say(this.T().aReady);
   }
   resetImport() {
     clearTimeout(this._readT);
     this._srcData = null; this._srcCanvas = null;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '', impFileName: null, impOutput: this.state.output });
   }
   // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
   _captureSource(bmp, w, h) {
@@ -2823,7 +3143,7 @@ class Component extends DCLogic {
     if (!(okExt || okType)) { clearTimeout(this._readT); this.setState({ impErr: 'type', imgReady: false, impLoading: false }); return; }
     if (file.size && file.size > 10 * 1024 * 1024) { clearTimeout(this._readT); this.setState({ impErr: 'size', imgReady: false, impLoading: false }); return; }
     clearTimeout(this._readT);
-    this.setState({ impErr: '', impLoading: true, imgReady: false, impName: name, fileName: name.replace(/\.[^.]+$/, '') });
+    this.setState({ impErr: '', impLoading: true, imgReady: false, impName: name, impFileName: name.replace(/\.[^.]+$/, '') });
     const fail = () => { this._srcData = null; this.setState({ impErr: 'load', impLoading: false, imgReady: false }); };
     const done = (bmp, w, h) => {
       try { this._captureSource(bmp, w, h); this.setState({ impLoading: false, imgReady: true }); this.drawImp(); }
@@ -2849,7 +3169,7 @@ class Component extends DCLogic {
     const cnv = document.createElement('canvas'); cnv.width = 150; cnv.height = 130;
     const g = cnv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 150, 130); g.strokeStyle = '#000'; this.drawCat(g, 50);
     this._srcData = g.getImageData(0, 0, 150, 130).data; this._srcW = 150; this._srcH = 130; this._srcCanvas = cnv;
-    this.setState({ impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName, fileName: this.state.fileName ?? (this.state.lang === 'ko' ? '고양이' : 'Cat') });
+    this.setState({ impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName, impFileName: this.state.lang === 'ko' ? '고양이' : 'Cat' });
     this.drawImp();
   }
   // guard destructive new-document actions when the canvas has content
@@ -2863,29 +3183,44 @@ class Component extends DCLogic {
     this.undoStack = []; this.redoStack = [];
     this.setState({ entry: false, importOpen: false, tplOpen: false, cmdOpen: false, confirmOpen: false, fileName: name, sendPhase: 'idle', pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, corpusCtx: null });
   }
-  // apply an image conversion onto the document per chosen mode
+  // Apply the staged image conversion onto the live document. This is the ONLY
+  // commit point: the wizard stages size (impOutput), crop, and options without
+  // touching the live grid/cells/history until now. Grid size, cells, title, and
+  // history all change here in one transaction, behind a single undo checkpoint.
   applyImport(mode) {
     const st = this.state, t = this.T();
+    const dm = this.impDims(), w = dm.w, h = dm.h;
     const crop = st.cropChoice === 'crop' ? st.cropRect : null;
-    const r = this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop);
-    const conv = this.applyConv(r.cells, st.gridW, st.gridH);
-    const q = this.convQuality(conv, st.gridW, st.gridH);
-    if (window.__TS_DEBUG) console.log('[TactileConvert]', { src: this._srcW + 'x' + this._srcH, crop, target: st.gridW + 'x' + st.gridH, preset: st.convPreset, dots: q.dots, density: +(q.density * 100).toFixed(1), isolated: q.isolated, removed: r.removedDots });
-    const name = st.fileName ?? (st.lang === 'ko' ? '고양이' : 'Cat');
+    const r = this.imgToCells(w, h, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop);
+    const conv = this.applyConv(r.cells, w, h);
+    const q = this.convQuality(conv, w, h);
+    if (window.__TS_DEBUG) console.log('[TactileConvert]', { src: this._srcW + 'x' + this._srcH, crop, target: w + 'x' + h, preset: st.convPreset, dots: q.dots, density: +(q.density * 100).toFixed(1), isolated: q.isolated, removed: r.removedDots });
+    const name = st.impFileName ?? st.fileName ?? (st.lang === 'ko' ? '고양이' : 'Cat');
     if (mode === 'new') {
+      // New page at the chosen output size — resize existing pages to match first
+      // so the document stays uniform, then insert the converted page. A new page
+      // starts a fresh history (matches other add-page flows).
+      this._commitOutputSize(w, h);
       const at = st.pageIndex + 1;
       this.pages.splice(at, 0, conv);
       this.cells = conv; this.undoStack = []; this.redoStack = [];
-      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
+      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, output: dm.key, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
       this.say(this.callI18n(t.aImgNewPage, '', at + 1, this.pages.length));
     } else if (mode === 'replace') {
-      this.snapshot(); this.setCells(conv);
-      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, corpusCtx: null });
+      // Snapshot BEFORE any mutation so undo restores the prior canvas (and its
+      // grid size — see _histEntry/_restoreHistEntry), then resize + write cells.
+      this.snapshot();
+      this._commitOutputSize(w, h);
+      this.setCells(conv);
+      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, output: dm.key, corpusCtx: null });
       this.say(t.aRetouchReady);
     } else { // merge into current page
       this.snapshot();
+      this._commitOutputSize(w, h);
       for (let i = 0; i < conv.length; i++) if (conv[i]) this.cells[i] = 1;
-      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, confirmOpen: false, corpusCtx: null });
+      // Name a fresh (entry) canvas after the imported file; leave an existing
+      // document's name untouched when merging into it.
+      this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, confirmOpen: false, output: dm.key, corpusCtx: null, fileName: st.entry ? name : this.state.fileName });
       this.say(t.aImgMerged);
     }
     clearTimeout(this._hintT);
@@ -2893,50 +3228,90 @@ class Component extends DCLogic {
     this.bump();
   }
   // Command Generation v1 — deterministic local match + safe fallback
-  runCommand() {
-    const t = this.T(), st = this.state, prompt = st.cmdPrompt.trim();
+  // Build a command draft PURELY — decode corpus hit or synthesize a pattern —
+  // WITHOUT touching the live document. Returns { cells, title, tags, mode,
+  // corpusCtx, outKey, gw, gh, dots, source }. Rule-based only (no AI backend).
+  _buildCommandDraft(prompt, gw, gh) {
+    const st = this.state, ko = st.lang === 'ko';
+    let cells = null, title = null, ctx = null, outKey = null, source = 'pattern';
+    const search = typeof window.searchCorpus === 'function' ? window.searchCorpus(prompt, { limit: 1 }) : [];
+    const hit = search[0];
+    if (hit && hit.graphic && (hit.confident || this.corpusPageLoadable(hit))) {
+      const dec = this.corpusCellsFromHex(hit.graphic); // corpus graphics are 60×40
+      if (dec) {
+        cells = dec; outKey = (this.OUTPUTS.find(o => o.gw === 60 && o.gh === 40) || this.OUTPUTS[0]).key;
+        title = hit.pageCount > 1 ? `${hit.title} · ${hit.pageNumber}` : hit.title;
+        ctx = this.corpusCtxFor(hit); source = 'corpus';
+      }
+    }
+    if (!cells) {
+      const intent = this.matchIntent(prompt);
+      cells = this.makePattern(intent ? intent.kind : 'coord', gw, gh);
+      outKey = (this.OUTPUTS.find(o => o.gw === gw && o.gh === gh) || this.OUTPUTS[0]).key;
+      title = intent ? (ko ? intent.name : intent.nameEn) : (ko ? '명령어 초안' : 'Command draft');
+    }
+    const o = this.outputDef(outKey), dw = o.gw, dh = o.gh;
+    const tags = this._autoTags(prompt, dw, dh, cells);
+    return { cells, title, tags, mode: 'rule-based', corpusCtx: ctx, outKey, gw: dw, gh: dh, dots: this._countDots(cells), source };
+  }
+  // GENERATE: stage a draft only — never mutates the live canvas, undo, dirty, or
+  // grid. Moves the modal to the Review step.
+  generateCommandDraft() {
+    const t = this.T(), st = this.state, prompt = (st.cmdPrompt || '').trim();
     if (!prompt) { this.setState({ cmdError: true }); this.say(t.cmdEnterFirst); return; }
     this.setState({ cmdError: false, cmdGenerating: true });
-    const o = this.outputDef(st.cmdGrid), gw = o.gw, gh = o.gh, mode = st.cmdApply || 'current';
     clearTimeout(this._cmdT);
     this._cmdT = setTimeout(() => {
-      // Corpus first: a CONFIDENT hit (title/tag/category match) seeds the real
-      // DTMS graphic. Failing that, Stage 5 lets a STRONG page-content match on the
-      // top deterministic result (page-label / desc / braille, validated) load its
-      // matched page too. Weak/no hits fall through to the existing generator below;
-      // nearMatches stays suggestion-only and never mutates the canvas.
-      const search = typeof window.searchCorpus === 'function' ? window.searchCorpus(prompt, { limit: 1 }) : [];
-      const corpusHit = search[0];
-      if (corpusHit && corpusHit.confident && this.seedCorpusResult(corpusHit, mode)) return;
-      if (corpusHit && this.corpusPageLoadable(corpusHit) && this.seedCorpusResult(corpusHit, mode)) return;
-      const intent = this.matchIntent(prompt);
-      const kind = intent ? intent.kind : 'coord';
-      if (gw !== this.state.gridW || gh !== this.state.gridH) this.setGrid(gw, gh);
-      const cells = this.makePattern(kind, gw, gh);
-      const name = intent ? (st.lang === 'ko' ? intent.name : intent.nameEn) : (st.lang === 'ko' ? '명령어 초안' : 'Command draft');
-      if (mode === 'new') {
-        const at = this.state.pageIndex + 1;
-        this.pages.splice(at, 0, cells);
-        this.cells = cells; this.undoStack = []; this.redoStack = [];
-        this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
-        this.say(this.callI18n(t.aCmdNewPage, '', at + 1, this.pages.length));
-      } else {
-        this.snapshot(); this.setCells(cells);
-        this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: null });
-        this.say(intent ? t.aCmdOk : t.aCmdFallback);
-      }
-      if (!intent) {
-        // Optional recall aid: if the corpus has near candidates, suggest them
-        // (visual toast only — does NOT replace the generated draft on canvas).
-        const near = typeof window.nearMatches === 'function' ? window.nearMatches(prompt, { limit: 3 }) : [];
-        if (near.length) {
-          const names = near.map(n => n.title).join(', ');
-          this.toastMsg(this.callI18n(t.aCmdNearHint, t.aCmdFallback, names));
-        } else {
-          this.toastMsg(t.aCmdNoLib);
-        }
-      }
-    }, 700);
+      const o = this.outputDef(st.cmdGrid);
+      const d = this._buildCommandDraft(prompt, o.gw, o.gh);
+      this.cmdDraftCells = d.cells;         // instance field (not serialized in state)
+      this.cmdDraftCtx = d.corpusCtx;
+      this.setState({
+        cmdGenerating: false, cmdStep: 'review',
+        cmdDraftGrid: d.outKey, cmdDraftDots: d.dots, cmdDraftTags: d.tags,
+        cmdDraftTitle: d.title, cmdDraftMode: d.mode, cmdDraftPrompt: prompt
+      });
+      this.drawCmdDraft();
+      this.say(this.callI18n(t.aCmdReview, '', d.dots));
+    }, 500);
+  }
+  regenerateCommandDraft() { this.generateCommandDraft(); }
+  cmdBack() { this.setState({ cmdStep: 'prompt' }); }
+  // APPLY: the ONLY live-editor mutation. One undo checkpoint (snapshot captures
+  // cells + grid), resize if needed, commit cells + tags + metadata, mark dirty.
+  applyCommandDraft() {
+    const t = this.T(), st = this.state, cells = this.cmdDraftCells;
+    if (!cells) return;
+    const o = this.outputDef(st.cmdDraftGrid), w = o.gw, h = o.gh;
+    const keepTitle = !!st.fileName && !st.entry; // preserve an existing named doc's title
+    this.snapshot();
+    this._commitOutputSize(w, h);
+    this.setCells(cells.slice());
+    this.setState({
+      output: st.cmdDraftGrid, cmdOpen: false, cmdStep: 'prompt', entry: false,
+      corpusCtx: this.cmdDraftCtx || null, cx: 0, cy: 0, selRect: null,
+      fileName: keepTitle ? st.fileName : st.cmdDraftTitle,
+      docTags: (st.cmdDraftTags || []).slice(), docSource: 'command-generated',
+      docPrompt: st.cmdDraftPrompt, docGenMode: 'rule-based'
+    });
+    this.cmdDraftCells = null; this.cmdDraftCtx = null;
+    this.bump(); // marks dirty
+    this.say(t.aCmdApplied); this.toastMsg(t.aCmdApplied);
+  }
+  // Render the staged draft into the review preview canvas (never the live canvas).
+  drawCmdDraft() {
+    const cv = this.cmdRef && this.cmdRef.current;
+    if (!cv || this.state.cmdStep !== 'review' || !this.cmdDraftCells) return;
+    const o = this.outputDef(this.state.cmdDraftGrid), w = o.gw, h = o.gh, s = 6, cells = this.cmdDraftCells;
+    const a4 = this.state.cmdDraftGrid === 'a4';
+    cv.width = w * s; cv.height = h * s;
+    const g = cv.getContext('2d');
+    g.fillStyle = a4 ? '#FFFFFF' : '#141210'; g.fillRect(0, 0, cv.width, cv.height);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const on = cells[y * w + x];
+      g.fillStyle = on ? (a4 ? '#1E1C1A' : '#F2E9DD') : (a4 ? 'rgba(30,28,26,0.08)' : 'rgba(255,255,255,0.07)');
+      g.beginPath(); g.arc(x * s + s / 2, y * s + s / 2, on ? s * 0.4 : s * 0.14, 0, Math.PI * 2); g.fill();
+    }
   }
   // Web Bluetooth/Serial support in this browser + secure context.
   dotSupported(type) {
@@ -3126,27 +3501,83 @@ class Component extends DCLogic {
     }
   }
   cropUp() { this.cropDrag = null; }
-  doSaveCommit() {
-    const t = this.T(), name = this.state.fileName || t.untitled;
-    const thumb = this.thumbFrom(this.cells, this.state.gridW, this.state.gridH);
+  // ---- honest local persistence — this browser only, no cloud/backend ----
+  _persistSaved(list) {
+    try {
+      // Local-only (this browser). Includes docTags + command metadata; older
+      // records without these fields still load (see _loadSaved defaults).
+      const compact = (list || []).slice(0, 24).map(s => ({
+        name: s.name, loc: s.loc, grid: s.grid, thumb: s.thumb, cells: Array.from(s.cells || []),
+        tags: Array.isArray(s.tags) ? s.tags : [], sourceType: s.sourceType || 'manual',
+        sourcePrompt: s.sourcePrompt || '', generatorMode: s.generatorMode || '', generatedAt: s.generatedAt || ''
+      }));
+      localStorage.setItem('tactile-studio.saved.v1', JSON.stringify(compact));
+    } catch (e) { /* quota / privacy mode — falls back to in-session save only */ }
+  }
+  _loadSaved() {
+    try {
+      const raw = localStorage.getItem('tactile-studio.saved.v1');
+      const arr = raw ? JSON.parse(raw) : null;
+      if (!Array.isArray(arr)) return [];
+      // Backward compatible: records saved before tags existed default safely.
+      return arr.map(s => ({
+        name: s.name, loc: s.loc, grid: s.grid, thumb: s.thumb, cells: Uint8Array.from(s.cells || []),
+        tags: Array.isArray(s.tags) ? s.tags : [], sourceType: s.sourceType || 'manual',
+        sourcePrompt: s.sourcePrompt || '', generatorMode: s.generatorMode || '', generatedAt: s.generatedAt || ''
+      }));
+    } catch (e) { return []; }
+  }
+  // Record the current document into the local library (update-or-insert by
+  // name + location), persist it to this browser, and clear the unsaved flag.
+  _recordSave(loc) {
+    const t = this.T(), st = this.state, name = st.fileName || t.untitled, loc2 = loc || 'drive';
+    const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
     const cells = this.cells.slice();
-    this.setState(s => ({
-      savePhase: 'done',
-      saved: [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved]
-    }));
+    const grid = st.gridW + '×' + st.gridH;
+    const rec = {
+      name, loc: loc2, thumb, cells, grid,
+      tags: (st.docTags || []).slice(), sourceType: st.docSource || 'manual',
+      sourcePrompt: st.docPrompt || '', generatorMode: st.docGenMode || '',
+      generatedAt: (st.docSource === 'command-generated' && typeof Date !== 'undefined') ? new Date().toISOString() : ''
+    };
+    const rest = (st.saved || []).filter(x => !(x.name === name && x.loc === loc2));
+    const list = [rec, ...rest].slice(0, 24);
+    this.setState({ saved: list, dirty: false, saveState: 'saved' });
+    this._persistSaved(list);
+    return list;
+  }
+  // One-click Save from the top bar — honest local save to this browser.
+  saveNow() {
+    const t = this.T();
+    this.setState({ saveState: 'saving' });
+    try {
+      this._recordSave(this.state.saveLoc || 'drive');
+      const msg = (this.state.saveLoc === 'library') ? t.tSavedLib : t.tSavedDrive;
+      this.toastMsg(msg); this.say(msg);
+    } catch (e) {
+      this.setState({ saveState: 'error' });
+      this.toastMsg(t.saveFailed); this.say(t.saveFailed);
+    }
+  }
+  doSaveCommit() {
+    const t = this.T();
+    this._recordSave(this.state.saveLoc);
+    this.setState({ savePhase: 'done' });
     this.say(this.state.saveLoc === 'drive' ? t.tSavedDrive : t.tSavedLib);
   }
   // open / send a Tactile Drive file back into Studio
-  openCard(kind, gw, gh, cells, name) {
+  openCard(kind, gw, gh, cells, name, meta) {
     this.cells = cells ? cells.slice() : this.makePattern(kind, gw, gh);
     this.resetPages(this.cells);
     this.undoStack = []; this.redoStack = [];
     const out = (this.OUTPUTS.find(o => o.gw === gw && o.gh === gh) || this.OUTPUTS[0]).key;
-    this.setState({ screen: 'studio', entry: false, output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle', corpusCtx: null });
+    const m = meta || {};
+    this.setState({ screen: 'studio', entry: false, output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle', corpusCtx: null, dirty: false, saveState: 'saved',
+      docTags: Array.isArray(m.tags) ? m.tags.slice() : [], docSource: m.sourceType || 'manual', docPrompt: m.sourcePrompt || '', docGenMode: m.generatorMode || '' });
     this.say(this.T().aReady);
   }
-  sendCard(kind, gw, gh, cells, name) {
-    this.openCard(kind, gw, gh, cells, name);
+  sendCard(kind, gw, gh, cells, name, meta) {
+    this.openCard(kind, gw, gh, cells, name, meta);
     this.setState(s => ({ dotpadOpen: true, sendPhase: s.connected ? 'idle' : 'error' }));
   }
 
@@ -3257,7 +3688,7 @@ class Component extends DCLogic {
       return {
         id: 's' + i, name: f.name, thumb: f.thumb, grid: f.grid, type: t.imgType, time: t.justNow,
         statusLabel: s.label, statusIcon: s.icon, statusStyle: s.style,
-        open: () => this.openCard('saved', gw, gh, f.cells, f.name), edit: () => this.openCard('saved', gw, gh, f.cells, f.name), send: () => this.sendCard('saved', gw, gh, f.cells, f.name),
+        open: () => this.openCard('saved', gw, gh, f.cells, f.name, f), edit: () => this.openCard('saved', gw, gh, f.cells, f.name, f), send: () => this.sendCard('saved', gw, gh, f.cells, f.name, f),
         aOpen: t.open + ' · ' + f.name, aEdit: t.edit + ' · ' + f.name, aSend: t.sendCardBtn + ' · ' + f.name
       };
     });
@@ -3308,6 +3739,24 @@ class Component extends DCLogic {
       isA4: this.isA4(), outName: (t.outNames && t.outNames[st.output]) || '',
       output: st.output,
       outputChange: e => this.setOutput(e.target.value),
+      // Save workflow (honest local save to this browser — no cloud backend).
+      saveNow: () => this.saveNow(),
+      saveBtnLabel: t.saveAction,
+      saveBtnAria: t.saveAction + ' — ' + t.saveLocalHint,
+      saveHint: t.saveLocalHint,
+      saveChipLabel: st.saveState === 'dirty' ? t.saveDirty : st.saveState === 'saving' ? t.saveSaving : st.saveState === 'error' ? t.saveFailed : t.savedStatus,
+      saveChipColor: st.saveState === 'dirty' ? '#B7791F' : st.saveState === 'error' ? '#B93E15' : st.saveState === 'saving' ? '#6B6862' : '#0B8800',
+      saveDotStyle: 'width:8px;height:8px;border-radius:100px;flex:none;background:' + (st.saveState === 'dirty' ? '#E8A93B' : st.saveState === 'error' ? '#B93E15' : st.saveState === 'saving' ? '#B7AEA4' : '#0B8800'),
+      saveBtnStyle: 'height:38px;padding:0 12px;border-radius:9px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap;transition:background 0.15s ease,border-color 0.15s ease;' + (st.saveState === 'dirty' ? 'border:1px solid #EC5927;background:#FDF1EC;color:#B93E15' : 'border:1px solid #EAE1D7;background:#fff;color:#1E1C1A'),
+      // Wizard-scoped output selector: stages `impOutput` only — never mutates the
+      // live grid/history. Committed by applyImport at "Apply to editor".
+      impOutputOpts: this.OUTPUTS.map(o => ({
+        key: o.key, label: o.label, name: (t.outNames && t.outNames[o.key]) || o.label, sub: (t.outSubs && t.outSubs[o.key]) || '',
+        active: st.impOutput === o.key, pick: () => this.setState({ impOutput: o.key }),
+        segStyle: seg(st.impOutput === o.key)
+      })),
+      impOutName: (t.outNames && t.outNames[st.impOutput]) || '',
+      impGridLabel: (st.impOutput === 'a4' ? 'A4 · ' : '') + this.impDims().w + '×' + this.impDims().h,
       doUndo: () => this.undo(), doRedo: () => this.redo(),
       ...this.corpusNavProps(),
       undoBtnStyle: iconBtn(this.undoStack.length > 0), redoBtnStyle: iconBtn(this.redoStack.length > 0),
@@ -3316,6 +3765,20 @@ class Component extends DCLogic {
         this.setState({ connected: c, sendPhase: st.dotpadOpen ? (c ? 'idle' : 'error') : st.sendPhase });
         this.say(c ? t.aConnOn : t.aConnOff);
       },
+      // ---- Properties inspector: Tool Options (contextual, wired to real state) ----
+      toolSizeApplies: ['pen', 'eraser', 'line', 'rect', 'ellipse', 'poly'].indexOf(st.tool) !== -1,
+      toolSizeLabel: st.tool === 'eraser' ? t.eraserL : t.strokeL,
+      toolSizeOpts: [1, 2, 3].map(n => ({ n, label: (t.rowN || ['1', '2', '3'])[n - 1], active: (st.tool === 'eraser' ? st.eraserSize : st.strokeSize) === n, pick: () => { this.setState(st.tool === 'eraser' ? { eraserSize: n } : { strokeSize: n }); }, style: seg((st.tool === 'eraser' ? st.eraserSize : st.strokeSize) === n) })),
+      toolIsText: st.tool === 'text',
+      toolIsPointer: st.tool === 'cursor' || st.tool === 'select',
+      toolOptHint: st.tool === 'text' ? t.toolTextHint : (st.tool === 'cursor' || st.tool === 'select') ? t.toolPointerHint : t.toolRetouchHint,
+      // ---- Properties inspector: Tactile Cleanup (deterministic, undoable) ----
+      densityPct: (this._countDots() / (st.gridW * st.gridH) * 100).toFixed(1),
+      cleanupItems: [
+        { label: t.cleanIsolated, run: () => this.tactileCleanup('isolated') },
+        { label: t.cleanNoise, run: () => this.tactileCleanup('noise') },
+        { label: t.cleanGaps, run: () => this.tactileCleanup('gaps') }
+      ],
       // top toolbar status chip → opens the DotPad Output inspector
       openDpPanel: () => this.setState(s => ({ inspectorOpen: true })),
       connChipText: st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + st.gridW + '×' + st.gridH) : t.dpChipDisc,
@@ -3363,6 +3826,9 @@ class Component extends DCLogic {
       startBlankFn: () => { this.setState({ entry: false }); this.say(t.aReady); },
       // tools (grouped compact rail)
       primaryTools, selectTool, textTool, shapeTools, shapeGroup, quickGroup, quickItems,
+      // mobile bottom dock: image-import shortcut + neutral tool style
+      dockImport: () => { this.resetImport(); this.setState({ importOpen: true }); },
+      dockImportStyle: railStyle(false),
       textSizeOpts, textOrientOpts, textStyleOpts,
       textPopoverOpen: !!st.textPopover,
       textPopoverStyle: st.textPopover ? { position: 'fixed', left: st.textPopover.left, top: st.textPopover.top, zIndex: 82, width: 258, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 16, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' } : null,
@@ -3378,7 +3844,7 @@ class Component extends DCLogic {
       hideTip: () => this.hideTip(),
       tip: st.tip,
       tipStyle: st.tip ? { position: 'fixed', top: st.tip.top, left: st.tip.left, transform: 'translateY(-50%)', zIndex: 90, display: 'inline-flex', alignItems: 'center', background: '#1E1C1A', color: '#fff', fontSize: 12, fontWeight: 600, borderRadius: 8, padding: '6px 10px', boxShadow: '0 4px 6px -2px rgba(10,13,18,0.12),0 12px 16px -4px rgba(10,13,18,0.18)', pointerEvents: 'none', whiteSpace: 'nowrap', animation: 'tsTip 0.12s ease-out' } : null,
-      railFlyoutStyle: st.railMenu ? { position: 'fixed', top: st.railMenu.top, left: st.railMenu.left, zIndex: 80, width: 190, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', transformOrigin: 'left top', animation: 'tsFly 0.15s ease-out' } : null,
+      railFlyoutStyle: st.railMenu ? Object.assign({ position: 'fixed', left: st.railMenu.left, zIndex: 80, width: 190, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' }, st.railMenu.bottom != null ? { bottom: st.railMenu.bottom, transformOrigin: 'left bottom' } : { top: st.railMenu.top, transformOrigin: 'left top' }) : null,
       // contextual stroke / eraser thickness (tactile grid rows: 1/2/3)
       strokeToolActive: ['pen', 'line', 'eraser', 'rect', 'ellipse', 'poly'].indexOf(st.tool) !== -1,
       strokeIsEraser: st.tool === 'eraser',
@@ -3496,7 +3962,7 @@ class Component extends DCLogic {
       // conversion state
       converting: st.converting, convertDone: st.convertDone,
       // step navigation
-      impPickSample: () => this.setState({ impStep: 'crop', fileName: st.fileName ?? (st.lang === 'ko' ? '고양이' : 'Cat') }),
+      impPickSample: () => this.setState({ impStep: 'crop' }),
       impCropNext: () => this.startConvert(),
       impToReview: () => this.setState({ impStep: 'review' }),
       impReConvert: () => this.startConvert(),
@@ -3532,24 +3998,31 @@ class Component extends DCLogic {
       armedPreset: st.armedPreset, armedPresetName: st.armedPreset ? (t.presetNames ? t.presetNames[st.armedPreset] : st.armedPreset) : '',
       // command generation
       cmdOpen: st.cmdOpen,
-      openCmd: () => this.setState({ cmdOpen: true, cmdError: false, cmdGenerating: false }),
-      cmdApplyOpts: [
-        { key: 'current', label: t.cmdApplyCur },
-        { key: 'new', label: t.cmdApplyNew }
-      ].map(o => { const active = st.cmdApply === o.key; return { key: o.key, label: o.label, active, pick: () => this.setState({ cmdApply: o.key }),
-        style: { flex: 1, height: 34, padding: '0 8px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 12, border: active ? '1.5px solid #EC5927' : '1px solid #EAE1D7', background: active ? 'rgba(236,89,39,0.08)' : '#fff', color: active ? '#B93E15' : '#6B6862', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }; }),
-      closeCmd: () => this.setState({ cmdOpen: false }),
+      openCmd: () => this.setState({ cmdOpen: true, cmdStep: 'prompt', cmdError: false, cmdGenerating: false }),
+      // Cancel/close: reset to prompt step and drop the staged draft — the live
+      // document is never touched by the command flow except at Apply.
+      closeCmd: () => { this.cmdDraftCells = null; this.cmdDraftCtx = null; this.setState({ cmdOpen: false, cmdStep: 'prompt', cmdGenerating: false }); },
+      cmdIsPrompt: st.cmdStep !== 'review', cmdIsReview: st.cmdStep === 'review',
       cmdPrompt: st.cmdPrompt, cmdPromptChange: e => this.setState({ cmdPrompt: e.target.value, cmdError: false }),
-      cmdGrid: st.cmdGrid, cmdGridChange: e => this.setState({ cmdGrid: e.target.value }),
       cmdPurpose: st.cmdPurpose, cmdPurposeChange: e => this.setState({ cmdPurpose: e.target.value }),
       cmdGenerating: st.cmdGenerating, cmdError: st.cmdError,
-      cmdG60: st.cmdGrid === '60', cmdG96: st.cmdGrid === '96',
-      setCmdG60: () => this.setState({ cmdGrid: '60' }), setCmdG96: () => this.setState({ cmdGrid: '96' }),
-      cmdG60Style: seg(st.cmdGrid === '60'), cmdG96Style: seg(st.cmdGrid === '96'),
-      runCommand: () => this.runCommand(),
+      // Wizard-scoped output selector — sets cmdGrid only, never the live grid.
+      cmdOutputOpts: this.OUTPUTS.map(o => ({ key: o.key, label: o.label, name: (t.outNames && t.outNames[o.key]) || o.label, active: st.cmdGrid === o.key, pick: () => this.setState({ cmdGrid: o.key }), segStyle: seg(st.cmdGrid === o.key) })),
+      cmdGenerate: () => this.generateCommandDraft(),
+      cmdRegenerate: () => this.regenerateCommandDraft(),
+      cmdApplyDraft: () => this.applyCommandDraft(),
+      cmdBackStep: () => this.cmdBack(),
+      cmdRef: this.cmdRef,
+      cmdDraftDots: st.cmdDraftDots,
+      cmdDraftGridLabel: (st.cmdDraftGrid === 'a4' ? 'A4 · ' : '') + this.outputDef(st.cmdDraftGrid).gw + '×' + this.outputDef(st.cmdDraftGrid).gh,
+      cmdDraftDensity: (function () { const o = this.outputDef(st.cmdDraftGrid); return (st.cmdDraftDots / (o.gw * o.gh) * 100).toFixed(1); }).call(this),
+      cmdDraftTagList: st.cmdDraftTags || [],
+      cmdDraftPrompt: st.cmdDraftPrompt,
       cmdIdle: !st.cmdGenerating,
       cmdGenBtnStyle: { height: 40, padding: '0 22px', border: 'none', borderRadius: 8, background: '#EC5927', color: '#fff', fontWeight: 700, fontSize: 13.5, display: 'inline-flex', alignItems: 'center', gap: 8, opacity: st.cmdGenerating ? 0.6 : 1, cursor: st.cmdGenerating ? 'not-allowed' : 'pointer' },
       cmdChips: (t.cmdChips || []).map(c => ({ label: c, pick: () => this.setState({ cmdPrompt: c, cmdError: false }) })),
+      cmdRandom: () => { const list = t.cmdChips || []; if (!list.length) return; const pick = list[Math.floor(Math.random() * list.length)]; this.setState({ cmdPrompt: pick, cmdError: false }); if (this.state.cmdStep === 'review') this.generateCommandDraft(); },
+      docTags: st.docTags || [], docTagList: st.docTags || [], hasDocTags: !!(st.docTags && st.docTags.length), docSource: st.docSource || 'manual',
       purposeOpts: (t.purposes || []).map((label, i) => ({ label, value: i === 0 ? 'auto' : label })),
       // template library
       tplOpen: st.tplOpen,
@@ -3640,15 +4113,13 @@ class Component extends DCLogic {
       },
       // send-success next steps
       successSaveDrive: () => {
-        const name = st.fileName || t.untitled;
-        const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
-        this.setState(s => ({ dotpadOpen: false, saveLoc: 'drive', saved: [{ name, loc: 'drive', thumb, cells: this.cells.slice(), grid: s.gridW + '×' + s.gridH }, ...s.saved] }));
+        this.setState({ dotpadOpen: false, saveLoc: 'drive' });
+        this._recordSave('drive');
         this.toastMsg(t.tSavedDrive); this.say(t.tSavedDrive);
       },
       successAddLibrary: () => {
-        const name = st.fileName || t.untitled;
-        const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
-        this.setState(s => ({ dotpadOpen: false, saveLoc: 'library', saved: [{ name, loc: 'library', thumb, cells: this.cells.slice(), grid: s.gridW + '×' + s.gridH }, ...s.saved] }));
+        this.setState({ dotpadOpen: false, saveLoc: 'library' });
+        this._recordSave('library');
         this.toastMsg(t.tSavedLib); this.say(t.tSavedLib);
       },
       continueEditing: () => this.setState({ dotpadOpen: false }),
@@ -3661,6 +4132,8 @@ class Component extends DCLogic {
       toggleCreate: e => this.toggleMenu('create', e),
       toggleExport: e => this.toggleMenu('export', e),
       toggleDevice: e => this.toggleMenu('device', e),
+      toggleMore: e => this.toggleMenu('more', e),
+      moreOpen: !!st.menu && st.menu.kind === 'more',
       closeMenu: () => this.setState({ menu: null }),
       menuStyleLeft: st.menu ? { position: 'fixed', top: st.menu.top, left: st.menu.left, zIndex: 75, minWidth: 240, background: '#fff', border: '1px solid #E8DFD6', borderRadius: 12, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', transformOrigin: 'top left', animation: 'tsFly 0.15s ease-out' } : null,
       menuStyleRight: st.menu ? { position: 'fixed', top: st.menu.top, right: st.menu.right, zIndex: 75, minWidth: 216, background: '#fff', border: '1px solid #E8DFD6', borderRadius: 12, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', transformOrigin: 'top right', animation: 'tsFly 0.15s ease-out' } : null,
@@ -3671,8 +4144,9 @@ class Component extends DCLogic {
         { label: t.startImage, sub: t.startImageSub, iconPath: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01', run: () => { this.resetImport(); this.setState({ menu: null, importOpen: true }); } },
         { label: t.entTpl, sub: t.entTplSub, iconPath: 'M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 1-1-1zM13 4h6a1 1 0 0 1 1 1v6h-7zM13 13h7v6a1 1 0 0 1-1 1h-6z', run: () => { this.setState({ menu: null, tplOpen: true, tplGroup: 'recommended' }); } }
       ],
+      // Export = generate an output file only. Saving the editable project lives
+      // on the dedicated Save button, so the two actions stay distinct.
       exportItems: [
-        { label: t.saveToLib, sub: '', iconPath: 'M6 4h10l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 4v5h7V4M8 20v-6h8v6', run: () => { this.setState({ menu: null, saveOpen: true, savePhase: 'form' }); } },
         ...['PNG', 'SVG', 'JSON', 'DTMS'].map(f => ({ label: f, sub: '', iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => { this.setState({ menu: null }); this.toastMsg(t.tExport + ' · ' + f); } }))
       ],
       deviceItems: [
@@ -3683,6 +4157,15 @@ class Component extends DCLogic {
           this.setState({ menu: null, connected: c, sendPhase: st.dotpadOpen ? (c ? 'idle' : 'error') : st.sendPhase });
           this.say(c ? t.aConnOn : t.aConnOff);
         } }
+      ],
+      // Mobile/narrow overflow: secondary actions that collapse out of the top bar
+      // (Save + Send stay visible as buttons). Export drills into the format list.
+      moreItems: [
+        { label: t.startImage, sub: '', iconPath: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01', run: () => { this.resetImport(); this.setState({ menu: null, importOpen: true }); } },
+        { label: t.export, sub: '', iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.setState(s => ({ menu: s.menu ? { ...s.menu, kind: 'export' } : null })) },
+        { label: t.devControls, sub: '', iconPath: 'M4 6h16v10H4zM9 20h6M9 16v4M15 16v4', run: () => this.setState({ menu: null, inspectorOpen: true }) },
+        { label: t.helpTitle, sub: '', iconPath: 'M12 17h.01M9.1 9a3 3 0 1 1 4.5 2.6c-.9.5-1.6 1.2-1.6 2.4', run: () => this.setState({ menu: null, helpOpen: true }) },
+        { label: t.langMenu, sub: '', iconPath: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M3 12h18M12 3c2.4 2.6 3.5 6 3.5 9s-1.1 6.4-3.5 9c-2.4-2.6-3.5-6-3.5-9s1.1-6.4 3.5-9z', run: () => this.setState(s => ({ menu: null, lang: s.lang === 'ko' ? 'en' : 'ko' })) }
       ],
       // floating undo/redo (near canvas)
       undoFloatStyle: { width: 44, height: 44, border: 'none', borderRadius: 100, background: 'transparent', color: this.undoStack.length ? '#1E1C1A' : '#C9BBAF', display: 'grid', placeItems: 'center', opacity: this.undoStack.length ? 1 : 0.5, cursor: this.undoStack.length ? 'pointer' : 'not-allowed' },
