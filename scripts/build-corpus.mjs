@@ -13,6 +13,10 @@
 // "save to library" exports a schema-v1 asset .json — drop those in --assets
 // (default <src>/assets) and they join the corpus with no curated mapping.
 //
+// QA gate: assets only enter the corpus when qa.status='approved' AND
+// sharing='community'. Reviewers promote drafts with scripts/review-asset.mjs
+// (creators can't self-approve). --include-drafts bypasses the gate locally.
+//
 // NOTE: rule-based, backendless. The extraction logic mirrors the studio
 // reference ingest (a node build tool, not app runtime), producing the shape
 // the vanilla runCommand search/decode reads: { id, title, lang, category,
@@ -145,6 +149,19 @@ for (const { file, meta } of entries) {
 // .json here, re-run, and the corpus grows. Point at a dir with --assets <dir>
 // or ASSETS_SRC=<dir> (defaults to <SRC>/assets if present).
 const ASSETS = resolve(arg('--assets') ?? process.env.ASSETS_SRC ?? join(SRC, 'assets'));
+// Corpus is the CANONICAL library: only approved + community assets ship (per
+// schema v1). Drafts / in-review / rejected /私的(private,campus) stay out so the
+// backendless corpus.js never carries unreviewed content. --include-drafts
+// bypasses the gate for local iteration only.
+const INCLUDE_DRAFTS = process.argv.includes('--include-drafts');
+function assetGate(a) {
+  const status = (a.qa && a.qa.status) || 'draft';
+  const sharing = a.sharing || 'private';
+  if (INCLUDE_DRAFTS) return { ok: true };
+  if (status !== 'approved') return { ok: false, why: `qa.status=${status} (approved 필요)` };
+  if (sharing !== 'community') return { ok: false, why: `sharing=${sharing} (community 필요)` };
+  return { ok: true };
+}
 function assetToRecord(a, file) {
   const pages = (a.pages ?? []).map((p, i) => {
     const page = { page: typeof p.page === 'number' ? p.page : i + 1, label: p.label || `${i + 1}쪽`, graphic: p.graphic ?? '' };
@@ -171,6 +188,8 @@ if (existsSync(ASSETS)) {
     try {
       const a = JSON.parse(readFileSync(join(ASSETS, file), 'utf8'));
       if (!a || !Array.isArray(a.pages) || !a.pages.length) { console.warn(`  ! skip (no pages): ${file}`); skipped++; continue; }
+      const gate = assetGate(a);
+      if (!gate.ok) { console.warn(`  ! skip (QA gate): ${file} — ${gate.why}`); skipped++; continue; }
       records.push(assetToRecord(a, file));
     } catch (e) {
       console.warn(`  ! skip (asset parse error): ${file} — ${e.message}`);
