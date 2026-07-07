@@ -171,13 +171,22 @@ function assetToRecord(a, file) {
     if (p.audio && nonEmpty(p.audio.src)) page.audio = p.audio; // path reference (not inlined)
     return page;
   });
+  const spec = /^\d+x\d+$/.test(a.spec || '') ? a.spec : '60x40';
+  // graphicFeatures are derived by Studio from the graphic; trust them if present.
+  // If absent, fill only the spec-decidable flag (compatible) and leave the
+  // touch-quality/emboss flags unset rather than guess.
+  const NATIVE = { '60x40': 1, '96x64': 1, '28x40': 1 };
+  const gf = (a.graphicFeatures && typeof a.graphicFeatures === 'object')
+    ? a.graphicFeatures
+    : { dotpadCompatible: !!NATIVE[spec] };
   return {
     id: a.id || `lib-${slug(a.title ?? file)}`,
     title: a.title ?? slug(file),
-    spec: /^\d+x\d+$/.test(a.spec || '') ? a.spec : '60x40',
+    spec,
     lang: String(a.lang ?? '').toLowerCase().startsWith('en') ? 'en' : 'ko',
     category: a.category || 'basic',
     tags: Array.isArray(a.tags) ? a.tags : [],
+    graphicFeatures: gf,
     pages,
     source: file,
   };
