@@ -153,6 +153,7 @@ input[type=range]{accent-color:var(--ts-primary)}
   .ts-send-short{display:inline-block}
   .ts-menu-caret{display:none!important}
   .ts-language-switch,.ts-help-button{display:none!important}
+  .ts-undo-group{display:none!important}
   .ts-topbar{grid-template-columns:minmax(72px,1fr) minmax(184px,auto) 44px;gap:6px;padding:0 8px}
   .ts-topbar-center{gap:6px}
   .ts-topbar-action:not(.ts-topbar-primary),.device-status-pill{width:44px!important;padding-left:0!important;padding-right:0!important}
@@ -256,6 +257,14 @@ input[type=range]{accent-color:var(--ts-primary)}
           </sc-for>
         </select>
       </label>
+      <div class="ts-undo-group" role="group" aria-label="{{ t.undoRedoL }}" style="display:inline-flex;align-items:center;gap:1px;flex:none;border:1px solid var(--ts-border-decor);border-radius:10px;padding:2px;background:#fff">
+        <button onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoBarStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <button onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoBarStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+      </div>
     </div>
 
     <!-- CENTER ZONE: primary actions -->
@@ -473,16 +482,6 @@ input[type=range]{accent-color:var(--ts-primary)}
     </sc-if>
 
     <div class="ts-canvas-zone" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
-      <sc-if value="{{ canvasChromeOn }}" hint-placeholder-val="{{ true }}">
-      <div role="group" aria-label="{{ t.undoRedoL }}" style="position:absolute;top:16px;right:20px;z-index:20;display:inline-flex;gap:2px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
-        <button onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </button>
-        <button onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoFloatStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </button>
-      </div>
-      </sc-if>
       <sc-if value="{{ corpusNavOn }}" hint-placeholder-val="{{ false }}">
         <div role="group" aria-label="{{ corpusNavGroupLabel }}" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px 6px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
           <button onClick="{{ corpusPrev }}" data-corpus-nav="prev" aria-label="{{ corpusPrevLabel }}" title="{{ corpusPrevLabel }}" disabled="{{ corpusPrevDisabled }}" style="{{ corpusPrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -492,21 +491,6 @@ input[type=range]{accent-color:var(--ts-primary)}
           <button onClick="{{ corpusNext }}" data-corpus-nav="next" aria-label="{{ corpusNextLabel }}" title="{{ corpusNextLabel }}" disabled="{{ corpusNextDisabled }}" style="{{ corpusNextStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
-        </div>
-      </sc-if>
-      <sc-if value="{{ strokeCtlOn }}" hint-placeholder-val="{{ true }}">
-        <div role="group" aria-label="{{ strokeCtlLabel }}" style="position:absolute;top:16px;left:20px;z-index:20;display:inline-flex;align-items:center;gap:10px;background:#F7F4EF;border:1px solid #E3D9CE;border-radius:100px;padding:6px 8px 6px 14px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
-          <span style="color:var(--ts-text-secondary);font-weight:800;font-size:12px;white-space:nowrap;letter-spacing:-0.1px">{{ strokeCtlLabel }}</span>
-          <div style="display:inline-flex;align-items:center;gap:6px">
-            <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
-              <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}">
-                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </sc-if>
-                {{ s.label }}
-              </button>
-            </sc-for>
-          </div>
         </div>
       </sc-if>
       <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
@@ -618,8 +602,15 @@ input[type=range]{accent-color:var(--ts-primary)}
             </select>
           </label>
 
-          <sc-if value="{{ propHasBrush }}" hint-placeholder-val="{{ true }}">
-            <div style="font-size:11.5px;color:var(--ts-text-secondary);line-height:1.5">{{ t.inspBrushMoved }}</div>
+          <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:7px">{{ strokeCtlLabel }}</div>
+              <div role="group" aria-label="{{ strokeCtlLabel }}" style="display:flex;gap:6px">
+                <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
+                  <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.panelStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ s.label }}</button>
+                </sc-for>
+              </div>
+            </div>
           </sc-if>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
@@ -1682,7 +1673,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspBrushMoved: '선 두께는 캔버스 위 컨트롤에서 조절합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioAdd: '오디오 파일 첨부', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '미리 만든 오디오 파일을 올리면 자산에 경로로 저장됩니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
+      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioAdd: '오디오 파일 첨부', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '미리 만든 오디오 파일을 올리면 자산에 경로로 저장됩니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
@@ -1799,7 +1790,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspBrushMoved: 'Adjust line thickness from the control on the canvas.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
+      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
@@ -3787,7 +3778,6 @@ class Component extends DCLogic {
       inspTabDeviceStyle: this.tabStyle(st.inspectorTab === 'device'),
       // Properties tab: contextual tool options + window.TW canvas cleanup
       propToolName: (this.T().toolNames || {})[st.tool] || st.tool,
-      propHasBrush: (st.tool === 'pen' || st.tool === 'eraser'),
       fxThinner: () => this.thickenFx(-1),
       fxThicker: () => this.thickenFx(1),
       fxDenoise: () => this.denoiseFx(),
@@ -3874,8 +3864,6 @@ class Component extends DCLogic {
       strokeToolActive: ['pen', 'line', 'eraser', 'rect', 'ellipse', 'poly'].indexOf(st.tool) !== -1,
       // ---- simplified-shell gates: hide editor chrome while the empty entry screen is up ----
       showCreateMenu: !st.entry,
-      canvasChromeOn: !st.entry,
-      strokeCtlOn: (!st.entry) && (['pen', 'line', 'eraser', 'rect', 'ellipse', 'poly'].indexOf(st.tool) !== -1),
       inspectorShown: st.inspectorOpen && !st.entry,
       strokeIsEraser: st.tool === 'eraser',
       strokeCtlLabel: (st.tool === 'eraser' ? t.eraserL : t.strokeL) || '',
@@ -3893,7 +3881,8 @@ class Component extends DCLogic {
           n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
           aria: (ctlL + ' ' + desc).trim(), title: desc,
           pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
-          style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: 30, padding: active ? '0 11px 0 10px' : '0 12px', borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12 }
+          style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: 30, padding: active ? '0 11px 0 10px' : '0 12px', borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12 },
+          panelStyle: { flex: 1, height: 32, borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: active ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-functional)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : '#1E1C1A' }
         };
       }),
       // pages (v1 simple multi-page document)
@@ -4259,8 +4248,8 @@ class Component extends DCLogic {
         } }
       ],
       // floating undo/redo (near canvas)
-      undoFloatStyle: { width: 44, height: 44, border: 'none', borderRadius: 100, background: 'transparent', color: this.undoStack.length ? '#1E1C1A' : '#C9BBAF', display: 'grid', placeItems: 'center', opacity: this.undoStack.length ? 1 : 0.5, cursor: this.undoStack.length ? 'pointer' : 'not-allowed' },
-      redoFloatStyle: { width: 44, height: 44, border: 'none', borderRadius: 100, background: 'transparent', color: this.redoStack.length ? '#1E1C1A' : '#C9BBAF', display: 'grid', placeItems: 'center', opacity: this.redoStack.length ? 1 : 0.5, cursor: this.redoStack.length ? 'pointer' : 'not-allowed' },
+      undoBarStyle: { width: 34, height: 34, border: 'none', borderRadius: 8, background: 'transparent', color: this.undoStack.length ? '#1E1C1A' : '#C9BBAF', display: 'grid', placeItems: 'center', opacity: this.undoStack.length ? 1 : 0.5, cursor: this.undoStack.length ? 'pointer' : 'not-allowed' },
+      redoBarStyle: { width: 34, height: 34, border: 'none', borderRadius: 8, background: 'transparent', color: this.redoStack.length ? '#1E1C1A' : '#C9BBAF', display: 'grid', placeItems: 'center', opacity: this.redoStack.length ? 1 : 0.5, cursor: this.redoStack.length ? 'pointer' : 'not-allowed' },
       // help / toast
       helpOpen: st.helpOpen,
       toggleHelp: () => this.setState(s => ({ helpOpen: !s.helpOpen })),
