@@ -627,6 +627,29 @@ input[type=range]{accent-color:var(--ts-primary)}
             </div>
             <button onClick="{{ fxDenoise }}" style="width:100%;height:32px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspDenoise }}</button>
           </div>
+
+          <div style="border-top:1px solid #F2ECE4;padding-top:14px">
+            <div style="font-size:11px;color:var(--ts-text-secondary);letter-spacing:.02em;margin-bottom:9px">{{ t.inspPageMeta }} · {{ t.inspAudio }}</div>
+            <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
+            <textarea onChange="{{ onNarration }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;margin-bottom:12px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgAudio.narration }}</textarea>
+
+            <sc-if value="{{ pgAudio.has }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;margin-bottom:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.8"></circle><circle cx="19" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>
+                <span style="flex:1;font-size:12px;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pgAudio.fileName }} {{ pgAudio.dur }}</span>
+                <button onClick="{{ onAudioRemove }}" style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:6px" style-hover="color:#B93E15;background:#F3E3DC" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspAudioRemove }}</button>
+              </div>
+              <audio controls src="{{ pgAudio.url }}" style="width:100%;height:34px"></audio>
+            </sc-if>
+            <sc-if value="{{ pgAudio.has }}" hint-placeholder-val="{{ true }}">
+              <label style="display:flex;align-items:center;justify-content:center;gap:7px;height:36px;border:1.5px dashed var(--ts-border-functional);border-radius:9px;font-size:12.5px;font-weight:700;color:var(--ts-primary);cursor:pointer;background:#fff" style-hover="border-color:var(--ts-primary);background:rgba(var(--ts-primary-rgb),0.04)">
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+                {{ t.inspAudioAdd }}
+                <input type="file" accept="audio/*" onChange="{{ onAudioFile }}" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+              </label>
+              <div style="font-size:10.5px;color:var(--ts-text-secondary);line-height:1.5;margin-top:7px">{{ t.inspAudioHint }}</div>
+            </sc-if>
+          </div>
         </div>
         </sc-if>
 
@@ -1489,6 +1512,7 @@ class Component extends DCLogic {
     this.heroRef = React.createRef();
     this.cells = new Uint8Array(60 * 40);
     this.pages = [this.cells];   // multi-page document; this.cells === this.pages[state.pageIndex]
+    this.pageAudio = {};         // pageIndex → { src, mime, bytes, durationSec, narration } (DTMA, path-reference)
     this.undoStack = []; this.redoStack = [];
     this.preview = null;   // Set of idx (additive overlay)
     this.drag = null;      // {mode,x0,y0,...}
@@ -1567,7 +1591,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
+      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioAdd: '오디오 파일 첨부', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '미리 만든 오디오 파일을 올리면 자산에 경로로 저장됩니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
@@ -1624,7 +1648,7 @@ class Component extends DCLogic {
       srNote3: '캔버스는 키보드만으로 편집할 수 있습니다 — 화살표 이동, 스페이스 토글, 도구 단축키.',
       hRows: [['V / P / E', '커서 · 펜 · 지우개'], ['L / R / O', '직선 · 사각형 · 원'], ['G / F / S', '다각형 · 채우기 · 선택'], ['T', '묵자 · 촉각 글자'], ['화살표', '커서 이동'], ['Space', '점 토글'], ['Enter', '다각형 닫기'], ['Ctrl+Z', '실행 취소'], ['Ctrl+Shift+Z', '다시 실행'], ['?', '이 안내 열기'], ['Esc', '닫기 · 취소']],
       aToolSel: n => n + ' 도구 선택됨', aDotOn: (x, y) => '점 찍음 (' + x + ', ' + y + ')', aDotOff: (x, y) => '점 지움 (' + x + ', ' + y + ')',
-      aUndo: '실행 취소됨', aRedo: '다시 실행됨', aClear: '모두 지웠습니다', aInvert: '반전했습니다', aFlipH: '좌우로 뒤집었습니다', aFlipV: '상하로 뒤집었습니다', aThicken: '선을 조정했습니다', aDenoise: '고립된 점을 제거했습니다',
+      aUndo: '실행 취소됨', aRedo: '다시 실행됨', aClear: '모두 지웠습니다', aInvert: '반전했습니다', aFlipH: '좌우로 뒤집었습니다', aFlipV: '상하로 뒤집었습니다', aThicken: '선을 조정했습니다', aDenoise: '고립된 점을 제거했습니다', audAttached: '오디오를 첨부했습니다', audRemoved: '오디오를 제거했습니다', audErrType: '오디오 파일만 첨부할 수 있습니다.', audErrSize: '오디오는 25MB 이하만 첨부할 수 있습니다.',
       aTextAdded: '촉각 글자를 캔버스에 추가했습니다. 점으로 편집할 수 있습니다.', aTextEmpty: '입력한 글자가 없습니다.',
       aGrid: g => '그리드 크기 변경: ' + g, aConnOn: 'DotPad가 연결되었습니다', aConnOff: 'DotPad 연결이 끊어졌습니다',
       aSent: 'DotPad 전송 완료', aSendErr: 'DotPad 전송 실패', aReady: '캔버스 준비됨 — 화살표 키로 이동, 스페이스로 점 토글',
@@ -1684,7 +1708,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
+      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
@@ -1741,7 +1765,7 @@ class Component extends DCLogic {
       srNote3: 'The canvas is fully keyboard-editable — arrows to move, Space to toggle, letter keys for tools.',
       hRows: [['V / P / E', 'Cursor · Pen · Eraser'], ['L / R / O', 'Line · Rectangle · Ellipse'], ['G / F / S', 'Polygon · Fill · Select'], ['T', 'Tactile text'], ['Arrows', 'Move cursor'], ['Space', 'Toggle dot'], ['Enter', 'Close polygon'], ['Ctrl+Z', 'Undo'], ['Ctrl+Shift+Z', 'Redo'], ['?', 'Open this guide'], ['Esc', 'Close · cancel']],
       aToolSel: n => n + ' tool selected', aDotOn: (x, y) => 'Dot placed (' + x + ', ' + y + ')', aDotOff: (x, y) => 'Dot erased (' + x + ', ' + y + ')',
-      aUndo: 'Undone', aRedo: 'Redone', aClear: 'Canvas cleared', aInvert: 'Inverted', aFlipH: 'Flipped horizontally', aFlipV: 'Flipped vertically', aThicken: 'Adjusted line weight', aDenoise: 'Removed isolated dots',
+      aUndo: 'Undone', aRedo: 'Redone', aClear: 'Canvas cleared', aInvert: 'Inverted', aFlipH: 'Flipped horizontally', aFlipV: 'Flipped vertically', aThicken: 'Adjusted line weight', aDenoise: 'Removed isolated dots', audAttached: 'Audio attached', audRemoved: 'Audio removed', audErrType: 'Only audio files can be attached.', audErrSize: 'Audio must be 25MB or smaller.',
       aTextAdded: 'Tactile text added to the canvas. You can edit it as dots.', aTextEmpty: 'No text was entered.',
       aGrid: g => 'Grid size changed: ' + g, aConnOn: 'DotPad connected', aConnOff: 'DotPad disconnected',
       aSent: 'Sent to DotPad', aSendErr: 'Send to DotPad failed', aReady: 'Canvas ready — arrows to move, Space to toggle dots',
@@ -3217,21 +3241,31 @@ class Component extends DCLogic {
     const st = this.state, ctx = st.corpusCtx;
     const w = st.gridW, h = st.gridH, TW = window.TW;
     const hexOf = (cellBuf) => (TW && TW.encodeBits) ? TW.encodeBits(this.cellsToBits(cellBuf, w, h), w, h) : '';
-    const pages = (this.pages || [this.cells]).map((cellBuf, i) => ({
-      page: i + 1,
-      label: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].label) || (name + ' · ' + (i + 1)),
-      desc: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].desc) || '',
-      braille: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].braille) || '',
-      graphic: hexOf(cellBuf),
-    }));
+    const audioMap = this.pageAudio || {};
+    const pages = (this.pages || [this.cells]).map((cellBuf, i) => {
+      const page = {
+        page: i + 1,
+        label: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].label) || (name + ' · ' + (i + 1)),
+        desc: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].desc) || '',
+        braille: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].braille) || '',
+        graphic: hexOf(cellBuf),
+      };
+      const a = audioMap[i];
+      if (a && a.narration) page.narration = a.narration;
+      if (a && a.src) page.audio = { src: a.src, mime: a.mime || '', bytes: a.bytes || 0, durationSec: a.durationSec || 0 };
+      return page;
+    });
     const slug = ((name || 'asset').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-|-$/g, '')) || 'asset';
+    // Valid enums: category ∈ {science,language,geography,math,basic}; lang ∈ {ko,en,bilingual}.
+    const CATS = ['science', 'language', 'geography', 'math', 'basic'];
+    const category = (ctx && CATS.includes(ctx.category)) ? ctx.category : 'basic';
     return {
       id: 'lib-' + slug + '-' + Date.now().toString(36),
       title: name,
       spec: w + 'x' + h,
-      lang: st.lang === 'en' ? 'english' : 'korean',
-      category: (ctx && ctx.category) || 'uncategorized',
-      tags: (ctx && ctx.tags) ? ctx.tags.slice() : [],
+      lang: st.lang === 'en' ? 'en' : 'ko',
+      category: category,
+      tags: (ctx && Array.isArray(ctx.tags)) ? ctx.tags.slice() : [],
       pages: pages,
       provenance: {
         createdBy: 'tactile-studio',
@@ -3249,6 +3283,42 @@ class Component extends DCLogic {
     const fname = (TW.safeName ? TW.safeName(asset.id, 'json') : asset.id + '.json');
     try { TW.downloadBlob(new Blob([JSON.stringify(asset, null, 2)], { type: 'application/json' }), fname); }
     catch (e) { /* noop — save still recorded in-memory */ }
+  }
+  // ── DTMA page audio (pre-made file, path reference, 25MB cap) ──────────────
+  attachPageAudio(file) {
+    const t = this.T(), i = this.state.pageIndex;
+    if (!file) return;
+    if (!/^audio\//.test(file.type || '')) { this.toastMsg(t.audErrType); this.say(t.audErrType); return; }
+    if (file.size > 26214400 /* 25MB */) { this.toastMsg(t.audErrSize); this.say(t.audErrSize); return; }
+    const prev = this.pageAudio[i];
+    if (prev && prev._url) { try { URL.revokeObjectURL(prev._url); } catch (e) {} }
+    const url = URL.createObjectURL(file);
+    // src is the deploy-relative path where the file should live; the object URL
+    // is only for in-app preview and is never written into the exported asset.
+    const rec = {
+      src: 'assets/audio/' + (window.TW && window.TW.safeName ? window.TW.safeName(file.name.replace(/\.[^.]+$/, ''), file.name.split('.').pop() || 'mp3') : file.name),
+      mime: file.type, bytes: file.size, durationSec: 0,
+      narration: (prev && prev.narration) || '', fileName: file.name, _url: url,
+    };
+    this.pageAudio = Object.assign({}, this.pageAudio, { [i]: rec });
+    // read duration when metadata loads (best-effort)
+    try {
+      const probe = new Audio(); probe.preload = 'metadata';
+      probe.onloadedmetadata = () => { rec.durationSec = Math.round(probe.duration || 0); this.bump(); };
+      probe.src = url;
+    } catch (e) {}
+    this.say(t.audAttached); this.bump();
+  }
+  removePageAudio() {
+    const i = this.state.pageIndex, rec = this.pageAudio[i];
+    if (rec && rec._url) { try { URL.revokeObjectURL(rec._url); } catch (e) {} }
+    const next = Object.assign({}, this.pageAudio); delete next[i]; this.pageAudio = next;
+    this.say(this.T().audRemoved); this.bump();
+  }
+  setPageNarration(text) {
+    const i = this.state.pageIndex, cur = this.pageAudio[i] || {};
+    this.pageAudio = Object.assign({}, this.pageAudio, { [i]: Object.assign({}, cur, { narration: text }) });
+    this.bump();
   }
   // open / send a Tactile Drive file back into Studio
   openCard(kind, gw, gh, cells, name) {
@@ -3467,6 +3537,20 @@ class Component extends DCLogic {
       fxThinner: () => this.thickenFx(-1),
       fxThicker: () => this.thickenFx(1),
       fxDenoise: () => this.denoiseFx(),
+      // DTMA: current-page audio + narration
+      pgAudio: (() => {
+        const a = (this.pageAudio || {})[st.pageIndex];
+        return {
+          has: !!(a && a.src),
+          fileName: (a && (a.fileName || a.src)) || '',
+          url: (a && a._url) || '',
+          dur: (a && a.durationSec) ? (a.durationSec + 's') : '',
+          narration: (a && a.narration) || '',
+        };
+      })(),
+      onAudioFile: (e) => { const f = e && e.target && e.target.files && e.target.files[0]; if (f) this.attachPageAudio(f); },
+      onAudioRemove: () => this.removePageAudio(),
+      onNarration: (e) => this.setPageNarration(e && e.target ? e.target.value : ''),
       dpIsConnected: st.connected, dpIsDisconnected: !st.connected,
       dpConnBusy: !!st.connBusy, dpBusyBle: st.connBusy === 'ble', dpBusyUsb: st.connBusy === 'usb',
       dpBusyBleOff: st.connBusy !== 'ble', dpBusyUsbOff: st.connBusy !== 'usb',

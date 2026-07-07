@@ -150,6 +150,8 @@ function assetToRecord(a, file) {
     const page = { page: typeof p.page === 'number' ? p.page : i + 1, label: p.label || `${i + 1}쪽`, graphic: p.graphic ?? '' };
     if (nonEmpty(p.desc)) page.desc = String(p.desc).trim();
     if (isHex(p.braille)) page.braille = p.braille;
+    if (nonEmpty(p.narration)) page.narration = String(p.narration).trim();
+    if (p.audio && nonEmpty(p.audio.src)) page.audio = p.audio; // path reference (not inlined)
     return page;
   });
   return {

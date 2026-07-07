@@ -6,7 +6,7 @@
   "type": "object",
   "required": ["id", "title", "spec", "lang", "category", "tags", "pages"],
   "properties": {
-    "id": { "type": "string", "pattern": "^dtms-[\\w가-힣-]+$" },
+    "id": { "type": "string", "pattern": "^(dtms|lib)-[\\w가-힣-]+$" },
     "title": { "type": "string", "minLength": 1 },
     "titleEn": { "type": "string", "description": "글로벌 검색용 영문 제목 (KO 자산 권장)" },
     "spec": { "type": "string", "enum": ["60x40", "96x64", "28x40"] },
@@ -24,7 +24,19 @@
           "label": { "type": "string" },
           "desc": { "type": "string" },
           "braille": { "type": "string" },
-          "graphic": { "type": "string", "pattern": "^[0-9a-f]+$", "description": "DTMS hex — 60x40은 600 hex chars(300 bytes)" }
+          "graphic": { "type": "string", "pattern": "^[0-9a-f]+$", "description": "DTMS hex — 60x40은 600 hex chars(300 bytes)" },
+          "narration": { "type": "string", "description": "오디오가 낭독할 텍스트. 없으면 재생기는 desc로 폴백한다." },
+          "audio": {
+            "type": "object",
+            "description": "미리 만든 나레이션 오디오의 경로 참조(DTMA). 파일 실체는 corpus.js에 인라인하지 않고 별도 배포(assets/audio/…)한다. 업로드 시 bytes <= 26214400(25MB) 검증.",
+            "required": ["src"],
+            "properties": {
+              "src": { "type": "string", "description": "상대 경로 예: assets/audio/태양-p1.mp3" },
+              "mime": { "type": "string", "description": "예: audio/mpeg, audio/wav, audio/mp4" },
+              "bytes": { "type": "integer", "minimum": 0, "maximum": 26214400, "description": "파일 크기(바이트). 최대 25MB." },
+              "durationSec": { "type": "number", "minimum": 0 }
+            }
+          }
         }
       }
     },
