@@ -1494,6 +1494,11 @@ class Component extends DCLogic {
     this.drag = null;      // {mode,x0,y0,...}
     this.polyPts = [];
     this.lastPaint = null;
+    this._liveT = null;
+    this._livePending = false;
+    this._liveSending = false;
+    this._liveHex = '';
+    this._liveErrAnnounced = false;
   }
 
   // ---------- i18n ----------
@@ -1753,7 +1758,7 @@ class Component extends DCLogic {
   inb(x, y) { return x >= 0 && y >= 0 && x < this.state.gridW && y < this.state.gridH; }
   cellPx() { const w = this.state.gridW; return w <= 28 ? 20 : w <= 60 ? 13 : w <= 84 ? 7 : 9; }
   // keep this.cells and the current page slot pointing at the same buffer
-  setCells(arr) { this.cells = arr; if (this.pages) this.pages[this.state.pageIndex] = arr; }
+  setCells(arr) { this.cells = arr; if (this.pages) this.pages[this.state.pageIndex] = arr; this.queueLivePreview(); }
   // tactile-grid brush: size 1 = single dot, 2 = 2×2 block, 3 = 3×3 block
   brushCb(baseCb, size) {
     const n = size || 1;
@@ -1785,7 +1790,7 @@ class Component extends DCLogic {
   }
   thickenFx(level) { const fx = window.TW && window.TW.thickenBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h, level), this.T().aThicken); }
   denoiseFx() { const fx = window.TW && window.TW.denoiseBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h), this.T().aDenoise); }
-  bump() { this.setState(s => ({ rev: s.rev + 1 })); }
+  bump() { this.setState(s => ({ rev: s.rev + 1 })); this.queueLivePreview(); }
   say(msg) { this.setState({ announce: msg }); }
   // Safe i18n invoker: locale value may be a function, a string, or missing.
   callI18n(value, fallback, ...args) {
@@ -2090,6 +2095,7 @@ class Component extends DCLogic {
       this.pages.splice(at, 0, cells);
       this.cells = cells; this.undoStack = []; this.redoStack = [];
       this.setState({ output: out, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: ctx });
+      this.queueLivePreview();
     } else {
       this.snapshot(); this.setCells(cells);
       this.setState({ output: out, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: ctx });
@@ -2367,7 +2373,7 @@ class Component extends DCLogic {
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._convT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); cancelAnimationFrame(this.heroRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._convT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); cancelAnimationFrame(this.heroRAF); }
   componentDidUpdate() { this.drawAll(); }
 
   drawAll() {
@@ -2764,6 +2770,7 @@ class Component extends DCLogic {
     this.cells = this.pages[i];
     this.polyPts = []; this.preview = null;
     this.setState({ pageIndex: i, pageCount: n, cx: 0, cy: 0, selRect: null });
+    this.queueLivePreview();
     this.say(this.T().aPage(i + 1, n));
   }
   addPage() {
@@ -2774,6 +2781,7 @@ class Component extends DCLogic {
     this.cells = blank; this.polyPts = []; this.preview = null;
     const n = this.pages.length;
     this.setState({ pageIndex: at, pageCount: n, entry: false, cx: 0, cy: 0, selRect: null });
+    this.queueLivePreview();
     this.say(this.T().aPageAdd(at + 1, n));
   }
   deletePage() {
@@ -2785,6 +2793,7 @@ class Component extends DCLogic {
     this.cells = this.pages[ni]; this.polyPts = []; this.preview = null;
     const n = this.pages.length;
     this.setState({ pageIndex: ni, pageCount: n, confirmOpen: false, cx: 0, cy: 0, selRect: null });
+    this.queueLivePreview();
     this.say(this.T().aPageDel(ni + 1, n));
   }
   resetPages(cells) { this.pages = [cells]; }
@@ -2812,6 +2821,7 @@ class Component extends DCLogic {
     });
     this.cells = this.pages[this.state.pageIndex]; this.undoStack = []; this.redoStack = [];
     this.setState({ gridW: w, gridH: h, cx: 0, cy: 0, selRect: null });
+    this.queueLivePreview();
     this.say(this.T().aGrid(w + '×' + h));
   }
   // output targets: DotPad grids + A4 embossing paper
@@ -2932,6 +2942,7 @@ class Component extends DCLogic {
     this.cells = cells; this.resetPages(cells);
     this.undoStack = []; this.redoStack = [];
     this.setState({ entry: false, importOpen: false, tplOpen: false, cmdOpen: false, confirmOpen: false, fileName: name, sendPhase: 'idle', pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, corpusCtx: null });
+    this.queueLivePreview();
   }
   // apply an image conversion onto the document per chosen mode
   applyImport(mode) {
@@ -2989,6 +3000,7 @@ class Component extends DCLogic {
         this.pages.splice(at, 0, cells);
         this.cells = cells; this.undoStack = []; this.redoStack = [];
         this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, entry: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
+        this.queueLivePreview();
         this.say(this.callI18n(t.aCmdNewPage, '', at + 1, this.pages.length));
       } else {
         this.snapshot(); this.setCells(cells);
@@ -3008,7 +3020,21 @@ class Component extends DCLogic {
       }
     }, 700);
   }
-  retryDotpad() {    this.setState({ sendPhase: 'connecting' });
+  syncRealConnection() {
+    const DP = this.dpReal();
+    if (!DP) return this.state.connected;
+    const connected = DP.isConnected();
+    this.setState(s => ({
+      connected,
+      livePreview: connected ? s.livePreview : false,
+      sendPhase: s.dotpadOpen ? (connected ? 'idle' : 'error') : s.sendPhase
+    }));
+    return connected;
+  }
+  retryDotpad() {
+    const DP = this.dpReal();
+    if (DP) { this.connectDot('ble'); return; }
+    this.setState({ sendPhase: 'connecting' });
     clearTimeout(this._connT);
     this._connT = setTimeout(() => {
       this.setState({ connected: true, sendPhase: this.state.dotpadOpen ? 'idle' : this.state.sendPhase });
@@ -3024,6 +3050,49 @@ class Component extends DCLogic {
     if (!TW || !TW.encodeBits) return '';
     return TW.encodeBits(this.cellsToBits(this.cells, w, h), w, h);
   }
+  queueLivePreview(immediate, force) {
+    clearTimeout(this._liveT);
+    if (!force && !this.state.livePreview) return;
+    if (this.isA4()) return;
+    this._liveT = setTimeout(() => this.flushLivePreview(force), immediate ? 0 : 180);
+  }
+  flushLivePreview(force) {
+    this._liveT = null;
+    if (!force && !this.state.livePreview) return;
+    if (this.isA4()) return;
+    const DP = this.dpReal();
+    if (!DP || !DP.isConnected()) return;
+    if (this._liveSending || DP.busy) {
+      this._livePending = true;
+      this._liveT = setTimeout(() => this.flushLivePreview(force), 240);
+      return;
+    }
+    const hex = this.cellsToHex();
+    if (!hex || hex === this._liveHex) return;
+    this._liveSending = true;
+    DP.output(hex).then(ok => {
+      if (ok) {
+        this._liveHex = hex;
+        this._liveErrAnnounced = false;
+      } else if (!this._liveErrAnnounced) {
+        this._liveErrAnnounced = true;
+        const t = this.T();
+        if (t.aSendErr) this.say(t.aSendErr);
+      }
+    }).catch(() => {
+      if (!this._liveErrAnnounced) {
+        this._liveErrAnnounced = true;
+        const t = this.T();
+        if (t.aSendErr) this.say(t.aSendErr);
+      }
+    }).finally(() => {
+      this._liveSending = false;
+      if (this._livePending && (force || this.state.livePreview)) {
+        this._livePending = false;
+        this.queueLivePreview(true, force);
+      }
+    });
+  }
   connectDot(type) {
     clearTimeout(this._connBusyT);
     const t = this.T();
@@ -3037,6 +3106,7 @@ class Component extends DCLogic {
         if (ok) this.setState(s => ({ connected: true, connType: 'ble', connBusy: '', sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
         else this.setState({ connBusy: '' }); // user cancelled or unavailable — stay as-is
         this.say(ok ? t.aConnOn : t.aConnOff);
+        if (ok && this.state.livePreview) this.queueLivePreview(true, true);
       }).catch(() => { this.setState({ connBusy: '' }); this.say(t.aConnOff); });
       return;
     }
@@ -3050,16 +3120,40 @@ class Component extends DCLogic {
   }
   disconnectDot() {
     clearTimeout(this._connBusyT);
+    clearTimeout(this._liveT);
+    this._livePending = false;
+    this._liveHex = '';
     const DP = this.dpReal();
     if (DP && DP.isConnected()) { try { Promise.resolve(DP.disconnect()).catch(() => {}); } catch (e) { /* noop */ } }
     this.setState(s => ({ connected: false, connBusy: '', livePreview: false, sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
     this.say(this.T().aConnOff);
   }
+  toggleConnection() {
+    if (this.state.connected) { this.disconnectDot(); return; }
+    const DP = this.dpReal();
+    if (DP) { this.connectDot('ble'); return; }
+    this.setState(s => ({ connected: true, connBusy: '', sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
+    this.say(this.T().aConnOn);
+  }
   toggleLive() {
     const t = this.T();
     if (!this.state.connected) { this.say(t.aConnectFirst); return; }
+    const DP = this.dpReal();
+    if (DP && !DP.isConnected()) {
+      this.setState({ connected: false, livePreview: false });
+      this.say(t.aConnectFirst);
+      return;
+    }
     const next = !this.state.livePreview;
     this.setState({ livePreview: next });
+    if (next) {
+      this._liveHex = '';
+      this._liveErrAnnounced = false;
+      this.queueLivePreview(true, true);
+    } else {
+      clearTimeout(this._liveT);
+      this._livePending = false;
+    }
     this.say(next ? t.aLiveOn : t.aLiveOff);
   }
   pinAction(kind) {
@@ -3121,11 +3215,13 @@ class Component extends DCLogic {
     this.undoStack = []; this.redoStack = [];
     const out = (this.OUTPUTS.find(o => o.gw === gw && o.gh === gh) || this.OUTPUTS[0]).key;
     this.setState({ screen: 'studio', entry: false, output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle', corpusCtx: null });
+    this.queueLivePreview();
     this.say(this.T().aReady);
   }
   sendCard(kind, gw, gh, cells, name) {
     this.openCard(kind, gw, gh, cells, name);
-    this.setState(s => ({ dotpadOpen: true, sendPhase: s.connected ? 'idle' : 'error' }));
+    const connected = this.syncRealConnection();
+    this.setState({ dotpadOpen: true, sendPhase: connected ? 'idle' : 'error' });
   }
 
   // ---------- render ----------
@@ -3289,11 +3385,7 @@ class Component extends DCLogic {
       doUndo: () => this.undo(), doRedo: () => this.redo(),
       ...this.corpusNavProps(),
       undoBtnStyle: iconBtn(this.undoStack.length > 0), redoBtnStyle: iconBtn(this.redoStack.length > 0),
-      toggleConn: () => {
-        const c = !st.connected;
-        this.setState({ connected: c, sendPhase: st.dotpadOpen ? (c ? 'idle' : 'error') : st.sendPhase });
-        this.say(c ? t.aConnOn : t.aConnOff);
-      },
+      toggleConn: () => this.toggleConnection(),
       // top toolbar status chip → opens the DotPad Output inspector
       openDpPanel: () => this.setState(s => ({ inspectorOpen: true })),
       connChipText: st.connBusy ? (t.dpDevice + ' · ' + t.connecting) : (st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + (st.connType === 'usb' ? 'USB' : 'BLE')) : t.dpChipDisc),
@@ -3598,6 +3690,7 @@ class Component extends DCLogic {
             this.pages.splice(at, 0, cells);
             this.cells = cells; this.undoStack = []; this.redoStack = [];
             this.setState({ tplOpen: false, entry: false, fileName: st.lang === 'ko' ? it.ko : it.en, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null });
+            this.queueLivePreview();
             this.say(this.callI18n(t.aTplNewPage, '', at + 1, this.pages.length));
           } else {
             this.guardNewDoc(() => {
@@ -3621,9 +3714,12 @@ class Component extends DCLogic {
       convertNextStyle: { height: 40, padding: '0 22px', border: 'none', borderRadius: 8, background: 'var(--ts-primary)', color: '#fff', fontWeight: 700, fontSize: 13.5, display: 'inline-flex', alignItems: 'center', gap: 7, opacity: st.converting ? 0.5 : 1, cursor: st.converting ? 'not-allowed' : 'pointer' },
       // dotpad
       dotpadOpen: st.dotpadOpen,
-      openSend: () => this.setState({ dotpadOpen: true, sendPhase: this.isA4() ? 'incompat' : (st.connected ? 'idle' : 'error') }),
+      openSend: () => {
+        const connected = this.syncRealConnection();
+        this.setState({ dotpadOpen: true, sendPhase: this.isA4() ? 'incompat' : (connected ? 'idle' : 'error') });
+      },
       phaseIncompat: phase === 'incompat',
-      switchTo60: () => { this.setOutput('60'); this.setState({ sendPhase: st.connected ? 'idle' : 'error' }); },
+      switchTo60: () => { const connected = this.syncRealConnection(); this.setOutput('60'); this.setState({ sendPhase: connected ? 'idle' : 'error' }); },
       goEmbossFromPad: () => this.setState({ dotpadOpen: false, embossOpen: true, embossPhase: 'idle' }),
       closeDotpad: () => this.setState({ dotpadOpen: false }),
       dpOuterStyle: dpOuter, dpPanelStyle: dpPanel,
@@ -3635,14 +3731,31 @@ class Component extends DCLogic {
         if (this.state.sendPhase === 'sending') return; // ignore re-entry while sending
         clearTimeout(this._sendT);                       // cancel any pending sim timer
         const DP = this.dpReal();
+        if (DP && !DP.isConnected()) {
+          this.setState({ connected: false, sendPhase: 'error' });
+          this.say(t.aConnectFirst);
+          return;
+        }
         if (DP && DP.isConnected()) {
-          const hex = this.cellsToHex();
-          if (!hex) { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); return; }
-          this.setState({ sendPhase: 'sending' });
-          DP.output(hex).then(ok => {
-            this.setState({ sendPhase: ok ? 'done' : 'error' });
-            if (ok) this.say(t.aSent); else if (t.aSendErr) this.say(t.aSendErr);
-          }).catch(() => { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); });
+          clearTimeout(this._liveT);
+          this._livePending = false;
+          const runRealSend = () => {
+            const hex = this.cellsToHex();
+            if (!hex) { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); return; }
+            this.setState({ sendPhase: 'sending' });
+            DP.output(hex).then(ok => {
+              this.setState({ sendPhase: ok ? 'done' : 'error' });
+              if (ok) { this._liveHex = hex; this.say(t.aSent); }
+              else if (t.aSendErr) this.say(t.aSendErr);
+            }).catch(() => { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); });
+          };
+          const waitForIdle = tries => {
+            if (!(this._liveSending || DP.busy)) { runRealSend(); return; }
+            if (tries <= 0) { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); return; }
+            this.setState({ sendPhase: 'sending' });
+            setTimeout(() => waitForIdle(tries - 1), 120);
+          };
+          waitForIdle(10);
           return;
         }
         // Simulation fallback (no real device / preview): unchanged timing.
@@ -3685,7 +3798,7 @@ class Component extends DCLogic {
       deviceOpen: !!st.menu && st.menu.kind === 'device',
       toggleCreate: e => this.toggleMenu('create', e),
       toggleExport: e => this.toggleMenu('export', e),
-      toggleDevice: e => this.toggleMenu('device', e),
+      toggleDevice: e => { this.syncRealConnection(); this.toggleMenu('device', e); },
       closeMenu: () => this.setState({ menu: null }),
       menuStyleLeft: st.menu ? { position: 'fixed', top: st.menu.top, left: st.menu.left, zIndex: 75, minWidth: 240, background: '#fff', border: '1px solid #E8DFD6', borderRadius: 12, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', transformOrigin: 'top left', animation: 'tsFly 0.15s ease-out' } : null,
       menuStyleRight: st.menu ? { position: 'fixed', top: st.menu.top, right: st.menu.right, zIndex: 75, minWidth: 216, background: '#fff', border: '1px solid #E8DFD6', borderRadius: 12, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', transformOrigin: 'top right', animation: 'tsFly 0.15s ease-out' } : null,
@@ -3704,9 +3817,8 @@ class Component extends DCLogic {
         { label: t.devSettings, sub: '', iconPath: 'M4 6h16v10H4zM9 20h6M9 16v4M15 16v4', run: () => { this.setState({ menu: null, inspectorOpen: true }); } },
         { label: t.devTest, sub: '', iconPath: 'M12 3v10M8 9l4 4 4-4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3', run: () => this.testOutput() },
         { label: st.connected ? t.devDisconnect : t.devConnect, sub: '', iconPath: 'M12 4v8M7.5 7.5a6 6 0 1 0 9 0', run: () => {
-          const c = !st.connected;
-          this.setState({ menu: null, connected: c, sendPhase: st.dotpadOpen ? (c ? 'idle' : 'error') : st.sendPhase });
-          this.say(c ? t.aConnOn : t.aConnOff);
+          this.setState({ menu: null });
+          this.toggleConnection();
         } }
       ],
       // floating undo/redo (near canvas)
