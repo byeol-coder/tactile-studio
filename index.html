@@ -43,6 +43,13 @@ if ('caches' in window) {
 <script src="./support.js"></script>
 <script src="./corpus.js"></script>
 <script src="./corpus-search.js"></script>
+<!-- Ported from tw-app (verified byte-identical pin encoding). Exposes window.TW.*
+     (imageToPins, pins encode/DTMS/post-process) and window.DotPad* (real SDK).
+     dotpad-sdk.js must load before dotpad.js (side-effect global). -->
+<script src="./vendor/tw/dotpad-sdk.js"></script>
+<script src="./vendor/tw/pins.js"></script>
+<script src="./vendor/tw/imageToPins.js"></script>
+<script src="./vendor/tw/dotpad.js"></script>
 <script>
 /* Boot watchdog — if the app root has not mounted within the grace window
    (runtime script 404, React CDN unreachable, SRI failure, offline, …),
