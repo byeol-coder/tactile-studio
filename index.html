@@ -1459,6 +1459,50 @@ input[type=range]{accent-color:var(--ts-primary)}
 </div>
 </sc-if>
 
+<sc-if value="{{ libraryOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeLibrary }}" style="position:fixed;inset:0;background:rgba(30,28,26,0.5);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div role="dialog" aria-modal="true" aria-label="{{ t.libTitle }}" onClick="{{ stopProp }}" style="width:720px;max-width:96vw;max-height:88vh;overflow-y:auto;background:#fff;border-radius:14px;box-shadow:0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1);padding:26px;animation:tsUp 0.22s ease-out">
+    <div style="display:flex;align-items:center;margin-bottom:18px">
+      <h3 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-0.3px">{{ t.libTitle }} <span style="font-size:13px;font-weight:600;color:var(--ts-text-secondary)">({{ libCount }})</span></h3>
+      <button onClick="{{ closeLibrary }}" aria-label="{{ t.close }}" style="margin-left:auto;width:32px;height:32px;border:none;border-radius:8px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+      </button>
+    </div>
+    <sc-if value="{{ libHasItems }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+        <sc-for list="{{ libraryCards }}" as="c" hint-placeholder-count="4">
+          <div style="border:1px solid var(--ts-border-decor);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column">
+            <div style="aspect-ratio:3/2;background:#141210;display:grid;place-items:center;position:relative">
+              <sc-if value="{{ c.hasThumb }}" hint-placeholder-val="{{ true }}"><img src="{{ c.thumb }}" alt="{{ c.name }}" style="width:100%;height:100%;object-fit:contain"></sc-if>
+              <span style="position:absolute;left:8px;top:8px;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,0.45);border-radius:5px;padding:2px 7px">{{ c.tag }}</span>
+            </div>
+            <div style="padding:11px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</div>
+              <div style="font-size:11px;color:var(--ts-text-secondary)">{{ c.grid }}</div>
+              <div style="display:flex;gap:6px;margin-top:2px">
+                <button onClick="{{ c.open }}" aria-label="{{ c.aOpen }}" style="flex:1;height:32px;border:none;border-radius:7px;background:var(--ts-primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:1px">{{ t.libOpenCard }}</button>
+                <button onClick="{{ c.send }}" aria-label="{{ c.aSend }}" title="{{ t.libSendCard }}" style="flex:none;width:32px;height:32px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+                <button onClick="{{ c.remove }}" aria-label="{{ c.aDelete }}" title="{{ t.libDeleteCard }}" style="flex:none;width:32px;height:32px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-text-secondary);display:grid;place-items:center;cursor:pointer" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ libEmptyState }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;padding:48px 20px;color:var(--ts-text-secondary)">
+        <svg width="44" height="44" viewBox="0 0 24 24" style="margin-bottom:14px;opacity:0.4"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path></svg>
+        <p style="margin:0;font-size:13.5px;line-height:1.6;max-width:340px;margin:0 auto">{{ t.libEmpty }}</p>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
 <sc-if value="{{ helpOpen }}" hint-placeholder-val="{{ false }}">
 <div onClick="{{ toggleHelp }}" style="position:fixed;inset:0;background:rgba(30,28,26,0.5);z-index:80;display:flex;align-items:center;justify-content:center">
   <div role="dialog" aria-modal="true" data-screen-label="9. Accessibility / keyboard guidance" onClick="{{ stopProp }}" style="width:600px;max-width:94vw;max-height:86vh;overflow-y:auto;background:#fff;border-radius:12px;box-shadow:0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1);padding:28px;animation:tsUp 0.22s ease-out">
@@ -1523,7 +1567,7 @@ class Component extends DCLogic {
     confirmOpen: false,
     connected: true, connType: 'ble', connBusy: '', livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
-    saveOpen: false, savePhase: 'form', saveLoc: 'drive',
+    saveOpen: false, savePhase: 'form', saveLoc: 'drive', libraryOpen: false,
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
@@ -1556,6 +1600,8 @@ class Component extends DCLogic {
     this._liveSending = false;
     this._liveHex = '';
     this._liveErrAnnounced = false;
+    // restore persisted library (non-fatal if storage is unavailable)
+    try { const lib = this.loadLibrary(); if (lib.length) this.state.saved = lib; } catch (e) { /* noop */ }
   }
 
   // ---------- i18n ----------
@@ -1672,7 +1718,7 @@ class Component extends DCLogic {
       statusEdit: '편집 가능', statusPrint: 'DotPad 출력 가능',
       fTypes: ['그래프', '도형', '파형'], fTimes: ['2일 전', '5일 전', '1주 전'],
       imgType: '이미지 변환', createTitle: '새 촉각 그래픽 만들기', createSub2: '빈 캔버스 · 이미지 가져오기 · 템플릿',
-      openDrive: 'Tactile Drive 열기', importTitle2: '이미지 가져오기', importSub2: '이미지를 촉각 그래픽으로 변환',
+      libOpen: '라이브러리 열기', libOpenSub: '저장한 촉각 그래픽을 다시 열기', libTitle: '내 라이브러리', libEmpty: '아직 저장한 그래픽이 없습니다. 그래픽을 만들고 저장하면 여기에 모입니다.', libOpenCard: '열기', libSendCard: 'DotPad로 전송', libDeleteCard: '삭제', libDriveTag: '드라이브', libLibraryTag: '라이브러리', aLibDeleted: '삭제했습니다', openDrive: 'Tactile Drive 열기', importTitle2: '이미지 가져오기', importSub2: '이미지를 촉각 그래픽으로 변환',
       langLabel: '언어 선택 (한국어 / 영어)',
       savedDrive: 'Tactile Drive에 저장되었습니다.', savedLib: 'Dot Library에 저장되었습니다.',
       helpTitle: '키보드 · 스크린리더 안내', kbSection: '키보드 단축키', srSection: '스크린리더 · TTS',
@@ -1789,7 +1835,7 @@ class Component extends DCLogic {
       statusEdit: 'Editable', statusPrint: 'Ready for DotPad',
       fTypes: ['Graph', 'Shape', 'Wave'], fTimes: ['2 days ago', '5 days ago', '1 week ago'],
       imgType: 'Image', createTitle: 'Create new', createSub2: 'Blank · Import image · Template',
-      openDrive: 'Open Tactile Drive', importTitle2: 'Import image', importSub2: 'Convert an image into a tactile graphic',
+      libOpen: 'Open library', libOpenSub: 'Reopen your saved tactile graphics', libTitle: 'My library', libEmpty: 'No saved graphics yet. Create and save a graphic and it will appear here.', libOpenCard: 'Open', libSendCard: 'Send to DotPad', libDeleteCard: 'Delete', libDriveTag: 'Drive', libLibraryTag: 'Library', aLibDeleted: 'Deleted', openDrive: 'Open Tactile Drive', importTitle2: 'Import image', importSub2: 'Convert an image into a tactile graphic',
       langLabel: 'Select language (Korean / English)',
       savedDrive: 'Saved to Tactile Drive.', savedLib: 'Saved to Dot Library.',
       helpTitle: 'Keyboard · screen reader guide', kbSection: 'Keyboard shortcuts', srSection: 'Screen reader · TTS',
@@ -3368,10 +3414,11 @@ class Component extends DCLogic {
     const t = this.T(), name = this.state.fileName || t.untitled;
     const thumb = this.thumbFrom(this.cells, this.state.gridW, this.state.gridH);
     const cells = this.cells.slice();
-    this.setState(s => ({
-      savePhase: 'done',
-      saved: [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved]
-    }));
+    this.setState(s => {
+      const saved = [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved];
+      this.saveLibrary(saved);
+      return { savePhase: 'done', saved };
+    });
     // Saving to the shared library also emits a schema-v1 asset file (JSON) so it
     // can drop straight into build-corpus → the app corpus grows (WS1↔WS2 link).
     if (this.state.saveLoc === 'library') this.exportLibraryAsset(name);
@@ -3476,6 +3523,41 @@ class Component extends DCLogic {
     this.bump();
   }
   // open / send a Tactile Drive file back into Studio
+  // ── library persistence (localStorage; cells stored as 600-hex to stay small)
+  static get LIB_KEY() { return 'ts.library.v1'; }
+  loadLibrary() {
+    try {
+      const raw = window.localStorage.getItem('ts.library.v1');
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      // rehydrate: hex → cells (fixed 60×40 hex → 2400 cells); tolerate legacy
+      return arr.map((it) => {
+        const cells = it.hex ? this.corpusCellsFromHex(it.hex) : null;
+        return { name: it.name || '', loc: it.loc || 'drive', grid: it.grid || '60×40', thumb: it.thumb || '', cells: cells || new Uint8Array(2400) };
+      }).filter(Boolean);
+    } catch (e) { return []; }
+  }
+  saveLibrary(saved) {
+    try {
+      const TW = window.TW;
+      const arr = (saved || []).map((it) => {
+        const p = String(it.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40;
+        // only 60×40 round-trips through 600-hex cleanly; others keep thumb only
+        const hex = (gw === 60 && gh === 40 && it.cells && TW && TW.encodeBits) ? TW.encodeBits(this.cellsToBits(it.cells, 60, 40), 60, 40) : '';
+        return { name: it.name, loc: it.loc, grid: it.grid, thumb: it.thumb || '', hex };
+      });
+      window.localStorage.setItem('ts.library.v1', JSON.stringify(arr));
+    } catch (e) { /* storage full or unavailable — session-only, non-fatal */ }
+  }
+  deleteSaved(index) {
+    this.setState(s => {
+      const saved = s.saved.slice(); saved.splice(index, 1);
+      this.saveLibrary(saved);
+      return { saved };
+    });
+    this.say(this.T().aLibDeleted || 'Deleted');
+  }
   openCard(kind, gw, gh, cells, name) {
     this.cells = cells ? cells.slice() : this.makePattern(kind, gw, gh);
     this.resetPages(this.cells);
@@ -3603,6 +3685,17 @@ class Component extends DCLogic {
       };
     });
     const recentCards = [...savedCards, ...presetCards].slice(0, 6);
+    const libraryCards = (st.saved || []).map((f, i) => {
+      const p = String(f.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40;
+      return {
+        name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: f.grid || '60×40',
+        tag: f.loc === 'library' ? t.libLibraryTag : t.libDriveTag,
+        open: () => { this.setState({ libraryOpen: false }); this.openCard('saved', gw, gh, f.cells, f.name); },
+        send: () => { this.setState({ libraryOpen: false }); this.sendCard('saved', gw, gh, f.cells, f.name); },
+        remove: () => this.deleteSaved(i),
+        aOpen: t.libOpenCard + ' · ' + f.name, aSend: t.libSendCard + ' · ' + f.name, aDelete: t.libDeleteCard + ' · ' + f.name,
+      };
+    });
 
     const impIdx = ['import', 'crop', 'convert', 'review', 'edit'].indexOf(st.impStep);
     const cellVal = this.cells[this.idx(st.cx, st.cy)];
@@ -3629,6 +3722,11 @@ class Component extends DCLogic {
       isKo: st.lang === 'ko', isEn: st.lang === 'en',
       // hub
       recentCards,
+      libraryCards,
+      libCount: (st.saved || []).length,
+      libHasItems: (st.saved || []).length > 0,
+      libEmptyState: (st.saved || []).length === 0,
+      closeLibrary: () => this.setState({ libraryOpen: false }),
       goStudio: () => this.enterStudio(true),
       goStudioBlank: () => this.enterStudio(false),
       goStudioImport: () => this.enterStudio(true, true),
@@ -4122,7 +4220,8 @@ class Component extends DCLogic {
       createItems: [
         { label: t.entCmd, sub: t.entCmdSub, iconPath: 'M8 9l3 3-3 3M13 15h4M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z', run: () => { this.setState({ menu: null, cmdOpen: true, cmdError: false, cmdGenerating: false }); } },
         { label: t.startImage, sub: t.startImageSub, iconPath: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01', run: () => { this.resetImport(); this.setState({ menu: null, importOpen: true }); } },
-        { label: t.entTpl, sub: t.entTplSub, iconPath: 'M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 1-1-1zM13 4h6a1 1 0 0 1 1 1v6h-7zM13 13h7v6a1 1 0 0 1-1 1h-6z', run: () => { this.setState({ menu: null, tplOpen: true, tplGroup: 'recommended' }); } }
+        { label: t.entTpl, sub: t.entTplSub, iconPath: 'M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 1-1-1zM13 4h6a1 1 0 0 1 1 1v6h-7zM13 13h7v6a1 1 0 0 1-1 1h-6z', run: () => { this.setState({ menu: null, tplOpen: true, tplGroup: 'recommended' }); } },
+        { label: t.libOpen, sub: t.libOpenSub, iconPath: 'M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z', run: () => { this.setState({ menu: null, libraryOpen: true }); } }
       ],
       exportItems: [
         { label: t.saveToLib, sub: '', iconPath: 'M6 4h10l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 4v5h7V4M8 20v-6h8v6', run: () => { this.setState({ menu: null, saveOpen: true, savePhase: 'form' }); } },
