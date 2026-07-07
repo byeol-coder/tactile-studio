@@ -13,6 +13,15 @@
     "lang": { "type": "string", "enum": ["ko", "en", "bilingual"] },
     "category": { "type": "string", "enum": ["science", "language", "geography", "math", "basic"] },
     "tags": { "type": "array", "items": { "type": "string" }, "minItems": 4 },
+    "graphicFeatures": {
+      "type": "object",
+      "description": "Device compatibility flags, modeled on APH TGIL's graphic-feature tags ('Template for embossable graphic', 'Optimized for Monarch'). Here: DotPad (a Monarch-like refreshable multiline display) + emboss. 'dotpadCompatible' means it renders on a DotPad grid at all (any DTMS spec); 'dotpadOptimized' additionally means it reads well on the device (passes the on-screen density check). 'embossable' means it meets BANA print minimums (banaPrintCheck). These are derived by Studio, not hand-set, so filters/search can rely on them.",
+      "properties": {
+        "dotpadCompatible": { "type": "boolean" },
+        "dotpadOptimized": { "type": "boolean" },
+        "embossable": { "type": "boolean" }
+      }
+    },
     "pages": {
       "type": "array",
       "minItems": 1,

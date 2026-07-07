@@ -3312,6 +3312,18 @@ class Component extends DCLogic {
   }
   // Serialize the whole document into a Tactile Library Asset v1 record.
   // Every page's graphic is DTMS hex from the byte-identical encoder.
+  // Derive TGIL-style device flags from the graphic itself (not hand-set), so
+  // filters/search stay honest. Judged on the first page.
+  //  · dotpadCompatible: renders on a DotPad grid (native DTMS specs)
+  //  · dotpadOptimized : reads well on-screen (convQuality 'readable')
+  //  · embossable      : meets BANA print minimums (banaPrintCheck)
+  deriveGraphicFeatures(cells, w, h) {
+    const NATIVE = { '60x40': 1, '96x64': 1, '28x40': 1 };
+    const compatible = !!NATIVE[w + 'x' + h];
+    const q = this.convQuality(cells, w, h);
+    const bana = this.banaPrintCheck(cells, w, h);
+    return { dotpadCompatible: compatible, dotpadOptimized: compatible && q.key === 'readable', embossable: bana.pass };
+  }
   buildLibraryAsset(name) {
     const st = this.state, ctx = st.corpusCtx;
     const w = st.gridW, h = st.gridH, TW = window.TW;
@@ -3341,6 +3353,7 @@ class Component extends DCLogic {
       lang: st.lang === 'en' ? 'en' : 'ko',
       category: category,
       tags: (ctx && Array.isArray(ctx.tags)) ? ctx.tags.slice() : [],
+      graphicFeatures: this.deriveGraphicFeatures(this.cells, w, h),
       pages: pages,
       provenance: {
         createdBy: 'tactile-studio',

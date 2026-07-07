@@ -203,6 +203,7 @@
       category: graphic.category,
       lang: graphic.lang,
       spec: graphic.spec,
+      graphicFeatures: graphic.graphicFeatures || null,
       matchedTags: s.matchedTags,
       pageIndex: s.pageIndex,
       pageNumber: typeof page.page === 'number' ? page.page : s.pageIndex + 1,
@@ -221,12 +222,16 @@
     options = options || {};
     var limit = typeof options.limit === 'number' ? options.limit : DEFAULT_LIMIT;
     var minScore = typeof options.minScore === 'number' ? options.minScore : 1;
+    // TGIL-style device filter: options.features = ['dotpadOptimized', ...] keeps
+    // only records whose graphicFeatures has every listed flag true.
+    var features = Array.isArray(options.features) ? options.features : [];
     var q = norm(query);
     if (!q) return [];
     var tokens = expandQuery(q, tokenize(q));
     var corpus = getCorpus();
     var scored = [];
     for (var i = 0; i < corpus.length; i++) {
+      if (!recordHasFeatures(corpus[i], features)) continue;
       var s = scoreRecord(corpus[i], q, tokens);
       if (s.score >= minScore) scored.push({ order: i, result: toResult(corpus[i], s) });
     }
@@ -236,6 +241,26 @@
       return a.order - b.order;
     });
     return scored.slice(0, limit).map(function (x) { return x.result; });
+  }
+  // Every listed feature flag must be true on the record's graphicFeatures.
+  function recordHasFeatures(rec, features) {
+    if (!features || !features.length) return true;
+    var gf = rec && rec.graphicFeatures;
+    if (!gf) return false;
+    for (var i = 0; i < features.length; i++) if (!gf[features[i]]) return false;
+    return true;
+  }
+  // Count corpus records per device feature — for TGIL-style filter counts.
+  function featureCounts() {
+    var corpus = getCorpus();
+    var out = { dotpadCompatible: 0, dotpadOptimized: 0, embossable: 0, total: corpus.length };
+    for (var i = 0; i < corpus.length; i++) {
+      var gf = corpus[i] && corpus[i].graphicFeatures; if (!gf) continue;
+      if (gf.dotpadCompatible) out.dotpadCompatible++;
+      if (gf.dotpadOptimized) out.dotpadOptimized++;
+      if (gf.embossable) out.embossable++;
+    }
+    return out;
   }
 
   // ── public: near-match suggestions (miss path) ──────────────────────────
@@ -320,5 +345,6 @@
     window.normalizeCorpusQuery = normalizeCorpusQuery;
     window.searchCorpus = searchCorpus;
     window.nearMatches = nearMatches;
+    window.corpusFeatureCounts = featureCounts;
   }
 })();
