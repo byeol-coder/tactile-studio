@@ -3015,9 +3015,32 @@ class Component extends DCLogic {
       this.say(this.T().aConnOn);
     }, 1200);
   }
+  // Real DotPad available? (Web Bluetooth + ported SDK). Falls back to simulation.
+  dpReal() { const DP = window.TW && window.TW.DP; return DP && DP.hasReal() ? DP : null; }
+  // Current page → DTMS hex via the ported (byte-identical) encoder.
+  cellsToHex() {
+    const { gridW: w, gridH: h } = this.state;
+    const TW = window.TW;
+    if (!TW || !TW.encodeBits) return '';
+    return TW.encodeBits(this.cellsToBits(this.cells, w, h), w, h);
+  }
   connectDot(type) {
     clearTimeout(this._connBusyT);
     const t = this.T();
+    if (this.state.connBusy) return; // ignore re-entry while a connect is in flight
+    const DP = this.dpReal();
+    // Real path: BLE via Web Bluetooth (USB not offered by the scanner here → BLE).
+    if (DP && type !== 'usb') {
+      this.setState({ connBusy: type });
+      this.say(t.aConnBle);
+      DP.connect().then(ok => {
+        if (ok) this.setState(s => ({ connected: true, connType: 'ble', connBusy: '', sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
+        else this.setState({ connBusy: '' }); // user cancelled or unavailable — stay as-is
+        this.say(ok ? t.aConnOn : t.aConnOff);
+      }).catch(() => { this.setState({ connBusy: '' }); this.say(t.aConnOff); });
+      return;
+    }
+    // Simulation fallback (unchanged): no real device / USB / preview environments.
     this.setState({ connBusy: type });
     this.say(type === 'usb' ? t.aConnUsb : t.aConnBle);
     this._connBusyT = setTimeout(() => {
@@ -3027,6 +3050,8 @@ class Component extends DCLogic {
   }
   disconnectDot() {
     clearTimeout(this._connBusyT);
+    const DP = this.dpReal();
+    if (DP && DP.isConnected()) { try { Promise.resolve(DP.disconnect()).catch(() => {}); } catch (e) { /* noop */ } }
     this.setState(s => ({ connected: false, connBusy: '', livePreview: false, sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
     this.say(this.T().aConnOff);
   }
@@ -3607,6 +3632,20 @@ class Component extends DCLogic {
       phaseConnecting: phase === 'connecting',
       phaseError: phase === 'error', phaseNotError: phase !== 'error' && phase !== 'incompat',
       doSend: () => {
+        if (this.state.sendPhase === 'sending') return; // ignore re-entry while sending
+        clearTimeout(this._sendT);                       // cancel any pending sim timer
+        const DP = this.dpReal();
+        if (DP && DP.isConnected()) {
+          const hex = this.cellsToHex();
+          if (!hex) { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); return; }
+          this.setState({ sendPhase: 'sending' });
+          DP.output(hex).then(ok => {
+            this.setState({ sendPhase: ok ? 'done' : 'error' });
+            if (ok) this.say(t.aSent); else if (t.aSendErr) this.say(t.aSendErr);
+          }).catch(() => { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); });
+          return;
+        }
+        // Simulation fallback (no real device / preview): unchanged timing.
         this.setState({ sendPhase: 'sending' });
         this._sendT = setTimeout(() => { this.setState({ sendPhase: 'done' }); this.say(t.aSent); }, 1500);
       },
