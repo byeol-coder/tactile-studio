@@ -187,6 +187,9 @@ input[type=range]{accent-color:var(--ts-primary)}
   /* selected-tool indicator: vertical left bar → horizontal underline */
   .ts-tool-rail>button>span[aria-hidden="true"]{left:12px!important;right:12px!important;top:auto!important;bottom:2px!important;width:auto!important;height:3px!important}
   .ts-rail-div{width:1px!important;height:26px!important;margin:0 5px!important;flex:none}
+  /* Pages rail: hide on mobile (like the layers panel in editors); the vertical
+     96px strip doesn't fit a stacked column. Page nav stays via existing controls. */
+  .ts-pages-rail{display:none!important}
   /* DotPad panel → full-height drawer over the canvas (existing ✕ button closes it) */
   .ts-side-panel{position:fixed!important;top:0;right:0;bottom:0;height:100dvh;width:min(320px,86vw)!important;z-index:60;border-left:1px solid var(--ts-border-decor);box-shadow:-16px 0 40px rgba(16,24,40,0.20);animation:tsDrawerIn 0.22s ease-out}
   .ts-statusbar{gap:10px;padding:0 10px;font-size:11px}
