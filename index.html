@@ -1359,12 +1359,17 @@ input[type=range]{accent-color:var(--ts-primary)}
       </div>
       <div style="display:flex;flex-direction:column;gap:14px">
         <div>
-          <div style="font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.fmtFile }}</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <sc-for list="{{ fmtChips }}" as="f" hint-placeholder-count="4">
-              <button onClick="{{ f.pick }}" style="border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-size:12.5px;font-weight:700;padding:8px 14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ f.label }}</button>
-            </sc-for>
-          </div>
+          <sc-for list="{{ exportGroups }}" as="grp" hint-placeholder-count="2">
+            <div style="margin-bottom:14px">
+              <div style="font-size:11.5px;font-weight:800;color:#1E1C1A;margin-bottom:2px">{{ grp.title }}</div>
+              <div style="font-size:11px;color:var(--ts-text-secondary);margin-bottom:8px;line-height:1.4">{{ grp.sub }}</div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                <sc-for list="{{ grp.items }}" as="f" hint-placeholder-count="3">
+                  <button onClick="{{ f.pick }}" style="border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-size:12.5px;font-weight:700;padding:8px 14px;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ f.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
         </div>
         <div style="border:1.5px solid var(--ts-primary);border-radius:12px;background:rgba(var(--ts-primary-rgb),0.05);padding:16px">
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:4px">
@@ -1609,7 +1614,7 @@ class Component extends DCLogic {
       outSubs: { '60': 'DotPad 기본 크기', '96': '대형 DotPad 크기', '28': '컴팩트 크기', 'a4': '인쇄용 크기' },
       aOutput: n => '출력 대상 변경: ' + n,
       a4Badge: 'A4 점자용지 · 엠보싱 출력', paperPreview: 'A4 점자용지 미리보기',
-      exportTitle: '내보내기', exportSub: '파일로 저장하거나 점자용지 인쇄용으로 준비합니다.',
+      exportTitle: '내보내기', exportSub: '파일로 저장하거나 점자용지 인쇄용으로 준비합니다.', exportOriginal: '원본 (편집·출력용)', exportOriginalSub: 'DotPad 전송·엠보싱에 쓰는 실제 데이터입니다.', exportPreview: '미리보기 (참고용)', exportPreviewSub: '화면·인쇄로 확인하는 이미지입니다.', aExported: '내보냈습니다', aExportUnavail: '내보내기를 사용할 수 없습니다',
       fmtFile: '파일 형식', embossCard: 'A4 점자용지 (엠보싱)', embossCardSub: '인쇄용 촉각 파일로 내보냅니다',
       embossExport: '엠보싱용 내보내기', exporting: '내보내는 중…', exportDone: '내보내기 완료',
       embossReadyMsg: '인쇄용 촉각 파일이 준비되었습니다. 점자용지에 엠보싱 출력할 수 있습니다.',
@@ -1726,7 +1731,7 @@ class Component extends DCLogic {
       outSubs: { '60': 'Default DotPad size', '96': 'Large DotPad size', '28': 'Compact size', 'a4': 'Print-ready size' },
       aOutput: n => 'Target output changed: ' + n,
       a4Badge: 'A4 braille paper · embossing output', paperPreview: 'A4 braille paper preview',
-      exportTitle: 'Export', exportSub: 'Save as a file, or prepare it for braille paper printing.',
+      exportTitle: 'Export', exportSub: 'Save as a file, or prepare it for braille paper printing.', exportOriginal: 'Original (editable / output)', exportOriginalSub: 'The real data used for DotPad transmission and embossing.', exportPreview: 'Preview (reference)', exportPreviewSub: 'An image for viewing or reference printing.', aExported: 'Exported', aExportUnavail: 'Export unavailable',
       fmtFile: 'File format', embossCard: 'A4 braille paper (embossing)', embossCardSub: 'Export as a print-ready tactile file',
       embossExport: 'Export for embossing', exporting: 'Exporting…', exportDone: 'Export complete',
       embossReadyMsg: 'Your print-ready tactile file is prepared. It can be embossed onto braille paper.',
@@ -3163,6 +3168,54 @@ class Component extends DCLogic {
     if (!TW || !TW.encodeBits) return '';
     return TW.encodeBits(this.cellsToBits(this.cells, w, h), w, h);
   }
+  // ── real file export, split by purpose (TGIL Original vs Preview) ─────────
+  // Original = editable/output data for DotPad + embossing: DTMS (all pages),
+  // SVG (vector). Preview = a reference raster of the current page: PNG.
+  exportFormat(fmt) {
+    const TW = window.TW, t = this.T();
+    if (!TW || !TW.downloadBlob) { this.toastMsg(t.aExportUnavail || 'Export unavailable'); return; }
+    const { gridW: w, gridH: h } = this.state;
+    const name = this.state.fileName || t.untitled;
+    const bitsOf = (cellBuf) => this.cellsToBits(cellBuf, w, h);
+    try {
+      if (fmt === 'DTMS') {
+        // all pages → one multi-page DTMS (DotPad canonical data)
+        const items = (this.pages || [this.cells]).map((cellBuf, i) => ({
+          label: (this.state.corpusCtx && this.state.corpusCtx.pages && this.state.corpusCtx.pages[i] && this.state.corpusCtx.pages[i].label) || (name + ' · ' + (i + 1)),
+          data: TW.encodeBits(bitsOf(cellBuf), w, h),
+        }));
+        const json = TW.buildDtms(name, w + 'x' + h, items);
+        TW.downloadBlob(new Blob([json], { type: 'application/json' }), TW.safeName(name, 'dtms'));
+      } else if (fmt === 'SVG') {
+        const svg = TW.bitsToSVG(bitsOf(this.cells), w, h, { title: name });
+        TW.downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), TW.safeName(name, 'svg'));
+      } else if (fmt === 'PNG') {
+        this.exportPNG(name, w, h);
+      } else if (fmt === 'JSON') {
+        // library asset (schema v1) — same artifact as save-to-library
+        const asset = this.buildLibraryAsset(name);
+        TW.downloadBlob(new Blob([JSON.stringify(asset, null, 2)], { type: 'application/json' }), TW.safeName(asset.id, 'json'));
+      }
+      this.setState({ menu: null });
+      this.toastMsg(t.tExport + ' · ' + fmt);
+      this.say((t.aExported || t.tExport) + ' ' + fmt);
+    } catch (e) {
+      this.toastMsg(t.aExportUnavail || 'Export failed');
+    }
+  }
+  // Preview raster: draw the current page to an offscreen canvas → PNG blob.
+  exportPNG(name, w, h) {
+    const TW = window.TW, cell = 12, pad = cell;
+    const cnv = document.createElement('canvas');
+    cnv.width = w * cell + pad * 2; cnv.height = h * cell + pad * 2;
+    const g = cnv.getContext('2d');
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, cnv.width, cnv.height);
+    g.fillStyle = '#1a1a1a';
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      if (this.cells[y * w + x]) { g.beginPath(); g.arc(pad + x * cell + cell / 2, pad + y * cell + cell / 2, cell * 0.42, 0, Math.PI * 2); g.fill(); }
+    }
+    cnv.toBlob((blob) => { if (blob && TW && TW.downloadBlob) TW.downloadBlob(blob, TW.safeName(name || 'preview', 'png')); }, 'image/png');
+  }
   queueLivePreview(immediate, force) {
     clearTimeout(this._liveT);
     if (!force && !this.state.livePreview) return;
@@ -3680,7 +3733,16 @@ class Component extends DCLogic {
         clearTimeout(this._embT);
         this._embT = setTimeout(() => { this.setState({ embossPhase: 'done' }); this.say(t.embossReadyMsg); }, 1400);
       },
-      fmtChips: ['PNG', 'SVG', 'JSON', 'DTMS'].map(f => ({ label: f, pick: () => { this.setState({ embossOpen: false }); this.toastMsg(t.tExport + ' · ' + f); } })),
+      exportGroups: [
+        { title: t.exportOriginal, sub: t.exportOriginalSub, items: [
+          { label: 'DTMS', pick: () => this.exportFormat('DTMS') },
+          { label: 'SVG', pick: () => this.exportFormat('SVG') },
+          { label: 'JSON', pick: () => this.exportFormat('JSON') },
+        ] },
+        { title: t.exportPreview, sub: t.exportPreviewSub, items: [
+          { label: 'PNG', pick: () => this.exportFormat('PNG') },
+        ] },
+      ],
       // canvas
       canvasRef: this.canvasRef,
       heroRef: this.heroRef,
@@ -4064,7 +4126,10 @@ class Component extends DCLogic {
       ],
       exportItems: [
         { label: t.saveToLib, sub: '', iconPath: 'M6 4h10l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 4v5h7V4M8 20v-6h8v6', run: () => { this.setState({ menu: null, saveOpen: true, savePhase: 'form' }); } },
-        ...['PNG', 'SVG', 'JSON', 'DTMS'].map(f => ({ label: f, sub: '', iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => { this.setState({ menu: null }); this.toastMsg(t.tExport + ' · ' + f); } }))
+        { label: 'DTMS', sub: t.exportOriginal, iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.exportFormat('DTMS') },
+        { label: 'SVG', sub: t.exportOriginal, iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.exportFormat('SVG') },
+        { label: 'JSON', sub: t.exportOriginal, iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.exportFormat('JSON') },
+        { label: 'PNG', sub: t.exportPreview, iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.exportFormat('PNG') },
       ],
       deviceItems: [
         { label: t.devSettings, sub: '', iconPath: 'M4 6h16v10H4zM9 20h6M9 16v4M15 16v4', run: () => { this.setState({ menu: null, inspectorOpen: true }); } },
