@@ -639,7 +639,7 @@ input[type=range]{accent-color:var(--ts-primary)}
                 <span style="flex:1;font-size:12px;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pgAudio.fileName }} {{ pgAudio.dur }}</span>
                 <button onClick="{{ onAudioRemove }}" style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:6px" style-hover="color:#B93E15;background:#F3E3DC" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspAudioRemove }}</button>
               </div>
-              <audio controls src="{{ pgAudio.url }}" style="width:100%;height:34px"></audio>
+              <audio ref="{{ audioRef }}" controls style="width:100%;height:34px"></audio>
             </sc-if>
             <sc-if value="{{ pgAudio.none }}" hint-placeholder-val="{{ true }}">
               <label style="display:flex;align-items:center;justify-content:center;gap:7px;height:36px;border:1.5px dashed var(--ts-border-functional);border-radius:9px;font-size:12.5px;font-weight:700;color:var(--ts-primary);cursor:pointer;background:#fff" style-hover="border-color:var(--ts-primary);background:rgba(var(--ts-primary-rgb),0.04)">
@@ -1510,6 +1510,7 @@ class Component extends DCLogic {
     this.cropRef = React.createRef();
     this.embossRef = React.createRef();
     this.heroRef = React.createRef();
+    this.audioRef = React.createRef();
     this.cells = new Uint8Array(60 * 40);
     this.pages = [this.cells];   // multi-page document; this.cells === this.pages[state.pageIndex]
     this.pageAudio = {};         // pageIndex → { src, mime, bytes, durationSec, narration } (DTMA, path-reference)
@@ -2398,7 +2399,15 @@ class Component extends DCLogic {
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
   componentWillUnmount() { window.removeEventListener('keydown', this._key); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._convT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); cancelAnimationFrame(this.heroRAF); }
-  componentDidUpdate() { this.drawAll(); }
+  componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); }
+  syncAudioPreview() {
+    const el = this.audioRef.current;
+    if (!el) return;
+    const a = (this.pageAudio || {})[this.state.pageIndex];
+    const src = (a && a._url) || '';
+    if (src && el.getAttribute('src') !== src) el.src = src;
+    else if (!src && el.hasAttribute('src')) el.removeAttribute('src');
+  }
 
   drawAll() {
     this.drawMain();
