@@ -239,6 +239,9 @@ input[type=range]{accent-color:var(--ts-primary)}
   <div class="ts-topbar">
     <!-- LEFT ZONE: identity + document title (no back button — the app IS the editor) -->
     <div class="ts-topbar-left">
+      <button onClick="{{ goHome }}" class="ts-home-btn" aria-label="{{ t.homeNewPrimary }}" title="Tactile Studio" style="width:36px;height:36px;flex:none;border:1px solid var(--ts-border-decor);border-radius:9px;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
       <img class="ts-brand-logo" src="assets/tactile-studio-logo.svg" alt="Tactile Studio">
       <div class="ts-divider ts-left-divider"></div>
       <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;flex:1 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
@@ -790,6 +793,80 @@ input[type=range]{accent-color:var(--ts-primary)}
       {{ t.returnBtn }}
     </button>
   </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Home" style="min-height:100vh;display:flex;flex-direction:column;background:var(--ts-bg,#F8F6EF)">
+  <div style="height:5px;background:var(--ts-primary);flex:none"></div>
+  <header style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--ts-border-decor);background:#fff">
+    <img src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;flex:none">
+    <div style="flex:1"></div>
+    <button onClick="{{ homeNew60 }}" style="height:40px;padding:0 16px;border:none;border-radius:10px;background:var(--ts-primary);color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;cursor:pointer" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+      {{ t.homeNewPrimary }}
+    </button>
+    <div role="group" aria-label="Language" style="display:inline-flex;gap:2px;background:#1E1C1A;border-radius:100px;padding:3px;flex:none">
+      <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">KO</button>
+      <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">EN</button>
+    </div>
+  </header>
+
+  <main style="flex:1;overflow-y:auto;padding:44px 22px 72px">
+    <div style="max-width:1040px;margin:0 auto">
+      <h1 style="font-size:28px;font-weight:800;color:#1E1C1A;margin:0 0 8px;letter-spacing:-0.4px">{{ t.homeTitle }}</h1>
+      <p style="font-size:14.5px;color:var(--ts-text-secondary);margin:0 0 34px;line-height:1.5">{{ t.homeSub }}</p>
+
+      <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px">{{ t.homeQuickL }}</div>
+      <div role="group" aria-label="{{ t.homeQuickL }}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px;margin-bottom:44px">
+        <button onClick="{{ homeCommand }}" style="text-align:left;background:#fff;border:1px solid #EDE4DA;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -12px rgba(var(--ts-primary-rgb),0.28)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <span style="width:40px;height:40px;border-radius:10px;background:var(--ts-primary);color:#fff;display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 9l3 3-3 3M13 15h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span style="display:flex;align-items:center;gap:7px"><span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.entCmd }}</span><span style="font-size:10px;font-weight:800;color:#fff;background:var(--ts-primary);border-radius:100px;padding:2px 8px">{{ t.entCmdBadge }}</span></span>
+          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.entCmdSub }}</span>
+        </button>
+        <button onClick="{{ homeConvert }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:#E3C9BC;transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.14)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <span style="width:40px;height:40px;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeConvertL }}</span>
+          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeConvertSub }}</span>
+        </button>
+        <button onClick="{{ homeTemplate }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:#E3C9BC;transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.14)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <span style="width:40px;height:40px;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 1-1-1zM13 4h6a1 1 0 0 1 1 1v6h-7zM13 13h7v6a1 1 0 0 1-1 1h-6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.entTpl }}</span>
+          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.entTplSub }}</span>
+        </button>
+        <button onClick="{{ homeNew60 }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:#E3C9BC;transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.14)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <span style="width:40px;height:40px;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeNew60L }}</span>
+          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeNew60Sub }}</span>
+        </button>
+        <button onClick="{{ homeNew96 }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:#E3C9BC;transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.14)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <span style="width:40px;height:40px;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 9h18M8 9v10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeNew96L }}</span>
+          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeNew96Sub }}</span>
+        </button>
+      </div>
+
+      <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px">{{ t.homeRecentL }}</div>
+      <sc-if value="{{ libEmptyState }}" hint-placeholder-val="{{ true }}">
+        <p style="font-size:13px;color:var(--ts-text-secondary);margin:0 0 14px;line-height:1.5">{{ t.homeEmptyTitle }} {{ t.homeEmptySub }}</p>
+      </sc-if>
+      <div role="list" aria-label="{{ t.homeRecentL }}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px">
+        <sc-for list="{{ recentCards }}" as="c" hint-placeholder-count="6">
+          <button role="listitem" onClick="{{ c.open }}" aria-label="{{ c.aOpen }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:12px;padding:0;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.16)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <span style="aspect-ratio:3/2;background:#FBF7EE;border-bottom:1px solid #F2ECE4;display:grid;place-items:center;overflow:hidden">
+              <sc-if value="{{ c.hasThumb }}" hint-placeholder-val="{{ true }}">
+                <img src="{{ c.thumb }}" alt="" style="width:100%;height:100%;object-fit:contain">
+              </sc-if>
+            </span>
+            <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
+              <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
+              <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ c.grid }} · {{ c.time }}</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </main>
 </div>
 </sc-if>
 
@@ -1552,7 +1629,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 <script type="text/x-dc" data-dc-script data-props="{&quot;hubCard&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;banner&quot;,&quot;split&quot;,&quot;compact&quot;],&quot;default&quot;:&quot;banner&quot;,&quot;section&quot;:&quot;Variants&quot;,&quot;tsType&quot;:&quot;'banner'|'split'|'compact'&quot;},&quot;dotpadPanel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;modal&quot;,&quot;sheet&quot;,&quot;dock&quot;],&quot;default&quot;:&quot;modal&quot;,&quot;section&quot;:&quot;Variants&quot;,&quot;tsType&quot;:&quot;'modal'|'sheet'|'dock'&quot;},&quot;returnStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;bar&quot;,&quot;chip&quot;,&quot;breadcrumb&quot;],&quot;default&quot;:&quot;breadcrumb&quot;,&quot;section&quot;:&quot;Variants&quot;,&quot;tsType&quot;:&quot;'bar'|'chip'|'breadcrumb'&quot;}}">
 class Component extends DCLogic {
   state = {
-    screen: 'studio', lang: 'ko', tool: 'pen',
+    screen: 'home', lang: 'ko', tool: 'pen',
     gridW: 60, gridH: 40, rev: 0,
     strokeSize: 1, eraserSize: 1,
     pageIndex: 0, pageCount: 1,
@@ -1560,7 +1637,7 @@ class Component extends DCLogic {
     confirmKind: 'newdoc',
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
-    entry: true, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
+    entry: false, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
     impStep: 'import', cropChoice: 'full', converting: false, convertDone: false,
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, retouchHint: false, armedPreset: null,
@@ -1626,6 +1703,11 @@ class Component extends DCLogic {
       navHome: '홈', hubTitle: '안녕하세요, 샛별님.', hubSub: '촉각 콘텐츠를 만들고, 저장하고, DotPad로 보내보세요.',
       create: '촉각 그래픽 만들기', createSub: '촉각 그래픽을 만들고, 이미지를 변환하고, DotPad로 전송하거나 점자용지 엠보싱 출력을 준비합니다.',
       newBtn: '새로 만들기', startBlank: '빈 그리드', startBlankSub: '촉각 그리드에 직접 그립니다.',
+      homeTitle: '촉각 그래픽을 시작하세요', homeSub: '명령어·이미지·템플릿으로 만들고 DotPad나 A4 점자용지로 출력합니다.',
+      homeNewPrimary: '새 촉각그래픽', homeQuickL: '빠른 시작', homeRecentL: '최근 작업',
+      homeNew60L: '새 60×40', homeNew60Sub: 'DotPad 기본 크기', homeNew96L: '새 96×64', homeNew96Sub: '대형 DotPad 크기',
+      homeConvertL: '이미지 변환', homeConvertSub: '이미지를 촉각 점 그래픽으로 변환합니다.',
+      homeEmptyTitle: '아직 만든 촉각그래픽이 없습니다.', homeEmptySub: '아래에서 새로 시작하거나 이미지를 변환해 보세요.', homeOpenCard: '열기',
       chImage: '이미지 변환', chCmd: '명령어 생성', chTpl: '템플릿', chDot: 'DotPad 출력', chEmboss: 'A4 엠보싱',
       startImage: '이미지 변환', startImageSub: '이미지를 촉각 점 그래픽으로 변환합니다.',
       recent: '최근 파일', viewAll: '전체 보기',
@@ -1743,6 +1825,11 @@ class Component extends DCLogic {
       navHome: 'Home', hubTitle: 'Hello, Saetbyeol.', hubSub: 'Create, store, and send tactile content to DotPad.',
       create: 'Create tactile graphic', createSub: 'Create tactile graphics, convert images, and send them to DotPad or prepare them for embossing.',
       newBtn: 'New graphic', startBlank: 'Blank grid', startBlankSub: 'Draw directly on the tactile grid.',
+      homeTitle: 'Start a tactile graphic', homeSub: 'Create from a command, image, or template and output to DotPad or A4 braille paper.',
+      homeNewPrimary: 'New tactile graphic', homeQuickL: 'Quick start', homeRecentL: 'Recent',
+      homeNew60L: 'New 60×40', homeNew60Sub: 'DotPad default size', homeNew96L: 'New 96×64', homeNew96Sub: 'Large DotPad size',
+      homeConvertL: 'Convert image', homeConvertSub: 'Turn an image into a tactile dot graphic.',
+      homeEmptyTitle: 'No tactile graphics yet.', homeEmptySub: 'Start a new one below or convert an image.', homeOpenCard: 'Open',
       chImage: 'Image conversion', chCmd: 'Command generation', chTpl: 'Templates', chDot: 'DotPad output', chEmboss: 'A4 embossing',
       startImage: 'Convert image', startImageSub: 'Turn an image into tactile dots.',
       recent: 'Recent files', viewAll: 'View all',
@@ -3708,7 +3795,7 @@ class Component extends DCLogic {
     return {
       t,
       // routing
-      isHub: false, isStudio: true,
+      isStudio: st.screen === 'studio', isHome: st.screen === 'home',
       hubBanner: hubCard === 'banner', hubSplit: hubCard === 'split', hubCompact: hubCard === 'compact',
       heroChips: [
         { label: t.chImage, icon: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01' },
@@ -3734,7 +3821,13 @@ class Component extends DCLogic {
       goStudio: () => this.enterStudio(true),
       goStudioBlank: () => this.enterStudio(false),
       goStudioImport: () => this.enterStudio(true, true),
-      backToHub: () => this.setState({ screen: 'hub' }),
+      backToHub: () => this.setState({ screen: 'home' }),
+      goHome: () => this.setState({ screen: 'home' }),
+      homeNew60: () => this.openCard('blank', 60, 40, new Uint8Array(2400), this.T().untitled),
+      homeNew96: () => this.openCard('blank', 96, 64, new Uint8Array(96 * 64), this.T().untitled),
+      homeConvert: () => this.enterStudio(false, true),
+      homeCommand: () => { this.enterStudio(false); this.setState({ cmdOpen: true, cmdError: false, cmdGenerating: false }); },
+      homeTemplate: () => { this.enterStudio(false); this.setState({ tplOpen: true, tplGroup: 'recommended' }); },
       // topbar
       fileName: st.fileName ?? t.untitled,
       nameChange: e => this.setState({ fileName: e.target.value }),
