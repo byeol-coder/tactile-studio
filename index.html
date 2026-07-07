@@ -811,6 +811,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     </div>
 
     <input type="file" ref="{{ fileInputRef }}" onChange="{{ onFilePick }}" accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" tabIndex="-1" aria-hidden="true">
+    <input type="file" ref="{{ assetInputRef }}" onChange="{{ onAssetPick }}" accept="application/json,.json,.dtms" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" tabIndex="-1" aria-hidden="true">
 
     <div style="padding:24px 26px;overflow-y:auto;flex:1;min-height:0">
       <!-- STEP 1 · IMPORT -->
@@ -849,6 +850,18 @@ input[type=range]{accent-color:var(--ts-primary)}
             </button>
           </div>
           <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-top:2px">{{ t.impFormats }}</div>
+        </div>
+
+        <!-- TGIL / DTMS / library asset import (already-tactile files → DotPad) -->
+        <div style="display:flex;align-items:center;gap:12px;margin-top:12px;padding:13px 15px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff">
+          <span style="width:38px;height:38px;flex:none;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.10);display:grid;place-items:center;color:var(--ts-primary)">
+            <svg width="19" height="19" viewBox="0 0 24 24"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><circle cx="9" cy="13" r="1" fill="currentColor"></circle><circle cx="13" cy="13" r="1" fill="currentColor"></circle><circle cx="17" cy="13" r="1" fill="currentColor"></circle></svg>
+          </span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:800;color:#1E1C1A">{{ t.impAssetTitle }}</div>
+            <div style="font-size:11.5px;color:var(--ts-text-secondary);line-height:1.4">{{ t.impAssetSub }}</div>
+          </div>
+          <button onClick="{{ chooseAssetFile }}" style="flex:none;height:38px;padding:0 16px;border:1px solid var(--ts-border-functional);border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:12.5px;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impAssetChoose }}</button>
         </div>
 
         <!-- states -->
@@ -1506,6 +1519,7 @@ class Component extends DCLogic {
     this.padRef = React.createRef();
     this.impRef = React.createRef();
     this.fileRef = React.createRef();
+    this.assetRef = React.createRef();
     this.impOrigRef = React.createRef();
     this.cropRef = React.createRef();
     this.embossRef = React.createRef();
@@ -1630,7 +1644,7 @@ class Component extends DCLogic {
       impErrLoad: '이미지를 불러오지 못했어요. 10MB 이하의 PNG 또는 JPG로 다시 시도해 주세요.',
       advTests: '고급 장치 테스트', advTestsHint: '아래는 DotPad 하드웨어 점검용입니다. 일반 편집에는 필요하지 않습니다.',
       retouchHintMsg: 'AI 변환 결과입니다. 펜·지우개·채우기 등 도구로 세부를 수정하세요.',
-      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aConverting: 'AI 촉각 변환을 시작했습니다',
+      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', aConverting: 'AI 촉각 변환을 시작했습니다',
       preview: 'DotPad 미리보기', sendNow: '지금 전송', sending: 'DotPad로 전송 중…', sent: '전송 완료', sentSub: 'DotPad에서 촉각 그래픽이 출력되고 있습니다.',
       errTitle: 'DotPad에 연결할 수 없습니다', errSub: '케이블 또는 블루투스 연결을 확인한 뒤 다시 시도해주세요.',
       saveTitle: '저장', saveLocL: '저장 위치', locDriveSub: '내 촉각 파일 보관함', locLibSub: '팀과 공유하는 라이브러리',
@@ -1747,7 +1761,7 @@ class Component extends DCLogic {
       impErrLoad: 'Couldn\u2019t load this image. Please try a PNG or JPG under 10MB.',
       advTests: 'Advanced device tests', advTestsHint: 'The controls below are for checking DotPad hardware. They are not needed for normal editing.',
       retouchHintMsg: 'This is the AI conversion result. Refine details with the Pen, Eraser, Fill and other tools.',
-      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aConverting: 'AI tactile conversion started',
+      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', aConverting: 'AI tactile conversion started',
       preview: 'DotPad preview', sendNow: 'Send now', sending: 'Sending to DotPad…', sent: 'Sent to DotPad', sentSub: 'Your graphic is now rendering on the DotPad.',
       errTitle: "Can't reach DotPad", errSub: 'Check the cable or Bluetooth connection and try again.',
       saveTitle: 'Save', saveLocL: 'Save to', locDriveSub: 'Your tactile file storage', locLibSub: 'Shared team library',
@@ -2980,6 +2994,52 @@ class Component extends DCLogic {
     this.setState({ entry: false, importOpen: false, tplOpen: false, cmdOpen: false, confirmOpen: false, fileName: name, sendPhase: 'idle', pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, corpusCtx: null });
     this.queueLivePreview();
   }
+  // ── TGIL / library asset import (DTMS JSON or schema-v1 asset) ─────────────
+  // Reads a downloaded tactile-graphic file and loads its 60×40 pages into the
+  // document, so APH/TGIL-style print assets become viewable + sendable on
+  // DotPad. Accepts: schema-v1 asset { pages:[{graphic}] }, corpus record, or a
+  // raw DTMS { items:[{graphic:{data}}] }. Each page's hex must be 600 chars.
+  assetPagesFromJson(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    // schema-v1 / corpus record: pages[].graphic (hex string)
+    let raw = Array.isArray(obj.pages) ? obj.pages.map(p => ({ hex: p.graphic || p.data, label: p.label, desc: p.desc, narration: p.narration }))
+      // raw DTMS export: items[].graphic.data
+      : Array.isArray(obj.items) ? obj.items.map((it, i) => ({ hex: it.graphic && it.graphic.data, label: it.title || (i + 1) + '쪽' }))
+      : null;
+    if (!raw) return null;
+    const pages = [];
+    for (const r of raw) { const cells = this.corpusCellsFromHex(r.hex); if (cells) pages.push({ cells, label: r.label, desc: r.desc, narration: r.narration }); }
+    return pages.length ? { title: obj.title || '', pages } : null;
+  }
+  importAssetFile(file) {
+    if (!file) return;
+    const t = this.T();
+    const name = (file.name || '').replace(/\.[^.]+$/, '');
+    const reader = new FileReader();
+    reader.onerror = () => { this.setState({ impErr: 'load', impLoading: false }); this.say(t.aImportErr || t.impErrLoad || 'Import failed'); };
+    reader.onload = () => {
+      let obj = null; try { obj = JSON.parse(String(reader.result || '')); } catch (e) { obj = null; }
+      const parsed = obj && this.assetPagesFromJson(obj);
+      if (!parsed) { this.setState({ impErr: 'assetFormat', impLoading: false }); this.say(t.aAssetBadFmt); return; }
+      // Load every page as a fresh document (clean undo checkpoint).
+      this.pages = parsed.pages.map(p => p.cells);
+      this.pageAudio = {};
+      parsed.pages.forEach((p, i) => { if (p.narration) this.pageAudio[i] = { narration: p.narration }; });
+      this.cells = this.pages[0];
+      this.undoStack = []; this.redoStack = [];
+      if (this.state.gridW !== 60 || this.state.gridH !== 40) this.setGrid(60, 40);
+      // Auto BANA print-standard check on the FIRST page (informational).
+      const bana = this.banaPrintCheck(this.cells, 60, 40);
+      const banaMsg = bana.pass ? t.banaPass : t.aAssetBanaWarn;
+      this.setState({ importOpen: false, entry: false, fileName: parsed.title || name, output: '60',
+        pageIndex: 0, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null,
+        sendPhase: 'idle', banaResult: { pass: bana.pass, msg: banaMsg } });
+      this.queueLivePreview();
+      this.say(this.callI18n(t.aAssetLoaded, '', this.pages.length) + ' ' + banaMsg);
+    };
+    this.setState({ impLoading: true, impErr: '' });
+    reader.readAsText(file);
+  }
   // apply an image conversion onto the document per chosen mode
   applyImport(mode) {
     const st = this.state, t = this.T();
@@ -3707,8 +3767,11 @@ class Component extends DCLogic {
       impBackLabel: st.impStep === 'import' ? t.impCancel : t.impBack,
       // step 1 upload
       fileInputRef: this.fileRef,
+      assetInputRef: this.assetRef,
+      chooseAssetFile: () => { if (this.assetRef.current) this.assetRef.current.click(); },
+      onAssetPick: e => { const f = e.target.files && e.target.files[0]; this.importAssetFile(f); e.target.value = ''; },
       imgReady: st.imgReady, imgNotReady: !st.imgReady, impLoading: st.impLoading, impName: st.impName,
-      impErr: !!st.impErr, impErrMsg: st.impErr === 'type' ? t.impErrType : st.impErr === 'size' ? t.impErrSize : st.impErr === 'load' ? t.impErrLoad : '',
+      impErr: !!st.impErr, impErrMsg: st.impErr === 'type' ? t.impErrType : st.impErr === 'size' ? t.impErrSize : st.impErr === 'load' ? t.impErrLoad : st.impErr === 'assetFormat' ? t.aAssetBadFmt : '',
       convPreset: st.convPreset,
       presetLabel: t.presetL,
       convPresets: [
