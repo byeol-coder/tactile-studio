@@ -343,7 +343,9 @@ input[type=range]{accent-color:var(--ts-primary)}
                 <span style="width:5px;height:5px;border-radius:100px;background:var(--ts-primary);display:inline-block"></span>Drive
               </span>
               <span style="position:absolute;top:12px;right:12px;z-index:1;font-size:10px;font-weight:700;color:#fff;background:rgba(30,28,26,0.78);border-radius:100px;padding:2px 8px">{{ c.type }}</span>
+              <sc-if value="{{ c.hasThumb }}" hint-placeholder-val="{{ false }}">
               <img src="{{ c.thumb }}" alt="" style="width:100%;height:120px;object-fit:contain;border-radius:8px;display:block;background:#fff;border:1px solid #E8DFD6">
+              </sc-if>
             </button>
             <div style="padding:13px 15px 15px;display:flex;flex-direction:column;gap:9px">
               <div>
@@ -541,6 +543,28 @@ input[type=range]{accent-color:var(--ts-primary)}
       <button onClick="{{ quickGroup.toggle }}" onMouseEnter="{{ quickGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ quickGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ quickMenuOpen }}" aria-label="{{ quickGroup.aria }}" style="{{ quickGroup.style }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
         {{ quickGroup.iconEl }}
       </button>
+    </div>
+
+    <!-- Pages panel (Figma-style): thumbnails of each page/장. thumb is a data: URL
+         from thumbFrom, guarded by hasThumb so placeholder renders never leak a
+         literal {{ }} into <img src> (no phantom 404). -->
+    <div class="ts-pages-rail" role="tablist" aria-label="{{ t.pagesLabel }}" style="width:96px;flex:none;background:#fff;border-right:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 8px 6px;font-size:11px;color:var(--ts-text-secondary)">
+        <span>{{ t.pagesLabel }}</span>
+        <button onClick="{{ addPageFn }}" aria-label="{{ t.addPage }}" title="{{ t.addPage }}" style="width:22px;height:22px;border:none;border-radius:6px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+        </button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:2px 8px 10px;display:flex;flex-direction:column;gap:4px">
+        <sc-for list="{{ pageList }}" as="p" hint-placeholder-count="2">
+          <button onClick="{{ p.pick }}" role="tab" aria-selected="{{ p.selected }}" aria-label="{{ p.aria }}" style="{{ p.style }}" style-hover="background:rgba(var(--ts-primary-rgb),0.06)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+            <sc-if value="{{ p.hasThumb }}" hint-placeholder-val="{{ false }}">
+              <img src="{{ p.thumb }}" alt="" style="{{ p.thumbStyle }}">
+            </sc-if>
+            <span style="font-size:11.5px;font-weight:700;color:#1E1C1A;font-variant-numeric:tabular-nums">{{ p.n }}</span>
+          </button>
+        </sc-for>
+      </div>
     </div>
 
     <sc-if value="{{ tip }}" hint-placeholder-val="{{ false }}">
@@ -1267,7 +1291,9 @@ input[type=range]{accent-color:var(--ts-primary)}
               <sc-if value="{{ it.isPreset }}" hint-placeholder-val="{{ false }}">
                 <span style="position:absolute;top:14px;right:14px;z-index:1;font-size:10px;font-weight:700;color:#fff;background:var(--ts-primary);border-radius:100px;padding:2px 8px">{{ it.tag }}</span>
               </sc-if>
+              <sc-if value="{{ it.hasThumb }}" hint-placeholder-val="{{ false }}">
               <img src="{{ it.thumb }}" alt="" style="display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:6px;background:#fff;border:1px solid #E3D9CE">
+              </sc-if>
             </span>
             <span style="padding:11px 13px;display:flex;flex-direction:column;gap:4px">
               <span style="font-size:13.5px;font-weight:800;color:#1E1C1A">{{ it.name }}</span>
@@ -1686,7 +1712,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
+      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
@@ -1803,7 +1829,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
+      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
@@ -3300,7 +3326,7 @@ class Component extends DCLogic {
     const presetCards = (this.presetFiles || []).map((f, i) => {
       const [gw, gh] = pGrid[i] || [60, 40], s = mkStatus(pPrint[i]), nm = (t.fNames && t.fNames[i]) || 'Untitled', k = pKind[i] || 'bar';
       return {
-        id: 'p' + i, name: nm, thumb: f.thumb, grid: gw + '×' + gh, type: (t.fTypes && t.fTypes[i]) || '', time: (t.fTimes && t.fTimes[i]) || '',
+        id: 'p' + i, name: nm, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: gw + '×' + gh, type: (t.fTypes && t.fTypes[i]) || '', time: (t.fTimes && t.fTimes[i]) || '',
         statusLabel: s.label, statusIcon: s.icon, statusStyle: s.style,
         open: () => this.openCard(k, gw, gh, null, nm), edit: () => this.openCard(k, gw, gh, null, nm), send: () => this.sendCard(k, gw, gh, null, nm),
         aOpen: t.open + ' · ' + nm, aEdit: t.edit + ' · ' + nm, aSend: t.sendCardBtn + ' · ' + nm
@@ -3309,7 +3335,7 @@ class Component extends DCLogic {
     const savedCards = (st.saved || []).map((f, i) => {
       const p = String(f.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40, s = mkStatus(false);
       return {
-        id: 's' + i, name: f.name, thumb: f.thumb, grid: f.grid, type: t.imgType, time: t.justNow,
+        id: 's' + i, name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: f.grid, type: t.imgType, time: t.justNow,
         statusLabel: s.label, statusIcon: s.icon, statusStyle: s.style,
         open: () => this.openCard('saved', gw, gh, f.cells, f.name), edit: () => this.openCard('saved', gw, gh, f.cells, f.name), send: () => this.sendCard('saved', gw, gh, f.cells, f.name),
         aOpen: t.open + ' · ' + f.name, aEdit: t.edit + ' · ' + f.name, aSend: t.sendCardBtn + ' · ' + f.name
@@ -3472,6 +3498,20 @@ class Component extends DCLogic {
       goPrevPage: () => this.goPage(st.pageIndex - 1),
       goNextPage: () => this.goPage(st.pageIndex + 1),
       addPageFn: () => this.addPage(),
+      pageList: (this.pages || []).map((cells, i) => {
+        const th = this.thumbFrom(cells, st.gridW, st.gridH);
+        return {
+          i, n: i + 1, selected: i === st.pageIndex,
+          hasThumb: !!th, thumb: th || '',
+          pick: () => this.goPage(i),
+          aria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (i === st.pageIndex ? (st.lang === 'ko' ? ' (현재)' : ' (current)') : ''),
+          style: 'display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border-radius:8px;cursor:pointer;text-align:left;'
+            + 'border:1px solid ' + (i === st.pageIndex ? 'var(--ts-primary)' : 'transparent') + ';'
+            + 'background:' + (i === st.pageIndex ? 'rgba(var(--ts-primary-rgb),0.06)' : 'transparent'),
+          thumbStyle: 'width:34px;height:23px;flex:none;border-radius:3px;border:1px solid var(--ts-border-decor);background:#fff;'
+            + (th ? 'object-fit:contain' : ''),
+        };
+      }),
       deletePageFn: () => { if (st.pageCount <= 1) return; this._pendingDoc = () => this.deletePage(); this.setState({ confirmOpen: true, confirmKind: 'delpage' }); },
       prevPageStyle: pageBtn(st.pageIndex > 0),
       nextPageStyle: pageBtn(st.pageIndex < st.pageCount - 1),
@@ -3629,6 +3669,7 @@ class Component extends DCLogic {
         name: st.lang === 'ko' ? it.ko : it.en, tag: it.preset ? t.presetChip : (st.lang === 'ko' ? it.gridKo || (it.gw + '×' + it.gh) : (it.gw + '×' + it.gh)),
         formats: it.preset ? t.presetChip : '60×40 · 96×64 · 28×40 · A4',
         thumb: this.thumbFrom(this.makePattern(it.kind, it.gw, it.gh), it.gw, it.gh),
+        hasThumb: true,
         isPreset: !!it.preset,
         pick: () => {
           if (it.preset) {
