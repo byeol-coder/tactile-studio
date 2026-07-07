@@ -3946,6 +3946,8 @@ class Component extends DCLogic {
       },
     }));
     const homeGalleryTitle = homeView === 'projects' ? t.navProjects : homeView === 'library' ? t.navLibrary : homeView === 'drive' ? t.navDrive : homeView === 'demo' ? t.navDemo : '';
+
+    const impIdx = ['import', 'crop', 'convert', 'review', 'edit'].indexOf(st.impStep);
     const cellVal = this.cells[this.idx(st.cx, st.cy)];
     let dots = 0; for (let i = 0; i < this.cells.length; i++) dots += this.cells[i];
     const phase = st.sendPhase;
