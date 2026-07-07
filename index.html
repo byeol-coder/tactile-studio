@@ -601,9 +601,32 @@ input[type=range]{accent-color:var(--ts-primary)}
 
         <!-- Properties tab: contextual tool options (wired to window.TW post-processing later) -->
         <sc-if value="{{ inspTabProps }}" hint-placeholder-val="{{ true }}">
-        <div data-screen-label="Inspector · Properties" style="padding:16px">
-          <div style="font-size:11px;color:var(--ts-text-secondary);letter-spacing:.02em;margin-bottom:10px">{{ t.inspToolOpts }}</div>
-          <p style="margin:0;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.6">{{ t.inspNoSel }}</p>
+        <div data-screen-label="Inspector · Properties" style="padding:16px;display:flex;flex-direction:column;gap:16px">
+          <div>
+            <div style="font-size:11px;color:var(--ts-text-secondary);letter-spacing:.02em;margin-bottom:8px">{{ t.inspToolOpts }}</div>
+            <div style="font-size:13px;font-weight:800;color:#1E1C1A">{{ propToolName }}</div>
+          </div>
+
+          <sc-if value="{{ propHasBrush }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:7px">{{ t.inspBrush }}</div>
+              <div role="group" aria-label="{{ t.inspBrush }}" style="display:flex;gap:6px">
+                <sc-for list="{{ propBrushOpts }}" as="b" hint-placeholder-count="3">
+                  <button onClick="{{ b.pick }}" aria-pressed="{{ b.active }}" style="{{ b.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ b.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="border-top:1px solid #F2ECE4;padding-top:14px">
+            <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:3px">{{ t.inspCleanup }}</div>
+            <div style="font-size:11px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
+            <div style="display:flex;gap:6px;margin-bottom:6px">
+              <button onClick="{{ fxThinner }}" style="flex:1;height:32px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThinner }}</button>
+              <button onClick="{{ fxThicker }}" style="flex:1;height:32px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThicker }}</button>
+            </div>
+            <button onClick="{{ fxDenoise }}" style="width:100%;height:32px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspDenoise }}</button>
+          </div>
         </div>
         </sc-if>
 
@@ -1539,7 +1562,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
+      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
@@ -1596,7 +1619,7 @@ class Component extends DCLogic {
       srNote3: '캔버스는 키보드만으로 편집할 수 있습니다 — 화살표 이동, 스페이스 토글, 도구 단축키.',
       hRows: [['V / P / E', '커서 · 펜 · 지우개'], ['L / R / O', '직선 · 사각형 · 원'], ['G / F / S', '다각형 · 채우기 · 선택'], ['T', '묵자 · 촉각 글자'], ['화살표', '커서 이동'], ['Space', '점 토글'], ['Enter', '다각형 닫기'], ['Ctrl+Z', '실행 취소'], ['Ctrl+Shift+Z', '다시 실행'], ['?', '이 안내 열기'], ['Esc', '닫기 · 취소']],
       aToolSel: n => n + ' 도구 선택됨', aDotOn: (x, y) => '점 찍음 (' + x + ', ' + y + ')', aDotOff: (x, y) => '점 지움 (' + x + ', ' + y + ')',
-      aUndo: '실행 취소됨', aRedo: '다시 실행됨', aClear: '모두 지웠습니다', aInvert: '반전했습니다', aFlipH: '좌우로 뒤집었습니다', aFlipV: '상하로 뒤집었습니다',
+      aUndo: '실행 취소됨', aRedo: '다시 실행됨', aClear: '모두 지웠습니다', aInvert: '반전했습니다', aFlipH: '좌우로 뒤집었습니다', aFlipV: '상하로 뒤집었습니다', aThicken: '선을 조정했습니다', aDenoise: '고립된 점을 제거했습니다',
       aTextAdded: '촉각 글자를 캔버스에 추가했습니다. 점으로 편집할 수 있습니다.', aTextEmpty: '입력한 글자가 없습니다.',
       aGrid: g => '그리드 크기 변경: ' + g, aConnOn: 'DotPad가 연결되었습니다', aConnOff: 'DotPad 연결이 끊어졌습니다',
       aSent: 'DotPad 전송 완료', aReady: '캔버스 준비됨 — 화살표 키로 이동, 스페이스로 점 토글',
@@ -1656,7 +1679,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
+      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
@@ -1713,7 +1736,7 @@ class Component extends DCLogic {
       srNote3: 'The canvas is fully keyboard-editable — arrows to move, Space to toggle, letter keys for tools.',
       hRows: [['V / P / E', 'Cursor · Pen · Eraser'], ['L / R / O', 'Line · Rectangle · Ellipse'], ['G / F / S', 'Polygon · Fill · Select'], ['T', 'Tactile text'], ['Arrows', 'Move cursor'], ['Space', 'Toggle dot'], ['Enter', 'Close polygon'], ['Ctrl+Z', 'Undo'], ['Ctrl+Shift+Z', 'Redo'], ['?', 'Open this guide'], ['Esc', 'Close · cancel']],
       aToolSel: n => n + ' tool selected', aDotOn: (x, y) => 'Dot placed (' + x + ', ' + y + ')', aDotOff: (x, y) => 'Dot erased (' + x + ', ' + y + ')',
-      aUndo: 'Undone', aRedo: 'Redone', aClear: 'Canvas cleared', aInvert: 'Inverted', aFlipH: 'Flipped horizontally', aFlipV: 'Flipped vertically',
+      aUndo: 'Undone', aRedo: 'Redone', aClear: 'Canvas cleared', aInvert: 'Inverted', aFlipH: 'Flipped horizontally', aFlipV: 'Flipped vertically', aThicken: 'Adjusted line weight', aDenoise: 'Removed isolated dots',
       aTextAdded: 'Tactile text added to the canvas. You can edit it as dots.', aTextEmpty: 'No text was entered.',
       aGrid: g => 'Grid size changed: ' + g, aConnOn: 'DotPad connected', aConnOff: 'DotPad disconnected',
       aSent: 'Sent to DotPad', aReady: 'Canvas ready — arrows to move, Space to toggle dots',
@@ -1739,6 +1762,29 @@ class Component extends DCLogic {
     return (x, y) => { for (const oy of offs) for (const ox of offs) baseCb(x + ox, y + oy); };
   }
   strokeSizeFor(tool) { return tool === 'eraser' ? this.state.eraserSize : this.state.strokeSize; }
+  // flat Uint8Array(w*h) ↔ bits[row][col] — bridge to window.TW post-processing.
+  cellsToBits(cells, w, h) {
+    const bits = new Array(h);
+    for (let y = 0; y < h; y++) { const row = new Array(w); for (let x = 0; x < w; x++) row[x] = !!cells[y * w + x]; bits[y] = row; }
+    return bits;
+  }
+  bitsToCells(bits, w, h) {
+    const out = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (bits[y] && bits[y][x]) out[y * w + x] = 1;
+    return out;
+  }
+  // Apply a window.TW grid transform to the current page (undoable). fn(bits,w,h)→bits.
+  applyGridFx(fn, sayMsg) {
+    if (typeof fn !== 'function') return;
+    const { gridW: w, gridH: h } = this.state;
+    this.snapshot();
+    const out = fn(this.cellsToBits(this.cells, w, h), w, h);
+    this.setCells(this.bitsToCells(out, w, h));
+    if (sayMsg) this.say(sayMsg);
+    this.bump();
+  }
+  thickenFx(level) { const fx = window.TW && window.TW.thickenBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h, level), this.T().aThicken); }
+  denoiseFx() { const fx = window.TW && window.TW.denoiseBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h), this.T().aDenoise); }
   bump() { this.setState(s => ({ rev: s.rev + 1 })); }
   say(msg) { this.setState({ announce: msg }); }
   // Safe i18n invoker: locale value may be a function, a string, or missing.
@@ -3244,6 +3290,24 @@ class Component extends DCLogic {
       setInspDevice: () => this.setState({ inspectorTab: 'device' }),
       inspTabPropsStyle: this.tabStyle(st.inspectorTab === 'props'),
       inspTabDeviceStyle: this.tabStyle(st.inspectorTab === 'device'),
+      // Properties tab: contextual tool options + window.TW canvas cleanup
+      propToolName: (this.T().toolNames || {})[st.tool] || st.tool,
+      propHasBrush: (st.tool === 'pen' || st.tool === 'eraser'),
+      propBrushOpts: [1, 2, 3].map(sz => {
+        const cur = st.tool === 'eraser' ? st.eraserSize : st.strokeSize;
+        return {
+          sz, active: cur === sz,
+          label: String(sz),
+          pick: () => { this.setState(st.tool === 'eraser' ? { eraserSize: sz } : { strokeSize: sz }); },
+          style: 'flex:1;height:32px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;'
+            + 'border:1px solid ' + (cur === sz ? 'var(--ts-primary)' : 'var(--ts-border-functional)') + ';'
+            + 'background:' + (cur === sz ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff') + ';'
+            + 'color:' + (cur === sz ? '#B93E15' : '#1E1C1A'),
+        };
+      }),
+      fxThinner: () => this.thickenFx(-1),
+      fxThicker: () => this.thickenFx(1),
+      fxDenoise: () => this.denoiseFx(),
       dpIsConnected: st.connected, dpIsDisconnected: !st.connected,
       dpConnBusy: !!st.connBusy, dpBusyBle: st.connBusy === 'ble', dpBusyUsb: st.connBusy === 'usb',
       dpBusyBleOff: st.connBusy !== 'ble', dpBusyUsbOff: st.connBusy !== 'usb',
