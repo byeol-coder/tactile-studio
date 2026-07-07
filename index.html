@@ -3206,7 +3206,49 @@ class Component extends DCLogic {
       savePhase: 'done',
       saved: [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved]
     }));
+    // Saving to the shared library also emits a schema-v1 asset file (JSON) so it
+    // can drop straight into build-corpus → the app corpus grows (WS1↔WS2 link).
+    if (this.state.saveLoc === 'library') this.exportLibraryAsset(name);
     this.say(this.state.saveLoc === 'drive' ? t.tSavedDrive : t.tSavedLib);
+  }
+  // Serialize the whole document into a Tactile Library Asset v1 record.
+  // Every page's graphic is DTMS hex from the byte-identical encoder.
+  buildLibraryAsset(name) {
+    const st = this.state, ctx = st.corpusCtx;
+    const w = st.gridW, h = st.gridH, TW = window.TW;
+    const hexOf = (cellBuf) => (TW && TW.encodeBits) ? TW.encodeBits(this.cellsToBits(cellBuf, w, h), w, h) : '';
+    const pages = (this.pages || [this.cells]).map((cellBuf, i) => ({
+      page: i + 1,
+      label: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].label) || (name + ' · ' + (i + 1)),
+      desc: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].desc) || '',
+      braille: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].braille) || '',
+      graphic: hexOf(cellBuf),
+    }));
+    const slug = ((name || 'asset').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-|-$/g, '')) || 'asset';
+    return {
+      id: 'lib-' + slug + '-' + Date.now().toString(36),
+      title: name,
+      spec: w + 'x' + h,
+      lang: st.lang === 'en' ? 'english' : 'korean',
+      category: (ctx && ctx.category) || 'uncategorized',
+      tags: (ctx && ctx.tags) ? ctx.tags.slice() : [],
+      pages: pages,
+      provenance: {
+        createdBy: 'tactile-studio',
+        createdAt: new Date().toISOString(),
+        derivedFrom: ctx && ctx.id ? ctx.id : null,
+        sourceType: ctx ? 'command' : 'blank',
+      },
+      qa: { status: 'draft' },
+      sharing: 'campus',
+    };
+  }
+  exportLibraryAsset(name) {
+    const TW = window.TW; if (!TW || !TW.downloadBlob) return;
+    const asset = this.buildLibraryAsset(name);
+    const fname = (TW.safeName ? TW.safeName(asset.id, 'json') : asset.id + '.json');
+    try { TW.downloadBlob(new Blob([JSON.stringify(asset, null, 2)], { type: 'application/json' }), fname); }
+    catch (e) { /* noop — save still recorded in-memory */ }
   }
   // open / send a Tactile Drive file back into Studio
   openCard(kind, gw, gh, cells, name) {

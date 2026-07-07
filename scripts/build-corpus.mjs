@@ -6,10 +6,12 @@
 // no DB, no fetch (works from file://). This is the "재료 준비" step: the app
 // only depends on the generated `corpus.js`, never on the raw source folder.
 //
-//   node scripts/build-corpus.mjs [--src <dir>] [--all]
-//   DTMS_SRC=<dir> node scripts/build-corpus.mjs
+//   node scripts/build-corpus.mjs [--src <dir>] [--assets <dir>] [--all]
+//   DTMS_SRC=<dir> ASSETS_SRC=<dir> node scripts/build-corpus.mjs
 //
-// Growth loop: add a file to CURATED (or pass --all) and re-run.
+// Growth loop: add a file to CURATED (or pass --all) and re-run. Studio's
+// "save to library" exports a schema-v1 asset .json — drop those in --assets
+// (default <src>/assets) and they join the corpus with no curated mapping.
 //
 // NOTE: rule-based, backendless. The extraction logic mirrors the studio
 // reference ingest (a node build tool, not app runtime), producing the shape
@@ -134,6 +136,44 @@ for (const { file, meta } of entries) {
   } catch (e) {
     console.warn(`  ! skip (parse error): ${file} — ${e.message}`);
     skipped++;
+  }
+}
+
+// ── ingest Tactile Library Asset v1 files (Studio exports) ─────────────────
+// A schema-v1 asset already carries title/category/tags/pages, so it needs no
+// curated mapping — this is the WS1↔WS2 loop: save-to-library in Studio drops a
+// .json here, re-run, and the corpus grows. Point at a dir with --assets <dir>
+// or ASSETS_SRC=<dir> (defaults to <SRC>/assets if present).
+const ASSETS = resolve(arg('--assets') ?? process.env.ASSETS_SRC ?? join(SRC, 'assets'));
+function assetToRecord(a, file) {
+  const pages = (a.pages ?? []).map((p, i) => {
+    const page = { page: typeof p.page === 'number' ? p.page : i + 1, label: p.label || `${i + 1}쪽`, graphic: p.graphic ?? '' };
+    if (nonEmpty(p.desc)) page.desc = String(p.desc).trim();
+    if (isHex(p.braille)) page.braille = p.braille;
+    return page;
+  });
+  return {
+    id: a.id || `lib-${slug(a.title ?? file)}`,
+    title: a.title ?? slug(file),
+    spec: /^\d+x\d+$/.test(a.spec || '') ? a.spec : '60x40',
+    lang: String(a.lang ?? '').toLowerCase().startsWith('en') ? 'en' : 'ko',
+    category: a.category || 'basic',
+    tags: Array.isArray(a.tags) ? a.tags : [],
+    pages,
+    source: file,
+  };
+}
+if (existsSync(ASSETS)) {
+  const assetFiles = readdirSync(ASSETS).filter((f) => f.toLowerCase().endsWith('.json')).sort();
+  for (const file of assetFiles) {
+    try {
+      const a = JSON.parse(readFileSync(join(ASSETS, file), 'utf8'));
+      if (!a || !Array.isArray(a.pages) || !a.pages.length) { console.warn(`  ! skip (no pages): ${file}`); skipped++; continue; }
+      records.push(assetToRecord(a, file));
+    } catch (e) {
+      console.warn(`  ! skip (asset parse error): ${file} — ${e.message}`);
+      skipped++;
+    }
   }
 }
 
