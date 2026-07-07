@@ -3723,6 +3723,7 @@ class Component extends DCLogic {
       // hub
       recentCards,
       libraryCards,
+      libraryOpen: st.libraryOpen,
       libCount: (st.saved || []).length,
       libHasItems: (st.saved || []).length > 0,
       libEmptyState: (st.saved || []).length === 0,
@@ -4193,13 +4194,23 @@ class Component extends DCLogic {
       successSaveDrive: () => {
         const name = st.fileName || t.untitled;
         const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
-        this.setState(s => ({ dotpadOpen: false, saveLoc: 'drive', saved: [{ name, loc: 'drive', thumb, cells: this.cells.slice(), grid: s.gridW + '×' + s.gridH }, ...s.saved] }));
+        const cells = this.cells.slice();
+        this.setState(s => {
+          const saved = [{ name, loc: 'drive', thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved];
+          this.saveLibrary(saved);
+          return { dotpadOpen: false, saveLoc: 'drive', saved };
+        });
         this.toastMsg(t.tSavedDrive); this.say(t.tSavedDrive);
       },
       successAddLibrary: () => {
         const name = st.fileName || t.untitled;
         const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
-        this.setState(s => ({ dotpadOpen: false, saveLoc: 'library', saved: [{ name, loc: 'library', thumb, cells: this.cells.slice(), grid: s.gridW + '×' + s.gridH }, ...s.saved] }));
+        const cells = this.cells.slice();
+        this.setState(s => {
+          const saved = [{ name, loc: 'library', thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved];
+          this.saveLibrary(saved);
+          return { dotpadOpen: false, saveLoc: 'library', saved };
+        });
         this.toastMsg(t.tSavedLib); this.say(t.tSavedLib);
       },
       continueEditing: () => this.setState({ dotpadOpen: false }),
