@@ -500,12 +500,12 @@ input[type=range]{accent-color:var(--ts-primary)}
         </div>
       </sc-if>
       <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
-        <div role="status" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
+        <div role="status" style="pointer-events:none;position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
           <span style="width:26px;height:26px;border-radius:8px;background:rgba(var(--ts-primary-rgb),0.22);display:grid;place-items:center;color:var(--ts-primary);flex:none">
             <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </span>
           <span style="font-size:12.5px;font-weight:600;line-height:1.45">{{ t.retouchHintMsg }}</span>
-          <button onClick="{{ dismissRetouch }}" aria-label="{{ t.close }}" style="flex:none;width:26px;height:26px;border:none;border-radius:7px;background:rgba(255,255,255,0.12);color:#fff;display:grid;place-items:center" style-hover="background:rgba(255,255,255,0.22)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <button onClick="{{ dismissRetouch }}" aria-label="{{ t.close }}" style="pointer-events:auto;flex:none;width:26px;height:26px;border:none;border-radius:7px;background:rgba(255,255,255,0.12);color:#fff;display:grid;place-items:center" style-hover="background:rgba(255,255,255,0.22)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="13" height="13" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
           </button>
         </div>
@@ -517,7 +517,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             {{ t.a4Badge }}
           </span>
         </sc-if>
-        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="display:block;outline:none;touch-action:none;cursor:crosshair;max-width:100%"></canvas>
+        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="display:block;outline:none;touch-action:none;cursor:crosshair;max-width:100%"></canvas>
       </div>
 
       <sc-if value="{{ showEntry }}" hint-placeholder-val="{{ false }}">
@@ -839,7 +839,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           <div style="font-size:15.5px;font-weight:800;color:#1E1C1A">{{ t.impDrop }}</div>
           <div style="font-size:12.5px;color:var(--ts-text-secondary);max-width:360px;line-height:1.5">{{ t.impDropSecondary }}</div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap;justify-content:center">
-            <button onClick="{{ impChooseFile }}" style="height:42px;padding:0 22px;border:none;border-radius:9px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px" style-hover="background:#D64A1C" style-active="background:#B93E15" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+            <button onClick="{{ impChooseFileBtn }}" style="height:42px;padding:0 22px;border:none;border-radius:9px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px" style-hover="background:#D64A1C" style-active="background:#B93E15" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
               <svg width="15" height="15" viewBox="0 0 24 24"><path d="M6 20a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg>
               {{ t.impChooseFile }}
             </button>
@@ -920,7 +920,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           </button>
         </div>
         <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:16/9;padding:14px">
-          <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
+          <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
         </div>
         <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
           <div style="margin-top:10px;font-size:12px;color:var(--ts-text-secondary);display:flex;align-items:center;gap:7px">
@@ -2617,7 +2617,8 @@ class Component extends DCLogic {
     e.preventDefault();
     this.canvasRef.current.focus();
     const [x, y] = this.evCell(e), t = this.T(), tool = this.state.tool;
-    e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId);
+    // Capture is an optimization (drag beyond bounds); it must never break drawing.
+    try { e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
     if (tool === 'cursor') { this.setState({ cx: x, cy: y }); return; }
     if (tool === 'pen' || tool === 'eraser') {
       this.snapshot();
@@ -2930,7 +2931,9 @@ class Component extends DCLogic {
     const token = (this._uploadSeq || 0) + 1;
     this._uploadSeq = token;
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name, fileName: name.replace(/\.[^.]+$/, '') });
+    // NOTE: only temporary import state here — the document (fileName, cells,
+    // undo) must not change until the user explicitly applies (applyImport).
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name });
     const fail = () => {
       if (token !== this._uploadSeq) return;
       this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
@@ -2962,7 +2965,7 @@ class Component extends DCLogic {
     const cnv = document.createElement('canvas'); cnv.width = 150; cnv.height = 130;
     const g = cnv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 150, 130); g.strokeStyle = '#000'; this.drawCat(g, 50);
     this._srcData = g.getImageData(0, 0, 150, 130).data; this._srcW = 150; this._srcH = 130; this._srcCanvas = cnv;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName, fileName: this.state.fileName ?? (this.state.lang === 'ko' ? '고양이' : 'Cat') });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName });
     this.drawImp();
   }
   // guard destructive new-document actions when the canvas has content
@@ -2985,7 +2988,10 @@ class Component extends DCLogic {
     const conv = this.applyConv(r.cells, st.gridW, st.gridH);
     const q = this.convQuality(conv, st.gridW, st.gridH);
     if (window.__TS_DEBUG) console.log('[TactileConvert]', { src: this._srcW + 'x' + this._srcH, crop, target: st.gridW + 'x' + st.gridH, preset: st.convPreset, dots: q.dots, density: +(q.density * 100).toFixed(1), isolated: q.isolated, removed: r.removedDots });
-    const name = st.fileName ?? (st.lang === 'ko' ? '고양이' : 'Cat');
+    // Document title updates only now, at apply — derived from the imported
+    // file's basename (temp impName). Cancel never touches the previous name.
+    const base = st.impName ? String(st.impName).replace(/\.[^.]+$/, '') : '';
+    const name = base || st.fileName || (st.lang === 'ko' ? '고양이' : 'Cat');
     if (mode === 'new') {
       const at = st.pageIndex + 1;
       this.pages.splice(at, 0, conv);
@@ -3216,7 +3222,7 @@ class Component extends DCLogic {
   }
   cropDown(e) {
     if (this.state.cropChoice !== 'crop') return;
-    e.preventDefault(); e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId);
+    e.preventDefault(); try { e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
     const p = this.cropAt(e), r = this.state.cropRect;
     const nearR = Math.abs(p.x - (r.x + r.w)) < 0.06 && Math.abs(p.y - (r.y + r.h)) < 0.06;
     this.cropDrag = { mode: nearR ? 'resize' : 'move', px: p.x, py: p.y, r: { ...r } };
@@ -3726,6 +3732,9 @@ class Component extends DCLogic {
       toggleAdv: () => this.setState(x => ({ advOpen: !x.advOpen })),
       advCaret: st.advOpen ? '90deg' : '0deg',
       impChooseFile: () => { if (this.fileRef.current) this.fileRef.current.click(); },
+      // Inner button lives INSIDE the clickable drop zone — stop the bubble so a
+      // single user click can't trigger the hidden file input twice.
+      impChooseFileBtn: (e) => { if (e && e.stopPropagation) e.stopPropagation(); if (this.fileRef.current) this.fileRef.current.click(); },
       onFilePick: e => { const f = e.target.files && e.target.files[0]; this.handleFile(f); e.target.value = ''; },
       impUseSample: () => this.useSampleImage(),
       onDropZoneKey: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (this.fileRef.current) this.fileRef.current.click(); } },
