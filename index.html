@@ -1133,6 +1133,19 @@ input[type=range]{accent-color:var(--ts-primary)}
           </sc-for>
         </div>
       </div>
+      <div style="margin-top:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.cmdFilterL }}</div>
+        <div role="group" aria-label="{{ t.cmdFilterL }}" style="display:flex;flex-wrap:wrap;gap:7px">
+          <sc-for list="{{ featureFilterChips }}" as="f" hint-placeholder-count="3">
+            <button onClick="{{ f.toggle }}" role="checkbox" aria-checked="{{ f.on }}" style="{{ f.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <span aria-hidden="true" style="{{ f.boxStyle }}">
+                <sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><svg width="10" height="10" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+              </span>
+              {{ f.label }} <span style="opacity:0.6;font-variant-numeric:tabular-nums">{{ f.count }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;padding:18px 26px;margin-top:8px;border-top:1px solid #E8DFD6;background:#FCFAF7">
       <button onClick="{{ closeCmd }}" style="height:40px;padding:0 16px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13.5px" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.cancel }}</button>
@@ -1500,7 +1513,7 @@ class Component extends DCLogic {
     impStep: 'import', cropChoice: 'full', converting: false, convertDone: false,
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, retouchHint: false, armedPreset: null,
-    cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false,
+    cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false, cmdFeatureFilter: [],
     tplOpen: false, tplGroup: 'recommended',
     confirmOpen: false,
     connected: true, connType: 'ble', connBusy: '', livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
@@ -1584,7 +1597,7 @@ class Component extends DCLogic {
       entCmd: '명령어로 만들기', entCmdBadge: '추천', entCmdSub: '설명만 입력하면 촉각 그래픽 초안을 자동으로 만들어줍니다.', entTpl: '템플릿에서 시작', entTplSub: '읽기 쉬운 촉각 스타터로 시작합니다.',
       cmdTitle: '명령어로 촉각 그래픽 만들기', cmdLabel: '명령어', cmdPh: '예: 수학 수업용 좌표평면을 만들어줘',
       cmdGridL: '그리드 크기', cmdPurposeL: '용도(선택)', cmdAuto: '자동 인식', cmdExamples: '예시 명령어', cmdGen: '생성', cmdGening: '생성하는 중…',
-      cmdEnterFirst: '명령어를 입력하세요.', cmdV1Note: 'v1 · 로컬 규칙 기반 생성 (실제 AI 아님)',
+      cmdEnterFirst: '명령어를 입력하세요.', cmdFilterL: '기기 적합성 필터', featCompat: 'DotPad 호환', featOpt: 'DotPad 최적화', featEmboss: '엠보싱 가능', cmdV1Note: 'v1 · 로컬 규칙 기반 생성 (실제 AI 아님)',
       cmdChips: ['수학 수업용 좌표평면', '수직선 그리기', '별 도형', '고양이 얼굴', '순서도 다이어그램'],
       purposes: ['자동 인식', '수업', '다이어그램', '지도', '사물', '박물관', '안내'],
       tplTitle: '스타터 템플릿 라이브러리', tplSub: '촉각 그래픽 제작을 위한 시작점을 선택하세요.',
@@ -1701,7 +1714,7 @@ class Component extends DCLogic {
       entCmd: 'Generate from command', entCmdBadge: 'Recommended', entCmdSub: 'Create a tactile graphic draft from a description.', entTpl: 'Start from template', entTplSub: 'Use a readable tactile starter.',
       cmdTitle: 'Create a tactile graphic from a command', cmdLabel: 'Command', cmdPh: 'e.g. Create a coordinate plane for a math lesson',
       cmdGridL: 'Grid size', cmdPurposeL: 'Purpose (optional)', cmdAuto: 'Auto-detect', cmdExamples: 'Example commands', cmdGen: 'Generate', cmdGening: 'Generating…',
-      cmdEnterFirst: 'Enter a command first.', cmdV1Note: 'v1 · local rule-based generation (not real AI)',
+      cmdEnterFirst: 'Enter a command first.', cmdFilterL: 'Device fitness filter', featCompat: 'DotPad compatible', featOpt: 'DotPad optimized', featEmboss: 'Embossable', cmdV1Note: 'v1 · local rule-based generation (not real AI)',
       cmdChips: ['Coordinate plane for math', 'Draw a number line', 'Star shape', 'Cat face', 'Flowchart diagram'],
       purposes: ['Auto-detect', 'Lesson', 'Diagram', 'Map', 'Object', 'Museum', 'Guide'],
       tplTitle: 'Starter template library', tplSub: 'Pick a starting point for tactile creation.',
@@ -3085,7 +3098,8 @@ class Component extends DCLogic {
       // top deterministic result (page-label / desc / braille, validated) load its
       // matched page too. Weak/no hits fall through to the existing generator below;
       // nearMatches stays suggestion-only and never mutates the canvas.
-      const search = typeof window.searchCorpus === 'function' ? window.searchCorpus(prompt, { limit: 1 }) : [];
+      const features = (st.cmdFeatureFilter && st.cmdFeatureFilter.length) ? st.cmdFeatureFilter : undefined;
+      const search = typeof window.searchCorpus === 'function' ? window.searchCorpus(prompt, { limit: 1, features: features }) : [];
       const corpusHit = search[0];
       if (corpusHit && corpusHit.confident && this.seedCorpusResult(corpusHit, mode)) return;
       if (corpusHit && this.corpusPageLoadable(corpusHit) && this.seedCorpusResult(corpusHit, mode)) return;
@@ -3882,6 +3896,24 @@ class Component extends DCLogic {
       cmdIdle: !st.cmdGenerating,
       cmdGenBtnStyle: { height: 40, padding: '0 22px', border: 'none', borderRadius: 8, background: 'var(--ts-primary)', color: '#fff', fontWeight: 700, fontSize: 13.5, display: 'inline-flex', alignItems: 'center', gap: 8, opacity: st.cmdGenerating ? 0.6 : 1, cursor: st.cmdGenerating ? 'not-allowed' : 'pointer' },
       cmdChips: (t.cmdChips || []).map(c => ({ label: c, pick: () => this.setState({ cmdPrompt: c, cmdError: false }) })),
+      featureFilterChips: (() => {
+        const counts = (typeof window !== 'undefined' && typeof window.corpusFeatureCounts === 'function') ? window.corpusFeatureCounts() : { dotpadCompatible: 0, dotpadOptimized: 0, embossable: 0 };
+        const active = st.cmdFeatureFilter || [];
+        const defs = [
+          { key: 'dotpadCompatible', label: t.featCompat, count: counts.dotpadCompatible },
+          { key: 'dotpadOptimized', label: t.featOpt, count: counts.dotpadOptimized },
+          { key: 'embossable', label: t.featEmboss, count: counts.embossable },
+        ];
+        return defs.map(d => {
+          const on = active.indexOf(d.key) !== -1;
+          return {
+            key: d.key, label: d.label, count: d.count, on,
+            toggle: () => { const cur = (this.state.cmdFeatureFilter || []).slice(); const i = cur.indexOf(d.key); if (i === -1) cur.push(d.key); else cur.splice(i, 1); this.setState({ cmdFeatureFilter: cur }); },
+            style: 'display:inline-flex;align-items:center;gap:7px;border:1px solid ' + (on ? 'var(--ts-primary)' : 'var(--ts-border-decor)') + ';border-radius:100px;background:' + (on ? 'rgba(var(--ts-primary-rgb),0.08)' : '#F7F4EF') + ';color:' + (on ? '#B93E15' : '#1E1C1A') + ';font-size:12px;font-weight:600;padding:6px 13px;cursor:pointer',
+            boxStyle: 'width:15px;height:15px;flex:none;border-radius:4px;display:grid;place-items:center;border:1.5px solid ' + (on ? 'var(--ts-primary)' : 'var(--ts-border-functional)') + ';background:' + (on ? 'var(--ts-primary)' : '#fff') + ';color:#fff',
+          };
+        });
+      })(),
       purposeOpts: (t.purposes || []).map((label, i) => ({ label, value: i === 0 ? 'auto' : label })),
       // template library
       tplOpen: st.tplOpen,
