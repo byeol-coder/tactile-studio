@@ -1006,8 +1006,31 @@ input[type=range]{accent-color:var(--ts-primary)}
       </sc-if>
 
       <sc-if value="{{ isViewTrash }}" hint-placeholder-val="{{ false }}">
-        <h1 style="font-size:22px;font-weight:800;color:#1E1C1A;margin:0 0 16px;letter-spacing:-0.3px">{{ t.homeTrashTitle }}</h1>
-        <p style="font-size:13.5px;color:var(--ts-text-secondary);margin:0;line-height:1.5">{{ t.homeTrashEmpty }} {{ t.homeTrashSoon }}</p>
+        <h1 style="font-size:22px;font-weight:800;color:#1E1C1A;margin:0 0 22px;letter-spacing:-0.3px">{{ t.homeTrashTitle }}</h1>
+        <sc-if value="{{ homeTrashEmpty }}" hint-placeholder-val="{{ false }}">
+          <p style="font-size:13.5px;color:var(--ts-text-secondary);margin:0;line-height:1.5">{{ t.homeTrashEmpty }}</p>
+        </sc-if>
+        <div class="ts-pgrid" role="list" aria-label="{{ t.homeTrashTitle }}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px">
+          <sc-for list="{{ trashCards }}" as="d" hint-placeholder-count="2">
+            <div role="listitem" style="position:relative;background:#fff;border:1px solid #EFE7DE;border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,0.04);opacity:0.72">
+              <span style="aspect-ratio:3/2;background:#FBF7EE;border-bottom:1px solid #F2ECE4;display:grid;place-items:center;overflow:hidden">
+                <sc-if value="{{ d.hasThumb }}" hint-placeholder-val="{{ true }}">
+                  <img src="{{ d.thumb }}" alt="" style="width:100%;height:100%;object-fit:contain;filter:grayscale(0.4)">
+                </sc-if>
+              </span>
+              <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
+                <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.name }}</span>
+                <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ d.grid }} · {{ t.homeTrashDeletedAt }} {{ d.deletedTime }}</span>
+              </span>
+              <button onClick="{{ d.restore }}" aria-label="{{ d.aRestore }}" style="position:absolute;top:8px;right:38px;width:26px;height:26px;border:1px solid var(--ts-border-decor);border-radius:8px;background:rgba(255,255,255,0.92);color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#fff;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+              <button onClick="{{ d.permaDelete }}" aria-label="{{ d.aPermaDelete }}" style="position:absolute;top:8px;right:8px;width:26px;height:26px;border:1px solid var(--ts-border-decor);border-radius:8px;background:rgba(255,255,255,0.92);color:var(--ts-danger);display:grid;place-items:center;cursor:pointer" style-hover="background:#fff" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l16 0 M10 11l0 6 M14 11l0 6 M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12 M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+            </div>
+          </sc-for>
+        </div>
       </sc-if>
     </div>
   </main>
@@ -1856,7 +1879,7 @@ class Component extends DCLogic {
       homeOpenL: '기존 파일 열기', homeOpenSub: '저장한 촉각 그래픽을 불러옵니다.', homeConnectL: 'DotPad 연결', homeConnectSub: '기기를 연결하고 상태를 확인합니다.',
       homeNewPrimary: '새 촉각그래픽', homeQuickL: '빠른 시작', homeRecentL: '최근 작업',
       navRecent: '최근', navProjects: '내 프로젝트', navTemplates: '템플릿', navLibrary: 'Dot Library', navDrive: 'Tactile Drive', navDemo: 'DotPad 데모', navTrash: '휴지통',
-      homeGalleryEmptyL: '여기에 표시할 항목이 없습니다.', homeTrashTitle: '휴지통', homeTrashEmpty: '휴지통이 비어 있습니다.', homeTrashSoon: '삭제·복원 기능은 곧 제공됩니다.',
+      homeGalleryEmptyL: '여기에 표시할 항목이 없습니다.', homeTrashTitle: '휴지통', homeTrashEmpty: '휴지통이 비어 있습니다.',
       flowInput: '입력 · 이미지·텍스트·템플릿', flowPreview: '촉각 미리보기', flowOutput: 'DotPad 출력',
       homeNew60L: '새 60×40', homeNew60Sub: 'DotPad 기본 크기', homeNew96L: '새 96×64', homeNew96Sub: '대형 DotPad 크기',
       homeConvertL: '이미지 변환', homeConvertSub: '이미지를 촉각 점 그래픽으로 변환합니다.',
@@ -1957,7 +1980,11 @@ class Component extends DCLogic {
       fTypes: ['그래프', '도형', '파형'], fTimes: ['2일 전', '5일 전', '1주 전'],
       imgType: '이미지 변환', createTitle: '새 촉각 그래픽 만들기', createSub2: '빈 캔버스 · 이미지 가져오기 · 템플릿',
       libOpen: '라이브러리 열기', libOpenSub: '저장한 촉각 그래픽을 다시 열기', libTitle: '내 라이브러리', libEmpty: '아직 저장한 그래픽이 없습니다. 그래픽을 만들고 저장하면 여기에 모입니다.', libOpenCard: '열기', libSendCard: 'DotPad로 전송', libDeleteCard: '삭제', libDriveTag: '드라이브', libLibraryTag: '라이브러리', aLibDeleted: '삭제했습니다', openDrive: 'Tactile Drive 열기', importTitle2: '이미지 가져오기', importSub2: '이미지를 촉각 그래픽으로 변환',
-      favAdd: '즐겨찾기 추가', favRemove: '즐겨찾기 해제', moreMenuL: '더보기', deleteL: '삭제', delSavedTitle: '이 항목을 삭제할까요?', delSavedSub: '삭제하면 되돌릴 수 없습니다.', delSavedBtn: '삭제',
+      favAdd: '즐겨찾기 추가', favRemove: '즐겨찾기 해제', moreMenuL: '더보기', deleteL: '삭제',
+      trashMoveTitle: '휴지통으로 이동할까요?', trashMoveSub: '나중에 휴지통에서 복원할 수 있습니다.', trashMoveBtn: '휴지통으로 이동',
+      permaDeleteTitle: '영구적으로 삭제할까요?', permaDeleteSub: '이 작업은 되돌릴 수 없습니다.', permaDeleteBtn: '영구 삭제',
+      restoreL: '복원', permaDeleteL: '영구 삭제', aMovedTrash: '휴지통으로 이동했습니다', aRestored: '복원했습니다',
+      homeTrashDeletedAt: '삭제됨',
       langLabel: '언어 선택 (한국어 / 영어)',
       savedDrive: 'Tactile Drive에 저장되었습니다.', savedLib: 'Dot Library에 저장되었습니다.',
       helpTitle: '키보드 · 스크린리더 안내', kbSection: '키보드 단축키', srSection: '스크린리더 · TTS',
@@ -1986,7 +2013,7 @@ class Component extends DCLogic {
       homeOpenL: 'Open a file', homeOpenSub: 'Load a saved tactile graphic.', homeConnectL: 'Connect DotPad', homeConnectSub: 'Connect a device and check its status.',
       homeNewPrimary: 'New tactile graphic', homeQuickL: 'Quick start', homeRecentL: 'Recent',
       navRecent: 'Recent', navProjects: 'My Projects', navTemplates: 'Templates', navLibrary: 'Dot Library', navDrive: 'Tactile Drive', navDemo: 'DotPad Demo', navTrash: 'Trash',
-      homeGalleryEmptyL: 'Nothing to show here yet.', homeTrashTitle: 'Trash', homeTrashEmpty: 'Trash is empty.', homeTrashSoon: 'Delete and restore are coming soon.',
+      homeGalleryEmptyL: 'Nothing to show here yet.', homeTrashTitle: 'Trash', homeTrashEmpty: 'Trash is empty.',
       flowInput: 'Input · image·text·template', flowPreview: 'Tactile preview', flowOutput: 'DotPad output',
       homeNew60L: 'New 60×40', homeNew60Sub: 'DotPad default size', homeNew96L: 'New 96×64', homeNew96Sub: 'Large DotPad size',
       homeConvertL: 'Convert image', homeConvertSub: 'Turn an image into a tactile dot graphic.',
@@ -2087,7 +2114,11 @@ class Component extends DCLogic {
       fTypes: ['Graph', 'Shape', 'Wave'], fTimes: ['2 days ago', '5 days ago', '1 week ago'],
       imgType: 'Image', createTitle: 'Create new', createSub2: 'Blank · Import image · Template',
       libOpen: 'Open library', libOpenSub: 'Reopen your saved tactile graphics', libTitle: 'My library', libEmpty: 'No saved graphics yet. Create and save a graphic and it will appear here.', libOpenCard: 'Open', libSendCard: 'Send to DotPad', libDeleteCard: 'Delete', libDriveTag: 'Drive', libLibraryTag: 'Library', aLibDeleted: 'Deleted', openDrive: 'Open Tactile Drive', importTitle2: 'Import image', importSub2: 'Convert an image into a tactile graphic',
-      favAdd: 'Add to favorites', favRemove: 'Remove from favorites', moreMenuL: 'More options', deleteL: 'Delete', delSavedTitle: 'Delete this item?', delSavedSub: "This can't be undone.", delSavedBtn: 'Delete',
+      favAdd: 'Add to favorites', favRemove: 'Remove from favorites', moreMenuL: 'More options', deleteL: 'Delete',
+      trashMoveTitle: 'Move to Trash?', trashMoveSub: 'You can restore it later from Trash.', trashMoveBtn: 'Move to Trash',
+      permaDeleteTitle: 'Delete permanently?', permaDeleteSub: "This action can't be undone.", permaDeleteBtn: 'Delete permanently',
+      restoreL: 'Restore', permaDeleteL: 'Delete permanently', aMovedTrash: 'Moved to Trash', aRestored: 'Restored',
+      homeTrashDeletedAt: 'Deleted',
       langLabel: 'Select language (Korean / English)',
       savedDrive: 'Saved to Tactile Drive.', savedLib: 'Saved to Dot Library.',
       helpTitle: 'Keyboard · screen reader guide', kbSection: 'Keyboard shortcuts', srSection: 'Screen reader · TTS',
@@ -3811,6 +3842,29 @@ class Component extends DCLogic {
     });
     this.say(this.T().aLibDeleted || 'Deleted');
   }
+  // P2d: soft delete moves an item to Trash (deletedAt flag) instead of
+  // removing it outright; restoreSaved reverses that; deleteSaved above
+  // remains the one truly-permanent removal, used only from within Trash.
+  softDeleteSaved(index) {
+    this.setState(s => {
+      const saved = s.saved.slice();
+      if (!saved[index]) return null;
+      saved[index] = { ...saved[index], deletedAt: Date.now() };
+      this.saveLibrary(saved);
+      return { saved };
+    });
+    this.say(this.T().aMovedTrash || 'Moved to Trash');
+  }
+  restoreSaved(index) {
+    this.setState(s => {
+      const saved = s.saved.slice();
+      if (!saved[index]) return null;
+      saved[index] = { ...saved[index], deletedAt: null };
+      this.saveLibrary(saved);
+      return { saved };
+    });
+    this.say(this.T().aRestored || 'Restored');
+  }
   toggleFavorite(index) {
     this.setState(s => {
       const saved = s.saved.slice();
@@ -3949,7 +4003,7 @@ class Component extends DCLogic {
         aOpen: t.open + ' · ' + nm, aEdit: t.edit + ' · ' + nm, aSend: t.sendCardBtn + ' · ' + nm
       };
     });
-    const savedCards = (st.saved || []).map((f, i) => {
+    const savedCards = (st.saved || []).map((f, i) => [f, i]).filter(([f]) => !f.deletedAt).map(([f, i]) => {
       const p = String(f.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40, s = mkStatus(false);
       const menuId = 's' + i;
       return {
@@ -3962,20 +4016,20 @@ class Component extends DCLogic {
         menuOpen: st.cardMenuOpen === menuId,
         toggleMenu: () => this.setState(s2 => ({ cardMenuOpen: s2.cardMenuOpen === menuId ? null : menuId })),
         closeMenu: () => this.setState({ cardMenuOpen: null }),
-        deleteCard: () => { this._pendingDoc = () => this.deleteSaved(i); this.setState({ confirmOpen: true, confirmKind: 'delsaved', cardMenuOpen: null }); },
+        deleteCard: () => { this._pendingDoc = () => this.softDeleteSaved(i); this.setState({ confirmOpen: true, confirmKind: 'trashsaved', cardMenuOpen: null }); },
         open: () => this.openCard('saved', gw, gh, f.cells, f.name), edit: () => this.openCard('saved', gw, gh, f.cells, f.name), send: () => this.sendCard('saved', gw, gh, f.cells, f.name),
         aOpen: t.open + ' · ' + f.name, aEdit: t.edit + ' · ' + f.name, aSend: t.sendCardBtn + ' · ' + f.name
       };
     });
     const recentCards = [...savedCards, ...presetCards].slice(0, 6);
-    const libraryCards = (st.saved || []).map((f, i) => {
+    const libraryCards = (st.saved || []).map((f, i) => [f, i]).filter(([f]) => !f.deletedAt).map(([f, i]) => {
       const p = String(f.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40;
       return {
         name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: f.grid || '60×40',
         tag: f.loc === 'library' ? t.libLibraryTag : t.libDriveTag,
         open: () => { this.setState({ libraryOpen: false }); this.openCard('saved', gw, gh, f.cells, f.name); },
         send: () => { this.setState({ libraryOpen: false }); this.sendCard('saved', gw, gh, f.cells, f.name); },
-        remove: () => this.deleteSaved(i),
+        remove: () => this.softDeleteSaved(i),
         aOpen: t.libOpenCard + ' · ' + f.name, aSend: t.libSendCard + ' · ' + f.name, aDelete: t.libDeleteCard + ' · ' + f.name,
       };
     });
@@ -3995,19 +4049,31 @@ class Component extends DCLogic {
         menuOpen: st.cardMenuOpen === menuId,
         toggleMenu: () => this.setState(s2 => ({ cardMenuOpen: s2.cardMenuOpen === menuId ? null : menuId })),
         closeMenu: () => this.setState({ cardMenuOpen: null }),
-        deleteCard: () => { this._pendingDoc = () => this.deleteSaved(i); this.setState({ confirmOpen: true, confirmKind: 'delsaved', cardMenuOpen: null }); },
+        deleteCard: () => { this._pendingDoc = () => this.softDeleteSaved(i); this.setState({ confirmOpen: true, confirmKind: 'trashsaved', cardMenuOpen: null }); },
         open: () => this.openCard('saved', gw, gh, f.cells, f.name),
         aOpen: t.open + ' · ' + f.name,
       };
     };
     const allSaved = (st.saved || []);
-    const allSavedIdx = allSaved.map((f, i) => [f, i]);
+    const allSavedIdx = allSaved.map((f, i) => [f, i]).filter(([f]) => !f.deletedAt);
     const galleryFor = (v) => v === 'projects' ? allSavedIdx.map(([f, i]) => mkSavedCard(f, i))
       : v === 'library' ? allSavedIdx.filter(([f]) => f.loc === 'library').map(([f, i]) => mkSavedCard(f, i))
       : v === 'drive' ? allSavedIdx.filter(([f]) => f.loc === 'drive').map(([f, i]) => mkSavedCard(f, i))
       : v === 'demo' ? presetCards
       : [];
     const homeGalleryCards = galleryFor(homeView);
+    // P2d: Trash view — deleted-only items, restore (undo icon reused) or
+    // permanently delete (strong confirm, separate from the soft-delete flow).
+    const trashCards = (st.saved || []).map((f, i) => [f, i]).filter(([f]) => !!f.deletedAt).map(([f, i]) => {
+      const p = String(f.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40;
+      return {
+        id: 't' + i, name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: f.grid || (gw + '×' + gh),
+        deletedTime: relTime(f.deletedAt),
+        restore: () => this.restoreSaved(i), aRestore: t.restoreL + ' · ' + f.name,
+        permaDelete: () => { this._pendingDoc = () => this.deleteSaved(i); this.setState({ confirmOpen: true, confirmKind: 'permadelete' }); },
+        aPermaDelete: t.permaDeleteL + ' · ' + f.name,
+      };
+    });
     const homeTplCards = (tplData.recommended || []).map((it, i) => {
       const nm2 = st.lang === 'ko' ? it.ko : it.en;
       return { id: 'tpl' + i, name: nm2, grid: it.gw + '×' + it.gh, open: () => this.openCard(it.kind, it.gw, it.gh, null, nm2), aOpen: t.open + ' · ' + nm2 };
@@ -4065,6 +4131,7 @@ class Component extends DCLogic {
       isViewTrash: homeView === 'trash',
       homeGalleryCards, homeGalleryTitle,
       homeGalleryEmpty: homeGalleryCards.length === 0,
+      trashCards, homeTrashEmpty: trashCards.length === 0,
       homeTplCards,
       openTemplates: () => this.setState({ homeView: 'templates' }),
       homeOpenDemo: () => this.setState({ homeView: 'demo' }),
@@ -4467,9 +4534,9 @@ class Component extends DCLogic {
       })),
       // unsaved-changes / destructive confirm (dynamic)
       confirmOpen: st.confirmOpen,
-      confirmTitleV: st.confirmKind === 'delpage' ? t.delPageTitle : st.confirmKind === 'replacepage' ? t.replaceImgTitle : st.confirmKind === 'delsaved' ? t.delSavedTitle : t.confirmTitle,
-      confirmSubV: st.confirmKind === 'delpage' ? t.delPageSub : st.confirmKind === 'replacepage' ? t.replaceImgSub : st.confirmKind === 'delsaved' ? t.delSavedSub : t.confirmSub,
-      confirmBtnV: st.confirmKind === 'delpage' ? t.delPageBtn : st.confirmKind === 'replacepage' ? t.replaceImgBtn : st.confirmKind === 'delsaved' ? t.delSavedBtn : t.confirmReplace,
+      confirmTitleV: st.confirmKind === 'delpage' ? t.delPageTitle : st.confirmKind === 'replacepage' ? t.replaceImgTitle : st.confirmKind === 'trashsaved' ? t.trashMoveTitle : st.confirmKind === 'permadelete' ? t.permaDeleteTitle : t.confirmTitle,
+      confirmSubV: st.confirmKind === 'delpage' ? t.delPageSub : st.confirmKind === 'replacepage' ? t.replaceImgSub : st.confirmKind === 'trashsaved' ? t.trashMoveSub : st.confirmKind === 'permadelete' ? t.permaDeleteSub : t.confirmSub,
+      confirmBtnV: st.confirmKind === 'delpage' ? t.delPageBtn : st.confirmKind === 'replacepage' ? t.replaceImgBtn : st.confirmKind === 'trashsaved' ? t.trashMoveBtn : st.confirmKind === 'permadelete' ? t.permaDeleteBtn : t.confirmReplace,
       confirmCancelV: t.keepWork,
       confirmReplace: () => { const fn = this._pendingDoc; this._pendingDoc = null; this.setState({ confirmOpen: false }); if (fn) fn(); },
       confirmCancel: () => { this._pendingDoc = null; this.setState({ confirmOpen: false }); },
