@@ -2803,6 +2803,16 @@ class Component extends DCLogic {
     this.bump();
     this._key = (e) => this.onKey(e);
     window.addEventListener('keydown', this._key);
+    // 닷패드 물리 화살표(패닝) 키 → 페이지 이동. 한 번만 등록하면 재연결과
+    // 무관하게 계속 유지된다(DP.onKey 참고). 편집 화면일 때만 반응해서
+    // 홈 화면·모달이 열려 있을 때 의도치 않게 페이지가 넘어가지 않게 한다.
+    if (window.TW && window.TW.DP && window.TW.DP.onKey) {
+      window.TW.DP.onKey((code) => {
+        if (this.state.screen !== 'studio') return;
+        if (code === 'PanningLeft') this.goPage(this.state.pageIndex - 1);
+        else if (code === 'PanningRight') this.goPage(this.state.pageIndex + 1);
+      });
+    }
     this.drawAll();
     this.heroSetup();
     this.heroReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
