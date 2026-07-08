@@ -50,6 +50,10 @@ if ('caches' in window) {
 <script src="./vendor/tw/pins.js"></script>
 <script src="./vendor/tw/imageToPins.js"></script>
 <script src="./vendor/tw/dotpad.js"></script>
+<!-- 점역(braille) 어댑터. window.TSBraille만 정의하는 작은 파일 — 실제 liblouis
+     엔진(asm.js, ~1.6MB)과 점자 테이블(~940KB)은 preload()를 호출할 때까지
+     로드되지 않으므로 부팅 성능에 영향을 주지 않는다. -->
+<script src="./vendor/liblouis/braille.js"></script>
 <script>
 /* Boot watchdog — if the app root has not mounted within the grace window
    (runtime script 404, React CDN unreachable, SRI failure, offline, …),
@@ -660,6 +664,23 @@ input[type=range]{accent-color:var(--ts-primary)}
             </button>
             <sc-if value="{{ narrOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:11px">
+            <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspDesc }}</label>
+            <textarea onChange="{{ onPgDesc }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgDesc }}</textarea>
+
+            <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
+            <select onChange="{{ onBrailleLang }}" value="{{ brailleLangValue }}" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;background:#fff;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
+              <sc-for list="{{ brailleLangOptions }}" as="o" hint-placeholder-count="4">
+                <option value="{{ o.key }}">{{ o.label }}</option>
+              </sc-for>
+            </select>
+
+            <div aria-live="polite" style="padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;margin-bottom:4px">
+              <div style="font-size:15px;letter-spacing:0.06em;color:#1E1C1A;min-height:20px;word-break:break-all">{{ braillePreviewText }}</div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+              <span style="font-size:10.5px;font-weight:700;{{ brailleCounterColor }}">{{ brailleCounterText }}</span>
+            </div>
+
             <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
             <textarea onChange="{{ onNarration }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;margin-bottom:12px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgNarration }}</textarea>
 
@@ -1842,6 +1863,7 @@ class Component extends DCLogic {
     connected: true, connType: 'ble', connBusy: '', connFailed: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     narrOpen: false,
+    brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 },
     saveOpen: false, savePhase: 'form', saveLoc: 'drive', libraryOpen: false,
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
@@ -1957,7 +1979,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioAdd: '오디오 파일 첨부', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '미리 만든 오디오 파일을 올리면 자산에 경로로 저장됩니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨', dpConnFailed: '연결 실패',
+      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioAdd: '오디오 파일 첨부', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '미리 만든 오디오 파일을 올리면 자산에 경로로 저장됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨', dpConnFailed: '연결 실패',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
@@ -2092,7 +2114,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected', dpConnFailed: 'Connection failed',
+      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected', dpConnFailed: 'Connection failed',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
@@ -2787,7 +2809,7 @@ class Component extends DCLogic {
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._convT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); cancelAnimationFrame(this.heroRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._convT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); cancelAnimationFrame(this.heroRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); }
   syncAudioPreview() {
     const el = this.audioRef.current;
@@ -3219,32 +3241,37 @@ class Component extends DCLogic {
     this.polyPts = []; this.preview = null;
     this.setState({ pageIndex: i, pageCount: n, cx: 0, cy: 0, selRect: null });
     this.queueLivePreview();
+    this.queueBraillePreview(); // 페이지마다 설명/나레이션이 다르므로 갱신
     this.say(this.T().aPage(i + 1, n));
   }
   addPage() {
     const blank = new Uint8Array(this.state.gridW * this.state.gridH);
     const at = this.state.pageIndex + 1;
     this.pages.splice(at, 0, blank);
+    this._reindexPageAudioInsert(at);
     this.undoStack = []; this.redoStack = [];
     this.cells = blank; this.polyPts = []; this.preview = null;
     const n = this.pages.length;
     this.setState({ pageIndex: at, pageCount: n, entry: false, cx: 0, cy: 0, selRect: null });
     this.queueLivePreview();
+    this.queueBraillePreview();
     this.say(this.T().aPageAdd(at + 1, n));
   }
   deletePage() {
     if (this.pages.length <= 1) return;
     const idx = this.state.pageIndex;
     this.pages.splice(idx, 1);
+    this._reindexPageAudioDelete(idx);
     const ni = Math.max(0, Math.min(this.pages.length - 1, idx));
     this.undoStack = []; this.redoStack = [];
     this.cells = this.pages[ni]; this.polyPts = []; this.preview = null;
     const n = this.pages.length;
     this.setState({ pageIndex: ni, pageCount: n, confirmOpen: false, cx: 0, cy: 0, selRect: null });
     this.queueLivePreview();
+    this.queueBraillePreview();
     this.say(this.T().aPageDel(ni + 1, n));
   }
-  resetPages(cells) { this.pages = [cells]; }
+  resetPages(cells) { this.pages = [cells]; this.pageAudio = {}; }
   undo() {
     if (!this.undoStack.length) return;
     this.redoStack.push(this._histEntry());
@@ -3424,17 +3451,22 @@ class Component extends DCLogic {
       // Load every page as a fresh document (clean undo checkpoint).
       this.pages = parsed.pages.map(p => p.cells);
       this.pageAudio = {};
-      parsed.pages.forEach((p, i) => { if (p.narration) this.pageAudio[i] = { narration: p.narration }; });
+      parsed.pages.forEach((p, i) => {
+        if (p.narration || p.desc) this.pageAudio[i] = Object.assign({}, p.narration ? { narration: p.narration } : null, p.desc ? { desc: p.desc } : null);
+      });
       this.cells = this.pages[0];
       this.undoStack = []; this.redoStack = [];
       if (this.state.gridW !== 60 || this.state.gridH !== 40) this.setGrid(60, 40);
       // Auto BANA print-standard check on the FIRST page (informational).
       const bana = this.banaPrintCheck(this.cells, 60, 40);
       const banaMsg = bana.pass ? t.banaPass : t.aAssetBanaWarn;
+      const BRAILLE_LANGS = ['ko-g2', 'ko-g1', 'ueb-g1', 'ueb-g2'];
+      const importedBrailleLang = BRAILLE_LANGS.includes(obj.brailleLang) ? obj.brailleLang : this.state.brailleLang;
       this.setState({ importOpen: false, entry: false, fileName: parsed.title || name, output: '60',
         pageIndex: 0, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null,
-        sendPhase: 'idle', banaResult: { pass: bana.pass, msg: banaMsg } });
+        sendPhase: 'idle', banaResult: { pass: bana.pass, msg: banaMsg }, brailleLang: importedBrailleLang });
       this.queueLivePreview();
+      this.queueBraillePreview();
       this.say(this.callI18n(t.aAssetLoaded, '', this.pages.length) + ' ' + banaMsg);
     };
     this.setState({ impLoading: true, impErr: '' });
@@ -3820,7 +3852,7 @@ class Component extends DCLogic {
       const page = {
         page: i + 1,
         label: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].label) || (name + ' · ' + (i + 1)),
-        desc: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].desc) || '',
+        desc: this.pageDesc(i) || ((ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].desc) || ''),
         braille: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].braille) || '',
         graphic: hexOf(cellBuf),
       };
@@ -3841,6 +3873,7 @@ class Component extends DCLogic {
       category: category,
       tags: (ctx && Array.isArray(ctx.tags)) ? ctx.tags.slice() : [],
       graphicFeatures: this.deriveGraphicFeatures(this.cells, w, h),
+      brailleLang: st.brailleLang,
       pages: pages,
       provenance: {
         createdBy: 'tactile-studio',
@@ -3894,21 +3927,110 @@ class Component extends DCLogic {
     const i = this.state.pageIndex, cur = this.pageAudio[i] || {};
     this.pageAudio = Object.assign({}, this.pageAudio, { [i]: Object.assign({}, cur, { narration: text }) });
     this.bump();
+    this.queueBraillePreview();
   }
-  // ── Braille output (NOT YET IMPLEMENTED) ────────────────────────────────
-  // Narration text is meant to be translated into braille and shown on the
-  // DotPad's braille line (SDK: displayTextData / numberBrailleCellColumns,
-  // default 20 cells — see vendor/tw/dotpad-sdk.js). No translator (e.g.
-  // Liblouis) is wired in yet, so this deliberately returns null rather than
-  // guessing at a conversion. Sending untranslated text as if it were braille
-  // would show wrong dot patterns to a blind user, which is worse than
-  // sending nothing. Wire a real translator here before enabling output.
-  translateToBraille(text) {
-    if (!text) return null;
-    // TODO: plug in the real text→braille translator (e.g. the Liblouis
-    // integration already built for Dot Lens) and return its hex-encoded
-    // cell data here. Until then, always return null.
-    return null;
+  // ── Braille output ───────────────────────────────────────────────────────
+  // Translates text to real braille via the vendored liblouis engine
+  // (vendor/liblouis/), then packs it into the hex byte format
+  // displayTextData()/outputText() expect.
+  //
+  // Bit convention note (verified empirically against the actual SDK source,
+  // not assumed): the SDK's internal brailleToGraphic() remaps each input
+  // byte from the *same* dot1..8 = bit0..7 convention used by Unicode Braille
+  // Patterns (U+2800 block) onto the physical 2×4 cell grid. So a Unicode
+  // braille codepoint minus 0x2800 is already the exact byte outputText()
+  // wants — no bit reversal needed. (Reproducible check: feed each single-dot
+  // codepoint 0x2801, 0x2802, 0x2804... through brailleToGraphic and confirm
+  // dots 1/2/3/8 land unchanged while 4/5/6/7 shift to the 2×4 grid's second
+  // column / extra row — exactly the standard 8-dot physical layout.)
+  //
+  // Absolute rule: on ANY failure (engine not loaded, translation error,
+  // unknown language) this returns null. It never falls back to sending the
+  // raw text — showing wrong dot patterns to a blind user is worse than
+  // showing nothing.
+  _brailleUnicodeToHex(unicodeStr) {
+    let hex = '';
+    for (const ch of unicodeStr) {
+      const cp = ch.codePointAt(0);
+      const byte = (cp >= 0x2800 && cp <= 0x28FF) ? (cp - 0x2800) : 0;
+      hex += byte.toString(16).padStart(2, '0');
+    }
+    return hex;
+  }
+  async translateToBraille(text, langKey) {
+    if (!text || !window.TSBraille) return null;
+    try {
+      await window.TSBraille.preload();
+      const r = window.TSBraille.translate(text, langKey || this.state.brailleLang);
+      if (!r || !r.ok) return null;
+      const DP = this.dpReal();
+      const cellCount = (DP && DP.brailleCellCount) ? DP.brailleCellCount() : 20;
+      const padded = window.TSBraille.padOrTruncate(r.unicode, cellCount);
+      return this._brailleUnicodeToHex(padded);
+    } catch (e) {
+      return null;
+    }
+  }
+  // current page's braille-line description (independent of narration; see
+  // T().inspDescPh for the fallback relationship shown to the user)
+  pageDesc(i) {
+    const a = this.pageAudio[i];
+    return (a && typeof a.desc === 'string') ? a.desc : '';
+  }
+  setPageDesc(text) {
+    const i = this.state.pageIndex, cur = this.pageAudio[i] || {};
+    this.pageAudio = Object.assign({}, this.pageAudio, { [i]: Object.assign({}, cur, { desc: text }) });
+    this.bump();
+    this.queueBraillePreview();
+  }
+  setBrailleLang(key) {
+    this.setState({ brailleLang: key });
+    this.queueBraillePreview();
+  }
+  // Debounced live Unicode-braille preview for the inspector. Loads the
+  // engine lazily on first use (non-blocking — boot is unaffected) and
+  // re-checks pageIndex/text after the await in case the user switched pages
+  // or kept typing while the engine was still loading, so a slow first-load
+  // never flashes a stale preview onto the wrong page.
+  queueBraillePreview() {
+    clearTimeout(this._brT);
+    this._brT = setTimeout(() => this._runBraillePreview(), 220);
+  }
+  _runBraillePreview() {
+    const pageIdx = this.state.pageIndex, lang = this.state.brailleLang;
+    const a = this.pageAudio[pageIdx];
+    const text = this.pageDesc(pageIdx) || (a && a.narration) || '';
+    if (!text) { this.setState({ braillePreview: { ok: true, unicode: '', cells: 0 } }); return; }
+    if (!window.TSBraille) { this.setState({ braillePreview: { ok: false, unicode: '', cells: 0 } }); return; }
+    window.TSBraille.preload().then(() => {
+      if (this.state.pageIndex !== pageIdx || this.state.brailleLang !== lang) return; // stale
+      const r = window.TSBraille.translate(text, lang);
+      this.setState({ braillePreview: r });
+    }).catch(() => {
+      if (this.state.pageIndex !== pageIdx || this.state.brailleLang !== lang) return;
+      this.setState({ braillePreview: { ok: false, unicode: '', cells: 0 } });
+    });
+  }
+  // pageAudio is keyed by page index, not a real array — addPage/deletePage
+  // splice `this.pages` but numeric object keys don't shift on their own, so
+  // without this every page after an insert/delete used to show the *wrong*
+  // page's description/narration/audio. Keeps the two structures in sync.
+  _reindexPageAudioInsert(at) {
+    const next = {};
+    Object.keys(this.pageAudio || {}).forEach(k => {
+      const idx = +k;
+      next[idx >= at ? idx + 1 : idx] = this.pageAudio[k];
+    });
+    this.pageAudio = next;
+  }
+  _reindexPageAudioDelete(at) {
+    const next = {};
+    Object.keys(this.pageAudio || {}).forEach(k => {
+      const idx = +k;
+      if (idx === at) return;
+      next[idx > at ? idx - 1 : idx] = this.pageAudio[k];
+    });
+    this.pageAudio = next;
   }
   // open / send a Tactile Drive file back into Studio
   // ── library persistence (localStorage; cells stored as 600-hex to stay small)
@@ -4315,12 +4437,40 @@ class Component extends DCLogic {
           narration: (a && a.narration) || '',
         };
       })(),
+      pgDesc: this.pageDesc(st.pageIndex),
+      onPgDesc: (e) => this.setPageDesc(e && e.target ? e.target.value : ''),
+      brailleLangValue: st.brailleLang,
+      brailleLangOptions: [
+        { key: 'ko-g2', label: t.brailleLangKoG2 },
+        { key: 'ko-g1', label: t.brailleLangKoG1 },
+        { key: 'ueb-g1', label: t.brailleLangUebG1 },
+        { key: 'ueb-g2', label: t.brailleLangUebG2 },
+      ],
+      onBrailleLang: (e) => this.setBrailleLang(e && e.target ? e.target.value : 'ko-g2'),
+      braillePreviewText: (() => {
+        const bp = st.braillePreview || { ok: true, unicode: '', cells: 0 };
+        const hasSrc = !!(this.pageDesc(st.pageIndex) || ((this.pageAudio || {})[st.pageIndex] || {}).narration);
+        if (!hasSrc) return t.braillePreviewEmpty;
+        if (!bp.ok) return t.braillePreviewFail;
+        return bp.unicode || '\u2800';
+      })(),
+      brailleCounterText: (() => {
+        const bp = st.braillePreview || { ok: true, unicode: '', cells: 0 };
+        const hasSrc = !!(this.pageDesc(st.pageIndex) || ((this.pageAudio || {})[st.pageIndex] || {}).narration);
+        return (hasSrc && bp.ok) ? t.brailleCellsOf(bp.cells || 0, 20) : '';
+      })(),
+      brailleCounterColor: 'color:' + (((st.braillePreview || {}).cells || 0) > 20 ? 'var(--ts-danger)' : 'var(--ts-text-secondary)'),
       pgNarration: (() => { const a = (this.pageAudio || {})[st.pageIndex]; return (a && typeof a.narration === 'string') ? a.narration : ''; })(),
       onAudioFile: (e) => { const f = e && e.target && e.target.files && e.target.files[0]; if (f) this.attachPageAudio(f); },
       onAudioRemove: () => this.removePageAudio(),
       onNarration: (e) => this.setPageNarration(e && e.target ? e.target.value : ''),
       narrOpen: st.narrOpen,
-      toggleNarr: () => this.setState(s => ({ narrOpen: !s.narrOpen })),
+      toggleNarr: () => this.setState(s => {
+        const open = !s.narrOpen;
+        // 패널을 여는 순간 미리 로드해서, 실제로 설명을 입력했을 때 지연이 체감되지 않게 한다.
+        if (open) { window.TSBraille && window.TSBraille.preload().catch(() => {}); this.queueBraillePreview(); }
+        return { narrOpen: open };
+      }),
       narrCaretStyle: { transition: 'transform 0.15s ease', transform: st.narrOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
       dpIsConnected: st.connected, dpIsDisconnected: !st.connected,
       dpConnBusy: !!st.connBusy, dpBusyBle: st.connBusy === 'ble', dpBusyUsb: st.connBusy === 'usb',
@@ -4681,17 +4831,23 @@ class Component extends DCLogic {
               this.setState({ sendPhase: ok ? 'done' : 'error' });
               if (ok) {
                 this._liveHex = hex; this.say(t.aSent);
-                // Braille narration line (best-effort, non-blocking): only sent
-                // once a real translator is wired into translateToBraille().
-                const a = (this.pageAudio || {})[this.state.pageIndex];
-                const narrText = (a && a.narration) || '';
-                const brailleHex = this.translateToBraille(narrText);
-                if (brailleHex && DP.outputText) {
-                  DP.outputText(brailleHex).catch(() => {});
-                } else if (narrText && !this._brailleWarnShown) {
-                  this._brailleWarnShown = true;
-                  console.warn('[TactileStudio] Narration text is set, but no braille translator is wired in yet — braille line was not sent.');
-                }
+                // Braille line (best-effort, non-blocking, fire-and-forget): the
+                // graphic send already succeeded and reported to the user, so a
+                // slow/failed braille translation must never block or flip that
+                // result. Priority: this page's description first, narration as
+                // fallback. Never sends untranslated text (translateToBraille
+                // returns null on any failure — see its definition for why).
+                const pageIdx = this.state.pageIndex;
+                const a = (this.pageAudio || {})[pageIdx];
+                const brailleText = this.pageDesc(pageIdx) || (a && a.narration) || '';
+                this.translateToBraille(brailleText).then(brailleHex => {
+                  if (brailleHex && DP.outputText) {
+                    DP.outputText(brailleHex).catch(() => {});
+                  } else if (brailleText && !this._brailleWarnShown) {
+                    this._brailleWarnShown = true;
+                    console.warn('[TactileStudio] 설명/나레이션 텍스트가 있지만 점역에 실패해 점자 줄은 전송하지 않았습니다.');
+                  }
+                });
               }
               else if (t.aSendErr) this.say(t.aSendErr);
             }).catch(() => { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); });
