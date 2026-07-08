@@ -683,6 +683,8 @@ input[type=range]{accent-color:var(--ts-primary)}
 
             <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
             <textarea onChange="{{ onNarration }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;margin-bottom:12px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgNarration }}</textarea>
+            <div class="ts-inspector-divider" style="height:1px;background:var(--ts-border-functional);margin:2px 0 10px"></div>
+            <div class="ts-inspector-subtitle" style="font-size:11.5px;color:var(--ts-text-secondary);font-weight:700;margin-bottom:8px">{{ t.inspAudioSub }}</div>
 
             <sc-if value="{{ pgAudio.has }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;margin-bottom:8px">
