@@ -130,6 +130,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-language-switch>button{flex:1 0 auto;min-width:44px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;border:0;background:#fff;color:var(--ts-text-secondary);font-weight:600;font-size:12px;cursor:pointer;padding:0 14px}
 .ts-language-switch>button[aria-pressed="true"]{background:#1E1C1A;color:#fff;font-weight:800}
 .ts-language-switch>button:focus-visible{outline:2px solid var(--ts-primary);outline-offset:-2px}
+.ts-topbar .ts-language-switch{height:44px;border-radius:12px}
 .image-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .image-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .tactile-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -143,7 +144,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 }
 @media (max-width:1080px){
   .ts-topbar{grid-template-columns:minmax(150px,1fr) minmax(246px,auto) minmax(112px,auto);gap:8px;padding:0 10px}
-  .ts-output-zone,.ts-brand-logo,.ts-left-divider{display:none!important}
+  .ts-output-zone,.ts-brand-logo,.ts-left-divider,.ts-tools-divider{display:none!important}
   .ts-create-label,.ts-export-label{display:none}
   .device-status-pill{max-width:128px}
   .ts-pill-medium{display:none}
@@ -319,12 +320,12 @@ input[type=range]{accent-color:var(--ts-primary)}
   <div class="ts-topbar">
     <!-- LEFT ZONE: identity + document title (no back button — the app IS the editor) -->
     <div class="ts-topbar-left">
-      <button onClick="{{ goHome }}" class="ts-home-btn" aria-label="{{ t.homeNewPrimary }}" title="Tactile Studio" style="width:36px;height:36px;flex:none;border:1px solid var(--ts-border-decor);border-radius:9px;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+      <button onClick="{{ goHome }}" class="ts-home-btn" aria-label="{{ t.homeNewPrimary }}" title="Tactile Studio" style="width:44px;height:44px;flex:none;border:1px solid var(--ts-border-decor);border-radius:12px;box-sizing:border-box;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
         <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
       <img class="ts-brand-logo" src="assets/tactile-studio-logo.svg" alt="Tactile Studio">
       <div class="ts-divider ts-left-divider"></div>
-      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;padding:7px 9px;flex:1 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
+      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;height:40px;box-sizing:border-box;padding:0 9px;flex:1 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
       <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
         <span style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
       </sc-if>
@@ -332,6 +333,7 @@ input[type=range]{accent-color:var(--ts-primary)}
         <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         <span class="ts-save-text">{{ t.savedStatus }}</span>
       </span>
+      <div class="ts-divider ts-tools-divider"></div>
       <label class="ts-output-zone ts-topbar-pill" style="display:inline-flex;align-items:center;gap:9px;padding:0 8px 0 12px;border:1px solid var(--ts-border-decor);border-radius:100px;background:#F7F4EF" style-hover="border:1px solid #C9BBAF">
         <svg width="15" height="15" viewBox="0 0 24 24" style="color:var(--ts-text-secondary);flex:none" aria-hidden="true"><path d="M4 5h16v14H4zM4 9h16M9 9v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.outputL }}" style="border:none;background:transparent;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 4px;cursor:pointer;height:36px;border-radius:6px" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -388,7 +390,7 @@ input[type=range]{accent-color:var(--ts-primary)}
         <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어">KO</button>
         <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English">EN</button>
       </div>
-      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
+      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
     </div>
   </div>
 
