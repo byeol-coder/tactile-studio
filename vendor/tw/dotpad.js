@@ -8,6 +8,12 @@
 
 const DP = {
   sdk: null, btDevice: null, device: null, live: false, busy: false, _vis: false,
+  _appKeyHandler: null,
+
+  // 앱이 닷패드 물리 키 입력(PanningLeft/PanningRight/KeyFunction* 등)을 구독하는 통로.
+  // DP는 connect()마다 새 sdk 인스턴스를 만들지만 이 핸들러는 DP(싱글턴)에 저장되므로
+  // 재연결과 무관하게 한 번만 등록하면 계속 유지된다.
+  onKey(fn) { this._appKeyHandler = typeof fn === 'function' ? fn : null; },
 
   // 실제 SDK + Web Bluetooth 사용 가능 여부
   hasReal() {
@@ -55,7 +61,9 @@ const DP = {
         const C = window.DotPadDataCodes || {};
         if (code === C.Disconnected || code === "Disconnected") { DP.live = false; DP.device = null; }
         else if (code === C.Connected || code === "Connected") { DP.live = true; }
-      }, () => {});
+      }, (d, code, extra) => {
+        if (DP._appKeyHandler) { try { DP._appKeyHandler(code, extra); } catch { /* noop */ } }
+      });
     } catch { /* noop */ }
     this.sdk = sdk; this.btDevice = bt; this.device = dev; this.live = !!dev;
     // 탭 복귀 시 GATT 끊김 자동 복구
