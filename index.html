@@ -126,7 +126,10 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-send-short{display:none}
 .ts-save-status{max-width:94px;overflow:hidden}
 .device-status-pill{max-width:240px;min-width:0;overflow:hidden}
-.ts-language-switch{display:flex;flex:none;border:1px solid var(--ts-border-decor);border-radius:100px;overflow:hidden}
+.ts-language-switch{display:inline-flex;flex:none;box-sizing:border-box;border:1px solid var(--ts-border-decor);border-radius:999px;overflow:hidden;background:#fff}
+.ts-language-switch>button{flex:1 0 auto;min-width:44px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;border:0;background:#fff;color:var(--ts-text-secondary);font-weight:600;font-size:12px;cursor:pointer;padding:0 14px}
+.ts-language-switch>button[aria-pressed="true"]{background:#1E1C1A;color:#fff;font-weight:800}
+.ts-language-switch>button:focus-visible{outline:2px solid var(--ts-primary);outline-offset:-2px}
 .image-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .image-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .tactile-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -382,8 +385,8 @@ input[type=range]{accent-color:var(--ts-primary)}
       </button>
 
       <div class="ts-language-switch" role="group" aria-label="{{ t.langLabel }}">
-        <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">KO</button>
-        <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">EN</button>
+        <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어">KO</button>
+        <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English">EN</button>
       </div>
       <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:100px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
     </div>
@@ -883,9 +886,9 @@ input[type=range]{accent-color:var(--ts-primary)}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
       {{ t.homeNewPrimary }}
     </button>
-    <div role="group" aria-label="Language" style="display:inline-flex;gap:2px;background:#1E1C1A;border-radius:100px;padding:3px;flex:none">
-      <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어" style="{{ koBtnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">KO</button>
-      <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English" style="{{ enBtnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">EN</button>
+    <div class="ts-language-switch" role="group" aria-label="{{ t.langLabel }}">
+      <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어">KO</button>
+      <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English">EN</button>
     </div>
   </header>
 
@@ -3855,7 +3858,6 @@ class Component extends DCLogic {
     const dpVar = p.dotpadPanel ?? 'modal';
     const retVar = p.returnStyle ?? 'bar';
     const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
-    const pill = on => ({ height: 28, padding: '0 12px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
     const pinBtn = kind => ({ flex: 1, height: 34, borderRadius: 8, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 11.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
@@ -4037,7 +4039,6 @@ class Component extends DCLogic {
       topbarPill: retVar !== 'bar',
       // lang
       setKo: () => this.setState({ lang: 'ko', announce: this.T('ko').aLangSet }), setEn: () => this.setState({ lang: 'en', announce: this.T('en').aLangSet }),
-      koBtnStyle: pill(st.lang === 'ko'), enBtnStyle: pill(st.lang === 'en'),
       isKo: st.lang === 'ko', isEn: st.lang === 'en',
       // hub
       recentCards,
