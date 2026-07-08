@@ -1869,7 +1869,7 @@ class Component extends DCLogic {
       + 'color:' + (active ? '#1E1C1A' : 'var(--ts-text-secondary)') + ';cursor:pointer;'
       + 'transition:color 0.15s ease,border-color 0.15s ease';
   }
-  T() {
+  T(lang) {
     const ko = {
       navHome: '홈', hubTitle: '안녕하세요, 샛별님.', hubSub: '촉각 콘텐츠를 만들고, 저장하고, DotPad로 보내보세요.',
       create: '촉각 그래픽 만들기', createSub: '촉각 그래픽을 만들고, 이미지를 변환하고, DotPad로 전송하거나 점자용지 엠보싱 출력을 준비합니다.',
@@ -1993,6 +1993,7 @@ class Component extends DCLogic {
       aTextAdded: '촉각 글자를 캔버스에 추가했습니다. 점으로 편집할 수 있습니다.', aTextEmpty: '입력한 글자가 없습니다.',
       aGrid: g => '그리드 크기 변경: ' + g, aConnOn: 'DotPad가 연결되었습니다', aConnOff: 'DotPad 연결이 끊어졌습니다',
       aSent: 'DotPad 전송 완료', aSendErr: 'DotPad 전송 실패', aReady: '캔버스 준비됨 — 화살표 키로 이동, 스페이스로 점 토글',
+      aLangSet: '언어를 한국어로 변경했습니다',
       aConverted: '이미지를 촉각 그래픽으로 변환했습니다', aPoly: 'Enter 키로 다각형을 닫습니다', aFill: '영역을 채웠습니다',
       aShape: n => n + ' 그리기 완료', aSel: '영역 선택됨 — 드래그하여 이동', aMoved: '선택 영역을 이동했습니다',
       tExport: 'PNG로 내보냈습니다', tSavedDrive: 'Tactile Drive에 저장되었습니다', tSavedLib: 'Dot Library에 저장되었습니다',
@@ -2121,12 +2122,13 @@ class Component extends DCLogic {
       aTextAdded: 'Tactile text added to the canvas. You can edit it as dots.', aTextEmpty: 'No text was entered.',
       aGrid: g => 'Grid size changed: ' + g, aConnOn: 'DotPad connected', aConnOff: 'DotPad disconnected',
       aSent: 'Sent to DotPad', aSendErr: 'Send to DotPad failed', aReady: 'Canvas ready — arrows to move, Space to toggle dots',
+      aLangSet: 'Language changed to English',
       aConverted: 'Image converted to tactile graphic', aPoly: 'Press Enter to close the polygon', aFill: 'Region filled',
       aShape: n => n + ' drawn', aSel: 'Region selected — drag to move', aMoved: 'Selection moved',
       tExport: 'Exported as PNG', tSavedDrive: 'Saved to Tactile Drive', tSavedLib: 'Saved to Dot Library',
       justNow: 'just now', fNames: ['Bar chart', 'Star shape', 'Triangle wave'], fMeta: ['60×40 · 2 days ago', '60×40 · 5 days ago', '96×64 · 1 week ago']
     };
-    return this.state.lang === 'ko' ? ko : en;
+    return (lang || this.state.lang) === 'ko' ? ko : en;
   }
 
   // ---------- grid helpers ----------
@@ -4034,7 +4036,7 @@ class Component extends DCLogic {
       retBar: false, retChip: false, retCrumb: false,
       topbarPill: retVar !== 'bar',
       // lang
-      setKo: () => this.setState({ lang: 'ko' }), setEn: () => this.setState({ lang: 'en' }),
+      setKo: () => this.setState({ lang: 'ko', announce: this.T('ko').aLangSet }), setEn: () => this.setState({ lang: 'en', announce: this.T('en').aLangSet }),
       koBtnStyle: pill(st.lang === 'ko'), enBtnStyle: pill(st.lang === 'en'),
       isKo: st.lang === 'ko', isEn: st.lang === 'en',
       // hub
