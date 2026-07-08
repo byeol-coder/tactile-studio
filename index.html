@@ -3833,6 +3833,21 @@ class Component extends DCLogic {
     this.pageAudio = Object.assign({}, this.pageAudio, { [i]: Object.assign({}, cur, { narration: text }) });
     this.bump();
   }
+  // ── Braille output (NOT YET IMPLEMENTED) ────────────────────────────────
+  // Narration text is meant to be translated into braille and shown on the
+  // DotPad's braille line (SDK: displayTextData / numberBrailleCellColumns,
+  // default 20 cells — see vendor/tw/dotpad-sdk.js). No translator (e.g.
+  // Liblouis) is wired in yet, so this deliberately returns null rather than
+  // guessing at a conversion. Sending untranslated text as if it were braille
+  // would show wrong dot patterns to a blind user, which is worse than
+  // sending nothing. Wire a real translator here before enabling output.
+  translateToBraille(text) {
+    if (!text) return null;
+    // TODO: plug in the real text→braille translator (e.g. the Liblouis
+    // integration already built for Dot Lens) and return its hex-encoded
+    // cell data here. Until then, always return null.
+    return null;
+  }
   // open / send a Tactile Drive file back into Studio
   // ── library persistence (localStorage; cells stored as 600-hex to stay small)
   static get LIB_KEY() { return 'ts.library.v1'; }
@@ -4602,7 +4617,20 @@ class Component extends DCLogic {
             this.setState({ sendPhase: 'sending' });
             DP.output(hex).then(ok => {
               this.setState({ sendPhase: ok ? 'done' : 'error' });
-              if (ok) { this._liveHex = hex; this.say(t.aSent); }
+              if (ok) {
+                this._liveHex = hex; this.say(t.aSent);
+                // Braille narration line (best-effort, non-blocking): only sent
+                // once a real translator is wired into translateToBraille().
+                const a = (this.pageAudio || {})[this.state.pageIndex];
+                const narrText = (a && a.narration) || '';
+                const brailleHex = this.translateToBraille(narrText);
+                if (brailleHex && DP.outputText) {
+                  DP.outputText(brailleHex).catch(() => {});
+                } else if (narrText && !this._brailleWarnShown) {
+                  this._brailleWarnShown = true;
+                  console.warn('[TactileStudio] Narration text is set, but no braille translator is wired in yet — braille line was not sent.');
+                }
+              }
               else if (t.aSendErr) this.say(t.aSendErr);
             }).catch(() => { this.setState({ sendPhase: 'error' }); if (t.aSendErr) this.say(t.aSendErr); });
           };

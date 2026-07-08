@@ -88,6 +88,32 @@ const DP = {
     } finally { this.busy = false; }
   },
 
+  // 점자 라인 출력 (hex = 점역된 점자 데이터, brailleToGraphic 인코딩은 SDK가 처리).
+  // 호출부는 반드시 실제 점역(text→braille) 결과만 넘겨야 함 — 원문 텍스트를
+  // 그대로 넘기면 안 됨(잘못된 점자가 사용자에게 그대로 전달되는 심각한 문제).
+  async outputText(hex) {
+    if (this.busy || !hex) return false;
+    this.busy = true;
+    try {
+      if (!(this.sdk && this.btDevice)) return false;
+      const mode = (window.DotPadDisplayMode && window.DotPadDisplayMode.TextMode) || undefined;
+      if (!this.device || !this.gattOk()) await this.ensure();
+      if (!this.device) return false;
+      try { await this.sdk.displayTextData(hex, this.device, mode); return true; }
+      catch {
+        try { if (await this.ensure(true)) { await this.sdk.displayTextData(hex, this.device, mode); return true; } }
+        catch { /* noop */ }
+        return false;
+      }
+    } finally { this.busy = false; }
+  },
+
+  // 연결된 기기가 지원하는 점자 셀 수 (보드 정보로 실기기 값을 받기 전까지는 20 기본값).
+  brailleCellCount() {
+    try { return (this.device && this.device.numberBrailleCellColumns) || 20; }
+    catch { return 20; }
+  },
+
   async disconnect() {
     try { if (this.sdk && this.sdk.disconnect) await this.sdk.disconnect(); } catch { /* noop */ }
     this.sdk = null; this.btDevice = null; this.device = null; this.live = false;
