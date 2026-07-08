@@ -117,7 +117,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-topbar-action,.ts-topbar-pill{border-radius:12px!important;padding-left:14px!important;padding-right:14px!important}
 .ts-topbar-primary{background:var(--ts-primary)!important;color:#fff!important;border:none!important;font-weight:800!important;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.10)}
 .ts-brand-logo{height:24px;width:auto;display:block;flex:none}
-.ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 2px}
+.ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 6px}
 .ts-project-name{min-width:0!important;width:clamp(96px,14vw,220px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ts-output-zone{min-width:0;max-width:190px;overflow:hidden}
 .ts-output-zone select{min-width:0;max-width:150px}
@@ -325,7 +325,7 @@ input[type=range]{accent-color:var(--ts-primary)}
       </button>
       <img class="ts-brand-logo" src="assets/tactile-studio-logo.svg" alt="Tactile Studio">
       <div class="ts-divider ts-left-divider"></div>
-      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;height:40px;box-sizing:border-box;padding:0 9px;flex:1 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
+      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;height:40px;box-sizing:border-box;padding:0 9px;flex:0 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
       <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
         <span style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
       </sc-if>
@@ -342,7 +342,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           </sc-for>
         </select>
       </label>
-      <div class="ts-undo-group" role="group" aria-label="{{ t.undoRedoL }}" style="display:inline-flex;align-items:center;gap:1px;flex:none;border:1px solid var(--ts-border-decor);border-radius:10px;padding:2px;background:#fff">
+      <div class="ts-undo-group" role="group" aria-label="{{ t.undoRedoL }}" style="display:inline-flex;align-items:center;gap:1px;flex:none;height:44px;box-sizing:border-box;border:1px solid var(--ts-border-decor);border-radius:12px;padding:2px;background:#fff">
         <button onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoBarStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
