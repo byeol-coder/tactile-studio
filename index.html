@@ -590,65 +590,6 @@ input[type=range]{accent-color:var(--ts-primary)}
         <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="display:block;outline:none;touch-action:none;cursor:crosshair;max-width:100%"></canvas>
       </div>
 
-      <sc-if value="{{ showEntry }}" hint-placeholder-val="{{ false }}">
-        <div data-screen-label="3. Editor empty state (4 entries)" style="position:absolute;inset:0;background:#F7F4EF;display:grid;place-items:center;animation:tsUp 0.25s ease-out;overflow:auto;padding:24px">
-          <div style="text-align:center;max-width:680px">
-            <h2 style="margin:0 0 10px;font-size:24px;font-weight:800;letter-spacing:-0.5px;line-height:1.25;text-wrap:balance">{{ t.entryTitle }}</h2>
-            <p style="margin:0 auto 24px;max-width:560px;font-size:14.5px;color:var(--ts-text-secondary);line-height:1.55">{{ t.entrySub }}</p>
-            <sc-if value="{{ armedPreset }}" hint-placeholder-val="{{ false }}">
-              <div role="status" style="display:flex;align-items:center;gap:10px;justify-content:center;background:rgba(var(--ts-primary-rgb),0.08);border:1px solid var(--ts-primary);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:13px;font-weight:700;color:#B93E15">
-                <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                {{ t.presetArmed }} <b>{{ armedPresetName }}</b>
-                <button onClick="{{ openImport }}" style="border:none;background:var(--ts-primary);color:#fff;border-radius:100px;font-weight:700;font-size:12px;padding:4px 12px" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">{{ t.presetUse }}</button>
-              </div>
-            </sc-if>
-            <button onClick="{{ openCmd }}" aria-label="{{ t.entCmd }}" style="width:100%;text-align:left;display:flex;align-items:center;gap:18px;background:#fff;border:1px solid #EDE4DA;border-radius:16px;padding:22px 24px;box-shadow:0 1px 2px rgba(16,24,40,0.05),0 10px 24px -8px rgba(var(--ts-primary-rgb),0.18);margin-bottom:12px;transition:transform 0.16s ease,box-shadow 0.16s ease" style-hover="transform:translateY(-2px);box-shadow:0 1px 2px rgba(16,24,40,0.05),0 16px 30px -10px rgba(var(--ts-primary-rgb),0.24)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <div style="flex:none;width:52px;height:52px;border-radius:12px;background:var(--ts-primary);display:grid;place-items:center;color:#fff">
-                <svg width="26" height="26" viewBox="0 0 24 24"><path d="M8 9l3 3-3 3M13 15h4M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </div>
-              <div style="flex:1;min-width:0">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                  <span style="font-size:17px;font-weight:800;color:#1E1C1A">{{ t.entCmd }}</span>
-                  <span style="font-size:10.5px;font-weight:800;color:#fff;background:var(--ts-primary);border-radius:100px;padding:2px 9px;letter-spacing:0.3px">{{ t.entCmdBadge }}</span>
-                </div>
-                <div style="font-size:13px;color:var(--ts-text-secondary);margin-top:4px;line-height:1.45">{{ t.entCmdSub }}</div>
-              </div>
-              <svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;color:var(--ts-primary)" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </button>
-            <div class="ts-3col" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-              <button onClick="{{ openImport }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(16,24,40,0.04);display:flex;flex-direction:column;gap:8px;transition:transform 0.16s ease,box-shadow 0.16s ease,border-color 0.16s ease" style-hover="border-color:#E3C9BC;transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.14)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <div style="width:38px;height:38px;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.10);display:grid;place-items:center;color:var(--ts-primary)">
-                  <svg width="19" height="19" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 16l5-5 4 4 3-3 4 4M15 9h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </div>
-                <div style="font-size:14.5px;font-weight:800">{{ t.startImage }}</div>
-                <div style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.startImageSub }}</div>
-              </button>
-              <button onClick="{{ openTpl }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(16,24,40,0.04);display:flex;flex-direction:column;gap:8px;transition:transform 0.16s ease,box-shadow 0.16s ease,border-color 0.16s ease" style-hover="border-color:#E3C9BC;transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.14)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <div style="width:38px;height:38px;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.10);display:grid;place-items:center;color:var(--ts-primary)">
-                  <svg width="19" height="19" viewBox="0 0 24 24"><path d="M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 1-1-1zM13 4h6a1 1 0 0 1 1 1v6h-7zM13 13h7v6a1 1 0 0 1-1 1h-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </div>
-                <div style="font-size:14.5px;font-weight:800">{{ t.entTpl }}</div>
-                <div style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.entTplSub }}</div>
-              </button>
-              <button onClick="{{ startBlankFn }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(16,24,40,0.04);display:flex;flex-direction:column;gap:8px;transition:transform 0.16s ease,box-shadow 0.16s ease,border-color 0.16s ease" style-hover="border-color:#E3C9BC;transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.14)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <div style="width:38px;height:38px;border-radius:10px;background:rgba(var(--ts-primary-rgb),0.10);display:grid;place-items:center;color:var(--ts-primary)">
-                  <svg width="19" height="19" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM12 8v8M8 12h8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
-                </div>
-                <div style="font-size:14.5px;font-weight:800">{{ t.startBlank }}</div>
-                <div style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.startBlankSub }}</div>
-              </button>
-            </div>
-            <label class="ts-size-mobile" style="margin-top:16px;align-items:center;gap:8px;text-align:left;font-size:12px;font-weight:700;color:var(--ts-text-secondary)">
-              <span style="flex:none">{{ t.canvasSizeL }}</span>
-              <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.canvasSizeL }}" style="flex:1;min-width:0;height:40px;border:1px solid var(--ts-border-functional);border-radius:10px;background:#fff;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 10px" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
-                  <option value="{{ o.key }}">{{ o.name }}</option>
-                </sc-for>
-              </select>
-            </label>
-          </div>
-        </div>
-      </sc-if>
     </div>
 
     <sc-if value="{{ inspectorShown }}" hint-placeholder-val="{{ true }}">
@@ -928,7 +869,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 
       <h2 class="ts-home-h2">{{ t.homeQuickL }}</h2>
       <button class="ts-feature-card" onClick="{{ homeCommand }}">
-        <span class="ts-feature-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8a2 2 0 0 1 2 -2h16a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2 -2l0 -8" /><path d="M6 10l0 .01" /><path d="M10 10l0 .01" /><path d="M14 10l0 .01" /><path d="M18 10l0 .01" /><path d="M6 14l0 .01" /><path d="M18 14l0 .01" /><path d="M10 14l4 .01" /></svg></span>
+        <span class="ts-feature-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l3 3l-3 3" /><path d="M13 15l3 0" /><path d="M3 6a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2l0 -12" /></svg></span>
         <span class="ts-feature-body">
           <span class="ts-feature-titlerow"><span class="ts-feature-title">{{ t.entCmd }}</span><span class="ts-feature-badge">{{ t.entCmdBadge }}</span></span>
           <span class="ts-feature-sub">{{ t.entCmdSub }}</span>
@@ -953,12 +894,12 @@ input[type=range]{accent-color:var(--ts-primary)}
           <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeConvertSub }}</span>
         </button>
         <button onClick="{{ homeTemplate }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /><path d="M4 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /><path d="M14 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /><path d="M14 7l6 0" /><path d="M17 4l0 6" /></svg></span>
+          <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v1a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -1" /><path d="M4 15a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -3" /><path d="M14 6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -12" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.entTpl }}</span>
           <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.entTplSub }}</span>
         </button>
         <button onClick="{{ homeOpenProjects }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 9l5 -5l5 5" /><path d="M12 4l0 12" /></svg></span>
+          <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeOpenL }}</span>
           <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeOpenSub }}</span>
         </button>
@@ -975,17 +916,36 @@ input[type=range]{accent-color:var(--ts-primary)}
       </sc-if>
       <div class="ts-pgrid" role="list" aria-label="{{ t.homeRecentL }}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px">
         <sc-for list="{{ recentCards }}" as="c" hint-placeholder-count="6">
-          <button role="listitem" onClick="{{ c.open }}" aria-label="{{ c.aOpen }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:12px;padding:0;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.16)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <span style="aspect-ratio:3/2;background:#FBF7EE;border-bottom:1px solid #F2ECE4;display:grid;place-items:center;overflow:hidden">
-              <sc-if value="{{ c.hasThumb }}" hint-placeholder-val="{{ true }}">
-                <img src="{{ c.thumb }}" alt="" style="width:100%;height:100%;object-fit:contain">
+          <div role="listitem" style="position:relative;background:#fff;border:1px solid var(--ts-border-decor);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,0.04)">
+            <button onClick="{{ c.open }}" aria-label="{{ c.aOpen }}" style="width:100%;text-align:left;border:none;background:transparent;padding:0;cursor:pointer;display:flex;flex-direction:column" style-hover="box-shadow:0 10px 22px -10px rgba(16,24,40,0.16)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <span style="aspect-ratio:3/2;background:#FBF7EE;border-bottom:1px solid #F2ECE4;display:grid;place-items:center;overflow:hidden">
+                <sc-if value="{{ c.hasThumb }}" hint-placeholder-val="{{ true }}">
+                  <img src="{{ c.thumb }}" alt="" style="width:100%;height:100%;object-fit:contain">
+                </sc-if>
+              </span>
+              <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
+                <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
+                <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ c.grid }} · {{ c.time }}</span>
+              </span>
+            </button>
+            <sc-if value="{{ c.favoritable }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ c.toggleFav }}" aria-label="{{ c.aFav }}" aria-pressed="{{ c.favorite }}" style="{{ c.favBtnStyle }}" style-hover="background:#fff" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245" fill="{{ c.favFill }}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+              <button onClick="{{ c.toggleMenu }}" aria-haspopup="menu" aria-expanded="{{ c.menuOpen }}" aria-label="{{ t.moreMenuL }}" style="position:absolute;top:8px;right:38px;width:26px;height:26px;border:1px solid var(--ts-border-decor);border-radius:8px;background:rgba(255,255,255,0.92);color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#fff" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M11 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M11 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+              <sc-if value="{{ c.menuOpen }}" hint-placeholder-val="{{ false }}">
+                <button aria-label="{{ t.close }}" onClick="{{ c.closeMenu }}" tabindex="-1" style="position:fixed;inset:0;z-index:80;background:transparent;border:none;cursor:default"></button>
+                <div role="menu" style="position:absolute;top:38px;right:8px;z-index:81;background:#fff;border:1px solid var(--ts-border-decor);border-radius:10px;box-shadow:0 8px 20px -6px rgba(16,24,40,0.18);min-width:118px;padding:4px">
+                  <button role="menuitem" onClick="{{ c.deleteCard }}" style="width:100%;text-align:left;border:none;background:transparent;border-radius:6px;padding:8px 9px;color:var(--ts-danger);font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:7px;cursor:pointer" style-hover="background:rgba(218,18,13,0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l16 0 M10 11l0 6 M14 11l0 6 M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12 M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    {{ t.deleteL }}
+                  </button>
+                </div>
               </sc-if>
-            </span>
-            <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
-              <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
-              <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ c.grid }} · {{ c.time }}</span>
-            </span>
-          </button>
+            </sc-if>
+          </div>
         </sc-for>
       </div>
 
@@ -998,17 +958,36 @@ input[type=range]{accent-color:var(--ts-primary)}
         </sc-if>
         <div class="ts-pgrid" role="list" aria-label="{{ homeGalleryTitle }}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px">
           <sc-for list="{{ homeGalleryCards }}" as="g" hint-placeholder-count="4">
-            <button role="listitem" onClick="{{ g.open }}" aria-label="{{ g.aOpen }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:12px;padding:0;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.16)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <span style="aspect-ratio:3/2;background:#FBF7EE;border-bottom:1px solid #F2ECE4;display:grid;place-items:center;overflow:hidden">
-                <sc-if value="{{ g.hasThumb }}" hint-placeholder-val="{{ true }}">
-                  <img src="{{ g.thumb }}" alt="" style="width:100%;height:100%;object-fit:contain">
+            <div role="listitem" style="position:relative;background:#fff;border:1px solid #EFE7DE;border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,0.04)">
+              <button onClick="{{ g.open }}" aria-label="{{ g.aOpen }}" style="width:100%;text-align:left;border:none;background:transparent;padding:0;cursor:pointer;display:flex;flex-direction:column" style-hover="box-shadow:0 10px 22px -10px rgba(16,24,40,0.16)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <span style="aspect-ratio:3/2;background:#FBF7EE;border-bottom:1px solid #F2ECE4;display:grid;place-items:center;overflow:hidden">
+                  <sc-if value="{{ g.hasThumb }}" hint-placeholder-val="{{ true }}">
+                    <img src="{{ g.thumb }}" alt="" style="width:100%;height:100%;object-fit:contain">
+                  </sc-if>
+                </span>
+                <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
+                  <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.name }}</span>
+                  <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ g.grid }} · {{ g.time }}</span>
+                </span>
+              </button>
+              <sc-if value="{{ g.favoritable }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ g.toggleFav }}" aria-label="{{ g.aFav }}" aria-pressed="{{ g.favorite }}" style="{{ g.favBtnStyle }}" style-hover="background:#fff" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245" fill="{{ g.favFill }}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+                <button onClick="{{ g.toggleMenu }}" aria-haspopup="menu" aria-expanded="{{ g.menuOpen }}" aria-label="{{ t.moreMenuL }}" style="position:absolute;top:8px;right:38px;width:26px;height:26px;border:1px solid var(--ts-border-decor);border-radius:8px;background:rgba(255,255,255,0.92);color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#fff" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M11 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M11 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+                <sc-if value="{{ g.menuOpen }}" hint-placeholder-val="{{ false }}">
+                  <button aria-label="{{ t.close }}" onClick="{{ g.closeMenu }}" tabindex="-1" style="position:fixed;inset:0;z-index:80;background:transparent;border:none;cursor:default"></button>
+                  <div role="menu" style="position:absolute;top:38px;right:8px;z-index:81;background:#fff;border:1px solid var(--ts-border-decor);border-radius:10px;box-shadow:0 8px 20px -6px rgba(16,24,40,0.18);min-width:118px;padding:4px">
+                    <button role="menuitem" onClick="{{ g.deleteCard }}" style="width:100%;text-align:left;border:none;background:transparent;border-radius:6px;padding:8px 9px;color:var(--ts-danger);font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:7px;cursor:pointer" style-hover="background:rgba(218,18,13,0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+                      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l16 0 M10 11l0 6 M14 11l0 6 M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12 M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                      {{ t.deleteL }}
+                    </button>
+                  </div>
                 </sc-if>
-              </span>
-              <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
-                <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.name }}</span>
-                <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ g.grid }} · {{ g.time }}</span>
-              </span>
-            </button>
+              </sc-if>
+            </div>
           </sc-for>
         </div>
       </sc-if>
@@ -1802,6 +1781,7 @@ class Component extends DCLogic {
     pageIndex: 0, pageCount: 1,
     impApply: 'merge', cmdApply: 'current', tplApply: 'newdoc',
     confirmKind: 'newdoc',
+    cardMenuOpen: null,
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
     entry: false, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
@@ -1977,6 +1957,7 @@ class Component extends DCLogic {
       fTypes: ['그래프', '도형', '파형'], fTimes: ['2일 전', '5일 전', '1주 전'],
       imgType: '이미지 변환', createTitle: '새 촉각 그래픽 만들기', createSub2: '빈 캔버스 · 이미지 가져오기 · 템플릿',
       libOpen: '라이브러리 열기', libOpenSub: '저장한 촉각 그래픽을 다시 열기', libTitle: '내 라이브러리', libEmpty: '아직 저장한 그래픽이 없습니다. 그래픽을 만들고 저장하면 여기에 모입니다.', libOpenCard: '열기', libSendCard: 'DotPad로 전송', libDeleteCard: '삭제', libDriveTag: '드라이브', libLibraryTag: '라이브러리', aLibDeleted: '삭제했습니다', openDrive: 'Tactile Drive 열기', importTitle2: '이미지 가져오기', importSub2: '이미지를 촉각 그래픽으로 변환',
+      favAdd: '즐겨찾기 추가', favRemove: '즐겨찾기 해제', moreMenuL: '더보기', deleteL: '삭제', delSavedTitle: '이 항목을 삭제할까요?', delSavedSub: '삭제하면 되돌릴 수 없습니다.', delSavedBtn: '삭제',
       langLabel: '언어 선택 (한국어 / 영어)',
       savedDrive: 'Tactile Drive에 저장되었습니다.', savedLib: 'Dot Library에 저장되었습니다.',
       helpTitle: '키보드 · 스크린리더 안내', kbSection: '키보드 단축키', srSection: '스크린리더 · TTS',
@@ -1993,7 +1974,7 @@ class Component extends DCLogic {
       aConverted: '이미지를 촉각 그래픽으로 변환했습니다', aPoly: 'Enter 키로 다각형을 닫습니다', aFill: '영역을 채웠습니다',
       aShape: n => n + ' 그리기 완료', aSel: '영역 선택됨 — 드래그하여 이동', aMoved: '선택 영역을 이동했습니다',
       tExport: 'PNG로 내보냈습니다', tSavedDrive: 'Tactile Drive에 저장되었습니다', tSavedLib: 'Dot Library에 저장되었습니다',
-      justNow: '방금 전', fNames: ['막대 그래프', '별 도형', '삼각 파형'], fMeta: ['60×40 · 2일 전', '60×40 · 5일 전', '96×64 · 1주 전']
+      justNow: '방금 전', agoMinSuffix: '분 전', agoHourSuffix: '시간 전', agoDaySuffix: '일 전', yesterday: '어제', fNames: ['막대 그래프', '별 도형', '삼각 파형'], fMeta: ['60×40 · 2일 전', '60×40 · 5일 전', '96×64 · 1주 전']
     };
     const en = {
       navHome: 'Home', hubTitle: 'Hello, Saetbyeol.', hubSub: 'Create, store, and send tactile content to DotPad.',
@@ -2106,6 +2087,7 @@ class Component extends DCLogic {
       fTypes: ['Graph', 'Shape', 'Wave'], fTimes: ['2 days ago', '5 days ago', '1 week ago'],
       imgType: 'Image', createTitle: 'Create new', createSub2: 'Blank · Import image · Template',
       libOpen: 'Open library', libOpenSub: 'Reopen your saved tactile graphics', libTitle: 'My library', libEmpty: 'No saved graphics yet. Create and save a graphic and it will appear here.', libOpenCard: 'Open', libSendCard: 'Send to DotPad', libDeleteCard: 'Delete', libDriveTag: 'Drive', libLibraryTag: 'Library', aLibDeleted: 'Deleted', openDrive: 'Open Tactile Drive', importTitle2: 'Import image', importSub2: 'Convert an image into a tactile graphic',
+      favAdd: 'Add to favorites', favRemove: 'Remove from favorites', moreMenuL: 'More options', deleteL: 'Delete', delSavedTitle: 'Delete this item?', delSavedSub: "This can't be undone.", delSavedBtn: 'Delete',
       langLabel: 'Select language (Korean / English)',
       savedDrive: 'Saved to Tactile Drive.', savedLib: 'Saved to Dot Library.',
       helpTitle: 'Keyboard · screen reader guide', kbSection: 'Keyboard shortcuts', srSection: 'Screen reader · TTS',
@@ -2122,7 +2104,7 @@ class Component extends DCLogic {
       aConverted: 'Image converted to tactile graphic', aPoly: 'Press Enter to close the polygon', aFill: 'Region filled',
       aShape: n => n + ' drawn', aSel: 'Region selected — drag to move', aMoved: 'Selection moved',
       tExport: 'Exported as PNG', tSavedDrive: 'Saved to Tactile Drive', tSavedLib: 'Saved to Dot Library',
-      justNow: 'just now', fNames: ['Bar chart', 'Star shape', 'Triangle wave'], fMeta: ['60×40 · 2 days ago', '60×40 · 5 days ago', '96×64 · 1 week ago']
+      justNow: 'just now', agoMinSuffix: ' min ago', agoHourSuffix: ' hr ago', agoDaySuffix: ' days ago', yesterday: 'Yesterday', fNames: ['Bar chart', 'Star shape', 'Triangle wave'], fMeta: ['60×40 · 2 days ago', '60×40 · 5 days ago', '96×64 · 1 week ago']
     };
     return (lang || this.state.lang) === 'ko' ? ko : en;
   }
@@ -3686,7 +3668,7 @@ class Component extends DCLogic {
     const thumb = this.thumbFrom(this.cells, this.state.gridW, this.state.gridH);
     const cells = this.cells.slice();
     this.setState(s => {
-      const saved = [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved];
+      const saved = [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH, savedAt: Date.now(), favorite: false }, ...s.saved];
       this.saveLibrary(saved);
       return { savePhase: 'done', saved };
     });
@@ -3829,6 +3811,15 @@ class Component extends DCLogic {
     });
     this.say(this.T().aLibDeleted || 'Deleted');
   }
+  toggleFavorite(index) {
+    this.setState(s => {
+      const saved = s.saved.slice();
+      if (!saved[index]) return null;
+      saved[index] = { ...saved[index], favorite: !saved[index].favorite };
+      this.saveLibrary(saved);
+      return { saved };
+    });
+  }
   openCard(kind, gw, gh, cells, name) {
     this.cells = cells ? cells.slice() : this.makePattern(kind, gw, gh);
     this.resetPages(this.cells);
@@ -3936,20 +3927,42 @@ class Component extends DCLogic {
       style: { alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, borderRadius: 100, padding: '3px 10px', background: print ? 'rgba(var(--ts-primary-rgb),0.12)' : '#EFE7DE', color: print ? '#B93E15' : '#1E1C1A' }
     });
     const pKind = ['bar', 'star', 'wave'], pGrid = [[60, 40], [60, 40], [96, 64]], pPrint = [true, false, false];
+    // P2c: relative "edited" time from the real save timestamp. Entries saved
+    // before this change lack `savedAt`; fall back to justNow rather than guessing.
+    const relTime = (ts) => {
+      if (!ts) return t.justNow;
+      const diffMin = Math.floor((Date.now() - ts) / 60000);
+      if (diffMin < 1) return t.justNow;
+      if (diffMin < 60) return diffMin + t.agoMinSuffix;
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return diffHr + t.agoHourSuffix;
+      const diffDay = Math.floor(diffHr / 24);
+      if (diffDay === 1) return t.yesterday;
+      return diffDay + t.agoDaySuffix;
+    };
     const presetCards = (this.presetFiles || []).map((f, i) => {
       const [gw, gh] = pGrid[i] || [60, 40], s = mkStatus(pPrint[i]), nm = (t.fNames && t.fNames[i]) || 'Untitled', k = pKind[i] || 'bar';
       return {
         id: 'p' + i, name: nm, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: gw + '×' + gh, type: (t.fTypes && t.fTypes[i]) || '', time: (t.fTimes && t.fTimes[i]) || '',
-        statusLabel: s.label, statusIcon: s.icon, statusStyle: s.style,
+        statusLabel: s.label, statusIcon: s.icon, statusStyle: s.style, favoritable: false, isPreset: true,
         open: () => this.openCard(k, gw, gh, null, nm), edit: () => this.openCard(k, gw, gh, null, nm), send: () => this.sendCard(k, gw, gh, null, nm),
         aOpen: t.open + ' · ' + nm, aEdit: t.edit + ' · ' + nm, aSend: t.sendCardBtn + ' · ' + nm
       };
     });
     const savedCards = (st.saved || []).map((f, i) => {
       const p = String(f.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40, s = mkStatus(false);
+      const menuId = 's' + i;
       return {
-        id: 's' + i, name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: f.grid, type: t.imgType, time: t.justNow,
-        statusLabel: s.label, statusIcon: s.icon, statusStyle: s.style,
+        id: menuId, name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb, grid: f.grid, type: t.imgType, time: relTime(f.savedAt),
+        statusLabel: s.label, statusIcon: s.icon, statusStyle: s.style, favoritable: true, isPreset: false,
+        favorite: !!f.favorite, aFav: (f.favorite ? t.favRemove : t.favAdd) + ' · ' + f.name,
+        favFill: f.favorite ? '#B93E15' : 'none',
+        favBtnStyle: { position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: 8, border: '1px solid var(--ts-border-decor)', background: 'rgba(255,255,255,0.92)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: f.favorite ? '#B93E15' : '#1E1C1A' },
+        toggleFav: () => this.toggleFavorite(i),
+        menuOpen: st.cardMenuOpen === menuId,
+        toggleMenu: () => this.setState(s2 => ({ cardMenuOpen: s2.cardMenuOpen === menuId ? null : menuId })),
+        closeMenu: () => this.setState({ cardMenuOpen: null }),
+        deleteCard: () => { this._pendingDoc = () => this.deleteSaved(i); this.setState({ confirmOpen: true, confirmKind: 'delsaved', cardMenuOpen: null }); },
         open: () => this.openCard('saved', gw, gh, f.cells, f.name), edit: () => this.openCard('saved', gw, gh, f.cells, f.name), send: () => this.sendCard('saved', gw, gh, f.cells, f.name),
         aOpen: t.open + ' · ' + f.name, aEdit: t.edit + ' · ' + f.name, aSend: t.sendCardBtn + ' · ' + f.name
       };
@@ -3969,19 +3982,29 @@ class Component extends DCLogic {
 
     // ── P2a: Home sidebar view routing (existing data only; no model changes) ──
     const homeView = st.homeView || 'recent';
-    const mkSavedCard = (f) => {
+    const mkSavedCard = (f, i) => {
       const p = String(f.grid || '60×40').split('×'), gw = +p[0] || 60, gh = +p[1] || 40;
+      const menuId = 'v' + i;
       return {
-        id: 'v' + f.name + gw + gh, name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb,
-        grid: f.grid || (gw + '×' + gh), time: t.justNow,
+        id: menuId, name: f.name, thumb: f.thumb || '', hasThumb: !!f.thumb,
+        grid: f.grid || (gw + '×' + gh), time: relTime(f.savedAt), favoritable: true, isPreset: false,
+        favorite: !!f.favorite, aFav: (f.favorite ? t.favRemove : t.favAdd) + ' · ' + f.name,
+        favFill: f.favorite ? '#B93E15' : 'none',
+        favBtnStyle: { position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: 8, border: '1px solid var(--ts-border-decor)', background: 'rgba(255,255,255,0.92)', display: 'grid', placeItems: 'center', cursor: 'pointer', color: f.favorite ? '#B93E15' : '#1E1C1A' },
+        toggleFav: () => this.toggleFavorite(i),
+        menuOpen: st.cardMenuOpen === menuId,
+        toggleMenu: () => this.setState(s2 => ({ cardMenuOpen: s2.cardMenuOpen === menuId ? null : menuId })),
+        closeMenu: () => this.setState({ cardMenuOpen: null }),
+        deleteCard: () => { this._pendingDoc = () => this.deleteSaved(i); this.setState({ confirmOpen: true, confirmKind: 'delsaved', cardMenuOpen: null }); },
         open: () => this.openCard('saved', gw, gh, f.cells, f.name),
         aOpen: t.open + ' · ' + f.name,
       };
     };
     const allSaved = (st.saved || []);
-    const galleryFor = (v) => v === 'projects' ? allSaved.map(mkSavedCard)
-      : v === 'library' ? allSaved.filter(f => f.loc === 'library').map(mkSavedCard)
-      : v === 'drive' ? allSaved.filter(f => f.loc === 'drive').map(mkSavedCard)
+    const allSavedIdx = allSaved.map((f, i) => [f, i]);
+    const galleryFor = (v) => v === 'projects' ? allSavedIdx.map(([f, i]) => mkSavedCard(f, i))
+      : v === 'library' ? allSavedIdx.filter(([f]) => f.loc === 'library').map(([f, i]) => mkSavedCard(f, i))
+      : v === 'drive' ? allSavedIdx.filter(([f]) => f.loc === 'drive').map(([f, i]) => mkSavedCard(f, i))
       : v === 'demo' ? presetCards
       : [];
     const homeGalleryCards = galleryFor(homeView);
@@ -3990,13 +4013,13 @@ class Component extends DCLogic {
       return { id: 'tpl' + i, name: nm2, grid: it.gw + '×' + it.gh, open: () => this.openCard(it.kind, it.gw, it.gh, null, nm2), aOpen: t.open + ' · ' + nm2 };
     });
     const navDefs = [
-      ['recent', t.navRecent, 'M12 8v4l3 2M12 3a9 9 0 1 0 9 9'],
-      ['projects', t.navProjects, 'M3 7h6l2 2h10v10H3zM3 7V5h6l2 2'],
-      ['templates', t.navTemplates, 'M4 5h7v14H4zM13 5h7v6h-7zM13 13h7v6h-7z'],
-      ['library', t.navLibrary, 'M4 5h4v14H4zM10 5h4v14h-4zM17 6l3 1-3 12-3-1z'],
-      ['drive', t.navDrive, 'M4 16l4-9h8l4 9zM4 16h16v3H4zM8 16h.01'],
-      ['demo', t.navDemo, 'M6 4h12v3H6zM8 7v4a4 4 0 0 0 8 0V7M12 15v3M8 21h8'],
-      ['trash', t.navTrash, 'M5 7h14M9 7V5h6v2M6 7l1 13h10l1-13'],
+      ['recent', t.navRecent, 'M12 8l0 4l2 2 M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5'],
+      ['projects', t.navProjects, 'M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2'],
+      ['templates', t.navTemplates, 'M4 6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v1a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -1 M4 15a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -3 M14 6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -12'],
+      ['library', t.navLibrary, 'M5 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14 M9 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14 M5 8h4 M9 16h4 M13.803 4.56l2.184 -.53c.562 -.135 1.133 .19 1.282 .732l3.695 13.418a1.02 1.02 0 0 1 -.634 1.219l-.133 .041l-2.184 .53c-.562 .135 -1.133 -.19 -1.282 -.732l-3.695 -13.418a1.02 1.02 0 0 1 .634 -1.219l.133 -.041 M14 9l4 -1 M16 16l3.923 -.98'],
+      ['drive', t.navDrive, 'M6.657 18c-2.572 0 -4.657 -2.007 -4.657 -4.483c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.913 0 3.464 1.56 3.464 3.486c0 1.927 -1.551 3.487 -3.465 3.487h-11.878'],
+      ['demo', t.navDemo, 'M18 3a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2l12 0 M9 18h6'],
+      ['trash', t.navTrash, 'M4 7l16 0 M10 11l0 6 M14 11l0 6 M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12 M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3'],
     ];
     const homeNav = navDefs.map(([key, label, iconPath]) => ({
       key, label, iconPath, active: homeView === key,
@@ -4444,9 +4467,9 @@ class Component extends DCLogic {
       })),
       // unsaved-changes / destructive confirm (dynamic)
       confirmOpen: st.confirmOpen,
-      confirmTitleV: st.confirmKind === 'delpage' ? t.delPageTitle : st.confirmKind === 'replacepage' ? t.replaceImgTitle : t.confirmTitle,
-      confirmSubV: st.confirmKind === 'delpage' ? t.delPageSub : st.confirmKind === 'replacepage' ? t.replaceImgSub : t.confirmSub,
-      confirmBtnV: st.confirmKind === 'delpage' ? t.delPageBtn : st.confirmKind === 'replacepage' ? t.replaceImgBtn : t.confirmReplace,
+      confirmTitleV: st.confirmKind === 'delpage' ? t.delPageTitle : st.confirmKind === 'replacepage' ? t.replaceImgTitle : st.confirmKind === 'delsaved' ? t.delSavedTitle : t.confirmTitle,
+      confirmSubV: st.confirmKind === 'delpage' ? t.delPageSub : st.confirmKind === 'replacepage' ? t.replaceImgSub : st.confirmKind === 'delsaved' ? t.delSavedSub : t.confirmSub,
+      confirmBtnV: st.confirmKind === 'delpage' ? t.delPageBtn : st.confirmKind === 'replacepage' ? t.replaceImgBtn : st.confirmKind === 'delsaved' ? t.delSavedBtn : t.confirmReplace,
       confirmCancelV: t.keepWork,
       confirmReplace: () => { const fn = this._pendingDoc; this._pendingDoc = null; this.setState({ confirmOpen: false }); if (fn) fn(); },
       confirmCancel: () => { this._pendingDoc = null; this.setState({ confirmOpen: false }); },
