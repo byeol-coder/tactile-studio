@@ -4576,14 +4576,14 @@ class Component extends DCLogic {
         const descArr = (eraser ? t.eraserDesc : t.strokeDesc) || [];
         const desc = descArr[nn - 1] || '';
         const ctlL = (eraser ? t.eraserL : t.strokeL) || '';
-        const dot = 5 + nn * 4;   // 9/13/17px swatch
-        const boxH = dot + 21;    // 30/34/38px — the box itself now grows, not just the dot
-        const padH = 10 + nn * 2; // 12/14/16px
+        const dot = nn * 8 + 4;   // 12/20/28px swatch — much larger jumps, easy to see at a glance
+        const boxH = dot + 18;    // 30/38/46px — the box itself grows clearly
+        const padH = 8 + nn * 3;  // 11/14/17px
         return {
           n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
           aria: (ctlL + ' ' + desc).trim(), title: desc,
           pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
-          style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: boxH, padding: active ? ('0 ' + (padH + 1) + 'px 0 ' + padH + 'px') : ('0 ' + padH + 'px'), borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 11 + nn },
+          style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: boxH, padding: active ? ('0 ' + (padH + 1) + 'px 0 ' + padH + 'px') : ('0 ' + padH + 'px'), borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 10 + nn * 2 },
           dotStyle: { width: dot + 'px', height: dot + 'px', borderRadius: '50%', background: 'currentColor', flex: 'none' }
         };
       }),
