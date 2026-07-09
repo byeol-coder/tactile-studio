@@ -2688,10 +2688,20 @@ class Component extends DCLogic {
     const scale = Math.min(tw / cw, th / ch), dw = Math.max(1, Math.round(cw * scale)), dh = Math.max(1, Math.round(ch * scale));
     const ox = Math.floor((tw - dw) / 2), oy = Math.floor((th - dh) / 2), out = new Float32Array(tw * th).fill(255);
     for (let ty = 0; ty < dh; ty++) for (let tx = 0; tx < dw; tx++) {
-      const x0 = cx + Math.floor(tx * cw / dw), x1 = cx + Math.max(x0 + 1, Math.floor((tx + 1) * cw / dw));
-      const y0 = cy + Math.floor(ty * ch / dh), y1 = cy + Math.max(y0 + 1, Math.floor((ty + 1) * ch / dh));
-      let s = 0, n = 0; for (let yy = y0; yy < y1 && yy < sh; yy++) for (let xx = x0; xx < x1 && xx < sw; xx++) { s += gray[yy * sw + xx]; n++; }
-      out[(oy + ty) * tw + (ox + tx)] = n ? s / n : 255;
+      // Block bounds are offsets INTO the crop; add cx/cy once. The min-width guard must
+      // compare the un-offset floors — using x0 (which already includes cx) double-added cx,
+      // corrupting the sample window for any crop (cx/cy > 0) and leaving full-image (cx=0)
+      // accidentally correct. That was the "tight-crop maps wrong / 0 dots" bug.
+      const bx = Math.floor(tx * cw / dw), by = Math.floor(ty * ch / dh);
+      const x0 = cx + bx, x1 = cx + Math.max(bx + 1, Math.floor((tx + 1) * cw / dw));
+      const y0 = cy + by, y1 = cy + Math.max(by + 1, Math.floor((ty + 1) * ch / dh));
+      let s = 0, n = 0, mn = 255; for (let yy = y0; yy < y1 && yy < sh; yy++) for (let xx = x0; xx < x1 && xx < sw; xx++) { const v = gray[yy * sw + xx]; s += v; n++; if (v < mn) mn = v; }
+      // Ink-preserving downscale: a plain block mean washes thin dark line art out to
+      // background (a ~2px line inside a ~13px block averages to ~215 > threshold, so the
+      // outline drops to 0 dots). Bias toward the darkest pixel in the block — this keeps thin
+      // outlines readable even at the default detail level, leaves filled art almost unchanged
+      // (min≈mean there), and does not flood the way a pure-min downscale would.
+      out[(oy + ty) * tw + (ox + tx)] = n ? 0.45 * mn + 0.55 * (s / n) : 255;
     }
     return { grid: out, box: { ox, oy, dw, dh } };
   }
