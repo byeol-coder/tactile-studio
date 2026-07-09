@@ -418,17 +418,22 @@ input[type=range]{accent-color:var(--ts-primary)}
       </div>
       <div style="flex:1;overflow-y:auto;padding:2px 12px 12px;display:flex;flex-direction:column;gap:10px">
         <sc-for list="{{ pageList }}" as="p" hint-placeholder-count="2">
-          <button onClick="{{ p.pick }}" role="tab" aria-selected="{{ p.selected }}" aria-label="{{ p.aria }}" style="{{ p.style }}" style-hover="border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-            <sc-if value="{{ p.hasThumb }}" hint-placeholder-val="{{ false }}">
-              <img src="{{ p.thumb }}" alt="" style="{{ p.thumbStyle }}">
-            </sc-if>
-            <div style="{{ p.capStyle }}">
-              <span style="{{ p.numStyle }}">{{ p.label }}</span>
-              <sc-if value="{{ p.hasAudio }}" hint-placeholder-val="{{ false }}">
-                <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;color:var(--ts-primary)"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <div style="position:relative">
+            <button onClick="{{ p.pick }}" role="tab" aria-selected="{{ p.selected }}" aria-label="{{ p.aria }}" style="{{ p.style }}" style-hover="border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+              <sc-if value="{{ p.hasThumb }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ p.thumb }}" alt="" style="{{ p.thumbStyle }}">
               </sc-if>
-            </div>
-          </button>
+              <div style="{{ p.capStyle }}">
+                <span style="{{ p.numStyle }}">{{ p.label }}</span>
+                <sc-if value="{{ p.hasAudio }}" hint-placeholder-val="{{ false }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;color:var(--ts-primary)"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </sc-if>
+              </div>
+            </button>
+            <button onClick="{{ p.deletePick }}" disabled="{{ p.deleteDisabled }}" aria-label="{{ p.deleteAria }}" title="{{ p.deleteAria }}" style="{{ p.deleteStyle }}" style-hover="background:#fff;border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+              <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+            </button>
+          </div>
         </sc-for>
       </div>
     </div>
@@ -2015,6 +2020,7 @@ class Component extends DCLogic {
       libOpen: '라이브러리 열기', libOpenSub: '저장한 촉각 그래픽을 다시 열기', libTitle: '내 라이브러리', libEmpty: '아직 저장한 그래픽이 없습니다. 그래픽을 만들고 저장하면 여기에 모입니다.', libOpenCard: '열기', libSendCard: 'DotPad로 전송', libDeleteCard: '삭제', libDriveTag: '드라이브', libLibraryTag: '라이브러리', aLibDeleted: '삭제했습니다', openDrive: 'Tactile Drive 열기', importTitle2: '이미지 가져오기', importSub2: '이미지를 촉각 그래픽으로 변환',
       favAdd: '즐겨찾기 추가', favRemove: '즐겨찾기 해제', moreMenuL: '더보기', deleteL: '삭제',
       trashMoveTitle: '휴지통으로 이동할까요?', trashMoveSub: '나중에 휴지통에서 복원할 수 있습니다.', trashMoveBtn: '휴지통으로 이동',
+      delPageTitle: '페이지를 삭제할까요?', delPageSub: '이 페이지의 내용과 나레이션 오디오가 함께 삭제됩니다. 되돌릴 수 없습니다.', delPageBtn: '페이지 삭제',
       permaDeleteTitle: '영구적으로 삭제할까요?', permaDeleteSub: '이 작업은 되돌릴 수 없습니다.', permaDeleteBtn: '영구 삭제',
       restoreL: '복원', permaDeleteL: '영구 삭제', aMovedTrash: '휴지통으로 이동했습니다', aRestored: '복원했습니다',
       homeTrashDeletedAt: '삭제됨',
@@ -2150,6 +2156,7 @@ class Component extends DCLogic {
       libOpen: 'Open library', libOpenSub: 'Reopen your saved tactile graphics', libTitle: 'My library', libEmpty: 'No saved graphics yet. Create and save a graphic and it will appear here.', libOpenCard: 'Open', libSendCard: 'Send to DotPad', libDeleteCard: 'Delete', libDriveTag: 'Drive', libLibraryTag: 'Library', aLibDeleted: 'Deleted', openDrive: 'Open Tactile Drive', importTitle2: 'Import image', importSub2: 'Convert an image into a tactile graphic',
       favAdd: 'Add to favorites', favRemove: 'Remove from favorites', moreMenuL: 'More options', deleteL: 'Delete',
       trashMoveTitle: 'Move to Trash?', trashMoveSub: 'You can restore it later from Trash.', trashMoveBtn: 'Move to Trash',
+      delPageTitle: 'Delete this page?', delPageSub: "The page's content and narration audio will be removed. This can't be undone.", delPageBtn: 'Delete page',
       permaDeleteTitle: 'Delete permanently?', permaDeleteSub: "This action can't be undone.", permaDeleteBtn: 'Delete permanently',
       restoreL: 'Restore', permaDeleteL: 'Delete permanently', aMovedTrash: 'Moved to Trash', aRestored: 'Restored',
       homeTrashDeletedAt: 'Deleted',
@@ -3258,20 +3265,31 @@ class Component extends DCLogic {
     this.queueBraillePreview();
     this.say(this.T().aPageAdd(at + 1, n));
   }
-  deletePage() {
+  deletePageAt(idx) {
     if (this.pages.length <= 1) return;
-    const idx = this.state.pageIndex;
+    const wasActive = idx === this.state.pageIndex;
     this.pages.splice(idx, 1);
     this._reindexPageAudioDelete(idx);
-    const ni = Math.max(0, Math.min(this.pages.length - 1, idx));
-    this.undoStack = []; this.redoStack = [];
-    this.cells = this.pages[ni]; this.polyPts = []; this.preview = null;
     const n = this.pages.length;
-    this.setState({ pageIndex: ni, pageCount: n, confirmOpen: false, cx: 0, cy: 0, selRect: null });
+    const patch = { confirmOpen: false, pageCount: n };
+    let ni;
+    if (wasActive) {
+      ni = Math.max(0, Math.min(n - 1, idx));
+      this.undoStack = []; this.redoStack = [];
+      this.cells = this.pages[ni]; this.polyPts = []; this.preview = null;
+      patch.cx = 0; patch.cy = 0; patch.selRect = null;
+    } else {
+      // a non-active page was removed: the active page's own buffer/undo
+      // history is untouched, only its index shifts if it sat after idx.
+      ni = idx < this.state.pageIndex ? this.state.pageIndex - 1 : this.state.pageIndex;
+    }
+    patch.pageIndex = ni;
+    this.setState(patch);
     this.queueLivePreview();
     this.queueBraillePreview();
     this.say(this.T().aPageDel(ni + 1, n));
   }
+  deletePage() { this.deletePageAt(this.state.pageIndex); }
   resetPages(cells) { this.pages = [cells]; this.pageAudio = {}; }
   undo() {
     if (!this.undoStack.length) return;
@@ -4604,6 +4622,7 @@ class Component extends DCLogic {
         const th = this.thumbFrom(cells, st.gridW, st.gridH);
         const hasAudio = !!(this.pageAudio && this.pageAudio[i] && (this.pageAudio[i].url || this.pageAudio[i]._url || this.pageAudio[i].narration));
         const sel = i === st.pageIndex;
+        const canDelete = (this.pages || []).length > 1;
         return {
           i, n: i + 1, selected: sel,
           hasThumb: !!th, thumb: th || '', hasAudio,
@@ -4617,6 +4636,20 @@ class Component extends DCLogic {
             + (th ? 'object-fit:contain' : ''),
           capStyle: 'display:flex;align-items:center;justify-content:space-between;gap:6px',
           numStyle: 'font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;color:' + (sel ? 'var(--ts-primary)' : '#1E1C1A'),
+          deleteDisabled: !canDelete,
+          deleteAria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (st.lang === 'ko' ? ' 삭제' : ' delete'),
+          deletePick: () => {
+            if (!canDelete) return;
+            this._pendingDoc = () => this.deletePageAt(i);
+            this.setState({ confirmOpen: true, confirmKind: 'delpage' });
+          },
+          deleteStyle: {
+            position: 'absolute', top: 6, right: 6, width: 22, height: 22, flex: 'none',
+            border: '1px solid var(--ts-border-decor)', borderRadius: 6, boxSizing: 'border-box',
+            background: 'rgba(255,255,255,0.94)', color: canDelete ? 'var(--ts-text-secondary)' : '#C9BBAF',
+            display: 'grid', placeItems: 'center', cursor: canDelete ? 'pointer' : 'not-allowed',
+            boxShadow: '0 1px 3px rgba(16,24,40,0.14)'
+          },
         };
       }),
       deletePageFn: () => { if (st.pageCount <= 1) return; this._pendingDoc = () => this.deletePage(); this.setState({ confirmOpen: true, confirmKind: 'delpage' }); },
