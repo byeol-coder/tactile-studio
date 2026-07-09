@@ -543,7 +543,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           <svg width="6" height="16" viewBox="0 0 6 16" aria-hidden="true"><circle cx="1.2" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="14.6" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="14.6" r="1.2" fill="#B7AEA4"></circle></svg>
         </div>
         <sc-for list="{{ primaryTools }}" as="tl" hint-placeholder-count="3">
-          <button onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-label="{{ tl.aria }}" style="{{ tl.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <button onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-haspopup="{{ tl.haspopup }}" aria-expanded="{{ tl.expanded }}" aria-label="{{ tl.aria }}" style="{{ tl.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             {{ tl.iconEl }}
           </button>
         </sc-for>
@@ -3648,6 +3648,16 @@ class Component extends DCLogic {
     const t = this.T();
     this.say(t.aToolSel(t.toolNames[id]));
   }
+  // Pen/Eraser press both selects the tool AND opens the size dropdown right
+  // above that same button — no separate trigger needed for these two tools.
+  // Second press on an already-active, already-open one toggles it closed
+  // (checked BEFORE pickTool runs, since pickTool always clears railMenu).
+  pickToolAndStroke(id, ev) {
+    const wasOpenForThisTool = this.state.tool === id && this.state.railMenu && this.state.railMenu.kind === 'stroke';
+    this.pickTool(id);
+    if (wasOpenForThisTool) return;
+    this.toggleRail('stroke', ev);
+  }
   // ---------- pages (v1: simple multi-page document) ----------
   goPage(i) {
     const n = this.pages.length;
@@ -4666,14 +4676,21 @@ class Component extends DCLogic {
       border: 'none', cursor: 'pointer', background: sel ? 'var(--ts-primary)' : 'transparent',
       color: sel ? '#fff' : '#B7AEA4', transition: 'background 0.15s ease, color 0.15s ease, transform 0.1s ease'
     });
+    // Pen and Eraser are the two tools whose press also opens the contextual
+    // size dropdown (see pickToolAndStroke); Cursor/Select/Text stay plain picks.
+    const strokeToolIds = ['pen', 'eraser'];
     const mkTool = id => {
       const sel = st.tool === id;
+      const hasStrokeMenu = strokeToolIds.indexOf(id) !== -1;
+      const strokeMenuOpenHere = hasStrokeMenu && sel && !!(st.railMenu && st.railMenu.kind === 'stroke');
       return {
         id, label: nm(id), key: keys[id], selected: sel, iconEl: this.icon(id, 21),
         aria: nm(id) + ' (' + keys[id] + ')',
-        pick: () => this.pickTool(id),
+        pick: hasStrokeMenu ? (e => this.pickToolAndStroke(id, e)) : (() => this.pickTool(id)),
         onEnter: e => this.showTip(nm(id), keys[id], e),
-        style: railStyle(sel)
+        style: railStyle(sel),
+        haspopup: hasStrokeMenu ? 'menu' : undefined,
+        expanded: hasStrokeMenu ? strokeMenuOpenHere : undefined
       };
     };
     const primaryTools = ['cursor', 'pen', 'eraser'].map(mkTool);
@@ -5134,7 +5151,12 @@ class Component extends DCLogic {
       railDragMove: e => this.railDragMove(e),
       railDragUp: () => this.railDragUp(),
       // contextual stroke / eraser thickness (tactile grid rows: 1/2/3)
-      strokeToolActive: ['pen', 'line', 'eraser', 'rect', 'ellipse', 'poly'].indexOf(st.tool) !== -1,
+      // Pen/eraser no longer need the separate dedicated button — pressing
+      // either one now opens its own contextual size menu directly (see
+      // mkTool/pickToolAndStroke). The shared button stays visible only for
+      // shape-variant tools (line/rect/ellipse/poly), which have no primary
+      // toolbar button of their own to attach a trigger to.
+      strokeToolActive: ['line', 'rect', 'ellipse', 'poly'].indexOf(st.tool) !== -1,
       // ---- simplified-shell gates: hide editor chrome while the empty entry screen is up ----
       showCreateMenu: !st.entry,
       inspectorShown: st.inspectorOpen && !st.entry,
