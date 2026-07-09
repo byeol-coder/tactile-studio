@@ -120,8 +120,9 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-topbar-button,.ts-topbar-action,.ts-topbar-pill{min-height:44px!important;height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center;gap:8px!important;white-space:nowrap;flex:0 0 auto;box-sizing:border-box}
 .ts-topbar-action,.ts-topbar-pill{border-radius:12px!important;padding-left:14px!important;padding-right:14px!important}
 .ts-topbar-primary{background:var(--ts-primary)!important;color:#fff!important;border:none!important;font-weight:800!important;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.10)}
-.ts-brand-logo{height:24px;width:auto;display:block;flex:none}
+.ts-brand-logo{height:28px;width:auto;display:block;flex:none}
 .ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 6px}
+.ts-divider.ts-left-divider{height:26px}
 .ts-rail-history{width:44px!important;height:44px!important;border-radius:12px!important}
 .ts-project-name{min-width:0!important;width:clamp(96px,14vw,220px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ts-output-zone{min-width:0;max-width:190px;overflow:hidden}
@@ -131,14 +132,6 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-send-short{display:none}
 .ts-save-status{max-width:94px;overflow:hidden}
 .device-status-pill{max-width:240px;min-width:0;overflow:hidden}
-.ts-language-switch{display:inline-flex;flex:none;box-sizing:border-box;border:1px solid var(--ts-border-decor);border-radius:999px;overflow:hidden;background:var(--ts-bg-warm);padding:3px;gap:2px}
-.ts-language-switch>button{flex:1 0 auto;min-width:44px;min-height:30px;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid transparent;border-radius:999px;background:transparent;color:var(--ts-text-secondary);font-weight:600;font-size:12px;cursor:pointer;padding:0 14px;box-sizing:border-box;transition:background .15s ease,border-color .15s ease,color .15s ease}
-.ts-language-switch>button:hover{background:rgba(30,28,26,0.05)}
-.ts-language-switch>button[aria-pressed="true"]{background:#fff;border-color:var(--ts-primary);color:var(--ts-primary);font-weight:800}
-.ts-language-switch>button[aria-pressed="true"]:hover{background:#fff}
-.ts-language-switch>button:focus-visible{outline:2px solid var(--ts-primary);outline-offset:-2px}
-.ts-topbar .ts-language-switch{height:44px;border-radius:12px}
-.ts-topbar .ts-language-switch>button{border-radius:9px}
 .image-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .image-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .tactile-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -164,7 +157,7 @@ input[type=range]{accent-color:var(--ts-primary)}
   .ts-send-label{display:none}
   .ts-send-short{display:inline-block}
   .ts-menu-caret{display:none!important}
-  .ts-language-switch,.ts-help-button{display:none!important}
+  .ts-help-button{display:none!important}
   .ts-topbar{grid-template-columns:minmax(72px,1fr) minmax(184px,auto) 44px;gap:6px;padding:0 8px}
   .ts-topbar-center{gap:6px}
   .ts-topbar-action:not(.ts-topbar-primary),.device-status-pill{width:44px!important;padding-left:0!important;padding-right:0!important}
@@ -333,12 +326,12 @@ input[type=range]{accent-color:var(--ts-primary)}
   <div class="ts-topbar">
     <!-- LEFT ZONE: identity + document title (no back button — the app IS the editor) -->
     <div class="ts-topbar-left">
-      <button onClick="{{ goHome }}" class="ts-home-btn" aria-label="{{ t.homeNewPrimary }}" title="Tactile Studio" style="width:44px;height:44px;flex:none;border:1px solid var(--ts-border-decor);border-radius:12px;box-sizing:border-box;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+      <button onClick="{{ goHome }}" class="ts-home-btn" aria-label="{{ t.navHome }}" title="Tactile Studio" style="width:44px;height:44px;flex:none;border:1px solid var(--ts-border-decor);border-radius:12px;box-sizing:border-box;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
         <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
       <img class="ts-brand-logo" src="assets/tactile-studio-logo.svg" alt="Tactile Studio">
       <div class="ts-divider ts-left-divider"></div>
-      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:14px;color:#1E1C1A;height:40px;box-sizing:border-box;padding:0 9px;flex:0 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
+      <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:15px;color:#1E1C1A;height:40px;box-sizing:border-box;padding:0 9px;flex:0 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
       <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
         <span style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
       </sc-if>
@@ -382,10 +375,6 @@ input[type=range]{accent-color:var(--ts-primary)}
         <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
-      <div class="ts-language-switch" role="group" aria-label="{{ t.langLabel }}">
-        <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어">KO</button>
-        <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English">EN</button>
-      </div>
       <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
     </div>
   </div>
@@ -863,10 +852,6 @@ input[type=range]{accent-color:var(--ts-primary)}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
       {{ t.homeNewPrimary }}
     </button>
-    <div class="ts-language-switch" role="group" aria-label="{{ t.langLabel }}">
-      <button onClick="{{ setKo }}" aria-pressed="{{ isKo }}" aria-label="한국어">KO</button>
-      <button onClick="{{ setEn }}" aria-pressed="{{ isEn }}" aria-label="English">EN</button>
-    </div>
   </header>
 
   <div class="ts-home-body">
@@ -4574,14 +4559,12 @@ class Component extends DCLogic {
         const descArr = (eraser ? t.eraserDesc : t.strokeDesc) || [];
         const desc = descArr[nn - 1] || '';
         const ctlL = (eraser ? t.eraserL : t.strokeL) || '';
-        const dot = nn * 8 + 4;   // 12/20/28px swatch — much larger jumps, easy to see at a glance
-        const boxH = dot + 18;    // 30/38/46px — the box itself grows clearly
-        const padH = 8 + nn * 3;  // 11/14/17px
+        const dot = 6 + nn * 3;   // 9/12/15px — still a clear size cue, no longer oversized
         return {
           n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
           aria: (ctlL + ' ' + desc).trim(), title: desc,
           pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
-          style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: boxH, padding: active ? ('0 ' + (padH + 1) + 'px 0 ' + padH + 'px') : ('0 ' + padH + 'px'), borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 10 + nn * 2 },
+          style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, height: 30, padding: '0 12px', borderRadius: 8, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12 },
           dotStyle: { width: dot + 'px', height: dot + 'px', borderRadius: '50%', background: 'currentColor', flex: 'none' }
         };
       }),
