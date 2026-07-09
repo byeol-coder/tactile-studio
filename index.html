@@ -126,9 +126,8 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-project-name{min-width:0!important;width:clamp(96px,14vw,220px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ts-output-zone{min-width:0;max-width:190px;overflow:hidden}
 .ts-output-zone select{min-width:0;max-width:150px}
-.ts-action-label,.ts-pill-full,.ts-pill-medium,.ts-pill-short,.ts-save-text{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1}
+.ts-action-label,.ts-pill-full,.ts-pill-medium,.ts-pill-short{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1}
 .ts-pill-medium,.ts-pill-short{display:none}
-.ts-save-status{max-width:94px;overflow:hidden}
 .device-status-pill{max-width:240px;min-width:0;overflow:hidden}
 .image-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .image-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
@@ -136,7 +135,6 @@ input[type=range]{accent-color:var(--ts-primary)}
 .tactile-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 @media (max-width:1180px){
   .ts-topbar{grid-template-columns:minmax(220px,1fr) minmax(220px,auto);gap:10px}
-  .ts-save-status{display:none!important}
   .device-status-pill{max-width:190px}
   .ts-pill-full{display:none}
   .ts-pill-medium{display:inline-block}
@@ -325,13 +323,6 @@ input[type=range]{accent-color:var(--ts-primary)}
       </button>
       <div class="ts-divider ts-left-divider"></div>
       <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:15px;color:#1E1C1A;height:40px;box-sizing:border-box;padding:0 9px;flex:0 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
-      <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
-        <span style="font-size:12.5px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
-      </sc-if>
-      <span class="ts-save-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--ts-success);flex:none;white-space:nowrap">
-        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        <span class="ts-save-text">{{ t.savedStatus }}</span>
-      </span>
     </div>
 
     <!-- RIGHT ZONE: create, device status, and utilities -->
@@ -4649,7 +4640,6 @@ class Component extends DCLogic {
     const st = this.state, t = this.T(), p = this.props;
     const hubCard = p.hubCard ?? 'banner';
     const dpVar = p.dotpadPanel ?? 'modal';
-    const retVar = p.returnStyle ?? 'bar';
     const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
@@ -4873,7 +4863,6 @@ class Component extends DCLogic {
         { label: t.chEmboss, icon: 'M7 3h10v6H7zM5 9h14a1 1 0 0 1 1 1v7h-4v4H8v-4H4v-7a1 1 0 0 1 1-1zM8 17h8' }
       ],
       retBar: false, retChip: false, retCrumb: false,
-      topbarPill: retVar !== 'bar',
       // lang
       setKo: () => this.setState({ lang: 'ko', announce: this.T('ko').aLangSet }), setEn: () => this.setState({ lang: 'en', announce: this.T('en').aLangSet }),
       isKo: st.lang === 'ko', isEn: st.lang === 'en',
