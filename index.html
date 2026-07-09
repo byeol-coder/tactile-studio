@@ -590,7 +590,9 @@ input[type=range]{accent-color:var(--ts-primary)}
 
         <button onClick="{{ shapeGroup.toggle }}" onMouseEnter="{{ shapeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ shapeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ shapeMenuOpen }}" aria-label="{{ shapeGroup.aria }}" style="{{ shapeGroup.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ shapeGroup.iconEl }}
-          <svg aria-hidden="true" width="8" height="8" viewBox="0 0 24 24" style="position:absolute;right:3px;bottom:3px;opacity:0.55"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span aria-hidden="true" style="position:absolute;right:2px;bottom:2px;width:13px;height:13px;border-radius:100px;background:rgba(255,255,255,0.14);display:grid;place-items:center">
+            <svg width="7" height="7" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#B7AEA4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </span>
         </button>
 
         <button onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" style="{{ selectTool.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -3218,6 +3220,14 @@ class Component extends DCLogic {
   // only its CSS display size changes — so drawing/hit-testing (evCell) is
   // untouched: it already normalizes by cv.width/rect.width.
   //
+  // Accessibility note (decided, not a bug): cvWheel is bound only on the
+  // canvas viewport div (see ref="viewportRef" in the markup), not globally.
+  // That's deliberate — Ctrl/Cmd+wheel still triggers the browser's own
+  // page zoom everywhere else in the app (topbar, panels, status bar), for
+  // low-vision users who rely on it. Only inside the canvas itself does the
+  // same gesture zoom the drawing instead, matching Figma's own convention.
+  // No separate in-app text-scale setting was built for this — see chat.
+  //
   // zoomAround anchors the zoom to a specific viewport point (the mouse for
   // wheel/pinch, the viewport center for buttons/keyboard) by re-deriving
   // scrollLeft/scrollTop after the resize so that point stays visually put —
@@ -3438,7 +3448,7 @@ class Component extends DCLogic {
   ];
   // Toolbar icon set (from Figma node 470:32) — currentColor-driven, 24px frame
   ICONS = {
-    cursor: [{ d: 'M7.906 16.915C7.959 17.154 8.084 17.37 8.264 17.536C8.444 17.702 8.671 17.809 8.913 17.843C9.155 17.876 9.402 17.835 9.621 17.724C9.839 17.613 10.018 17.438 10.134 17.223L12.224 14.13L17.131 19.037C17.23 19.136 17.348 19.214 17.477 19.268C17.607 19.322 17.745 19.349 17.886 19.349C18.026 19.349 18.164 19.322 18.294 19.268C18.423 19.214 18.541 19.136 18.64 19.037L19.687 17.99C19.786 17.891 19.865 17.773 19.918 17.643C19.972 17.514 20 17.375 20 17.235C20 17.095 19.972 16.956 19.918 16.827C19.865 16.697 19.786 16.58 19.687 16.481L14.78 11.574L17.893 9.484C18.108 9.367 18.283 9.188 18.394 8.97C18.505 8.752 18.546 8.505 18.513 8.262C18.479 8.02 18.372 7.793 18.206 7.613C18.04 7.433 17.823 7.309 17.584 7.256L4.002 3.352L7.906 16.915Z' }],
+    cursor: [{ d: 'M7.906 16.915C7.959 17.154 8.084 17.37 8.264 17.536C8.444 17.702 8.671 17.809 8.913 17.843C9.155 17.876 9.402 17.835 9.621 17.724C9.839 17.613 10.018 17.438 10.134 17.223L12.224 14.13L17.131 19.037C17.23 19.136 17.348 19.214 17.477 19.268C17.607 19.322 17.745 19.349 17.886 19.349C18.026 19.349 18.164 19.322 18.294 19.268C18.423 19.214 18.541 19.136 18.64 19.037L19.687 17.99C19.786 17.891 19.865 17.773 19.918 17.643C19.972 17.514 20 17.375 20 17.235C20 17.095 19.972 16.956 19.918 16.827C19.865 16.697 19.786 16.58 19.687 16.481L14.78 11.574L17.893 9.484C18.108 9.367 18.283 9.188 18.394 8.97C18.505 8.752 18.546 8.505 18.513 8.262C18.479 8.02 18.372 7.793 18.206 7.613C18.04 7.433 17.823 7.309 17.584 7.256L4.002 3.352L7.906 16.915Z', fill: true }],
     pen: [{ d: 'M8 19.328H4V15.328L14.5 4.828C14.763 4.566 15.074 4.357 15.418 4.215C15.761 4.073 16.129 4 16.5 4C16.871 4 17.239 4.073 17.582 4.215C17.926 4.357 18.237 4.566 18.5 4.828C18.763 5.091 18.971 5.403 19.113 5.746C19.255 6.089 19.328 6.457 19.328 6.828C19.328 7.2 19.255 7.568 19.113 7.911C18.971 8.254 18.763 8.566 18.5 8.828L8 19.328ZM8 19.328H17.582' }, { d: 'M13.5 5.828L17.5 9.828' }],
     eraser: [{ d: 'M18.023 19.957H7.523L3.313 15.657C3.127 15.47 3.022 15.217 3.022 14.952C3.022 14.688 3.127 14.435 3.313 14.247L13.313 4.247C13.501 4.061 13.754 3.957 14.018 3.957C14.282 3.957 14.536 4.061 14.723 4.247L19.723 9.247C19.91 9.435 20.014 9.688 20.014 9.952C20.014 10.217 19.91 10.47 19.723 10.657L10.523 19.957' }, { d: 'M17.024 13.257L10.724 6.957' }, { d: 'M6.25 18.25L3.25 15.25' }],
     line: [{ d: 'M4 18C4 18.53 4.211 19.039 4.586 19.414C4.961 19.789 5.47 20 6 20C6.53 20 7.039 19.789 7.414 19.414C7.789 19.039 8 18.53 8 18C8 17.47 7.789 16.961 7.414 16.586C7.039 16.211 6.53 16 6 16C5.47 16 4.961 16.211 4.586 16.586C4.211 16.961 4 17.47 4 18Z' }, { d: 'M16 6C16 6.53 16.211 7.039 16.586 7.414C16.961 7.789 17.47 8 18 8C18.53 8 19.039 7.789 19.414 7.414C19.789 7.039 20 6.53 20 6C20 5.47 19.789 4.961 19.414 4.586C19.039 4.211 18.53 4 18 4C17.47 4 16.961 4.211 16.586 4.586C16.211 4.961 16 5.47 16 6Z' }, { d: 'M7.5 16.5L16.5 7.5' }],
