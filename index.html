@@ -667,12 +667,27 @@ input[type=range]{accent-color:var(--ts-primary)}
             <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspDesc }}</label>
             <textarea onChange="{{ onPgDesc }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgDesc }}</textarea>
 
-            <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
-            <select onChange="{{ onBrailleLang }}" value="{{ brailleLangValue }}" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;background:#fff;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
-              <sc-for list="{{ brailleLangOptions }}" as="o" hint-placeholder-count="4">
+            <label id="ts-braille-base-lbl" style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
+            <select onChange="{{ onBrailleBase }}" value="{{ brailleBaseValue }}" aria-labelledby="ts-braille-base-lbl" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;background:#fff;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
+              <sc-for list="{{ brailleBaseOptions }}" as="o" hint-placeholder-count="2">
                 <option value="{{ o.key }}">{{ o.label }}</option>
               </sc-for>
             </select>
+
+            <div style="display:flex;gap:10px;margin-bottom:8px">
+              <div style="flex:1;min-width:0">
+                <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleGrade }}</label>
+                <div role="group" aria-label="{{ t.inspBrailleGrade }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
+                  <sc-for list="{{ brailleGradeOptions }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.aria }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
+                </div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleCharSp }}</label>
+                <div role="group" aria-label="{{ t.inspBrailleCharSp }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
+                  <sc-for list="{{ brailleCharSpOptions }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.aria }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
+                </div>
+              </div>
+            </div>
 
             <div aria-live="polite" style="padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;margin-bottom:4px">
               <div style="font-size:15px;letter-spacing:0.06em;color:#1E1C1A;min-height:20px;word-break:break-all">{{ braillePreviewText }}</div>
@@ -1865,7 +1880,7 @@ class Component extends DCLogic {
     connected: true, connType: 'ble', connBusy: '', connFailed: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     narrOpen: false,
-    brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 },
+    brailleLang: 'ko-g2', brailleCharSpacing: 0, braillePreview: { ok: true, unicode: '', cells: 0 },
     saveOpen: false, savePhase: 'form', saveLoc: 'drive', libraryOpen: false,
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
@@ -1981,7 +1996,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨', dpConnFailed: '연결 실패',
+      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleBaseKo: '한국어', brailleBaseUeb: '영어 (UEB)', inspBrailleGrade: '점자 등급', brailleGrade1: '1종(정자)', brailleGrade2: '2종(약자)', brailleGrade1Aria: '점자 등급 1종 정자', brailleGrade2Aria: '점자 등급 2종 약자', inspBrailleCharSp: '자간', brailleCharSp0: '없음', brailleCharSp1: '넓게', brailleCharSp0Aria: '자간 없음', brailleCharSp1Aria: '자간 한 칸', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨', dpConnFailed: '연결 실패',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
@@ -2116,7 +2131,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected', dpConnFailed: 'Connection failed',
+      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleBaseKo: 'Korean', brailleBaseUeb: 'English (UEB)', inspBrailleGrade: 'Braille grade', brailleGrade1: 'Grade 1', brailleGrade2: 'Grade 2', brailleGrade1Aria: 'Braille grade 1 (uncontracted)', brailleGrade2Aria: 'Braille grade 2 (contracted)', inspBrailleCharSp: 'Char spacing', brailleCharSp0: 'None', brailleCharSp1: 'Wide', brailleCharSp0Aria: 'No character spacing', brailleCharSp1Aria: 'One blank cell between characters', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected', dpConnFailed: 'Connection failed',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
@@ -3484,9 +3499,10 @@ class Component extends DCLogic {
       const banaMsg = bana.pass ? t.banaPass : t.aAssetBanaWarn;
       const BRAILLE_LANGS = ['ko-g2', 'ko-g1', 'ueb-g1', 'ueb-g2'];
       const importedBrailleLang = BRAILLE_LANGS.includes(obj.brailleLang) ? obj.brailleLang : this.state.brailleLang;
+      const importedCharSp = (+obj.brailleCharSpacing === 1) ? 1 : 0;
       this.setState({ importOpen: false, entry: false, fileName: parsed.title || name, output: '60',
         pageIndex: 0, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null,
-        sendPhase: 'idle', banaResult: { pass: bana.pass, msg: banaMsg }, brailleLang: importedBrailleLang });
+        sendPhase: 'idle', banaResult: { pass: bana.pass, msg: banaMsg }, brailleLang: importedBrailleLang, brailleCharSpacing: importedCharSp });
       this.queueLivePreview();
       this.queueBraillePreview();
       this.say(this.callI18n(t.aAssetLoaded, '', this.pages.length) + ' ' + banaMsg);
@@ -3896,6 +3912,7 @@ class Component extends DCLogic {
       tags: (ctx && Array.isArray(ctx.tags)) ? ctx.tags.slice() : [],
       graphicFeatures: this.deriveGraphicFeatures(this.cells, w, h),
       brailleLang: st.brailleLang,
+      brailleCharSpacing: st.brailleCharSpacing || 0,
       pages: pages,
       provenance: {
         createdBy: 'tactile-studio',
@@ -3985,9 +4002,10 @@ class Component extends DCLogic {
       await window.TSBraille.preload();
       const r = window.TSBraille.translate(text, langKey || this.state.brailleLang);
       if (!r || !r.ok) return null;
+      const spaced = this._applyBrailleCharSpacing(r.unicode, this.state.brailleCharSpacing);
       const DP = this.dpReal();
       const cellCount = (DP && DP.brailleCellCount) ? DP.brailleCellCount() : 20;
-      const padded = window.TSBraille.padOrTruncate(r.unicode, cellCount);
+      const padded = window.TSBraille.padOrTruncate(spaced, cellCount);
       return this._brailleUnicodeToHex(padded);
     } catch (e) {
       return null;
@@ -4009,6 +4027,33 @@ class Component extends DCLogic {
     this.setState({ brailleLang: key });
     this.queueBraillePreview();
   }
+  // Combine a base language ('ko'|'ueb') and grade (1|2) into the flat engine
+  // key. All four combos have a real liblouis table, so nothing is disabled.
+  _brailleKeyWith(base, grade) {
+    const b = (base === 'ueb') ? 'ueb' : 'ko';
+    const g = (+grade === 1) ? 1 : 2;
+    return b + '-g' + g;
+  }
+  setBrailleBase(base) {
+    const grade = String(this.state.brailleLang || 'ko-g2').split('-g')[1] || '2';
+    this.setBrailleLang(this._brailleKeyWith(base, grade));
+  }
+  setBrailleGrade(grade) {
+    const base = String(this.state.brailleLang || 'ko-g2').split('-g')[0] || 'ko';
+    this.setBrailleLang(this._brailleKeyWith(base, grade));
+  }
+  setBrailleCharSpacing(v) {
+    this.setState({ brailleCharSpacing: (+v === 1) ? 1 : 0 });
+    this.queueBraillePreview();
+  }
+  // 자간(char spacing): insert N blank braille cells (U+2800) between every
+  // translated cell. Applied identically in the preview and the send path so
+  // what the user reads on screen is exactly what DotPad's text row receives.
+  _applyBrailleCharSpacing(unicode, spacing) {
+    const n = +spacing || 0;
+    if (!n || !unicode) return unicode || '';
+    return Array.from(unicode).join('⠀'.repeat(n));
+  }
   // Debounced live Unicode-braille preview for the inspector. Loads the
   // engine lazily on first use (non-blocking — boot is unaffected) and
   // re-checks pageIndex/text after the await in case the user switched pages
@@ -4027,7 +4072,14 @@ class Component extends DCLogic {
     window.TSBraille.preload().then(() => {
       if (this.state.pageIndex !== pageIdx || this.state.brailleLang !== lang) return; // stale
       const r = window.TSBraille.translate(text, lang);
-      this.setState({ braillePreview: r });
+      // Reflect char spacing in the preview + cell counter so what the user
+      // reads is exactly what the send path packs into the DotPad text row.
+      if (r && r.ok) {
+        const spaced = this._applyBrailleCharSpacing(r.unicode, this.state.brailleCharSpacing);
+        this.setState({ braillePreview: { ok: true, unicode: spaced, cells: Array.from(spaced).length } });
+      } else {
+        this.setState({ braillePreview: r || { ok: false, unicode: '', cells: 0 } });
+      }
     }).catch(() => {
       if (this.state.pageIndex !== pageIdx || this.state.brailleLang !== lang) return;
       this.setState({ braillePreview: { ok: false, unicode: '', cells: 0 } });
@@ -4461,14 +4513,23 @@ class Component extends DCLogic {
       })(),
       pgDesc: this.pageDesc(st.pageIndex),
       onPgDesc: (e) => this.setPageDesc(e && e.target ? e.target.value : ''),
-      brailleLangValue: st.brailleLang,
-      brailleLangOptions: [
-        { key: 'ko-g2', label: t.brailleLangKoG2 },
-        { key: 'ko-g1', label: t.brailleLangKoG1 },
-        { key: 'ueb-g1', label: t.brailleLangUebG1 },
-        { key: 'ueb-g2', label: t.brailleLangUebG2 },
+      // Braille language is split into a base-language select (Korean / UEB) +
+      // a Grade 1/2 toggle; the two combine into the flat brailleLang key
+      // (e.g. 'ko-g2') the engine and file format already use.
+      brailleBaseValue: String(st.brailleLang || 'ko-g2').split('-g')[0],
+      brailleBaseOptions: [
+        { key: 'ko', label: t.brailleBaseKo },
+        { key: 'ueb', label: t.brailleBaseUeb },
       ],
-      onBrailleLang: (e) => this.setBrailleLang(e && e.target ? e.target.value : 'ko-g2'),
+      onBrailleBase: (e) => this.setBrailleBase(e && e.target ? e.target.value : 'ko'),
+      brailleGradeOptions: [1, 2].map(g => {
+        const on = +(String(st.brailleLang || 'ko-g2').split('-g')[1]) === g;
+        return { key: g, label: (g === 1 ? t.brailleGrade1 : t.brailleGrade2), aria: (g === 1 ? t.brailleGrade1Aria : t.brailleGrade2Aria), active: on, pick: () => this.setBrailleGrade(g), style: segBtn(on) };
+      }),
+      brailleCharSpOptions: [0, 1].map(v => {
+        const on = (+st.brailleCharSpacing || 0) === v;
+        return { key: v, label: (v === 0 ? t.brailleCharSp0 : t.brailleCharSp1), aria: (v === 0 ? t.brailleCharSp0Aria : t.brailleCharSp1Aria), active: on, pick: () => this.setBrailleCharSpacing(v), style: segBtn(on) };
+      }),
       braillePreviewText: (() => {
         const bp = st.braillePreview || { ok: true, unicode: '', cells: 0 };
         const hasSrc = !!(this.pageDesc(st.pageIndex) || ((this.pageAudio || {})[st.pageIndex] || {}).narration);
