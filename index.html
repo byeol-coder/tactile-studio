@@ -2903,8 +2903,11 @@ class Component extends DCLogic {
       g.strokeRect(sel.x0 * c + 0.5, sel.y0 * c + 0.5, (sel.x1 - sel.x0 + 1) * c - 1, (sel.y1 - sel.y0 + 1) * c - 1);
       g.setLineDash([]);
     }
+    const brushN = (tool === 'pen' || tool === 'eraser') ? this.strokeSizeFor(tool) : 1;
+    const bAnchor = brushN === 3 ? -1 : 0; // mirrors brushCb's own offsets: 1→[0], 2→[0,1], 3→[-1,0,1]
+    const bx = (cx + bAnchor) * c, by = (cy + bAnchor) * c, bs = brushN * c;
     g.strokeStyle = '#C43D00'; g.lineWidth = 2;
-    g.strokeRect(cx * c + 1, cy * c + 1, c - 2, c - 2);
+    g.strokeRect(bx + 1, by + 1, bs - 2, bs - 2);
   }
   drawPad() {
     const cv = this.padRef.current; if (!cv) return;
