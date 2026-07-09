@@ -605,10 +605,10 @@ input[type=range]{accent-color:var(--ts-primary)}
 
         <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
         <button class="ts-rail-history" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
         <button class="ts-rail-history" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
 
         <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
@@ -1299,10 +1299,20 @@ input[type=range]{accent-color:var(--ts-primary)}
             </div>
           </div>
           <div>
-            <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.tactilePreview }}</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">
+              <sc-if value="{{ vectorizeEnabled }}" hint-placeholder-val="{{ false }}">
+                <div role="tablist" aria-label="{{ t.tactilePreview }}" style="display:inline-flex;gap:2px;background:#F2ECE4;border-radius:100px;padding:2px">
+                  <button role="tab" aria-selected="{{ vecViewIsTactile }}" onClick="{{ setVecTabTactile }}" style="{{ vecTabTactileStyle }}">{{ t.tactilePreview }}</button>
+                  <button role="tab" aria-selected="{{ vecViewIsVector }}" onClick="{{ setVecTabVector }}" style="{{ vecTabVectorStyle }}">{{ t.vecViewL }}</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ vectorizeEnabled }}" hint-placeholder-val="{{ true }}">
+                <span>{{ t.tactilePreview }}</span>
+              </sc-if>
+            </div>
             <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
-              <canvas ref="{{ impRef }}"></canvas>
-              <canvas ref="{{ impVecRef }}" aria-hidden="true" style="position:absolute;top:12px;left:12px;pointer-events:none"></canvas>
+              <canvas ref="{{ impRef }}" style="display:{{ impRefDisplay }}"></canvas>
+              <canvas ref="{{ impVecRef }}" style="display:{{ impVecDisplay }}"></canvas>
             </div>
           </div>
         </div>
@@ -1354,6 +1364,13 @@ input[type=range]{accent-color:var(--ts-primary)}
               <div role="alert" style="display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(218,18,13,0.06);border:1px solid var(--ts-danger);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--ts-danger)">
                 <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 {{ t.vecWarnMsg }}
+              </div>
+            </sc-if>
+            <sc-if value="{{ vecAdv.hasObjects }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
+                <sc-for list="{{ vecAdv.chips }}" as="ch" hint-placeholder-count="3">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#1F6FB2;background:rgba(31,111,178,0.09);border:1px solid rgba(31,111,178,0.28);border-radius:100px;padding:3px 10px">{{ ch.label }} {{ ch.count }}</span>
+                </sc-for>
               </div>
             </sc-if>
             <div role="status" style="margin-top:8px;font-size:12px;color:var(--ts-text-secondary);font-weight:600">{{ vecAdv.countText }}</div>
@@ -1883,7 +1900,7 @@ class Component extends DCLogic {
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
     entry: false, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
-    impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false,
+    impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile',
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, cropCursor: 'move', retouchHint: false, armedPreset: null,
     cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false, cmdFeatureFilter: [],
@@ -2027,7 +2044,7 @@ class Component extends DCLogic {
       aCmdNoLib: '라이브러리에서 일치하는 항목을 찾지 못해 기본 초안을 만들었습니다. 편집해서 완성하세요.', aCmdNearHint: (names) => `라이브러리에 정확한 항목이 없어 기본 초안을 만들었습니다. 혹시 이걸 찾으셨나요? ${names}`,
       aTplLoaded: '템플릿을 편집기로 불러왔습니다.', aPresetArmed: '이미지 변환 프리셋이 준비되었습니다.',
       aImgNewPage: (n, tot) => `변환한 이미지를 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aCmdNewPage: (n, tot) => `명령어 초안을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aTplNewPage: (n, tot) => `템플릿을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`,
-      importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
+      importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', vecViewL: '벡터화 보기', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
       impSteps: ['가져오기', '자르기', '변환', '검토', '편집'],
       impImportTitle: '이미지로 촉각 그래픽 만들기', impImportSub: '이미지를 가져오면 주요 윤곽과 구조를 분석해 DotPad용 촉각 그래픽으로 변환합니다.',
       impDrop: '이미지를 끌어다 놓거나 파일을 선택하세요', impDropSecondary: '사진, 도표, 지도, 선화 이미지를 촉각 그래픽으로 변환할 수 있습니다.', impDropOr: '또는', impChooseFile: '파일 선택', impSample: '샘플 이미지로 체험하기',
@@ -2045,6 +2062,7 @@ class Component extends DCLogic {
       vecToggleL: '벡터 라인 오브젝트 (베타)', vecToggleHelp: '촉각 변환 결과에서 편집 가능한 선 오브젝트를 만듭니다. 단순한 아이콘, 도표, 고대비 이미지에 가장 잘 맞아요.',
       vecWarnMsg: '이 이미지는 벡터 조각이 너무 많이 생길 수 있어요. 대비를 높이거나 이미지를 더 단순하게 만들어 보세요.',
       vecCountOf: n => '오브젝트 ' + n + '개 생성됨',
+      vecTypeRect: '사각형', vecTypeEllipse: '원', vecTypePolyline: '폴리라인', vecTypeLine: '선', vecOnlyViewL: '닷 숨기고 벡터만 보기',
       impResult: '촉각 결과', impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impReview: '미리보기 검토', impLoad: '편집기로 불러오기', impReConvert: '다시 변환',
       presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일',
       presetSubBalanced: '일반 사진·그림용', presetSubOutline: '아이콘·사물·도형용', presetSubDiagram: '차트·지도·선화용', presetSubDetail: '디테일 보존(점 밀도↑)',
@@ -2167,7 +2185,7 @@ class Component extends DCLogic {
       aCmdNoLib: 'No matching library item — created a starter draft you can edit.', aCmdNearHint: (names) => `No exact library item — created a starter draft. Did you mean: ${names}`,
       aTplLoaded: 'Template loaded into the editor.', aPresetArmed: 'Image-conversion preset armed.',
       aImgNewPage: (n, tot) => `Converted image added on page ${n}. ${tot} pages total`, aCmdNewPage: (n, tot) => `Command draft added on page ${n}. ${tot} pages total`, aTplNewPage: (n, tot) => `Template added on page ${n}. ${tot} pages total`,
-      importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
+      importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', vecViewL: 'Vectorized view', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
       impSteps: ['Import', 'Crop', 'Convert', 'Review', 'Edit'],
       impImportTitle: 'Create Tactile Graphic from Image', impImportSub: 'Import an image and convert its key outlines and structure into a DotPad-ready tactile graphic.',
       impDrop: 'Drop an image here or choose a file', impDropSecondary: 'Convert photos, diagrams, maps, and line drawings into tactile graphics.', impDropOr: 'or', impChooseFile: 'Choose File', impSample: 'Try Sample Image',
@@ -2185,6 +2203,7 @@ class Component extends DCLogic {
       vecToggleL: 'Vectorize lines (Beta)', vecToggleHelp: 'Creates editable line-like objects from the tactile conversion result. Best for simple icons, diagrams, and high-contrast images.',
       vecWarnMsg: 'This image may create too many vector fragments. Try increasing contrast or simplifying the image.',
       vecCountOf: n => n + ' object' + (n === 1 ? '' : 's') + ' generated',
+      vecTypeRect: 'Rectangle', vecTypeEllipse: 'Ellipse', vecTypePolyline: 'Polyline', vecTypeLine: 'Line', vecOnlyViewL: 'Hide dots, show vector only',
       impResult: 'Tactile result', impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impReview: 'Review preview', impLoad: 'Load into editor', impReConvert: 'Re-convert',
       presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail',
       presetSubBalanced: 'General photos & drawings', presetSubOutline: 'Icons, objects, shapes', presetSubDiagram: 'Charts, maps, line art', presetSubDetail: 'Keeps detail (denser)',
@@ -3282,24 +3301,38 @@ class Component extends DCLogic {
         g.fillStyle = on ? (a4 ? '#1E1C1A' : '#F2E9DD') : (a4 ? 'rgba(30,28,26,0.08)' : 'rgba(255,255,255,0.07)');
         g.beginPath(); g.arc(x * s + s / 2, y * s + s / 2, on ? s * 0.4 : s * 0.14, 0, Math.PI * 2); g.fill();
       }
-      // Vector-line overlay (Beta) — drawn imperatively onto a sibling
-      // canvas, same convention as the dot preview above (avoids the stale-
-      // by-one-render problem a declarative binding would have here, since
-      // this runs from componentDidUpdate, after render already committed).
-      // Stats/warning text uses its own fresh render()-time computation
-      // (see vecAdv), same pattern as the existing qAdv quality advisory.
+      // Vector-line view (Beta) — its own standalone canvas/tab now (see
+      // vecViewTab), not an overlay on top of the dots, so it gets full-
+      // strength color instead of competing with a dense dot field. Drawn
+      // imperatively, same convention as the dot preview above (avoids the
+      // stale-by-one-render problem a declarative binding would have here,
+      // since this runs from componentDidUpdate, after render already
+      // committed). Stats/warning text uses its own fresh render()-time
+      // computation (see vecAdv), same pattern as the qAdv quality advisory.
+      // Always drawn when the toggle is on — the template's vecViewTab
+      // bindings decide which of the two canvases is actually visible.
       const vc = this.impVecRef && this.impVecRef.current;
       if (vc) {
         vc.width = w * s; vc.height = h * s;
         const vg = vc.getContext('2d');
         vg.clearRect(0, 0, vc.width, vc.height);
         if (st.vectorizeEnabled && (st.impStep === 'review' || st.impStep === 'convert')) {
+          vg.fillStyle = a4 ? '#FFFFFF' : '#141210'; vg.fillRect(0, 0, vc.width, vc.height);
           const res = this.vectorizeGrid(pat, w, h);
-          vg.strokeStyle = '#1F6FB2'; vg.lineWidth = 1.5; vg.lineJoin = 'round'; vg.lineCap = 'round';
+          const lineColor = a4 ? '#1257A0' : '#5AA8E8', fillColor = a4 ? 'rgba(18,87,160,0.16)' : 'rgba(90,168,232,0.22)', dotColor = a4 ? '#FFFFFF' : '#141210';
           for (const obj of res.objects) {
             vg.beginPath();
             obj.points.forEach((p, i) => { const px = p[0] * s, py = p[1] * s; if (i === 0) vg.moveTo(px, py); else vg.lineTo(px, py); });
+            if (obj.closed) { vg.closePath(); vg.fillStyle = fillColor; vg.fill(); }
+            vg.lineWidth = 2.5; vg.lineJoin = 'round'; vg.lineCap = 'round'; vg.strokeStyle = lineColor;
             vg.stroke();
+            // vertex markers — makes it visually obvious these are structured,
+            // editable points rather than just another trace over the dots.
+            for (const p of obj.points) {
+              vg.beginPath(); vg.arc(p[0] * s, p[1] * s, 3, 0, Math.PI * 2);
+              vg.fillStyle = dotColor; vg.fill();
+              vg.lineWidth = 1.4; vg.strokeStyle = lineColor; vg.stroke();
+            }
           }
         }
       }
@@ -3793,7 +3826,7 @@ class Component extends DCLogic {
     clearTimeout(this._readT);
     this._uploadSeq = (this._uploadSeq || 0) + 1;
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile', threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
   }
   // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
   _captureSource(bmp, w, h) {
@@ -3816,7 +3849,7 @@ class Component extends DCLogic {
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
     // NOTE: only temporary import state here — the document (fileName, cells,
     // undo) must not change until the user explicitly applies (applyImport).
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name });
     const fail = () => {
       if (token !== this._uploadSeq) return;
       this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
@@ -3848,7 +3881,7 @@ class Component extends DCLogic {
     const cnv = document.createElement('canvas'); cnv.width = 150; cnv.height = 130;
     const g = cnv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 150, 130); g.strokeStyle = '#000'; this.drawCat(g, 50);
     this._srcData = g.getImageData(0, 0, 150, 130).data; this._srcW = 150; this._srcH = 130; this._srcCanvas = cnv;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName });
     this.drawImp();
   }
   // guard destructive new-document actions when the canvas has content
@@ -4643,7 +4676,7 @@ class Component extends DCLogic {
     const mkTool = id => {
       const sel = st.tool === id;
       return {
-        id, label: nm(id), key: keys[id], selected: sel, iconEl: this.icon(id, 24),
+        id, label: nm(id), key: keys[id], selected: sel, iconEl: this.icon(id, 21),
         aria: nm(id) + ' (' + keys[id] + ')',
         pick: () => this.pickTool(id),
         onEnter: e => this.showTip(nm(id), keys[id], e),
@@ -4669,13 +4702,13 @@ class Component extends DCLogic {
     });
     const shapeGroup = {
       active: shapeActive, aria: t.shapesGroup + (shapeActive ? ' — ' + nm(st.tool) : ''),
-      iconEl: this.icon(shapeActive ? st.tool : 'shapes', 24),
+      iconEl: this.icon(shapeActive ? st.tool : 'shapes', 21),
       style: railStyle(shapeActive || (st.railMenu && st.railMenu.kind === 'shape')),
       toggle: e => this.toggleRail('shape', e),
       onEnter: e => this.showTip(t.shapesGroup, '', e)
     };
     const quickGroup = {
-      aria: t.quick, iconEl: this.icon('more', 24),
+      aria: t.quick, iconEl: this.icon('more', 21),
       style: railStyle(st.railMenu && st.railMenu.kind === 'quick'),
       toggle: e => this.toggleRail('quick', e),
       onEnter: e => this.showTip(t.quick, '', e)
@@ -5197,6 +5230,18 @@ class Component extends DCLogic {
       vectorizeEnabled: st.vectorizeEnabled,
       toggleVectorize: () => this.setState(x => ({ vectorizeEnabled: !x.vectorizeEnabled })),
       vecStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, height: 36, padding: '0 14px', borderRadius: 100, cursor: 'pointer', border: '1px solid ' + (st.vectorizeEnabled ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.vectorizeEnabled ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: st.vectorizeEnabled ? '#B93E15' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12.5 },
+      // Preview-pane tab switcher (only shown once the Beta toggle is on):
+      // lets the right column flip between the normal dot preview and a
+      // dedicated, full-strength vector render — replaces the earlier
+      // dim-the-dots overlay hack with a cleaner either/or view.
+      vecViewIsTactile: st.vecViewTab !== 'vector',
+      vecViewIsVector: st.vecViewTab === 'vector',
+      setVecTabTactile: () => this.setState({ vecViewTab: 'tactile' }),
+      setVecTabVector: () => this.setState({ vecViewTab: 'vector' }),
+      vecTabTactileStyle: { height: 26, padding: '0 12px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700, background: st.vecViewTab !== 'vector' ? 'var(--ts-primary)' : 'transparent', color: st.vecViewTab !== 'vector' ? '#fff' : 'var(--ts-text-secondary)' },
+      vecTabVectorStyle: { height: 26, padding: '0 12px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700, background: st.vecViewTab === 'vector' ? 'var(--ts-primary)' : 'transparent', color: st.vecViewTab === 'vector' ? '#fff' : 'var(--ts-text-secondary)' },
+      impRefDisplay: (st.vectorizeEnabled && st.vecViewTab === 'vector') ? 'none' : 'block',
+      impVecDisplay: (st.vectorizeEnabled && st.vecViewTab === 'vector') ? 'block' : 'none',
       // Fresh per-render, same convention as qAdv above — never reads a value
       // cached by drawImp()'s imperative overlay draw, so it can't go stale.
       vecAdv: (() => {
@@ -5204,7 +5249,16 @@ class Component extends DCLogic {
         const crop = st.cropChoice === 'crop' ? st.cropRect : null;
         const pat = this.applyConv(this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, st.gridW, st.gridH);
         const res = this.vectorizeGrid(pat, st.gridW, st.gridH);
-        return { tooFragmented: res.stats.tooFragmented, countText: (typeof t.vecCountOf === 'function' ? t.vecCountOf(res.stats.objectCount) : (res.stats.objectCount + '')) };
+        const typeLabel = { rect: t.vecTypeRect, ellipse: t.vecTypeEllipse, polyline: t.vecTypePolyline, line: t.vecTypeLine };
+        const counts = {};
+        res.objects.forEach(o => { counts[o.type] = (counts[o.type] || 0) + 1; });
+        const chips = Object.keys(counts).map(k => ({ key: k, label: (typeLabel[k] || k), count: counts[k] }));
+        return {
+          tooFragmented: res.stats.tooFragmented,
+          hasObjects: res.stats.objectCount > 0,
+          countText: (typeof t.vecCountOf === 'function' ? t.vecCountOf(res.stats.objectCount) : (res.stats.objectCount + '')),
+          chips,
+        };
       })(),
       advOpen: st.advOpen,
       toggleAdv: () => this.setState(x => ({ advOpen: !x.advOpen })),
