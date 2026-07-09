@@ -1,21 +1,20 @@
 import { useCallback } from 'react';
 import { useAppStore } from '../app/appState';
 import * as dotPadSession from '../adapters/dotpad/session';
-import type { DeviceEvents } from '../adapters/types';
+import type { DeviceConnectOptions, DeviceEvents } from '../adapters/types';
 
 /**
  * DotPad connection hook.
  *
  * Drives {@link dotPadSession} (which owns the DotPadAdapter handle) and lets
  * the adapter's `onStatus` events set the UI connection state — no duplicated
- * mock timers here. The transport is still mocked in v0; Phase 3 replaces only
- * the adapter's `connect()`, leaving this hook's contract
- * (disconnected → connecting → connected | error) intact.
+ * mock timers here. Native chooser calls still originate from explicit user
+ * actions, satisfying Web Bluetooth/Web Serial gesture requirements.
  */
 export function useDotPadConnection() {
   const { state, dispatch } = useAppStore();
 
-  const connect = useCallback(() => {
+  const connect = useCallback((options?: DeviceConnectOptions) => {
     const events: DeviceEvents = {
       onStatus: (status, detail) => {
         switch (status) {
@@ -34,7 +33,7 @@ export function useDotPadConnection() {
         }
       },
     };
-    dotPadSession.connect(events).catch(() => {
+    dotPadSession.connect(events, options).catch(() => {
       dispatch({ type: 'dotpad/status', status: 'error' });
     });
   }, [dispatch]);
@@ -58,6 +57,8 @@ export function useDotPadConnection() {
     status: state.dotpadStatus,
     deviceName: state.deviceName,
     connect,
+    connectBle: () => connect({ transport: 'ble' }),
+    connectUsb: () => connect({ transport: 'usb' }),
     disconnect,
     retry,
   };

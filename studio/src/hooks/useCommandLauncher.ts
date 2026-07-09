@@ -29,7 +29,7 @@ export function useCommandLauncher() {
   const { state, dispatch } = useAppStore();
   const { connect } = useDotPadConnection();
   const { convert } = useTactileConversion();
-  const { send, canSend } = useDotPadSend();
+  const { send, canSend, sendPreview } = useDotPadSend();
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -109,6 +109,8 @@ export function useCommandLauncher() {
             send();
             return { message: 'DotPad로 전송을 시작합니다', tone: 'success' };
           }
+          if (!sendPreview())
+            return { message: '먼저 DotPad를 연결하고 그래픽을 변환하세요', tone: 'error' };
           return { message: 'DotPad 미리보기를 업데이트했습니다', tone: 'success' };
         }
         case 'library':
@@ -131,7 +133,7 @@ export function useCommandLauncher() {
           return { message: `명령을 이해하지 못했습니다: “${intent.label}”`, tone: 'error' };
       }
     },
-    [convert, dispatch, connect, send, canSend],
+    [convert, dispatch, connect, send, sendPreview, canSend],
   );
 
   const executeIntent = useCallback(
