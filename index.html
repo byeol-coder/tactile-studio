@@ -458,6 +458,16 @@ input[type=range]{accent-color:var(--ts-primary)}
         </sc-for>
       </div>
     </sc-if>
+    <sc-if value="{{ strokeMenuOpen }}" hint-placeholder-val="{{ false }}">
+      <div role="menu" aria-label="{{ strokeGroup.aria }}" style="{{ railFlyoutStyle }}">
+        <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
+          <button role="menuitem" onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.rowStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+            <span style="{{ s.iconStyle }}">{{ s.iconEl }}</span>
+            <span style="{{ s.textStyle }}">{{ s.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
     <sc-if value="{{ quickMenuOpen }}" hint-placeholder-val="{{ false }}">
       <div role="menu" aria-label="{{ t.quick }}" style="{{ railFlyoutStyle }}">
         <sc-for list="{{ quickItems }}" as="q" hint-placeholder-count="4">
@@ -509,20 +519,6 @@ input[type=range]{accent-color:var(--ts-primary)}
     </sc-if>
 
     <div class="ts-canvas-zone" style="flex:1;position:relative;display:flex;flex-direction:column;overflow:hidden;padding:0">
-      <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
-        <div role="group" aria-label="{{ strokeCtlLabel }}" style="flex:none;display:flex;align-items:center;gap:10px;padding:9px 20px;border-bottom:1px solid var(--ts-border-decor);background:#fff">
-          <span style="font-size:12.5px;color:var(--ts-text-secondary);white-space:nowrap">{{ strokeCtlLabel }}</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
-              <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-                <span aria-hidden="true" style="{{ s.dotStyle }}"></span>
-                {{ s.label }}
-              </button>
-            </sc-for>
-          </div>
-        </div>
-      </sc-if>
-
       <div ref="{{ viewportRef }}" onWheel="{{ cvWheel }}" onPointerDown="{{ canvasPanDown }}" onPointerMove="{{ canvasPanMove }}" onPointerUp="{{ canvasPanUp }}" onPointerCancel="{{ canvasPanUp }}" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
       <sc-if value="{{ corpusNavOn }}" hint-placeholder-val="{{ false }}">
         <div role="group" aria-label="{{ corpusNavGroupLabel }}" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px 6px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
@@ -553,7 +549,10 @@ input[type=range]{accent-color:var(--ts-primary)}
             {{ t.a4Badge }}
           </span>
         </sc-if>
-        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="{{ canvasStyle }}"></canvas>
+        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onPointerEnter="{{ cvEnter }}" onPointerLeave="{{ cvLeave }}" onDoubleClick="{{ cvDbl }}" style="{{ canvasStyle }}"></canvas>
+        <sc-if value="{{ eraserGuideVisible }}" hint-placeholder-val="{{ false }}">
+          <div aria-hidden="true" style="{{ eraserGuideStyle }}"></div>
+        </sc-if>
       </div>
       </div>
 
@@ -594,6 +593,15 @@ input[type=range]{accent-color:var(--ts-primary)}
             <svg width="7" height="7" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#B7AEA4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </span>
         </button>
+
+        <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ strokeGroup.toggle }}" onMouseEnter="{{ strokeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ strokeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ strokeMenuOpen }}" aria-label="{{ strokeGroup.aria }}" style="{{ strokeGroup.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            {{ strokeGroup.iconEl }}
+            <span aria-hidden="true" style="position:absolute;right:2px;bottom:2px;width:13px;height:13px;border-radius:100px;background:rgba(255,255,255,0.14);display:grid;place-items:center">
+              <svg width="7" height="7" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#B7AEA4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </span>
+          </button>
+        </sc-if>
 
         <button onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" style="{{ selectTool.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ selectTool.iconEl }}
@@ -1851,7 +1859,7 @@ class Component extends DCLogic {
     screen: 'home', lang: 'ko', tool: 'pen',
     homeView: 'recent',
     gridW: 60, gridH: 40, rev: 0,
-    strokeSize: 1, eraserSize: 1,
+    strokeSize: 1, eraserSize: 1, canvasHover: false,
     pageIndex: 0, pageCount: 1,
     impApply: 'merge', cmdApply: 'current', tplApply: 'newdoc',
     confirmKind: 'newdoc',
@@ -3765,6 +3773,24 @@ class Component extends DCLogic {
     return React.createElement('svg', { width: sz, height: sz, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
       spec.map((p, i) => React.createElement('path', { key: i, d: p.d, fill: p.fill ? 'currentColor' : 'none', stroke: p.fill ? 'none' : 'currentColor', strokeWidth: p.fill ? 0 : 2, strokeLinecap: 'round', strokeLinejoin: 'round' })));
   }
+  // Line-thickness preview glyph (1/2/3 = thin/regular/bold) — used inside
+  // the dropdown menu rows, one bar per option, next to each row's label.
+  strokeIcon(n, size) {
+    const sz = size || 20, sw = 3 + Math.max(1, Math.min(3, n || 1)) * 2.2;
+    return React.createElement('svg', { width: sz, height: sz, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+      React.createElement('line', { x1: 4, y1: 12, x2: 20, y2: 12, stroke: 'currentColor', strokeWidth: sw, strokeLinecap: 'round' }));
+  }
+  // Toolbar-button glyph for the stroke-width dropdown itself: three stacked
+  // bars, thin→thick (the standard "line weight" icon). Deliberately NOT a
+  // single line — a single line reads as the Line *tool* (see ICONS.line)
+  // sitting right next to it, which is confusing when Pen is the active tool.
+  strokeGroupIcon(size) {
+    const sz = size || 20;
+    return React.createElement('svg', { width: sz, height: sz, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+      React.createElement('line', { x1: 5, y1: 7, x2: 19, y2: 7, stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' }),
+      React.createElement('line', { x1: 5, y1: 12.5, x2: 19, y2: 12.5, stroke: 'currentColor', strokeWidth: 3, strokeLinecap: 'round' }),
+      React.createElement('line', { x1: 5, y1: 18, x2: 19, y2: 18, stroke: 'currentColor', strokeWidth: 4.6, strokeLinecap: 'round' }));
+  }
   outputDef(key) { return this.OUTPUTS.find(o => o.key === (key || this.state.output)) || this.OUTPUTS[0]; }
   setOutput(key) {
     const o = this.outputDef(key);
@@ -4660,6 +4686,22 @@ class Component extends DCLogic {
       toggle: e => this.toggleRail('shape', e),
       onEnter: e => this.showTip(t.shapesGroup, '', e)
     };
+    // Stroke-width dropdown: same toolbar-pill pattern as shapeGroup above,
+    // reusing the existing strokeSize/eraserSize state (see strokeOpts below)
+    // instead of introducing a parallel "px" scale — brushCb() only knows
+    // how to stamp 1/2/3-row brushes, so that's what the dropdown offers too.
+    const strokeToolActiveNow = ['pen', 'line', 'eraser', 'rect', 'ellipse', 'poly'].indexOf(st.tool) !== -1;
+    const strokeIsEraserNow = st.tool === 'eraser';
+    const strokeLabelNow = (strokeIsEraserNow ? t.eraserL : t.strokeL) || '';
+    const strokeSizeNow = strokeIsEraserNow ? st.eraserSize : st.strokeSize;
+    const strokeRowLabels = t.rowN || ['1', '2', '3'];
+    const strokeGroup = {
+      active: strokeToolActiveNow, aria: strokeLabelNow + (strokeSizeNow ? ' — ' + (strokeRowLabels[strokeSizeNow - 1] || strokeSizeNow) : ''),
+      iconEl: this.strokeGroupIcon(21),
+      style: railStyle(st.railMenu && st.railMenu.kind === 'stroke'),
+      toggle: e => this.toggleRail('stroke', e),
+      onEnter: e => this.showTip(strokeLabelNow, '', e)
+    };
     const quickGroup = {
       aria: t.quick, iconEl: this.icon('more', 21),
       style: railStyle(st.railMenu && st.railMenu.kind === 'quick'),
@@ -4994,6 +5036,7 @@ class Component extends DCLogic {
       canvasRef: this.canvasRef,
       heroRef: this.heroRef,
       cvDown: e => this.onDown(e), cvMove: e => this.onMove(e), cvUp: e => this.onUp(e), cvDbl: () => this.onDbl(),
+      cvEnter: () => this.setState({ canvasHover: true }), cvLeave: () => this.setState({ canvasHover: false }),
       cvWheel: e => this.cvWheel(e),
       viewportRef: this.viewportRef,
       canvasPanDown: e => this.canvasPanDown(e), canvasPanMove: e => this.canvasPanMove(e), canvasPanUp: () => this.canvasPanUp(),
@@ -5005,12 +5048,32 @@ class Component extends DCLogic {
       // Away from 100% we switch to an explicit pixel size so the scrollable viewport
       // can correctly grow/scroll — image-rendering keeps dots crisp instead of blurry.
       canvasStyle: st.zoom === 1
-        ? { display: 'block', outline: 'none', touchAction: 'none', cursor: 'crosshair', maxWidth: '100%' }
-        : { display: 'block', outline: 'none', touchAction: 'none', cursor: 'crosshair', width: (st.gridW * this.cellPx() * st.zoom) + 'px', height: (st.gridH * this.cellPx() * st.zoom) + 'px', imageRendering: 'pixelated' },
+        ? { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', maxWidth: '100%' }
+        : { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', width: (st.gridW * this.cellPx() * st.zoom) + 'px', height: (st.gridH * this.cellPx() * st.zoom) + 'px', imageRendering: 'pixelated' },
+      // Eraser cursor guide: a grid-aligned box over the exact cells the next
+      // erase stroke will hit (mirrors the offsets brushCb() actually stamps),
+      // so it stays correct at any zoom and never outruns the real erase area.
+      // Visual-only (pointer-events:none) — never touches erase logic itself.
+      eraserGuideVisible: st.tool === 'eraser' && st.canvasHover,
+      eraserGuideStyle: (() => {
+        const n = st.eraserSize || 1;
+        const offs = n <= 1 ? [0, 0] : n === 2 ? [0, 1] : [-1, 1];
+        const gx0 = Math.max(0, st.cx + offs[0]), gx1 = Math.min(st.gridW - 1, st.cx + offs[1]);
+        const gy0 = Math.max(0, st.cy + offs[0]), gy1 = Math.min(st.gridH - 1, st.cy + offs[1]);
+        const cs = this.cellPx() * st.zoom;
+        const cv = this.canvasRef.current;
+        const offX = cv ? cv.offsetLeft : 12, offY = cv ? cv.offsetTop : 12;
+        return {
+          position: 'absolute', pointerEvents: 'none', zIndex: 4, boxSizing: 'border-box',
+          left: (offX + gx0 * cs) + 'px', top: (offY + gy0 * cs) + 'px',
+          width: ((gx1 - gx0 + 1) * cs) + 'px', height: ((gy1 - gy0 + 1) * cs) + 'px',
+          border: '1.5px solid var(--ts-danger)', background: 'rgba(218,18,13,0.14)', borderRadius: '2px'
+        };
+      })(),
       showEntry: st.screen === 'studio' && st.entry,
       startBlankFn: () => { this.setState({ entry: false }); this.say(t.aReady); },
       // tools (grouped compact rail)
-      primaryTools, selectTool, textTool, shapeTools, shapeGroup, quickGroup, quickItems,
+      primaryTools, selectTool, textTool, shapeTools, shapeGroup, strokeGroup, quickGroup, quickItems,
       textSizeOpts, textOrientOpts, textStyleOpts,
       textPopoverOpen: !!st.textPopover,
       textPopoverStyle: st.textPopover ? { position: 'fixed', left: st.textPopover.left, top: st.textPopover.top, zIndex: 82, width: 258, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 16, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' } : null,
@@ -5020,6 +5083,7 @@ class Component extends DCLogic {
       textCancel: () => this.setState({ textPopover: null }),
       textCommit: () => this.commitText(),
       shapeMenuOpen: !!st.railMenu && st.railMenu.kind === 'shape',
+      strokeMenuOpen: !!st.railMenu && st.railMenu.kind === 'stroke',
       quickMenuOpen: !!st.railMenu && st.railMenu.kind === 'quick',
       railMenuOpen: !!st.railMenu,
       closeRail: () => this.setState({ railMenu: null }),
@@ -5056,13 +5120,15 @@ class Component extends DCLogic {
         const descArr = (eraser ? t.eraserDesc : t.strokeDesc) || [];
         const desc = descArr[nn - 1] || '';
         const ctlL = (eraser ? t.eraserL : t.strokeL) || '';
-        const dot = 6 + nn * 3;   // 9/12/15px — still a clear size cue, no longer oversized
         return {
-          n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
-          aria: (ctlL + ' ' + desc).trim(), title: desc,
-          pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
-          style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, height: 32, padding: '0 12px', borderRadius: 8, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 13 },
-          dotStyle: { width: dot + 'px', height: dot + 'px', borderRadius: '50%', background: 'currentColor', flex: 'none' }
+          n: nn, label: rowN[nn - 1] || String(nn), active,
+          aria: (ctlL + ' ' + (rowN[nn - 1] || nn) + (desc ? ' — ' + desc : '')).trim(), title: desc,
+          pick: () => {
+            this.setState(Object.assign(eraser ? { eraserSize: nn } : { strokeSize: nn }, { railMenu: null }));
+            this.say(desc ? (ctlL + ': ' + desc) : ctlL);
+          },
+          rowStyle: menuRow(active), iconStyle: menuGlyph(active), textStyle: menuText(active),
+          iconEl: this.strokeIcon(nn, 19)
         };
       }),
       // pages (v1 simple multi-page document)
