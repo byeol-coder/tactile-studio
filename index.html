@@ -523,7 +523,7 @@ input[type=range]{accent-color:var(--ts-primary)}
         </div>
       </sc-if>
 
-      <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
+      <div onWheel="{{ cvWheel }}" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
       <sc-if value="{{ corpusNavOn }}" hint-placeholder-val="{{ false }}">
         <div role="group" aria-label="{{ corpusNavGroupLabel }}" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px 6px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
           <button onClick="{{ corpusPrev }}" data-corpus-nav="prev" aria-label="{{ corpusPrevLabel }}" title="{{ corpusPrevLabel }}" disabled="{{ corpusPrevDisabled }}" style="{{ corpusPrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -553,8 +553,23 @@ input[type=range]{accent-color:var(--ts-primary)}
             {{ t.a4Badge }}
           </span>
         </sc-if>
-        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="display:block;outline:none;touch-action:none;cursor:crosshair;max-width:100%"></canvas>
+        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="{{ canvasStyle }}"></canvas>
       </div>
+      </div>
+
+      <!-- Zoom pill (Figma-style): Ctrl/Cmd + wheel or trackpad pinch zooms
+           continuously anywhere over the canvas viewport (see cvWheel on the
+           scroll container above); +/− jump between preset steps. Placed as
+           a sibling of the scrollable viewport so it stays put on scroll,
+           and above the floating tool pill so the two never overlap. -->
+      <div role="group" aria-label="{{ t.zoomLabel }}" style="position:absolute;right:16px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
+        <button onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" title="{{ t.zoomOutL }} (Ctrl+-)" style="width:28px;height:28px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+        </button>
+        <button onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" title="{{ t.zoomResetL }} (Ctrl+0)" style="min-width:46px;height:28px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
+        <button onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" title="{{ t.zoomInL }} (Ctrl+=)" style="width:28px;height:28px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+        </button>
       </div>
 
       <!-- Floating tool pill (Figma: 중앙 플로팅 툴바) — centered over the bottom edge
@@ -1858,6 +1873,7 @@ class Component extends DCLogic {
     toolbarPos: null,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
+    zoom: 1,
     corpusCtx: null,
     saved: []
   };
@@ -1880,6 +1896,7 @@ class Component extends DCLogic {
     this.undoStack = []; this.redoStack = [];
     this.preview = null;   // Set of idx (additive overlay)
     this.drag = null;      // {mode,x0,y0,...}
+    this.zoomSteps = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 8];
     this.polyPts = [];
     this.lastPaint = null;
     this._liveT = null;
@@ -1942,6 +1959,7 @@ class Component extends DCLogic {
       dpTestSent: 'DotPad로 테스트 패턴을 전송했습니다.', saveToLib: '라이브러리에 저장',
       pos: '위치', dotOn: '점 있음', dotOff: '점 없음', toolLabel: '도구', undo: '실행 취소', redo: '다시 실행', dots: '점', helpHint: '단축키 안내',
       canvasAria: '촉각 그리드 편집기. 화살표 키로 이동하고 스페이스로 점을 토글합니다.',
+      zoomLabel: '캔버스 확대/축소', zoomOutL: '축소', zoomInL: '확대', zoomResetL: '100%로 초기화',
       heroAria: '이미지가 왼쪽에서 오른쪽으로 스캔되며 촉각 점 그래픽으로 변환되는 애니메이션',
       entryTitle: '설명하고, 변환하고, 편집해 촉각 그래픽을 완성하세요.', entrySub: '명령어·이미지·템플릿으로 촉각 그래픽을 만들고, DotPad나 A4 점자용지로 출력하세요.',
       entCmd: '명령어로 만들기', entCmdBadge: '추천', entCmdSub: '설명만 입력하면 촉각 그래픽 초안을 자동으로 만들어줍니다.', entTpl: '템플릿에서 시작', entTplSub: '읽기 쉬운 촉각 스타터로 시작합니다.',
@@ -2078,6 +2096,7 @@ class Component extends DCLogic {
       dpTestSent: 'Sent a test pattern to DotPad.', saveToLib: 'Save to library',
       pos: 'Position', dotOn: 'Dot present', dotOff: 'No dot', toolLabel: 'Tool', undo: 'Undo', redo: 'Redo', dots: 'dots', helpHint: 'Shortcuts',
       canvasAria: 'Tactile grid editor. Move with arrow keys, toggle dots with Space.',
+      zoomLabel: 'Zoom canvas', zoomOutL: 'Zoom out', zoomInL: 'Zoom in', zoomResetL: 'Reset to 100%',
       heroAria: 'Animation of an image being scanned left to right and converted into a tactile dot graphic',
       entryTitle: 'Describe, convert, edit, and output tactile graphics.', entrySub: 'Create tactile graphics from commands, images, or templates, then output to DotPad or A4 embossing paper.',
       entCmd: 'Generate from command', entCmdBadge: 'Recommended', entCmdSub: 'Create a tactile graphic draft from a description.', entTpl: 'Start from template', entTplSub: 'Use a readable tactile starter.',
@@ -3187,6 +3206,32 @@ class Component extends DCLogic {
     this.bump();
   }
 
+  // ── Canvas zoom (Figma-style) ───────────────────────────────────────────
+  // Buttons/keyboard shortcuts jump between preset steps (zoomSteps); wheel
+  // + Ctrl/Cmd (and trackpad pinch, which browsers report as a ctrlKey wheel
+  // event) zooms continuously. The canvas keeps its real pixel resolution —
+  // only its CSS display size changes — so drawing/hit-testing (evCell) is
+  // untouched: it already normalizes by cv.width/rect.width.
+  zoomClamp(z) { return Math.max(this.zoomSteps[0], Math.min(this.zoomSteps[this.zoomSteps.length - 1], z)); }
+  zoomIn() {
+    const steps = this.zoomSteps, cur = this.state.zoom;
+    const next = steps.find(s => s > cur + 0.001);
+    this.setState({ zoom: next !== undefined ? next : steps[steps.length - 1] });
+  }
+  zoomOut() {
+    const steps = this.zoomSteps, cur = this.state.zoom;
+    let prev = steps[0];
+    for (const s of steps) { if (s < cur - 0.001) prev = s; }
+    this.setState({ zoom: prev });
+  }
+  zoomReset() { this.setState({ zoom: 1 }); }
+  cvWheel(e) {
+    if (!(e.ctrlKey || e.metaKey)) return; // plain wheel: let the viewport scroll/pan as usual
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.08 : 1 / 1.08;
+    this.setState({ zoom: Math.round(this.zoomClamp(this.state.zoom * factor) * 100) / 100 });
+  }
+
   // ---------- keyboard ----------
   onKey(e) {
     const tag = (e.target.tagName || '').toUpperCase();
@@ -3211,6 +3256,9 @@ class Component extends DCLogic {
       return e.shiftKey ? this.redo() : this.undo();
     }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); return this.redo(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) { e.preventDefault(); return this.zoomIn(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) { e.preventDefault(); return this.zoomOut(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); return this.zoomReset(); }
     const tools = { v: 'cursor', p: 'pen', e: 'eraser', l: 'line', r: 'rect', o: 'ellipse', g: 'poly', f: 'fill', s: 'select', t: 'text' };
     const k = e.key.toLowerCase();
     if (!e.ctrlKey && !e.metaKey && tools[k]) { this.pickTool(tools[k]); return; }
@@ -4551,6 +4599,17 @@ class Component extends DCLogic {
       canvasRef: this.canvasRef,
       heroRef: this.heroRef,
       cvDown: e => this.onDown(e), cvMove: e => this.onMove(e), cvUp: e => this.onUp(e), cvDbl: () => this.onDbl(),
+      cvWheel: e => this.cvWheel(e),
+      zoomPct: Math.round(st.zoom * 100) + '%',
+      zoomIn: () => this.zoomIn(), zoomOut: () => this.zoomOut(), zoomReset: () => this.zoomReset(),
+      zoomOutDisabled: st.zoom <= this.zoomSteps[0] + 0.001,
+      zoomInDisabled: st.zoom >= this.zoomSteps[this.zoomSteps.length - 1] - 0.001,
+      // At 100% this matches the original responsive (max-width:100%) behavior exactly.
+      // Away from 100% we switch to an explicit pixel size so the scrollable viewport
+      // can correctly grow/scroll — image-rendering keeps dots crisp instead of blurry.
+      canvasStyle: st.zoom === 1
+        ? { display: 'block', outline: 'none', touchAction: 'none', cursor: 'crosshair', maxWidth: '100%' }
+        : { display: 'block', outline: 'none', touchAction: 'none', cursor: 'crosshair', width: (st.gridW * this.cellPx() * st.zoom) + 'px', height: (st.gridH * this.cellPx() * st.zoom) + 'px', imageRendering: 'pixelated' },
       showEntry: st.screen === 'studio' && st.entry,
       startBlankFn: () => { this.setState({ entry: false }); this.say(t.aReady); },
       // tools (grouped compact rail)
