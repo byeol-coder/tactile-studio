@@ -523,7 +523,7 @@ input[type=range]{accent-color:var(--ts-primary)}
         </div>
       </sc-if>
 
-      <div onWheel="{{ cvWheel }}" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
+      <div ref="{{ viewportRef }}" onWheel="{{ cvWheel }}" onPointerDown="{{ canvasPanDown }}" onPointerMove="{{ canvasPanMove }}" onPointerUp="{{ canvasPanUp }}" onPointerCancel="{{ canvasPanUp }}" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
       <sc-if value="{{ corpusNavOn }}" hint-placeholder-val="{{ false }}">
         <div role="group" aria-label="{{ corpusNavGroupLabel }}" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px 6px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
           <button onClick="{{ corpusPrev }}" data-corpus-nav="prev" aria-label="{{ corpusPrevLabel }}" title="{{ corpusPrevLabel }}" disabled="{{ corpusPrevDisabled }}" style="{{ corpusPrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -1884,6 +1884,7 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.canvasRef = React.createRef();
+    this.viewportRef = React.createRef();
     this.padRef = React.createRef();
     this.impRef = React.createRef();
     this.fileRef = React.createRef();
@@ -3080,6 +3081,7 @@ class Component extends DCLogic {
     return [Math.max(0, Math.min(this.state.gridW - 1, x)), Math.max(0, Math.min(this.state.gridH - 1, y))];
   }
   onDown(e) {
+    if (e.button !== undefined && e.button !== 0) return; // middle/right click: not a drawing gesture (middle = pan, see canvasPanDown)
     e.preventDefault();
     this.canvasRef.current.focus();
     const [x, y] = this.evCell(e), t = this.T(), tool = this.state.tool;
@@ -3215,24 +3217,81 @@ class Component extends DCLogic {
   // event) zooms continuously. The canvas keeps its real pixel resolution —
   // only its CSS display size changes — so drawing/hit-testing (evCell) is
   // untouched: it already normalizes by cv.width/rect.width.
+  //
+  // zoomAround anchors the zoom to a specific viewport point (the mouse for
+  // wheel/pinch, the viewport center for buttons/keyboard) by re-deriving
+  // scrollLeft/scrollTop after the resize so that point stays visually put —
+  // without this, changing zoom without touching scroll makes the content
+  // appear to jump to a different part of the canvas.
   zoomClamp(z) { return Math.max(this.zoomSteps[0], Math.min(this.zoomSteps[this.zoomSteps.length - 1], z)); }
+  zoomAround(newZoom, clientX, clientY) {
+    const el = this.viewportRef.current;
+    const oldZoom = this.state.zoom;
+    newZoom = Math.round(this.zoomClamp(newZoom) * 100) / 100;
+    if (!el || newZoom === oldZoom) { this.setState({ zoom: newZoom }); return; }
+    const r = el.getBoundingClientRect();
+    const ax = clientX - r.left, ay = clientY - r.top;          // anchor, viewport-relative
+    const px = el.scrollLeft + ax, py = el.scrollTop + ay;      // same point, in content coordinates
+    const ratio = newZoom / oldZoom;
+    this.setState({ zoom: newZoom }, () => {
+      el.scrollLeft = px * ratio - ax;
+      el.scrollTop = py * ratio - ay;
+    });
+  }
+  zoomAtViewportCenter(newZoom) {
+    const el = this.viewportRef.current;
+    if (!el) { this.setState({ zoom: newZoom }); return; }
+    const r = el.getBoundingClientRect();
+    this.zoomAround(newZoom, r.left + r.width / 2, r.top + r.height / 2);
+  }
   zoomIn() {
     const steps = this.zoomSteps, cur = this.state.zoom;
     const next = steps.find(s => s > cur + 0.001);
-    this.setState({ zoom: next !== undefined ? next : steps[steps.length - 1] });
+    this.zoomAtViewportCenter(next !== undefined ? next : steps[steps.length - 1]);
   }
   zoomOut() {
     const steps = this.zoomSteps, cur = this.state.zoom;
     let prev = steps[0];
     for (const s of steps) { if (s < cur - 0.001) prev = s; }
-    this.setState({ zoom: prev });
+    this.zoomAtViewportCenter(prev);
   }
-  zoomReset() { this.setState({ zoom: 1 }); }
+  zoomReset() { this.zoomAtViewportCenter(1); }
   cvWheel(e) {
     if (!(e.ctrlKey || e.metaKey)) return; // plain wheel: let the viewport scroll/pan as usual
     e.preventDefault();
     const factor = e.deltaY < 0 ? 1.08 : 1 / 1.08;
-    this.setState({ zoom: Math.round(this.zoomClamp(this.state.zoom * factor) * 100) / 100 });
+    this.zoomAround(this.state.zoom * factor, e.clientX, e.clientY);
+  }
+  // Middle-mouse-button drag panning (Figma/Blender/Illustrator convention) —
+  // deliberately not spacebar-based, since Space already toggles the dot at
+  // the keyboard cursor for screen-reader/keyboard-only editing.
+  canvasPanDown(e) {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    const el = e.currentTarget;
+    try { el.setPointerCapture && el.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
+    this.panDrag = { x: e.clientX, y: e.clientY, sl: el.scrollLeft, stp: el.scrollTop };
+  }
+  canvasPanMove(e) {
+    const d = this.panDrag;
+    if (!d) return;
+    e.preventDefault();
+    e.currentTarget.scrollLeft = d.sl - (e.clientX - d.x);
+    e.currentTarget.scrollTop = d.stp - (e.clientY - d.y);
+  }
+  canvasPanUp() { this.panDrag = null; }
+  // Keeps the keyboard-navigated cell (cx,cy) visible after arrow-key moves —
+  // matters once zoomed in, where the full grid no longer fits on screen.
+  scrollCellIntoView(x, y) {
+    const el = this.viewportRef.current;
+    if (!el) return;
+    const c = this.cellPx() * this.state.zoom, pad = 24;
+    const left = x * c, right = left + c, top = y * c, bottom = top + c;
+    const vl = el.scrollLeft, vr = vl + el.clientWidth, vt = el.scrollTop, vb = vt + el.clientHeight;
+    if (left < vl + pad) el.scrollLeft = Math.max(0, left - pad);
+    else if (right > vr - pad) el.scrollLeft += (right - vr + pad);
+    if (top < vt + pad) el.scrollTop = Math.max(0, top - pad);
+    else if (bottom > vb - pad) el.scrollTop += (bottom - vb + pad);
   }
 
   // ---------- keyboard ----------
@@ -3259,8 +3318,8 @@ class Component extends DCLogic {
       return e.shiftKey ? this.redo() : this.undo();
     }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); return this.redo(); }
-    if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) { e.preventDefault(); return this.zoomIn(); }
-    if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) { e.preventDefault(); return this.zoomOut(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+' || e.code === 'NumpadAdd')) { e.preventDefault(); return this.zoomIn(); }
+    if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract')) { e.preventDefault(); return this.zoomOut(); }
     if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); return this.zoomReset(); }
     const tools = { v: 'cursor', p: 'pen', e: 'eraser', l: 'line', r: 'rect', o: 'ellipse', g: 'poly', f: 'fill', s: 'select', t: 'text' };
     const k = e.key.toLowerCase();
@@ -3272,6 +3331,7 @@ class Component extends DCLogic {
       const nx = Math.max(0, Math.min(st.gridW - 1, st.cx + mv[0]));
       const ny = Math.max(0, Math.min(st.gridH - 1, st.cy + mv[1]));
       this.setState({ cx: nx, cy: ny });
+      this.scrollCellIntoView(nx, ny);
       return;
     }
     if (e.key === ' ') {
@@ -4603,6 +4663,8 @@ class Component extends DCLogic {
       heroRef: this.heroRef,
       cvDown: e => this.onDown(e), cvMove: e => this.onMove(e), cvUp: e => this.onUp(e), cvDbl: () => this.onDbl(),
       cvWheel: e => this.cvWheel(e),
+      viewportRef: this.viewportRef,
+      canvasPanDown: e => this.canvasPanDown(e), canvasPanMove: e => this.canvasPanMove(e), canvasPanUp: () => this.canvasPanUp(),
       zoomPct: Math.round(st.zoom * 100) + '%',
       zoomIn: () => this.zoomIn(), zoomOut: () => this.zoomOut(), zoomReset: () => this.zoomReset(),
       zoomOutDisabled: st.zoom <= this.zoomSteps[0] + 0.001,
