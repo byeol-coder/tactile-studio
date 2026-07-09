@@ -211,7 +211,7 @@ input[type=range]{accent-color:var(--ts-primary)}
   .ts-sb-sec{display:none!important}
   .ts-return-chip{bottom:112px!important}
   /* floating canvas controls: tighter offsets so they don't crowd a narrow canvas */
-  .ts-canvas-zone>[role="group"]{top:10px!important}
+  .ts-canvas-zone [role="group"]{top:10px!important}
 }
 @keyframes tsDrawerIn{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
 /* Narrow phones: stack modal grids that were designed as 2/3 columns */
@@ -574,7 +574,22 @@ input[type=range]{accent-color:var(--ts-primary)}
       </div>
     </sc-if>
 
-    <div class="ts-canvas-zone" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
+    <div class="ts-canvas-zone" style="flex:1;position:relative;display:flex;flex-direction:column;overflow:hidden;padding:0">
+      <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
+        <div role="group" aria-label="{{ strokeCtlLabel }}" style="flex:none;display:flex;align-items:center;gap:10px;padding:9px 20px;border-bottom:1px solid var(--ts-border-decor);background:#fff">
+          <span style="font-size:11px;color:var(--ts-text-secondary);white-space:nowrap">{{ strokeCtlLabel }}</span>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
+              <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                <span aria-hidden="true" style="{{ s.dotStyle }}"></span>
+                {{ s.label }}
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
       <sc-if value="{{ corpusNavOn }}" hint-placeholder-val="{{ false }}">
         <div role="group" aria-label="{{ corpusNavGroupLabel }}" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px 6px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
           <button onClick="{{ corpusPrev }}" data-corpus-nav="prev" aria-label="{{ corpusPrevLabel }}" title="{{ corpusPrevLabel }}" disabled="{{ corpusPrevDisabled }}" style="{{ corpusPrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -606,6 +621,7 @@ input[type=range]{accent-color:var(--ts-primary)}
         </sc-if>
         <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onDoubleClick="{{ cvDbl }}" style="display:block;outline:none;touch-action:none;cursor:crosshair;max-width:100%"></canvas>
       </div>
+      </div>
 
     </div>
 
@@ -635,17 +651,6 @@ input[type=range]{accent-color:var(--ts-primary)}
               </sc-for>
             </select>
           </label>
-
-          <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
-            <div>
-              <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:7px">{{ strokeCtlLabel }}</div>
-              <div role="group" aria-label="{{ strokeCtlLabel }}" style="display:flex;gap:6px">
-                <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
-                  <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.panelStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ s.label }}</button>
-                </sc-for>
-              </div>
-            </div>
-          </sc-if>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
             <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:3px">{{ t.inspCleanup }}</div>
@@ -4571,12 +4576,13 @@ class Component extends DCLogic {
         const descArr = (eraser ? t.eraserDesc : t.strokeDesc) || [];
         const desc = descArr[nn - 1] || '';
         const ctlL = (eraser ? t.eraserL : t.strokeL) || '';
+        const dot = 5 + nn * 4; // 9/13/17px — swatch grows with the actual stroke weight it selects
         return {
           n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
           aria: (ctlL + ' ' + desc).trim(), title: desc,
           pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
           style: { display: 'inline-flex', alignItems: 'center', gap: 7, height: 30, padding: active ? '0 11px 0 10px' : '0 12px', borderRadius: 100, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12 },
-          panelStyle: { flex: 1, height: 32, borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: active ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-functional)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : '#1E1C1A' }
+          dotStyle: { width: dot + 'px', height: dot + 'px', borderRadius: '50%', background: 'currentColor', flex: 'none' }
         };
       }),
       // pages (v1 simple multi-page document)
