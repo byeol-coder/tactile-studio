@@ -1,8 +1,0 @@
-node_modules/
-dist/
-dist_verify/
-dist-ssr/
-vite.config.ts.timestamp-*
-*.tsbuildinfo
-*.local
-.DS_Store
