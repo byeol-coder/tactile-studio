@@ -605,10 +605,10 @@ input[type=range]{accent-color:var(--ts-primary)}
 
         <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
         <button class="ts-rail-history" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
         <button class="ts-rail-history" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
 
         <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
@@ -4308,7 +4308,7 @@ class Component extends DCLogic {
     const mkTool = id => {
       const sel = st.tool === id;
       return {
-        id, label: nm(id), key: keys[id], selected: sel, iconEl: this.icon(id, 21),
+        id, label: nm(id), key: keys[id], selected: sel, iconEl: this.icon(id, 24),
         aria: nm(id) + ' (' + keys[id] + ')',
         pick: () => this.pickTool(id),
         onEnter: e => this.showTip(nm(id), keys[id], e),
@@ -4334,13 +4334,13 @@ class Component extends DCLogic {
     });
     const shapeGroup = {
       active: shapeActive, aria: t.shapesGroup + (shapeActive ? ' — ' + nm(st.tool) : ''),
-      iconEl: this.icon(shapeActive ? st.tool : 'shapes', 21),
+      iconEl: this.icon(shapeActive ? st.tool : 'shapes', 24),
       style: railStyle(shapeActive || (st.railMenu && st.railMenu.kind === 'shape')),
       toggle: e => this.toggleRail('shape', e),
       onEnter: e => this.showTip(t.shapesGroup, '', e)
     };
     const quickGroup = {
-      aria: t.quick, iconEl: this.icon('more', 21),
+      aria: t.quick, iconEl: this.icon('more', 24),
       style: railStyle(st.railMenu && st.railMenu.kind === 'quick'),
       toggle: e => this.toggleRail('quick', e),
       onEnter: e => this.showTip(t.quick, '', e)
