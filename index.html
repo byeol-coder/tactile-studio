@@ -116,8 +116,8 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-topbar-left,.ts-topbar-right{display:flex;align-items:center;gap:8px;min-width:0}
 .ts-topbar-left{justify-content:flex-start}
 .ts-topbar-right{justify-content:flex-end}
-.ts-topbar-button,.ts-topbar-action,.ts-topbar-pill{min-height:44px!important;height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center;gap:8px!important;white-space:nowrap;flex:0 0 auto;box-sizing:border-box}
-.ts-topbar-action,.ts-topbar-pill{border-radius:12px!important;padding-left:14px!important;padding-right:14px!important}
+.ts-topbar-button,.ts-topbar-action{min-height:44px!important;height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center;gap:8px!important;white-space:nowrap;flex:0 0 auto;box-sizing:border-box}
+.ts-topbar-action{border-radius:12px!important;padding-left:14px!important;padding-right:14px!important}
 .ts-topbar-primary{background:var(--ts-primary)!important;color:#fff!important;border:none!important;font-weight:800!important;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.10)}
 .ts-brand-logo{height:28px;width:auto;display:block;flex:none}
 .ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 6px}
@@ -126,10 +126,8 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-project-name{min-width:0!important;width:clamp(96px,14vw,220px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ts-output-zone{min-width:0;max-width:190px;overflow:hidden}
 .ts-output-zone select{min-width:0;max-width:150px}
-.ts-action-label,.ts-pill-full,.ts-pill-medium,.ts-pill-short,.ts-save-text{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1}
-.ts-pill-medium,.ts-pill-short{display:none}
+.ts-action-label,.ts-save-text{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1}
 .ts-save-status{max-width:94px;overflow:hidden}
-.device-status-pill{max-width:240px;min-width:0;overflow:hidden}
 .image-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .image-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .tactile-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -137,17 +135,11 @@ input[type=range]{accent-color:var(--ts-primary)}
 @media (max-width:1180px){
   .ts-topbar{grid-template-columns:minmax(220px,1fr) minmax(220px,auto);gap:10px}
   .ts-save-status{display:none!important}
-  .device-status-pill{max-width:190px}
-  .ts-pill-full{display:none}
-  .ts-pill-medium{display:inline-block}
 }
 @media (max-width:1080px){
   .ts-topbar{grid-template-columns:minmax(150px,1fr) minmax(150px,auto);gap:8px;padding:0 10px}
   .ts-brand-logo,.ts-left-divider{display:none!important}
   .ts-create-label{display:none}
-  .device-status-pill{max-width:128px}
-  .ts-pill-medium{display:none}
-  .ts-pill-short{display:inline-block}
   .ts-topbar-action{padding-left:12px!important;padding-right:12px!important}
 }
 @media (max-width:820px){
@@ -155,9 +147,8 @@ input[type=range]{accent-color:var(--ts-primary)}
   .ts-menu-caret{display:none!important}
   .ts-help-button{display:none!important}
   .ts-topbar{grid-template-columns:minmax(72px,1fr) minmax(100px,auto);gap:6px;padding:0 8px}
-  .ts-topbar-action:not(.ts-topbar-primary),.device-status-pill{width:44px!important;padding-left:0!important;padding-right:0!important}
+  .ts-topbar-action:not(.ts-topbar-primary){width:44px!important;padding-left:0!important;padding-right:0!important}
   .ts-topbar-primary{padding-left:12px!important;padding-right:14px!important}
-  .ts-pill-short{display:none}
 }
 /* Hub landing — tablet padding tightening */
 @media (max-width:820px){
@@ -344,15 +335,6 @@ input[type=range]{accent-color:var(--ts-primary)}
       </button>
       </sc-if>
 
-      <button class="ts-topbar-pill device-status-pill" onClick="{{ toggleDevice }}" aria-haspopup="menu" aria-expanded="{{ deviceOpen }}" aria-label="{{ connChipAria }}" title="{{ connChipText }}" style="{{ connStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-        <span style="{{ connDotStyle }}"></span>
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.2" fill="currentColor"></circle><circle cx="12" cy="12" r="1.2" fill="currentColor"></circle><circle cx="16" cy="12" r="1.2" fill="currentColor"></circle></svg>
-        <span class="ts-pill-full">{{ connChipText }}</span>
-        <span class="ts-pill-medium">{{ connChipMediumText }}</span>
-        <span class="ts-pill-short">{{ connChipShortText }}</span>
-        <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45;flex:none"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </button>
-
       <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
     </div>
   </div>
@@ -384,25 +366,6 @@ input[type=range]{accent-color:var(--ts-primary)}
       </sc-for>
     </div>
   </sc-if>
-  <sc-if value="{{ deviceOpen }}" hint-placeholder-val="{{ false }}">
-    <div role="menu" aria-label="{{ t.dpPanelTitle }}" style="{{ menuStyleRight }}">
-      <sc-for list="{{ deviceItems }}" as="m" hint-placeholder-count="3">
-        <button role="menuitem" onClick="{{ m.run }}" style="{{ menuRowStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
-          <span style="{{ menuIconStyle }}"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ m.iconPath }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
-          <span style="flex:1;text-align:left;font-size:13px;font-weight:700;color:#1E1C1A">{{ m.label }}</span>
-        </button>
-      </sc-for>
-    </div>
-  </sc-if>
-
-  <sc-if value="{{ showErrBanner }}" hint-placeholder-val="{{ false }}">
-    <div data-screen-label="8. DotPad disconnected" role="alert" style="flex:none;display:flex;align-items:center;gap:10px;background:rgba(218,18,13,0.06);border-bottom:1px solid var(--ts-danger);color:var(--ts-danger);font-size:13px;font-weight:600;padding:9px 18px">
-      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      {{ t.bannerErr }}
-      <button onClick="{{ retryConn }}" style="margin-left:auto;border:1px solid var(--ts-danger);border-radius:100px;background:#fff;color:var(--ts-danger);font-weight:700;font-size:13px;padding:4px 14px">{{ t.retry }}</button>
-    </div>
-  </sc-if>
-
   <div class="ts-workspace" style="flex:1;display:flex;min-height:0">
 
     <!-- Pages panel (PowerPoint-style slide list): each page renders as a card with
@@ -630,12 +593,9 @@ input[type=range]{accent-color:var(--ts-primary)}
     <sc-if value="{{ inspectorShown }}" hint-placeholder-val="{{ true }}">
       <aside class="ts-side-panel" aria-label="{{ t.dpPanelTitle }}" data-screen-label="DotPad Output panel" style="width:256px;flex:none;background:#fff;border-left:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow-y:auto">
         <div style="display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #F2ECE4">
-          <button class="ts-topbar-action ts-topbar-primary" onClick="{{ openSend }}" style="flex:1;min-width:0;font-size:13px;transition:background 0.15s ease,transform 0.1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <span class="ts-action-label">{{ t.send }}</span>
-          </button>
-          <button onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" title="{{ t.export }}" style="width:44px;height:44px;flex:none;border:1px solid var(--ts-border-decor);border-radius:12px;box-sizing:border-box;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <button class="ts-topbar-action" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" title="{{ t.export }}" style="flex:1;min-width:0;font-size:13px;border:1px solid var(--ts-border-decor);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span class="ts-action-label">{{ t.export }}</span>
           </button>
         </div>
         <div style="display:flex;align-items:center;gap:4px;padding:0 8px 0 4px;border-bottom:1px solid #F2ECE4">
@@ -728,53 +688,80 @@ input[type=range]{accent-color:var(--ts-primary)}
         <sc-if value="{{ inspTabDevice }}" hint-placeholder-val="{{ false }}">
         <div data-screen-label="Inspector · DotPad">
 
-        <div style="padding:14px 16px;border-bottom:1px solid #F2ECE4">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
-            <span style="font-size:13px;font-weight:800;color:#1E1C1A">{{ t.dpDevice }}</span>
-            <span role="status" aria-live="polite" style="{{ dpStatusStyle }}">
-              <sc-if value="{{ dpIsConnected }}" hint-placeholder-val="{{ true }}">
-                <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </sc-if>
-              <sc-if value="{{ dpIsDisconnected }}" hint-placeholder-val="{{ false }}">
-                <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
-              </sc-if>
-              {{ dpStatusText }}
-            </span>
-          </div>
+        <!-- DotPad connection: one unified flow — connect → send → disconnect.
+             All device-connection state lives here (the top bar no longer duplicates it). -->
+        <div style="padding:14px 16px;border-bottom:1px solid #F2ECE4;display:flex;flex-direction:column;gap:11px">
+          <div style="font-size:13px;font-weight:800;color:#1E1C1A">{{ t.dpConnSection }}</div>
+
+          <sc-if value="{{ dpPhaseError }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="{{ dpConnStatusStyle }}">
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>{{ dpConnStatusText }}</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ dpPhaseNotError }}" hint-placeholder-val="{{ true }}">
+            <div role="status" aria-live="polite" style="{{ dpConnStatusStyle }}">
+              <span style="{{ dpConnStatusDotStyle }}"></span>
+              <span>{{ dpConnStatusText }}</span>
+            </div>
+          </sc-if>
+
+          <!-- disconnected → connect -->
+          <sc-if value="{{ dpPhaseDisconnected }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ dpConnectAction }}" aria-label="{{ t.dpConnectBtn }}" style="{{ dpPrimaryBtnStyle }}" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M7 8l10 8-5 4V4l5 4L7 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              {{ t.dpConnectBtn }}
+            </button>
+          </sc-if>
+
+          <!-- connecting → disabled loading (guards against duplicate connect requests) -->
+          <sc-if value="{{ dpPhaseConnecting }}" hint-placeholder-val="{{ false }}">
+            <button disabled="{{ dpPhaseConnecting }}" aria-label="{{ t.dpStateConnecting }}" style="{{ dpPrimaryBtnDisabledStyle }}">
+              <span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span>
+              {{ t.dpStateConnecting }}
+            </button>
+          </sc-if>
+
+          <!-- connected / sent → send (primary) + disconnect (secondary) -->
+          <sc-if value="{{ dpShowReadyActions }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ dpSendAction }}" aria-label="{{ t.dpSendBtn }}" style="{{ dpPrimaryBtnStyle }}" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              {{ t.dpSendBtn }}
+            </button>
+            <button onClick="{{ dpDisconnectAction }}" aria-label="{{ t.dpDisconnectBtn }}" style="{{ dpGhostBtnStyle }}" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+              {{ t.dpDisconnectBtn }}
+            </button>
+          </sc-if>
+
+          <!-- sending → disabled loading -->
+          <sc-if value="{{ dpPhaseSending }}" hint-placeholder-val="{{ false }}">
+            <button disabled="{{ dpPhaseSending }}" aria-label="{{ t.dpStateSending }}" style="{{ dpPrimaryBtnDisabledStyle }}">
+              <span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span>
+              {{ t.dpStateSending }}
+            </button>
+            <button onClick="{{ dpDisconnectAction }}" disabled="{{ dpPhaseSending }}" aria-label="{{ t.dpDisconnectBtn }}" style="{{ dpGhostBtnDisabledStyle }}">
+              {{ t.dpDisconnectBtn }}
+            </button>
+          </sc-if>
+
+          <!-- error → retry (+ disconnect if it failed while still connected) -->
+          <sc-if value="{{ dpPhaseError }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ dpRetryAction }}" aria-label="{{ t.dpRetryBtn }}" style="{{ dpPrimaryBtnStyle }}" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M4 9a8 8 0 0 1 14-4M20 5v4h-4M20 15a8 8 0 0 1-14 4M4 19v-4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              {{ t.dpRetryBtn }}
+            </button>
+            <sc-if value="{{ dpErrorWhileConnected }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ dpDisconnectAction }}" aria-label="{{ t.dpDisconnectBtn }}" style="{{ dpGhostBtnStyle }}" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                {{ t.dpDisconnectBtn }}
+              </button>
+            </sc-if>
+          </sc-if>
+
           <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ts-text-secondary)">
             <span style="font-weight:700">{{ t.dpSupported }}</span>
             <span style="font-variant-numeric:tabular-nums">{{ t.dpSupportedVal }}</span>
           </div>
-        </div>
-
-        <!-- connection -->
-        <div style="padding:14px 16px;border-bottom:1px solid #F2ECE4;display:flex;flex-direction:column;gap:8px">
-          <sc-if value="{{ dpIsDisconnected }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ connectBle }}" disabled="{{ dpConnBusy }}" aria-label="{{ t.aDpBle }}" style="height:38px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-              <sc-if value="{{ dpBusyBle }}" hint-placeholder-val="{{ false }}">
-                <span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:100px;animation:tsSpin 0.8s linear infinite"></span>
-              </sc-if>
-              <sc-if value="{{ dpBusyBleOff }}" hint-placeholder-val="{{ true }}">
-                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8l10 8-5 4V4l5 4L7 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </sc-if>
-              {{ dpBleLabel }}
-            </button>
-            <button onClick="{{ connectUsb }}" disabled="{{ dpConnBusy }}" aria-label="{{ t.aDpUsb }}" style="height:38px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <sc-if value="{{ dpBusyUsb }}" hint-placeholder-val="{{ false }}">
-                <span style="width:14px;height:14px;border:2px solid rgba(var(--ts-primary-rgb),0.3);border-top-color:var(--ts-primary);border-radius:100px;animation:tsSpin 0.8s linear infinite"></span>
-              </sc-if>
-              <sc-if value="{{ dpBusyUsbOff }}" hint-placeholder-val="{{ true }}">
-                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V6m0 0l-3 3m3-3l3 3M9 13l3 3 3-3M12 3v1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </sc-if>
-              {{ dpUsbLabel }}
-            </button>
-          </sc-if>
-          <sc-if value="{{ dpIsConnected }}" hint-placeholder-val="{{ true }}">
-            <button onClick="{{ disconnectDot }}" aria-label="{{ t.aDpDisconnect }}" style="height:34px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:var(--ts-text-secondary);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
-              {{ t.dpDisconnect }}
-            </button>
-          </sc-if>
         </div>
 
         <!-- live preview -->
@@ -2001,6 +1988,7 @@ class Component extends DCLogic {
       connecting: '연결 중…', reSend: '다시 전송',
       dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨', dpConnFailed: '연결 실패',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
+      dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
       dpVia: c => '연결됨 · ' + c, dpChipDisc: 'DotPad · 연결 안 됨', dpOpenPanel: 'DotPad 출력 패널 열기',
@@ -2142,6 +2130,7 @@ class Component extends DCLogic {
       connecting: 'Connecting…', reSend: 'Send again',
       dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected', dpConnFailed: 'Connection failed',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
+      dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
       dpVia: c => 'Connected · ' + c, dpChipDisc: 'DotPad · Disconnected', dpOpenPanel: 'Open DotPad Output panel',
@@ -4854,6 +4843,21 @@ class Component extends DCLogic {
     const cellVal = this.cells[this.idx(st.cx, st.cy)];
     let dots = 0; for (let i = 0; i < this.cells.length; i++) dots += this.cells[i];
     const phase = st.sendPhase;
+    // Unified DotPad connection flow (right pane): derive a single phase from the
+    // existing connection/send state — no new state is introduced.
+    const dpFlow = st.connBusy ? 'connecting'
+      : st.sendPhase === 'sending' ? 'sending'
+      : st.connFailed ? 'error'
+      : st.sendPhase === 'error' ? 'error'
+      : !st.connected ? 'disconnected'
+      : st.sendPhase === 'done' ? 'sent'
+      : 'connected';
+    const dpTone = (dpFlow === 'connected' || dpFlow === 'sent') ? 'ok' : (dpFlow === 'connecting' || dpFlow === 'sending') ? 'busy' : dpFlow === 'error' ? 'err' : 'off';
+    const dpToneColor = dpTone === 'ok' ? '#0B7500' : dpTone === 'busy' ? '#8A5400' : dpTone === 'err' ? 'var(--ts-danger)' : 'var(--ts-text-secondary)';
+    const dpToneBg = dpTone === 'ok' ? 'rgba(11,136,0,0.10)' : dpTone === 'busy' ? 'rgba(217,135,16,0.10)' : dpTone === 'err' ? 'rgba(218,18,13,0.07)' : 'rgba(140,131,119,0.08)';
+    const dpBtnPrimary = { height: 38, border: 'none', borderRadius: 8, background: 'var(--ts-primary)', color: '#fff', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', width: '100%', boxSizing: 'border-box' };
+    const dpBtnGhost = { height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer', width: '100%', boxSizing: 'border-box' };
+    const openSendFlow = () => { const c = this.syncRealConnection(); this.setState({ dotpadOpen: true, sendPhase: this.isA4() ? 'incompat' : (c ? 'idle' : 'error') }); };
 
     return {
       t,
@@ -4923,16 +4927,6 @@ class Component extends DCLogic {
       ...this.corpusNavProps(),
       undoBtnStyle: iconBtn(this.undoStack.length > 0), redoBtnStyle: iconBtn(this.redoStack.length > 0),
       toggleConn: () => this.toggleConnection(),
-      // top toolbar status chip → opens the DotPad Output inspector
-      openDpPanel: () => this.setState(s => ({ inspectorOpen: true })),
-      connChipText: st.connBusy ? (t.dpDevice + ' · ' + t.connecting) : (st.connFailed ? (t.dpDevice + ' · ' + t.dpConnFailed) : (st.connected ? (t.dpDevice + ' · ' + t.dpConnected + ' · ' + (st.connType === 'usb' ? 'USB' : 'BLE')) : t.dpChipDisc)),
-      connChipMediumText: st.connBusy ? t.connecting : (st.connFailed ? t.dpConnFailed : (st.connected ? (t.dpConnected + ' · ' + (st.connType === 'usb' ? 'USB' : 'BLE')) : t.dpDisconnected)),
-      connChipShortText: st.connBusy ? t.connecting : (st.connFailed ? t.dpConnFailed : (st.connected ? t.dpConnected : t.dpDisconnected)),
-      connChipAria: (st.connBusy ? (t.dpDevice + ' ' + t.connecting) : (st.connFailed ? (t.dpDevice + ' ' + t.dpConnFailed) : (st.connected ? (t.dpDevice + ' ' + t.dpConnected + ' ' + (st.connType === 'usb' ? 'USB' : 'BLE')) : t.dpDisconnected))) + '. ' + t.dpOpenPanel,
-      connLabel: st.connected ? t.connOn : t.connOff,
-      connStyle: { border: st.connBusy ? '1px solid #D98710' : (st.connFailed ? '1px solid var(--ts-danger)' : (st.connected ? '1px solid var(--ts-success)' : '1px solid var(--ts-border-decor)')), background: st.connBusy ? 'rgba(217,135,16,0.08)' : (st.connFailed ? 'rgba(218,18,13,0.06)' : (st.connected ? 'rgba(11,136,0,0.08)' : 'var(--ts-bg-warm)')), color: st.connBusy ? '#8A5400' : (st.connFailed ? 'var(--ts-danger)' : (st.connected ? 'var(--ts-success)' : 'var(--ts-text-secondary)')), fontWeight: 700, fontSize: 12.5, cursor: 'pointer' },
-      connDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', background: st.connBusy ? '#D98710' : (st.connFailed ? 'var(--ts-danger)' : (st.connected ? 'var(--ts-success)' : 'var(--ts-text-secondary)')), display: 'inline-block', boxShadow: st.connected && !st.connBusy ? '0 0 0 3px rgba(11,136,0,0.14)' : 'none', animation: st.connBusy ? 'tsPulse 1.2s infinite' : 'none' },
-      showErrBanner: st.screen === 'studio' && !st.connected,
       retryConn: () => this.retryDotpad(),
       // ---- DotPad Output inspector ----
       inspectorOpen: st.inspectorOpen,
@@ -4996,14 +4990,25 @@ class Component extends DCLogic {
         return { narrOpen: open };
       }),
       narrCaretStyle: { transition: 'transform 0.15s ease', transform: st.narrOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
-      dpIsConnected: st.connected, dpIsDisconnected: !st.connected,
-      dpConnBusy: !!st.connBusy, dpBusyBle: st.connBusy === 'ble', dpBusyUsb: st.connBusy === 'usb',
-      dpBusyBleOff: st.connBusy !== 'ble', dpBusyUsbOff: st.connBusy !== 'usb',
-      dpBleLabel: st.connBusy === 'ble' ? t.dpConnectingBle : t.dpConnBle,
-      dpUsbLabel: st.connBusy === 'usb' ? t.dpConnectingUsb : t.dpConnUsb,
-      dpStatusText: st.connFailed ? t.dpConnFailed : (st.connected ? t.dpVia(st.connType === 'usb' ? 'USB' : 'BLE') : t.dpDisconnected),
-      dpStatusStyle: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, borderRadius: 100, padding: '3px 10px', background: st.connected ? 'rgba(11,136,0,0.10)' : (st.connFailed ? 'rgba(218,18,13,0.07)' : 'rgba(140,131,119,0.08)'), color: st.connected ? '#0B7500' : (st.connFailed ? 'var(--ts-danger)' : 'var(--ts-text-secondary)') },
-      connectBle: () => this.connectDot('ble'), connectUsb: () => this.connectDot('usb'), disconnectDot: () => this.disconnectDot(),
+      // Unified DotPad connection section (right pane) — reuses connectDot/disconnectDot/send state.
+      dpPhaseDisconnected: dpFlow === 'disconnected',
+      dpPhaseConnecting: dpFlow === 'connecting',
+      dpPhaseSending: dpFlow === 'sending',
+      dpPhaseError: dpFlow === 'error',
+      dpPhaseNotError: dpFlow !== 'error',
+      dpShowReadyActions: dpFlow === 'connected' || dpFlow === 'sent',
+      dpErrorWhileConnected: dpFlow === 'error' && st.connected,
+      dpConnStatusText: dpFlow === 'connecting' ? t.dpStateConnecting : dpFlow === 'sending' ? t.dpStateSending : dpFlow === 'sent' ? t.dpStateSent : dpFlow === 'error' ? t.dpStateError : dpFlow === 'disconnected' ? t.dpStateDisconnected : t.dpStateConnected,
+      dpConnStatusStyle: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, borderRadius: 8, padding: '8px 10px', lineHeight: 1.35, background: dpToneBg, color: dpToneColor },
+      dpConnStatusDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', display: 'inline-block', background: dpToneColor, animation: dpTone === 'busy' ? 'tsPulse 1.2s infinite' : 'none' },
+      dpPrimaryBtnStyle: dpBtnPrimary,
+      dpPrimaryBtnDisabledStyle: Object.assign({}, dpBtnPrimary, { cursor: 'not-allowed', opacity: 0.72 }),
+      dpGhostBtnStyle: dpBtnGhost,
+      dpGhostBtnDisabledStyle: Object.assign({}, dpBtnGhost, { cursor: 'not-allowed', opacity: 0.5 }),
+      dpConnectAction: () => this.connectDot('ble'),
+      dpDisconnectAction: () => this.disconnectDot(),
+      dpSendAction: openSendFlow,
+      dpRetryAction: () => { if (this.state.connected && this.state.sendPhase === 'error') { openSendFlow(); } else { this.connectDot('ble'); } },
       livePreview: st.livePreview, liveStateLabel: st.livePreview ? t.dpLiveOn : t.dpLiveOff,
       toggleLive: () => this.toggleLive(),
       liveTrackStyle: { position: 'relative', width: 40, height: 22, borderRadius: 100, flex: 'none', transition: 'background 0.16s ease', background: st.livePreview && st.connected ? 'var(--ts-primary)' : 'var(--ts-border-decor)', cursor: st.connected ? 'pointer' : 'not-allowed', opacity: st.connected ? 1 : 0.5, border: 'none', padding: 0 },
@@ -5422,12 +5427,8 @@ class Component extends DCLogic {
       confirmReplace: () => { const fn = this._pendingDoc; this._pendingDoc = null; this.setState({ confirmOpen: false }); if (fn) fn(); },
       confirmCancel: () => { this._pendingDoc = null; this.setState({ confirmOpen: false }); },
       cropConfirmLabel: st.cropChoice === 'crop' ? t.impCropConfirm : t.impNext,
-      // dotpad
+      // dotpad — the preview/send modal is opened from the right-pane connection section (dpSendAction → openSendFlow)
       dotpadOpen: st.dotpadOpen,
-      openSend: () => {
-        const connected = this.syncRealConnection();
-        this.setState({ dotpadOpen: true, sendPhase: this.isA4() ? 'incompat' : (connected ? 'idle' : 'error') });
-      },
       phaseIncompat: phase === 'incompat',
       switchTo60: () => { const connected = this.syncRealConnection(); this.setOutput('60'); this.setState({ sendPhase: connected ? 'idle' : 'error' }); },
       goEmbossFromPad: () => this.setState({ dotpadOpen: false, embossOpen: true, embossPhase: 'idle' }),
@@ -5534,10 +5535,8 @@ class Component extends DCLogic {
       menuOpen: !!st.menu,
       createOpen: !!st.menu && st.menu.kind === 'create',
       exportOpen: !!st.menu && st.menu.kind === 'export',
-      deviceOpen: !!st.menu && st.menu.kind === 'device',
       toggleCreate: e => this.toggleMenu('create', e),
       toggleExport: e => this.toggleMenu('export', e),
-      toggleDevice: e => { this.syncRealConnection(); this.toggleMenu('device', e); },
       closeMenu: () => this.setState({ menu: null }),
       menuStyleLeft: st.menu ? { position: 'fixed', top: st.menu.top, left: st.menu.left, zIndex: 75, minWidth: 240, background: '#fff', border: '1px solid #E8DFD6', borderRadius: 12, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', transformOrigin: 'top left', animation: 'tsFly 0.15s ease-out' } : null,
       menuStyleRight: st.menu ? { position: 'fixed', top: st.menu.top, right: st.menu.right, zIndex: 75, minWidth: 216, background: '#fff', border: '1px solid #E8DFD6', borderRadius: 12, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', transformOrigin: 'top right', animation: 'tsFly 0.15s ease-out' } : null,
@@ -5555,14 +5554,6 @@ class Component extends DCLogic {
         { label: 'SVG', sub: t.exportOriginal, iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.exportFormat('SVG') },
         { label: 'JSON', sub: t.exportOriginal, iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.exportFormat('JSON') },
         { label: 'PNG', sub: t.exportPreview, iconPath: 'M12 4v11M7 10l5 5 5-5M5 20h14', run: () => this.exportFormat('PNG') },
-      ],
-      deviceItems: [
-        { label: t.devSettings, sub: '', iconPath: 'M4 6h16v10H4zM9 20h6M9 16v4M15 16v4', run: () => { this.setState({ menu: null, inspectorOpen: true }); } },
-        { label: t.devTest, sub: '', iconPath: 'M12 3v10M8 9l4 4 4-4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3', run: () => this.testOutput() },
-        { label: st.connected ? t.devDisconnect : t.devConnect, sub: '', iconPath: 'M12 4v8M7.5 7.5a6 6 0 1 0 9 0', run: () => {
-          this.setState({ menu: null });
-          this.toggleConnection();
-        } }
       ],
       // floating undo/redo (near canvas)
       undoBarStyle: { width: 34, height: 34, border: 'none', borderRadius: 8, background: 'transparent', color: this.undoStack.length ? '#F5F0EA' : '#5C5650', display: 'grid', placeItems: 'center', opacity: this.undoStack.length ? 1 : 0.5, cursor: this.undoStack.length ? 'pointer' : 'not-allowed' },
