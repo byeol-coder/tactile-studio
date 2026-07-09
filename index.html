@@ -1302,6 +1302,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.tactilePreview }}</div>
             <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
               <canvas ref="{{ impRef }}"></canvas>
+              <canvas ref="{{ impVecRef }}" aria-hidden="true" style="position:absolute;top:12px;left:12px;pointer-events:none"></canvas>
             </div>
           </div>
         </div>
@@ -1339,6 +1340,25 @@ input[type=range]{accent-color:var(--ts-primary)}
             </div>
           </div>
         </sc-if>
+
+        <!-- Vectorize lines (Beta) — optional, experimental, deliberately kept
+             secondary/below the fold of the main conversion controls above. -->
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #EFE7DE">
+          <button onClick="{{ toggleVectorize }}" aria-pressed="{{ vectorizeEnabled }}" style="{{ vecStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 8L13 14L20 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="8" r="1.6" fill="currentColor"></circle><circle cx="13" cy="14" r="1.6" fill="currentColor"></circle></svg>
+            {{ t.vecToggleL }}
+          </button>
+          <p style="margin:8px 0 0;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.5;max-width:520px">{{ t.vecToggleHelp }}</p>
+          <sc-if value="{{ vecAdv }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ vecAdv.tooFragmented }}" hint-placeholder-val="{{ false }}">
+              <div role="alert" style="display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(218,18,13,0.06);border:1px solid var(--ts-danger);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--ts-danger)">
+                <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                {{ t.vecWarnMsg }}
+              </div>
+            </sc-if>
+            <div role="status" style="margin-top:8px;font-size:12px;color:var(--ts-text-secondary);font-weight:600">{{ vecAdv.countText }}</div>
+          </sc-if>
+        </div>
       </sc-if>
     </div>
 
@@ -1863,7 +1883,7 @@ class Component extends DCLogic {
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
     entry: false, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
-    impStep: 'import', cropChoice: 'full', converting: false, convertDone: false,
+    impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false,
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, cropCursor: 'move', retouchHint: false, armedPreset: null,
     cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false, cmdFeatureFilter: [],
@@ -1892,6 +1912,7 @@ class Component extends DCLogic {
     this.fileRef = React.createRef();
     this.assetRef = React.createRef();
     this.impOrigRef = React.createRef();
+    this.impVecRef = React.createRef(); // vector-line overlay (Beta), sits on top of impRef
     this.cropRef = React.createRef();
     this.embossRef = React.createRef();
     this.heroRef = React.createRef();
@@ -1899,6 +1920,7 @@ class Component extends DCLogic {
     this.cells = new Uint8Array(60 * 40);
     this.pages = [this.cells];   // multi-page document; this.cells === this.pages[state.pageIndex]
     this.pageAudio = {};         // pageIndex → { src, mime, bytes, durationSec, narration } (DTMA, path-reference)
+    this.pageVectors = {};       // pageIndex → vectorLineObjects[] (optional, experimental — see vectorizeGrid)
     this.undoStack = []; this.redoStack = [];
     this.preview = null;   // Set of idx (additive overlay)
     this.drag = null;      // {mode,x0,y0,...}
@@ -2020,6 +2042,9 @@ class Component extends DCLogic {
       impConvertTitle: 'AI 촉각 그래픽 변환', impConvertSub: '이미지의 형태를 촉각으로 인식하기 쉬운 점 패턴으로 변환합니다.',
       impConverting: 'AI가 촉각 그래픽으로 변환하는 중…', impConvertDone: '변환 완료',
       impReviewTitle: '촉각 변환 미리보기', impReviewSub: '촉각 디테일 정도를 조정해 미리보기를 다듬은 뒤 편집기로 불러오세요. 세부 수정은 편집기 도구로 이어서 할 수 있습니다.',
+      vecToggleL: '벡터 라인 오브젝트 (베타)', vecToggleHelp: '촉각 변환 결과에서 편집 가능한 선 오브젝트를 만듭니다. 단순한 아이콘, 도표, 고대비 이미지에 가장 잘 맞아요.',
+      vecWarnMsg: '이 이미지는 벡터 조각이 너무 많이 생길 수 있어요. 대비를 높이거나 이미지를 더 단순하게 만들어 보세요.',
+      vecCountOf: n => '오브젝트 ' + n + '개 생성됨',
       impResult: '촉각 결과', impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impReview: '미리보기 검토', impLoad: '편집기로 불러오기', impReConvert: '다시 변환',
       presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일',
       presetSubBalanced: '일반 사진·그림용', presetSubOutline: '아이콘·사물·도형용', presetSubDiagram: '차트·지도·선화용', presetSubDetail: '디테일 보존(점 밀도↑)',
@@ -2157,6 +2182,9 @@ class Component extends DCLogic {
       impConvertTitle: 'AI tactile conversion', impConvertSub: 'Transforms the image into a dot pattern that is easy to read by touch.',
       impConverting: 'Converting to a tactile graphic with AI…', impConvertDone: 'Conversion complete',
       impReviewTitle: 'Tactile preview', impReviewSub: 'Adjust the tactile detail level to refine the preview, then load it into the editor. You can keep retouching with the editor tools.',
+      vecToggleL: 'Vectorize lines (Beta)', vecToggleHelp: 'Creates editable line-like objects from the tactile conversion result. Best for simple icons, diagrams, and high-contrast images.',
+      vecWarnMsg: 'This image may create too many vector fragments. Try increasing contrast or simplifying the image.',
+      vecCountOf: n => n + ' object' + (n === 1 ? '' : 's') + ' generated',
       impResult: 'Tactile result', impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impReview: 'Review preview', impLoad: 'Load into editor', impReConvert: 'Re-convert',
       presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail',
       presetSubBalanced: 'General photos & drawings', presetSubOutline: 'Icons, objects, shapes', presetSubDiagram: 'Charts, maps, line art', presetSubDetail: 'Keeps detail (denser)',
@@ -2924,6 +2952,256 @@ class Component extends DCLogic {
       g.beginPath(); g.arc(x * s + s / 2, y * s + s / 2, on ? s * 0.36 : s * 0.16, 0, Math.PI * 2); g.fill();
     }
   }
+  // ── Vectorize lines (Beta) ──────────────────────────────────────────────
+  // Optional, experimental: derives simplified vector line/shape objects from
+  // the SAME binary grid the dot conversion already produces (imgToCells +
+  // applyConv). Purely additive — never mutates cells/pages, never runs
+  // unless st.vectorizeEnabled is on, and the dot/tactile output above stays
+  // the only thing DotPad ever sees. All helpers are namespaced with a
+  // "_vec" prefix so this feature stays easy to locate (and remove) as a unit.
+  //
+  // Pipeline: connected components → edge-based boundary trace (robust to
+  // thin/concave/hole-bearing shapes, unlike pixel-center Moore tracing) →
+  // Ramer–Douglas–Peucker simplification (closed loops get a proper two-arc
+  // split, or a naive single-anchor RDP degenerates on anything but convex
+  // blobs) → thin-sliver fallback to a plain line segment (so hairline
+  // strokes in line art don't just vanish) → best-effort shape classification.
+  _vecConnectedComponents(cells, w, h) {
+    const labels = new Int32Array(w * h).fill(-1);
+    const comps = [];
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        if (!cells[i] || labels[i] !== -1) continue;
+        const compId = comps.length;
+        const stack = [i];
+        labels[i] = compId;
+        const pixels = [];
+        while (stack.length) {
+          const cur = stack.pop();
+          pixels.push(cur);
+          const cx = cur % w, cy = (cur - cx) / w;
+          const nbrs = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
+          for (let k = 0; k < 4; k++) {
+            const nx = nbrs[k][0], ny = nbrs[k][1];
+            if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+            const ni = ny * w + nx;
+            if (cells[ni] && labels[ni] === -1) { labels[ni] = compId; stack.push(ni); }
+          }
+        }
+        comps.push(pixels);
+      }
+    }
+    return comps;
+  }
+  _vecTraceContours(pixelIdx, w, h) {
+    const pixSet = new Set(pixelIdx);
+    const has = (x, y) => x >= 0 && y >= 0 && x < w && y < h && pixSet.has(y * w + x);
+    const key = (x, y) => x + ',' + y;
+    const nextFrom = new Map();
+    const addEdge = (x1, y1, x2, y2) => nextFrom.set(key(x1, y1), [x2, y2]);
+    for (const idx of pixelIdx) {
+      const x = idx % w, y = (idx - x) / w;
+      if (!has(x, y - 1)) addEdge(x, y, x + 1, y);
+      if (!has(x + 1, y)) addEdge(x + 1, y, x + 1, y + 1);
+      if (!has(x, y + 1)) addEdge(x + 1, y + 1, x, y + 1);
+      if (!has(x - 1, y)) addEdge(x, y + 1, x, y);
+    }
+    const visited = new Set(), loops = [];
+    for (const [startKey] of nextFrom) {
+      if (visited.has(startKey)) continue;
+      let curKey = startKey;
+      const loop = [startKey.split(',').map(Number)];
+      let guard = 0;
+      while (guard++ < 100000) {
+        visited.add(curKey);
+        const next = nextFrom.get(curKey);
+        if (!next) break;
+        const nk = next[0] + ',' + next[1];
+        loop.push(next);
+        if (nk === startKey) break;
+        if (visited.has(nk)) break;
+        curKey = nk;
+      }
+      if (loop.length > 2) loops.push(loop);
+    }
+    return loops;
+  }
+  _vecSqSegDist(p, a, b) {
+    let x = a[0], y = a[1], dx = b[0] - x, dy = b[1] - y;
+    if (dx !== 0 || dy !== 0) {
+      const t = ((p[0] - x) * dx + (p[1] - y) * dy) / (dx * dx + dy * dy);
+      if (t > 1) { x = b[0]; y = b[1]; } else if (t > 0) { x += dx * t; y += dy * t; }
+    }
+    dx = p[0] - x; dy = p[1] - y;
+    return dx * dx + dy * dy;
+  }
+  _vecRdpOpen(points, first, last, sqTolerance, out) {
+    let maxDist = sqTolerance, index = -1;
+    for (let i = first + 1; i < last; i++) {
+      const d = this._vecSqSegDist(points[i], points[first], points[last]);
+      if (d > maxDist) { index = i; maxDist = d; }
+    }
+    if (index !== -1) {
+      if (index - first > 1) this._vecRdpOpen(points, first, index, sqTolerance, out);
+      out.push(points[index]);
+      if (last - index > 1) this._vecRdpOpen(points, index, last, sqTolerance, out);
+    }
+  }
+  // RDP for both open polylines and closed loops. A closed loop (points[0] ≈
+  // points[last]) needs two independent anchors — a naive single-pair RDP
+  // degenerates to ~2-3 points on anything but convex blobs, since the first
+  // and last point are identical and give no useful reference line.
+  _vecRdp(points, tolerance) {
+    if (points.length < 3) return points.slice();
+    const sqTolerance = tolerance * tolerance;
+    const n = points.length;
+    const isClosed = Math.hypot(points[0][0] - points[n - 1][0], points[0][1] - points[n - 1][1]) < 1e-6;
+    if (!isClosed) {
+      const out = [points[0]];
+      this._vecRdpOpen(points, 0, n - 1, sqTolerance, out);
+      out.push(points[n - 1]);
+      return out;
+    }
+    const distinct = points.slice(0, n - 1);
+    const m = distinct.length;
+    if (m < 3) return points.slice();
+    let farIdx = 1, farDist = -1;
+    for (let i = 1; i < m; i++) {
+      const d = (distinct[i][0] - distinct[0][0]) ** 2 + (distinct[i][1] - distinct[0][1]) ** 2;
+      if (d > farDist) { farDist = d; farIdx = i; }
+    }
+    const arc1 = distinct.slice(0, farIdx + 1);
+    const arc2 = distinct.slice(farIdx).concat([distinct[0]]);
+    const out1 = [arc1[0]]; this._vecRdpOpen(arc1, 0, arc1.length - 1, sqTolerance, out1); out1.push(arc1[arc1.length - 1]);
+    const out2 = [arc2[0]]; this._vecRdpOpen(arc2, 0, arc2.length - 1, sqTolerance, out2); out2.push(arc2[arc2.length - 1]);
+    return out1.concat(out2.slice(1));
+  }
+  _vecClassifyShape(pts, bbox) {
+    const w = bbox.maxX - bbox.minX, h = bbox.maxY - bbox.minY;
+    const area = w * h;
+    if (area <= 0) return 'polyline';
+    const core = (pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1]) ? pts.slice(0, -1) : pts;
+    if (core.length >= 4 && core.length <= 6) {
+      let axisAligned = true;
+      for (let i = 0; i < core.length; i++) {
+        const a = core[i], b = core[(i + 1) % core.length];
+        if (Math.abs(a[0] - b[0]) > 0.6 && Math.abs(a[1] - b[1]) > 0.6) { axisAligned = false; break; }
+      }
+      if (axisAligned) return 'rect';
+    }
+    const cx = (bbox.minX + bbox.maxX) / 2, cy = (bbox.minY + bbox.maxY) / 2;
+    if (pts.length >= 8) {
+      let sum = 0, sumSq = 0;
+      for (const p of pts) { const r = Math.hypot(p[0] - cx, p[1] - cy); sum += r; sumSq += r * r; }
+      const mean = sum / pts.length;
+      const variance = sumSq / pts.length - mean * mean;
+      const cv = mean > 0 ? Math.sqrt(Math.max(0, variance)) / mean : 1;
+      if (cv < 0.18 && mean > 0) return 'ellipse';
+    }
+    return 'polyline';
+  }
+  _vecPolygonArea(pts) {
+    let a = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const p1 = pts[i], p2 = pts[(i + 1) % pts.length];
+      a += p1[0] * p2[1] - p2[0] * p1[1];
+    }
+    return Math.abs(a) / 2;
+  }
+  _vecBboxOf(pts) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of pts) { if (p[0] < minX) minX = p[0]; if (p[0] > maxX) maxX = p[0]; if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1]; }
+    return { minX, minY, maxX, maxY };
+  }
+  _vecMergeClosePoints(pts, minGap) {
+    if (pts.length < 3) return pts.slice();
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length; i++) {
+      const last = out[out.length - 1], p = pts[i];
+      if (Math.hypot(p[0] - last[0], p[1] - last[1]) >= minGap || i === pts.length - 1) out.push(p);
+    }
+    return out;
+  }
+  _vecFarthestPair(pts) {
+    let best = [pts[0], pts[1] || pts[0]], bestD = -1;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const d = (pts[i][0] - pts[j][0]) ** 2 + (pts[i][1] - pts[j][1]) ** 2;
+        if (d > bestD) { bestD = d; best = [pts[i], pts[j]]; }
+      }
+    }
+    return best;
+  }
+  _vecRound1(v) { return Math.round(v * 10) / 10; }
+  // Main entry point. cells/w/h = the SAME binary grid the dot preview draws
+  // from (see drawImp). Returns { objects, stats } — never throws; a fully
+  // pathological input (e.g. a photo) degrades to "many small objects +
+  // stats.tooFragmented", not a crash.
+  vectorizeGrid(cells, w, h, opts) {
+    opts = opts || {};
+    const tolerance = opts.tolerance != null ? opts.tolerance : 1.1;
+    const minArea = opts.minArea != null ? opts.minArea : 3;
+    const minGap = opts.minGap != null ? opts.minGap : 0.8;
+    const minLoopPoints = opts.minLoopPoints != null ? opts.minLoopPoints : 3;
+    const maxObjects = opts.maxObjects != null ? opts.maxObjects : 400;
+    let comps;
+    try { comps = this._vecConnectedComponents(cells, w, h); }
+    catch (e) { return { objects: [], stats: { error: true, componentCount: 0, objectCount: 0, tooFragmented: false, truncated: false } }; }
+    const objects = [];
+    let ignoredSmall = 0, ignoredDegenerate = 0, totalRawPoints = 0, totalSimplifiedPoints = 0;
+    outer:
+    for (const pixels of comps) {
+      if (pixels.length < minArea) { ignoredSmall++; continue; }
+      let loops;
+      try { loops = this._vecTraceContours(pixels, w, h); } catch (e) { continue; }
+      for (const loop of loops) {
+        totalRawPoints += loop.length;
+        let simplified = this._vecRdp(loop, tolerance);
+        simplified = this._vecMergeClosePoints(simplified, minGap);
+        const bbox0 = this._vecBboxOf(loop);
+        const bboxDiag = Math.hypot(bbox0.maxX - bbox0.minX, bbox0.maxY - bbox0.minY);
+        const area0 = this._vecPolygonArea(simplified.length >= 3 ? simplified : loop);
+        // Thin/elongated features (hairline strokes) can simplify below
+        // minLoopPoints, or to a near-zero-area sliver, well before they
+        // stop being meaningful — represent as a plain line instead of
+        // dropping them, since line art is exactly this feature's target.
+        const tooThin = simplified.length < minLoopPoints || (area0 < minArea * 0.5 && bboxDiag >= 3);
+        if (tooThin) {
+          if (bboxDiag < 2) { ignoredDegenerate++; continue; }
+          const pair = this._vecFarthestPair(loop);
+          objects.push({
+            type: 'line',
+            points: [[this._vecRound1(pair[0][0]), this._vecRound1(pair[0][1])], [this._vecRound1(pair[1][0]), this._vecRound1(pair[1][1])]],
+            closed: false,
+            bbox: { x: this._vecRound1(bbox0.minX), y: this._vecRound1(bbox0.minY), w: this._vecRound1(bbox0.maxX - bbox0.minX), h: this._vecRound1(bbox0.maxY - bbox0.minY) }
+          });
+          totalSimplifiedPoints += 2;
+          if (objects.length >= maxObjects) break outer;
+          continue;
+        }
+        totalSimplifiedPoints += simplified.length;
+        const bbox = this._vecBboxOf(simplified);
+        const area = this._vecPolygonArea(simplified);
+        if (area < minArea * 0.5) { ignoredDegenerate++; continue; }
+        const shape = this._vecClassifyShape(simplified, bbox);
+        objects.push({
+          type: shape,
+          points: simplified.map(p => [this._vecRound1(p[0]), this._vecRound1(p[1])]),
+          closed: true,
+          bbox: { x: this._vecRound1(bbox.minX), y: this._vecRound1(bbox.minY), w: this._vecRound1(bbox.maxX - bbox.minX), h: this._vecRound1(bbox.maxY - bbox.minY) }
+        });
+        if (objects.length >= maxObjects) break outer;
+      }
+    }
+    const fragmentDensity = (w * h) > 0 ? objects.length / (w * h) : 0;
+    const tooFragmented = objects.length > 60 || fragmentDensity > 0.06;
+    return {
+      objects,
+      stats: { componentCount: comps.length, objectCount: objects.length, ignoredSmall, ignoredDegenerate, totalRawPoints, totalSimplifiedPoints, tooFragmented, truncated: objects.length >= maxObjects }
+    };
+  }
+
   applyConv(pat, w, h) {
     const st = this.state;
     if (st.invertConv) for (let i = 0; i < pat.length; i++) pat[i] ^= 1;
@@ -3003,6 +3281,27 @@ class Component extends DCLogic {
         const on = pat[y * w + x];
         g.fillStyle = on ? (a4 ? '#1E1C1A' : '#F2E9DD') : (a4 ? 'rgba(30,28,26,0.08)' : 'rgba(255,255,255,0.07)');
         g.beginPath(); g.arc(x * s + s / 2, y * s + s / 2, on ? s * 0.4 : s * 0.14, 0, Math.PI * 2); g.fill();
+      }
+      // Vector-line overlay (Beta) — drawn imperatively onto a sibling
+      // canvas, same convention as the dot preview above (avoids the stale-
+      // by-one-render problem a declarative binding would have here, since
+      // this runs from componentDidUpdate, after render already committed).
+      // Stats/warning text uses its own fresh render()-time computation
+      // (see vecAdv), same pattern as the existing qAdv quality advisory.
+      const vc = this.impVecRef && this.impVecRef.current;
+      if (vc) {
+        vc.width = w * s; vc.height = h * s;
+        const vg = vc.getContext('2d');
+        vg.clearRect(0, 0, vc.width, vc.height);
+        if (st.vectorizeEnabled && (st.impStep === 'review' || st.impStep === 'convert')) {
+          const res = this.vectorizeGrid(pat, w, h);
+          vg.strokeStyle = '#1F6FB2'; vg.lineWidth = 1.5; vg.lineJoin = 'round'; vg.lineCap = 'round';
+          for (const obj of res.objects) {
+            vg.beginPath();
+            obj.points.forEach((p, i) => { const px = p[0] * s, py = p[1] * s; if (i === 0) vg.moveTo(px, py); else vg.lineTo(px, py); });
+            vg.stroke();
+          }
+        }
       }
     }
     // original image with optional crop overlay
@@ -3378,6 +3677,7 @@ class Component extends DCLogic {
     const at = this.state.pageIndex + 1;
     this.pages.splice(at, 0, blank);
     this._reindexPageAudioInsert(at);
+    this._reindexPageVectorsInsert(at);
     this.undoStack = []; this.redoStack = [];
     this.cells = blank; this.polyPts = []; this.preview = null;
     const n = this.pages.length;
@@ -3391,6 +3691,7 @@ class Component extends DCLogic {
     const wasActive = idx === this.state.pageIndex;
     this.pages.splice(idx, 1);
     this._reindexPageAudioDelete(idx);
+    this._reindexPageVectorsDelete(idx);
     const n = this.pages.length;
     const patch = { confirmOpen: false, pageCount: n };
     let ni;
@@ -3411,7 +3712,7 @@ class Component extends DCLogic {
     this.say(this.T().aPageDel(ni + 1, n));
   }
   deletePage() { this.deletePageAt(this.state.pageIndex); }
-  resetPages(cells) { this.pages = [cells]; this.pageAudio = {}; }
+  resetPages(cells) { this.pages = [cells]; this.pageAudio = {}; this.pageVectors = {}; }
   undo() {
     if (!this.undoStack.length) return;
     this.redoStack.push(this._histEntry());
@@ -3492,7 +3793,7 @@ class Component extends DCLogic {
     clearTimeout(this._readT);
     this._uploadSeq = (this._uploadSeq || 0) + 1;
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
   }
   // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
   _captureSource(bmp, w, h) {
@@ -3515,7 +3816,7 @@ class Component extends DCLogic {
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
     // NOTE: only temporary import state here — the document (fileName, cells,
     // undo) must not change until the user explicitly applies (applyImport).
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name });
     const fail = () => {
       if (token !== this._uploadSeq) return;
       this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
@@ -3547,7 +3848,7 @@ class Component extends DCLogic {
     const cnv = document.createElement('canvas'); cnv.width = 150; cnv.height = 130;
     const g = cnv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 150, 130); g.strokeStyle = '#000'; this.drawCat(g, 50);
     this._srcData = g.getImageData(0, 0, 150, 130).data; this._srcW = 150; this._srcH = 130; this._srcCanvas = cnv;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName });
+    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName });
     this.drawImp();
   }
   // guard destructive new-document actions when the canvas has content
@@ -3592,6 +3893,7 @@ class Component extends DCLogic {
       // Load every page as a fresh document (clean undo checkpoint).
       this.pages = parsed.pages.map(p => p.cells);
       this.pageAudio = {};
+      this.pageVectors = {};
       parsed.pages.forEach((p, i) => {
         if (p.narration || p.desc) this.pageAudio[i] = Object.assign({}, p.narration ? { narration: p.narration } : null, p.desc ? { desc: p.desc } : null);
       });
@@ -3621,6 +3923,12 @@ class Component extends DCLogic {
     const conv = this.applyConv(r.cells, st.gridW, st.gridH);
     const q = this.convQuality(conv, st.gridW, st.gridH);
     if (window.__TS_DEBUG) console.log('[TactileConvert]', { src: this._srcW + 'x' + this._srcH, crop, target: st.gridW + 'x' + st.gridH, preset: st.convPreset, dots: q.dots, density: +(q.density * 100).toFixed(1), isolated: q.isolated, removed: r.removedDots });
+    // Optional/experimental: vector-line objects (Beta), stored per-page like
+    // pageAudio — only meaningful for new/replace, where they describe the
+    // WHOLE resulting page; a merge mixes with existing content the vector
+    // pass never saw, so it's skipped there rather than storing something
+    // misleading.
+    const vecObjects = st.vectorizeEnabled ? this.vectorizeGrid(conv, st.gridW, st.gridH).objects : null;
     // Document title updates only now, at apply — derived from the imported
     // file's basename (temp impName). Cancel never touches the previous name.
     const base = st.impName ? String(st.impName).replace(/\.[^.]+$/, '') : '';
@@ -3628,11 +3936,14 @@ class Component extends DCLogic {
     if (mode === 'new') {
       const at = st.pageIndex + 1;
       this.pages.splice(at, 0, conv);
+      this._reindexPageVectorsInsert(at);
+      if (vecObjects && vecObjects.length) this.pageVectors[at] = vecObjects;
       this.cells = conv; this.undoStack = []; this.redoStack = [];
       this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
       this.say(this.callI18n(t.aImgNewPage, '', at + 1, this.pages.length));
     } else if (mode === 'replace') {
       this.snapshot(); this.setCells(conv);
+      if (vecObjects && vecObjects.length) this.pageVectors[st.pageIndex] = vecObjects; else delete this.pageVectors[st.pageIndex];
       this.setState({ importOpen: false, entry: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, corpusCtx: null });
       this.say(t.aRetouchReady);
     } else { // merge into current page
@@ -4009,6 +4320,7 @@ class Component extends DCLogic {
     const w = st.gridW, h = st.gridH, TW = window.TW;
     const hexOf = (cellBuf) => (TW && TW.encodeBits) ? TW.encodeBits(this.cellsToBits(cellBuf, w, h), w, h) : '';
     const audioMap = this.pageAudio || {};
+    const vectorMap = this.pageVectors || {};
     const pages = (this.pages || [this.cells]).map((cellBuf, i) => {
       const page = {
         page: i + 1,
@@ -4020,6 +4332,10 @@ class Component extends DCLogic {
       const a = audioMap[i];
       if (a && a.narration) page.narration = a.narration;
       if (a && a.src) page.audio = { src: a.src, mime: a.mime || '', bytes: a.bytes || 0, durationSec: a.durationSec || 0 };
+      // Optional/experimental (Vectorize lines, Beta) — additive-only field;
+      // readers that don't know about it simply ignore it.
+      const v = vectorMap[i];
+      if (v && v.length) page.vectorLineObjects = v;
       return page;
     });
     const slug = ((name || 'asset').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-|-$/g, '')) || 'asset';
@@ -4192,6 +4508,25 @@ class Component extends DCLogic {
       next[idx > at ? idx - 1 : idx] = this.pageAudio[k];
     });
     this.pageAudio = next;
+  }
+  // Mirrors the pageAudio reindex helpers above, for the optional/experimental
+  // per-page vectorLineObjects metadata (see vectorizeGrid).
+  _reindexPageVectorsInsert(at) {
+    const next = {};
+    Object.keys(this.pageVectors || {}).forEach(k => {
+      const idx = +k;
+      next[idx >= at ? idx + 1 : idx] = this.pageVectors[k];
+    });
+    this.pageVectors = next;
+  }
+  _reindexPageVectorsDelete(at) {
+    const next = {};
+    Object.keys(this.pageVectors || {}).forEach(k => {
+      const idx = +k;
+      if (idx === at) return;
+      next[idx > at ? idx - 1 : idx] = this.pageVectors[k];
+    });
+    this.pageVectors = next;
   }
   // open / send a Tactile Drive file back into Studio
   // ── library persistence (localStorage; cells stored as 600-hex to stay small)
@@ -4858,6 +5193,18 @@ class Component extends DCLogic {
         return { good, msg, metrics: this.callI18n(t.qMetrics, '', q.dots, +(q.density * 100).toFixed(1)),
           box: { display: 'flex', gap: 9, alignItems: 'flex-start', marginTop: 14, padding: '10px 12px', borderRadius: 9, background: good ? 'rgba(11,136,0,0.07)' : 'rgba(196,61,0,0.07)', border: '1px solid ' + (good ? 'rgba(11,136,0,0.25)' : 'rgba(196,61,0,0.25)') },
           color: good ? 'var(--ts-success)' : '#B93E15' };
+      })(),
+      vectorizeEnabled: st.vectorizeEnabled,
+      toggleVectorize: () => this.setState(x => ({ vectorizeEnabled: !x.vectorizeEnabled })),
+      vecStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, height: 36, padding: '0 14px', borderRadius: 100, cursor: 'pointer', border: '1px solid ' + (st.vectorizeEnabled ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.vectorizeEnabled ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: st.vectorizeEnabled ? '#B93E15' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12.5 },
+      // Fresh per-render, same convention as qAdv above — never reads a value
+      // cached by drawImp()'s imperative overlay draw, so it can't go stale.
+      vecAdv: (() => {
+        if (!(st.importOpen && st.impStep === 'review' && st.vectorizeEnabled)) return null;
+        const crop = st.cropChoice === 'crop' ? st.cropRect : null;
+        const pat = this.applyConv(this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, st.gridW, st.gridH);
+        const res = this.vectorizeGrid(pat, st.gridW, st.gridH);
+        return { tooFragmented: res.stats.tooFragmented, countText: (typeof t.vecCountOf === 'function' ? t.vecCountOf(res.stats.objectCount) : (res.stats.objectCount + '')) };
       })(),
       advOpen: st.advOpen,
       toggleAdv: () => this.setState(x => ({ advOpen: !x.advOpen })),
