@@ -190,7 +190,7 @@ input[type=range]{accent-color:var(--ts-primary)}
   .ts-pages-rail{display:none!important}
   /* DotPad panel → full-height drawer over the canvas (existing ✕ button closes it) */
   .ts-side-panel{position:fixed!important;top:0;right:0;bottom:0;height:100dvh;width:min(320px,86vw)!important;z-index:60;border-left:1px solid var(--ts-border-decor);box-shadow:-16px 0 40px rgba(16,24,40,0.20);animation:tsDrawerIn 0.22s ease-out}
-  .ts-statusbar{gap:10px;padding:0 10px;font-size:11px}
+  .ts-statusbar{gap:10px;padding:0 10px;font-size:13px}
   .ts-sb-sec{display:none!important}
   .ts-return-chip{bottom:112px!important}
   /* floating canvas controls: tighter offsets so they don't crowd a narrow canvas */
@@ -246,7 +246,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-hero::before{content:'';position:absolute;top:-30%;right:-20%;width:70%;height:160%;background:radial-gradient(closest-side,rgba(var(--ts-primary-rgb),0.12),transparent 72%);animation:tsHeroGlow 18s ease-in-out infinite;pointer-events:none}
 .ts-hero::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,#E4D9CB 1px,transparent 1.5px);background-size:20px 20px;opacity:.4;pointer-events:none}
 .ts-hero-copy{position:relative;z-index:1}
-.ts-hero-eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--ts-primary);letter-spacing:.2px;background:rgba(var(--ts-primary-rgb),0.09);border-radius:100px;padding:5px 12px}
+.ts-hero-eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--ts-primary);letter-spacing:.2px;background:rgba(var(--ts-primary-rgb),0.09);border-radius:100px;padding:5px 12px}
 .ts-hero-eyebrow-dot{width:7px;height:7px;border-radius:100px;background:var(--ts-primary-decor)}
 .ts-hero-title{font-size:34px;line-height:1.15;font-weight:800;color:#1E1C1A;letter-spacing:-0.6px;margin:16px 0 10px}
 .ts-hero-sub{font-size:15px;color:var(--ts-text-secondary);line-height:1.55;margin:0 0 24px;max-width:30em}
@@ -260,13 +260,13 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-hero-ghost:active{transform:translateY(1px)}
 .ts-hero-ghost:focus-visible{outline:2px solid var(--ts-primary);outline-offset:2px}
 .ts-hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
-.ts-hero-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:5px 11px}
+.ts-hero-chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:5px 11px}
 .ts-hero-chip svg{color:var(--ts-primary)}
 .ts-hero-visual{position:relative;z-index:1}
 .ts-canvas-preview{background:#fff;border:1px solid var(--ts-border-decor);border-radius:16px;padding:14px;box-shadow:0 24px 48px -24px rgba(16,24,40,0.3)}
 .ts-canvas-preview-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .ts-canvas-preview-dot{width:9px;height:9px;border-radius:100px;background:var(--ts-success);box-shadow:0 0 0 3px rgba(11,136,0,0.14)}
-.ts-canvas-preview-cap{font-size:11.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:.2px}
+.ts-canvas-preview-cap{font-size:12.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:.2px}
 .ts-canvas-preview-field{background:#FBF7EE;border:1px solid #F0E7DA;border-radius:11px;padding:16px}
 .ts-dot-on{animation:tsDotPulse 4.8s ease-in-out infinite;transform-origin:center}
 /* Featured action */
@@ -278,7 +278,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-feature-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .ts-feature-titlerow{display:flex;align-items:center;gap:8px}
 .ts-feature-title{font-size:16px;font-weight:800;color:#1E1C1A}
-.ts-feature-badge{font-size:10px;font-weight:800;color:#fff;background:var(--ts-primary);border-radius:100px;padding:2px 9px}
+.ts-feature-badge{font-size:11.5px;font-weight:800;color:#fff;background:var(--ts-primary);border-radius:100px;padding:2px 9px}
 .ts-feature-sub{font-size:13px;color:var(--ts-text-secondary);line-height:1.45}
 .ts-feature-go{flex:none;color:var(--ts-text-secondary);transition:transform .18s ease,color .18s ease}
 .ts-feature-card:hover .ts-feature-go{color:var(--ts-primary);transform:translateX(3px)}
@@ -310,7 +310,7 @@ input[type=range]{accent-color:var(--ts-primary)}
         {{ t.returnBtn }}
       </button>
       <span style="font-size:12.5px;color:var(--ts-text-secondary)">Tactile World&nbsp;&nbsp;›&nbsp;&nbsp;<b style="color:#fff">Tactile Studio</b></span>
-      <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.28);border-radius:100px;padding:4px 12px;color:var(--ts-text-secondary)">
+      <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;letter-spacing:0.5px;border:1px solid rgba(255,255,255,0.28);border-radius:100px;padding:4px 12px;color:var(--ts-text-secondary)">
         <svg width="11" height="11" viewBox="0 0 24 24"><path d="M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M14 4h6v6M20 4l-9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         {{ t.embedded }}
       </span>
@@ -326,9 +326,9 @@ input[type=range]{accent-color:var(--ts-primary)}
       <div class="ts-divider ts-left-divider"></div>
       <input class="ts-project-name" value="{{ fileName }}" onChange="{{ nameChange }}" aria-label="{{ t.fileNameL }}" title="{{ t.fileNameL }}" style="border:1px solid transparent;border-radius:8px;background:transparent;font-weight:700;font-size:15px;color:#1E1C1A;height:40px;box-sizing:border-box;padding:0 9px;flex:0 1 auto" style-hover="border:1px solid var(--ts-border-decor)" style-focus="border:1px solid var(--ts-primary);outline:none">
       <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
-        <span style="font-size:11px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
+        <span style="font-size:12.5px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
       </sc-if>
-      <span class="ts-save-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--ts-success);flex:none;white-space:nowrap">
+      <span class="ts-save-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--ts-success);flex:none;white-space:nowrap">
         <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         <span class="ts-save-text">{{ t.savedStatus }}</span>
       </span>
@@ -368,7 +368,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           <span style="{{ menuIconStyle }}"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ m.iconPath }}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <span style="flex:1;text-align:left;min-width:0">
             <span style="display:block;font-size:13px;font-weight:700;color:#1E1C1A">{{ m.label }}</span>
-            <sc-if value="{{ m.sub }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:11px;color:var(--ts-text-secondary);margin-top:1px;line-height:1.35">{{ m.sub }}</span></sc-if>
+            <sc-if value="{{ m.sub }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-top:1px;line-height:1.35">{{ m.sub }}</span></sc-if>
           </span>
         </button>
       </sc-for>
@@ -399,7 +399,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     <div data-screen-label="8. DotPad disconnected" role="alert" style="flex:none;display:flex;align-items:center;gap:10px;background:rgba(218,18,13,0.06);border-bottom:1px solid var(--ts-danger);color:var(--ts-danger);font-size:13px;font-weight:600;padding:9px 18px">
       <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       {{ t.bannerErr }}
-      <button onClick="{{ retryConn }}" style="margin-left:auto;border:1px solid var(--ts-danger);border-radius:100px;background:#fff;color:var(--ts-danger);font-weight:700;font-size:12px;padding:4px 14px">{{ t.retry }}</button>
+      <button onClick="{{ retryConn }}" style="margin-left:auto;border:1px solid var(--ts-danger);border-radius:100px;background:#fff;color:var(--ts-danger);font-weight:700;font-size:13px;padding:4px 14px">{{ t.retry }}</button>
     </div>
   </sc-if>
 
@@ -410,9 +410,9 @@ input[type=range]{accent-color:var(--ts-primary)}
          thumb is a data: URL from thumbFrom, guarded by hasThumb so placeholder
          renders never leak a literal {{ }} into <img src> (no phantom 404). -->
     <div class="ts-pages-rail" role="tablist" aria-label="{{ t.pagesLabel }}" style="width:188px;flex:none;background:#fff;border-right:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px;font-size:12px;font-weight:700;color:var(--ts-text-secondary)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px;font-size:13px;font-weight:700;color:var(--ts-text-secondary)">
         <span>{{ t.pagesLabel }}</span>
-        <button onClick="{{ addPageFn }}" aria-label="{{ t.addPage }}" title="{{ t.addPage }}" style="width:24px;height:24px;border:none;border-radius:6px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <button onClick="{{ addPageFn }}" aria-label="{{ t.addPage }}" title="{{ t.addPage }}" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
       </div>
@@ -431,7 +431,7 @@ input[type=range]{accent-color:var(--ts-primary)}
               </div>
             </button>
             <button onClick="{{ p.deletePick }}" disabled="{{ p.deleteDisabled }}" aria-label="{{ p.deleteAria }}" title="{{ p.deleteAria }}" style="{{ p.deleteStyle }}" style-hover="background:#fff;border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-              <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
             </button>
           </div>
         </sc-for>
@@ -441,7 +441,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     <sc-if value="{{ tip }}" hint-placeholder-val="{{ false }}">
       <div role="tooltip" style="{{ tipStyle }}">
         {{ tip.label }}
-        <sc-if value="{{ tip.key }}" hint-placeholder-val="{{ false }}"><span style="margin-left:9px;font-size:10px;font-weight:800;color:#C9BBAF;background:rgba(255,255,255,0.12);border-radius:4px;padding:1px 5px">{{ tip.key }}</span></sc-if>
+        <sc-if value="{{ tip.key }}" hint-placeholder-val="{{ false }}"><span style="margin-left:9px;font-size:11.5px;font-weight:800;color:#C9BBAF;background:rgba(255,255,255,0.12);border-radius:4px;padding:1px 5px">{{ tip.key }}</span></sc-if>
       </div>
     </sc-if>
     <sc-if value="{{ railMenuOpen }}" hint-placeholder-val="{{ false }}">
@@ -473,31 +473,31 @@ input[type=range]{accent-color:var(--ts-primary)}
       <button aria-label="{{ t.txtCancel }}" onClick="{{ textCancel }}" tabindex="-1" style="position:fixed;inset:0;z-index:81;background:transparent;border:none;cursor:default"></button>
       <div role="dialog" aria-label="{{ t.txtTitle }}" style="{{ textPopoverStyle }}">
         <div style="font-size:13.5px;font-weight:800;color:#1E1C1A;margin-bottom:3px">{{ t.txtTitle }}</div>
-        <div style="font-size:11.5px;color:#8A857E;line-height:1.4;margin-bottom:11px">{{ t.txtSub }}</div>
+        <div style="font-size:12.5px;color:#8A857E;line-height:1.4;margin-bottom:11px">{{ t.txtSub }}</div>
         <input value="{{ textValue }}" onChange="{{ onTextInput }}" onKeyDown="{{ onTextKey }}" autoFocus="{{ true }}" aria-label="{{ t.txtTitle }}" placeholder="{{ t.txtPlaceholder }}" maxLength="32" style="width:100%;height:38px;border:1px solid var(--ts-border-functional);border-radius:9px;background:#FBF8F4;padding:0 11px;font-size:14px;font-weight:600;color:#1E1C1A" style-focus="border:1px solid var(--ts-primary);outline:none;background:#fff">
         <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
           <div>
-            <div style="font-size:10.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtSizeL }}</div>
+            <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtSizeL }}</div>
             <div role="group" aria-label="{{ t.txtSizeL }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
               <sc-for list="{{ textSizeOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
             </div>
           </div>
           <div style="display:flex;gap:10px">
             <div style="flex:1;min-width:0">
-              <div style="font-size:10.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtOrientL }}</div>
+              <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtOrientL }}</div>
               <div role="group" aria-label="{{ t.txtOrientL }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
                 <sc-for list="{{ textOrientOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
               </div>
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:10.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtStyleL }}</div>
+              <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtStyleL }}</div>
               <div role="group" aria-label="{{ t.txtStyleL }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
                 <sc-for list="{{ textStyleOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
               </div>
             </div>
           </div>
         </div>
-        <div style="font-size:10.5px;color:#B7AEA4;line-height:1.45;margin-top:11px">{{ t.txtNote }}</div>
+        <div style="font-size:12px;color:#B7AEA4;line-height:1.45;margin-top:11px">{{ t.txtNote }}</div>
         <div style="display:flex;gap:8px;margin-top:13px">
           <button onClick="{{ textCancel }}" style="flex:none;height:38px;padding:0 14px;border:1px solid var(--ts-border-decor);border-radius:9px;background:#fff;color:var(--ts-text-secondary);font-weight:700;font-size:12.5px" style-hover="border-color:#C9BBAF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.txtCancel }}</button>
           <button onClick="{{ textCommit }}" aria-label="{{ t.txtAdd }}" style="flex:1;height:38px;border:none;border-radius:9px;background:var(--ts-primary);color:#fff;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px" style-hover="background:#D64A1C" style-active="background:#B93E15" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
@@ -511,7 +511,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     <div class="ts-canvas-zone" style="flex:1;position:relative;display:flex;flex-direction:column;overflow:hidden;padding:0">
       <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
         <div role="group" aria-label="{{ strokeCtlLabel }}" style="flex:none;display:flex;align-items:center;gap:10px;padding:9px 20px;border-bottom:1px solid var(--ts-border-decor);background:#fff">
-          <span style="font-size:11px;color:var(--ts-text-secondary);white-space:nowrap">{{ strokeCtlLabel }}</span>
+          <span style="font-size:12.5px;color:var(--ts-text-secondary);white-space:nowrap">{{ strokeCtlLabel }}</span>
           <div style="display:flex;align-items:center;gap:6px">
             <sc-for list="{{ strokeOpts }}" as="s" hint-placeholder-count="3">
               <button onClick="{{ s.pick }}" aria-pressed="{{ s.active }}" aria-label="{{ s.aria }}" title="{{ s.title }}" style="{{ s.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
@@ -529,7 +529,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           <button onClick="{{ corpusPrev }}" data-corpus-nav="prev" aria-label="{{ corpusPrevLabel }}" title="{{ corpusPrevLabel }}" disabled="{{ corpusPrevDisabled }}" style="{{ corpusPrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
-          <span style="font-weight:700;font-size:12px;color:#57534E;white-space:nowrap;padding:0 2px">{{ corpusPageText }}</span>
+          <span style="font-weight:700;font-size:13px;color:#57534E;white-space:nowrap;padding:0 2px">{{ corpusPageText }}</span>
           <button onClick="{{ corpusNext }}" data-corpus-nav="next" aria-label="{{ corpusNextLabel }}" title="{{ corpusNextLabel }}" disabled="{{ corpusNextDisabled }}" style="{{ corpusNextStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
@@ -548,7 +548,7 @@ input[type=range]{accent-color:var(--ts-primary)}
       </sc-if>
       <div style="position:relative;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,0.05),0 12px 28px -14px rgba(16,24,40,0.14);padding:12px">
         <sc-if value="{{ isA4 }}" hint-placeholder-val="{{ false }}">
-          <span style="position:absolute;top:-13px;left:12px;z-index:5;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--ts-text-secondary);background:#F7F4EF;border:1px dashed #C9BBAF;border-radius:100px;padding:3px 11px;white-space:nowrap">
+          <span style="position:absolute;top:-13px;left:12px;z-index:5;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--ts-text-secondary);background:#F7F4EF;border:1px dashed #C9BBAF;border-radius:100px;padding:3px 11px;white-space:nowrap">
             <svg width="11" height="11" viewBox="0 0 24 24"><path d="M7 3h10v6H7zM5 9h14a1 1 0 0 1 1 1v7h-4v4H8v-4H4v-7a1 1 0 0 1 1-1zM8 17h8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg>
             {{ t.a4Badge }}
           </span>
@@ -563,11 +563,11 @@ input[type=range]{accent-color:var(--ts-primary)}
            a sibling of the scrollable viewport so it stays put on scroll,
            and above the floating tool pill so the two never overlap. -->
       <div role="group" aria-label="{{ t.zoomLabel }}" style="position:absolute;right:16px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
-        <button onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" title="{{ t.zoomOutL }} (Ctrl+-)" style="width:28px;height:28px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <button onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" title="{{ t.zoomOutL }} (Ctrl+-)" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
-        <button onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" title="{{ t.zoomResetL }} (Ctrl+0)" style="min-width:46px;height:28px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
-        <button onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" title="{{ t.zoomInL }} (Ctrl+=)" style="width:28px;height:28px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <button onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" title="{{ t.zoomResetL }} (Ctrl+0)" style="min-width:48px;height:30px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
+        <button onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" title="{{ t.zoomInL }} (Ctrl+=)" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
       </div>
@@ -640,12 +640,12 @@ input[type=range]{accent-color:var(--ts-primary)}
         <sc-if value="{{ inspTabProps }}" hint-placeholder-val="{{ true }}">
         <div data-screen-label="Inspector · Properties" style="padding:16px;display:flex;flex-direction:column;gap:16px">
           <div>
-            <div style="font-size:11px;color:var(--ts-text-secondary);letter-spacing:.02em;margin-bottom:8px">{{ t.inspToolOpts }}</div>
-            <div style="font-size:13px;font-weight:800;color:#1E1C1A">{{ propToolName }}</div>
+            <div style="font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em;margin-bottom:8px">{{ t.inspToolOpts }}</div>
+            <div style="font-size:14px;font-weight:800;color:#1E1C1A">{{ propToolName }}</div>
           </div>
 
           <label style="display:flex;flex-direction:column;align-items:stretch;gap:6px;border-top:1px solid #F2ECE4;padding-top:14px">
-            <span style="font-size:11px;color:var(--ts-text-secondary);letter-spacing:.02em">{{ t.canvasSizeL }}</span>
+            <span style="font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em">{{ t.canvasSizeL }}</span>
             <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.canvasSizeL }}" style="width:100%;box-sizing:border-box;height:38px;border:1px solid var(--ts-border-functional);border-radius:8px;background:#fff;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 10px" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
               <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
                 <option value="{{ o.key }}">{{ o.name }}</option>
@@ -654,27 +654,27 @@ input[type=range]{accent-color:var(--ts-primary)}
           </label>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
-            <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:3px">{{ t.inspCleanup }}</div>
-            <div style="font-size:11px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
+            <div style="font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:3px">{{ t.inspCleanup }}</div>
+            <div style="font-size:13px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
             <div style="display:flex;gap:6px;margin-bottom:6px">
-              <button onClick="{{ fxThinner }}" style="flex:1;height:32px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThinner }}</button>
-              <button onClick="{{ fxThicker }}" style="flex:1;height:32px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThicker }}</button>
+              <button onClick="{{ fxThinner }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThinner }}</button>
+              <button onClick="{{ fxThicker }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThicker }}</button>
             </div>
-            <button onClick="{{ fxDenoise }}" style="width:100%;height:32px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspDenoise }}</button>
+            <button onClick="{{ fxDenoise }}" style="width:100%;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspDenoise }}</button>
           </div>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
-            <button onClick="{{ toggleNarr }}" aria-expanded="{{ narrOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:11px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <button onClick="{{ toggleNarr }}" aria-expanded="{{ narrOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
               <span style="flex:1;text-align:left;font-weight:700">{{ t.inspPageMeta }} · {{ t.inspAudio }}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" style="{{ narrCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
             <sc-if value="{{ narrOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:11px">
-            <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspDesc }}</label>
-            <textarea onChange="{{ onPgDesc }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgDesc }}</textarea>
+            <label style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspDesc }}</label>
+            <textarea onChange="{{ onPgDesc }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:#1E1C1A;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgDesc }}</textarea>
 
-            <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
-            <select onChange="{{ onBrailleLang }}" value="{{ brailleLangValue }}" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;background:#fff;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
+            <label style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
+            <select onChange="{{ onBrailleLang }}" value="{{ brailleLangValue }}" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:13px;font-family:inherit;color:#1E1C1A;background:#fff;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
               <sc-for list="{{ brailleLangOptions }}" as="o" hint-placeholder-count="4">
                 <option value="{{ o.key }}">{{ o.label }}</option>
               </sc-for>
@@ -684,19 +684,19 @@ input[type=range]{accent-color:var(--ts-primary)}
               <div style="font-size:15px;letter-spacing:0.06em;color:#1E1C1A;min-height:20px;word-break:break-all">{{ braillePreviewText }}</div>
             </div>
             <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-              <span style="font-size:10.5px;font-weight:700;{{ brailleCounterColor }}">{{ brailleCounterText }}</span>
+              <span style="font-size:12.5px;font-weight:700;{{ brailleCounterColor }}">{{ brailleCounterText }}</span>
             </div>
 
-            <label style="display:block;font-size:11.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
-            <textarea onChange="{{ onNarration }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;color:#1E1C1A;margin-bottom:12px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgNarration }}</textarea>
+            <label style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
+            <textarea onChange="{{ onNarration }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:#1E1C1A;margin-bottom:12px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgNarration }}</textarea>
             <div class="ts-inspector-divider" style="height:1px;background:var(--ts-border-functional);margin:2px 0 10px"></div>
-            <div class="ts-inspector-subtitle" style="font-size:11.5px;color:var(--ts-text-secondary);font-weight:700;margin-bottom:8px">{{ t.inspAudioSub }}</div>
+            <div class="ts-inspector-subtitle" style="font-size:12.5px;color:var(--ts-text-secondary);font-weight:700;margin-bottom:8px">{{ t.inspAudioSub }}</div>
 
             <sc-if value="{{ pgAudio.has }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;margin-bottom:8px">
                 <svg width="16" height="16" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.8"></circle><circle cx="19" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>
-                <span style="flex:1;font-size:12px;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pgAudio.fileName }} {{ pgAudio.dur }}</span>
-                <button onClick="{{ onAudioRemove }}" style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:6px" style-hover="color:#B93E15;background:#F3E3DC" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspAudioRemove }}</button>
+                <span style="flex:1;font-size:13px;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pgAudio.fileName }} {{ pgAudio.dur }}</span>
+                <button onClick="{{ onAudioRemove }}" style="flex:none;font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:6px" style-hover="color:#B93E15;background:#F3E3DC" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspAudioRemove }}</button>
               </div>
               <audio ref="{{ audioRef }}" controls style="width:100%;height:34px"></audio>
             </sc-if>
@@ -706,7 +706,7 @@ input[type=range]{accent-color:var(--ts-primary)}
                 {{ t.inspAudioAdd }}
                 <input type="file" accept="audio/*" onChange="{{ onAudioFile }}" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
               </label>
-              <div style="font-size:10.5px;color:var(--ts-text-secondary);line-height:1.5;margin-top:7px">{{ t.inspAudioHint }}</div>
+              <div style="font-size:12px;color:var(--ts-text-secondary);line-height:1.5;margin-top:7px">{{ t.inspAudioHint }}</div>
             </sc-if>
             </div>
             </sc-if>
@@ -731,7 +731,7 @@ input[type=range]{accent-color:var(--ts-primary)}
               {{ dpStatusText }}
             </span>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ts-text-secondary)">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ts-text-secondary)">
             <span style="font-weight:700">{{ t.dpSupported }}</span>
             <span style="font-variant-numeric:tabular-nums">{{ t.dpSupportedVal }}</span>
           </div>
@@ -760,7 +760,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             </button>
           </sc-if>
           <sc-if value="{{ dpIsConnected }}" hint-placeholder-val="{{ true }}">
-            <button onClick="{{ disconnectDot }}" aria-label="{{ t.aDpDisconnect }}" style="height:34px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:var(--ts-text-secondary);font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <button onClick="{{ disconnectDot }}" aria-label="{{ t.aDpDisconnect }}" style="height:34px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:var(--ts-text-secondary);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
               <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
               {{ t.dpDisconnect }}
             </button>
@@ -772,23 +772,23 @@ input[type=range]{accent-color:var(--ts-primary)}
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
             <div style="min-width:0">
               <div style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ t.dpLive }}</div>
-              <div style="font-size:11px;color:var(--ts-text-secondary);line-height:1.4;margin-top:2px">{{ t.dpLiveHelp }}</div>
+              <div style="font-size:12.5px;color:var(--ts-text-secondary);line-height:1.4;margin-top:2px">{{ t.dpLiveHelp }}</div>
             </div>
             <button onClick="{{ toggleLive }}" role="switch" aria-checked="{{ livePreview }}" aria-label="{{ t.aDpLive }}" style="{{ liveTrackStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
               <span style="{{ liveKnobStyle }}"></span>
             </button>
           </div>
-          <div aria-hidden="true" style="margin-top:8px;font-size:11px;font-weight:700;color:var(--ts-text-secondary)">{{ t.dpLive }}: <span style="color:#B93E15">{{ liveStateLabel }}</span></div>
+          <div aria-hidden="true" style="margin-top:8px;font-size:12.5px;font-weight:700;color:var(--ts-text-secondary)">{{ t.dpLive }}: <span style="color:#B93E15">{{ liveStateLabel }}</span></div>
         </div>
 
         <!-- advanced device tests (collapsed by default; hardware diagnostics, not editing) -->
         <div style="padding:12px 16px 14px;border-top:1px solid #F2ECE4">
           <button onClick="{{ toggleAdv }}" aria-expanded="{{ advOpen }}" style="display:flex;align-items:center;gap:8px;width:100%;min-height:44px;background:transparent;border:none;padding:4px 0;cursor:pointer;text-align:left" style-focus="outline:2px solid #C43D00;outline-offset:2px">
             <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;transition:transform 0.15s ease;transform:rotate({{ advCaret }})"><path d="M9 6l6 6-6 6" fill="none" stroke="var(--ts-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <span style="font-size:11px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase">{{ t.advTests }}</span>
+            <span style="font-size:12.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase">{{ t.advTests }}</span>
           </button>
           <sc-if value="{{ advOpen }}" hint-placeholder-val="{{ true }}">
-          <div style="margin-top:8px;font-size:11px;color:var(--ts-text-secondary);line-height:1.45">{{ t.advTestsHint }}</div>
+          <div style="margin-top:8px;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.45">{{ t.advTestsHint }}</div>
           <div role="group" aria-label="{{ t.dpPins }}" style="display:flex;gap:7px;margin-top:10px">
             <button onClick="{{ pinRaise }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpRaise }}" style="{{ pinRaiseStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
               <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0l-5 5m5-5l5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -804,7 +804,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             </button>
           </div>
           <sc-if value="{{ pinsDisabled }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:9px;font-size:11px;color:var(--ts-text-secondary);line-height:1.4">{{ t.dpConnectHint }}</div>
+            <div style="margin-top:9px;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.4">{{ t.dpConnectHint }}</div>
           </sc-if>
           </sc-if>
         </div>
@@ -814,7 +814,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     </sc-if>
   </div>
 
-  <div class="ts-statusbar" style="height:40px;background:#fff;border-top:1px solid var(--ts-border-decor);display:flex;align-items:center;gap:14px;padding:0 16px;font-size:11.5px;color:var(--ts-text-secondary);flex:none" data-screen-label="BottomPanel">
+  <div class="ts-statusbar" style="height:40px;background:#fff;border-top:1px solid var(--ts-border-decor);display:flex;align-items:center;gap:14px;padding:0 16px;font-size:13px;color:var(--ts-text-secondary);flex:none" data-screen-label="BottomPanel">
     <span>{{ t.pos }} <b style="color:#57534E;font-variant-numeric:tabular-nums">{{ posLabel }}</b></span>
     <span style="display:inline-flex;align-items:center;gap:6px;color:var(--ts-text-secondary);font-weight:600">
       <sc-if value="{{ cellOn }}" hint-placeholder-val="{{ false }}">
@@ -829,7 +829,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     <span class="ts-sb-sec">{{ t.undo }} {{ undoCount }} · {{ t.redo }} {{ redoCount }}</span>
     <div role="status" aria-live="polite" style="flex:1;text-align:center;color:#57534E;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ announce }}</div>
     <sc-if value="{{ qLabel }}" hint-placeholder-val="{{ false }}">
-      <span title="{{ qTitle }}" style="display:inline-flex;align-items:center;gap:5px;border:1px solid #EFE7DE;border-radius:100px;padding:3px 10px;font-weight:700;font-size:11px;color:var(--ts-text-secondary)">
+      <span title="{{ qTitle }}" style="display:inline-flex;align-items:center;gap:5px;border:1px solid #EFE7DE;border-radius:100px;padding:3px 10px;font-weight:700;font-size:12.5px;color:var(--ts-text-secondary)">
         <sc-if value="{{ qGoodState }}" hint-placeholder-val="{{ true }}">
           <svg width="12" height="12" viewBox="0 0 24 24" style="color:var(--ts-success)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </sc-if>
@@ -840,7 +840,7 @@ input[type=range]{accent-color:var(--ts-primary)}
       </span>
     </sc-if>
     <span style="color:var(--ts-text-secondary)">{{ gridLabel }} · {{ dotCount }} {{ t.dots }}</span>
-    <span class="ts-sb-sec" style="display:inline-flex;align-items:center;gap:6px;color:var(--ts-text-secondary)"><kbd style="border:1px solid var(--ts-border-decor);border-radius:4px;padding:1px 6px;font-size:11px;font-family:inherit;background:#F7F4EF">?</kbd>{{ t.helpHint }}</span>
+    <span class="ts-sb-sec" style="display:inline-flex;align-items:center;gap:6px;color:var(--ts-text-secondary)"><kbd style="border:1px solid var(--ts-border-decor);border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:inherit;background:#F7F4EF">?</kbd>{{ t.helpHint }}</span>
   </div>
 
   <sc-if value="{{ retChip }}" hint-placeholder-val="{{ false }}">
@@ -919,32 +919,32 @@ input[type=range]{accent-color:var(--ts-primary)}
         <button onClick="{{ homeNew60 }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M11 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M18 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M4 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M11 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M18 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeNew60L }}</span>
-          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeNew60Sub }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeNew60Sub }}</span>
         </button>
         <button onClick="{{ homeNew96 }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M11 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M18 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M4 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M11 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M18 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeNew96L }}</span>
-          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeNew96Sub }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeNew96Sub }}</span>
         </button>
         <button onClick="{{ homeConvert }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8h.01" /><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12" /><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5" /><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeConvertL }}</span>
-          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeConvertSub }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeConvertSub }}</span>
         </button>
         <button onClick="{{ homeTemplate }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v1a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -1" /><path d="M4 15a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -3" /><path d="M14 6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -12" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.entTpl }}</span>
-          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.entTplSub }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary);line-height:1.4">{{ t.entTplSub }}</span>
         </button>
         <button onClick="{{ homeOpenProjects }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeOpenL }}</span>
-          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeOpenSub }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeOpenSub }}</span>
         </button>
         <button onClick="{{ homeConnect }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 12px 26px -14px rgba(16,24,40,0.2)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <span style="width:40px;height:40px;border-radius:11px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 3a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2l12 0" /><path d="M9 18h6" /></svg></span>
           <span style="font-size:14.5px;font-weight:800;color:#1E1C1A">{{ t.homeConnectL }}</span>
-          <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeConnectSub }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary);line-height:1.4">{{ t.homeConnectSub }}</span>
         </button>
       </div>
 
@@ -963,7 +963,7 @@ input[type=range]{accent-color:var(--ts-primary)}
               </span>
               <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
                 <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
-                <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ c.grid }} · {{ c.time }}</span>
+                <span style="font-size:12.5px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ c.grid }} · {{ c.time }}</span>
               </span>
             </button>
             <sc-if value="{{ c.favoritable }}" hint-placeholder-val="{{ true }}">
@@ -1013,7 +1013,7 @@ input[type=range]{accent-color:var(--ts-primary)}
                 </span>
                 <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
                   <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.name }}</span>
-                  <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ g.grid }} · {{ g.time }}</span>
+                  <span style="font-size:12.5px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ g.grid }} · {{ g.time }}</span>
                 </span>
               </button>
               <sc-if value="{{ g.favoritable }}" hint-placeholder-val="{{ true }}">
@@ -1045,7 +1045,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             <button role="listitem" onClick="{{ p.open }}" aria-label="{{ p.aOpen }}" style="text-align:left;background:#fff;border:1px solid #EFE7DE;border-radius:12px;padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 2px rgba(16,24,40,0.04)" style-hover="border-color:var(--ts-primary);transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(16,24,40,0.16)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
               <span style="width:36px;height:36px;border-radius:9px;background:rgba(var(--ts-primary-rgb),0.1);color:var(--ts-primary);display:grid;place-items:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /><path d="M4 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /><path d="M14 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4" /><path d="M14 7l6 0" /><path d="M17 4l0 6" /></svg></span>
               <span style="font-size:13.5px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span>
-              <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ p.grid }}</span>
+              <span style="font-size:12.5px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ p.grid }}</span>
             </button>
           </sc-for>
         </div>
@@ -1070,7 +1070,7 @@ input[type=range]{accent-color:var(--ts-primary)}
               </span>
               <span style="padding:11px 13px;display:flex;flex-direction:column;gap:3px">
                 <span style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.name }}</span>
-                <span style="font-size:11px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ d.grid }} · {{ t.homeTrashDeletedAt }} {{ d.deletedTime }}</span>
+                <span style="font-size:12.5px;color:var(--ts-text-secondary);font-variant-numeric:tabular-nums">{{ d.grid }} · {{ t.homeTrashDeletedAt }} {{ d.deletedTime }}</span>
               </span>
               <button onClick="{{ d.restore }}" aria-label="{{ d.aRestore }}" style="position:absolute;top:8px;right:38px;width:26px;height:26px;border:1px solid var(--ts-border-decor);border-radius:8px;background:rgba(255,255,255,0.92);color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#fff;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
                 <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1096,7 +1096,7 @@ input[type=range]{accent-color:var(--ts-primary)}
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <h3 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-0.3px">{{ impHeaderTitle }}</h3>
-          <span role="status" aria-live="polite" style="font-size:12px;font-weight:700;color:var(--ts-text-secondary);white-space:nowrap">{{ impProgressLabel }}</span>
+          <span role="status" aria-live="polite" style="font-size:13px;font-weight:700;color:var(--ts-text-secondary);white-space:nowrap">{{ impProgressLabel }}</span>
         </div>
         <sc-if value="{{ impIsImport }}" hint-placeholder-val="{{ true }}">
           <p style="margin:8px 0 0;font-size:13.5px;color:var(--ts-text-secondary);line-height:1.5;max-width:520px">{{ t.impImportSub }}</p>
@@ -1142,7 +1142,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 
         <!-- output target chip -->
         <div style="display:flex;align-items:center;gap:9px;margin-bottom:16px;flex-wrap:wrap">
-          <span style="font-size:12px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
           <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:#1E1C1A;background:#F7F4EF;border:1px solid #E3D9CE;border-radius:100px;padding:4px 12px">
             <svg width="13" height="13" viewBox="0 0 24 24" style="color:var(--ts-primary)" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><circle cx="8" cy="12" r="1.3" fill="currentColor"></circle><circle cx="12" cy="12" r="1.3" fill="currentColor"></circle><circle cx="16" cy="12" r="1.3" fill="currentColor"></circle></svg>
             {{ outName }}
@@ -1166,7 +1166,7 @@ input[type=range]{accent-color:var(--ts-primary)}
               {{ t.impSample }}
             </button>
           </div>
-          <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-top:2px">{{ t.impFormats }}</div>
+          <div style="font-size:12.5px;color:var(--ts-text-secondary);margin-top:2px">{{ t.impFormats }}</div>
         </div>
 
         <!-- TGIL / DTMS / library asset import (already-tactile files → DotPad) —
@@ -1178,7 +1178,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           </span>
           <div style="flex:1;min-width:0">
             <span style="font-size:12.5px;font-weight:700;color:#1E1C1A">{{ t.impAssetTitle }}</span>
-            <span style="font-size:11.5px;color:var(--ts-text-secondary)"> · {{ t.impAssetSub }}</span>
+            <span style="font-size:12.5px;color:var(--ts-text-secondary)"> · {{ t.impAssetSub }}</span>
           </div>
           <button onClick="{{ chooseAssetFile }}" style="flex:none;height:30px;padding:0 4px;border:none;background:transparent;color:var(--ts-primary);font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:underline;text-decoration-color:transparent" style-hover="text-decoration-color:currentColor" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impAssetChoose }}</button>
         </div>
@@ -1219,7 +1219,7 @@ input[type=range]{accent-color:var(--ts-primary)}
                 <svg width="15" height="15" viewBox="0 0 24 24" style="margin-left:auto;color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               </sc-if>
             </span>
-            <span style="font-size:12px;color:var(--ts-text-secondary);font-weight:500">{{ t.impCropDesc }}</span>
+            <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:500">{{ t.impCropDesc }}</span>
           </button>
           <button onClick="{{ pickCropFull }}" aria-pressed="{{ cropIsFull }}" style="{{ fullCardStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <span style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
@@ -1229,26 +1229,26 @@ input[type=range]{accent-color:var(--ts-primary)}
                 <svg width="15" height="15" viewBox="0 0 24 24" style="margin-left:auto;color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               </sc-if>
             </span>
-            <span style="font-size:12px;color:var(--ts-text-secondary);font-weight:500">{{ t.impFullDesc }}</span>
+            <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:500">{{ t.impFullDesc }}</span>
           </button>
         </div>
         <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:16/9;padding:14px">
           <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
         </div>
         <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:10px;font-size:12px;color:var(--ts-text-secondary);display:flex;align-items:center;gap:7px">
+          <div style="margin-top:10px;font-size:13px;color:var(--ts-text-secondary);display:flex;align-items:center;gap:7px">
             <svg width="14" height="14" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none"><path d="M12 8v8M8 12h8M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
             {{ t.impCropHint }}
           </div>
         </sc-if>
         <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap">
-          <span style="font-size:12px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
           <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
             <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
               <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
             </sc-for>
           </div>
-          <span style="font-size:12px;color:var(--ts-text-secondary)">{{ outName }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary)">{{ outName }}</span>
         </div>
       </sc-if>
 
@@ -1257,16 +1257,16 @@ input[type=range]{accent-color:var(--ts-primary)}
         <p style="margin:0 0 16px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impConvertSub }}</p>
         <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
           <div>
-            <div style="font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
             <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:14px">
               <canvas ref="{{ impOrigRef }}" aria-label="{{ t.original }}"></canvas>
             </div>
           </div>
           <div>
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;height:18px">
-              <span style="font-size:11.5px;font-weight:700;color:var(--ts-text-secondary)">{{ t.impResult }}</span>
+              <span style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary)">{{ t.impResult }}</span>
               <sc-if value="{{ convertDone }}" hint-placeholder-val="{{ false }}">
-                <span role="status" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ts-success);background:rgba(11,136,0,0.10);border-radius:100px;padding:1px 8px">
+                <span role="status" style="display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;color:var(--ts-success);background:rgba(11,136,0,0.10);border-radius:100px;padding:1px 8px">
                   <svg width="12" height="12" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   {{ t.impConvertDone }}
                 </span>
@@ -1274,11 +1274,11 @@ input[type=range]{accent-color:var(--ts-primary)}
             </div>
             <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)">
               <canvas ref="{{ impRef }}"></canvas>
-              <span style="position:absolute;left:10px;bottom:9px;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
+              <span style="position:absolute;left:10px;bottom:9px;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
               <sc-if value="{{ converting }}" hint-placeholder-val="{{ true }}">
                 <div style="position:absolute;inset:0;background:rgba(20,18,16,0.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:10px">
                   <span style="width:26px;height:26px;border:3px solid rgba(255,255,255,0.25);border-top-color:var(--ts-primary);border-radius:100px;animation:tsSpin 0.8s linear infinite"></span>
-                  <span style="font-size:12px;font-weight:600;color:#F2E9DD;text-align:center;padding:0 14px">{{ t.impConverting }}</span>
+                  <span style="font-size:13px;font-weight:600;color:#F2E9DD;text-align:center;padding:0 14px">{{ t.impConverting }}</span>
                 </div>
               </sc-if>
             </div>
@@ -1291,25 +1291,25 @@ input[type=range]{accent-color:var(--ts-primary)}
         <p style="margin:0 0 18px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impReviewSub }}</p>
         <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
-            <div style="font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
             <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:14px">
               <canvas ref="{{ impOrigRef }}" aria-label="{{ t.original }}"></canvas>
             </div>
           </div>
           <div>
-            <div style="font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.tactilePreview }}</div>
-            <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:10.5px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
+            <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.tactilePreview }}</div>
+            <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
               <canvas ref="{{ impRef }}"></canvas>
             </div>
           </div>
         </div>
         <div style="margin-top:4px">
-          <div style="font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px">{{ presetLabel }}</div>
+          <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px">{{ presetLabel }}</div>
           <div role="group" aria-label="{{ presetLabel }}" style="display:flex;gap:7px">
             <sc-for list="{{ convPresets }}" as="pp" hint-placeholder-count="4">
               <button onClick="{{ pp.setIt }}" aria-pressed="{{ pp.sel }}" style="{{ pp.style }}" style-focus="outline:2px solid #C43D00;outline-offset:2px">
                 <span style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ pp.label }}</span>
-                <span style="font-size:10.5px;color:var(--ts-text-secondary);line-height:1.3">{{ pp.sub }}</span>
+                <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.3">{{ pp.sub }}</span>
               </button>
             </sc-for>
           </div>
@@ -1333,7 +1333,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 8v5M12 15.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="{{ qAdv.color }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             <div>
               <div style="font-size:12.5px;font-weight:800;color:{{ qAdv.color }}">{{ qAdv.metrics }}</div>
-              <div style="font-size:12px;color:#57534E;line-height:1.45;margin-top:2px">{{ qAdv.msg }}</div>
+              <div style="font-size:13px;color:#57534E;line-height:1.45;margin-top:2px">{{ qAdv.msg }}</div>
             </div>
           </div>
         </sc-if>
@@ -1355,7 +1355,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           </button>
         </sc-if>
         <sc-if value="{{ imgNotReady }}" hint-placeholder-val="{{ true }}">
-          <span style="font-size:12px;color:var(--ts-text-secondary);font-weight:600;margin-right:2px">{{ t.impChooseToContinue }}</span>
+          <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:600;margin-right:2px">{{ t.impChooseToContinue }}</span>
           <button disabled="{{ true }}" aria-disabled="true" style="height:40px;padding:0 22px;border:none;border-radius:8px;background:#E8DFD6;color:#B7AFA4;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:7px;cursor:not-allowed">
             {{ t.impNext }}
             <svg width="15" height="15" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1392,7 +1392,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     <div style="display:flex;align-items:center;padding:22px 26px 0">
       <div>
         <h3 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-0.3px">{{ t.cmdTitle }}</h3>
-        <div style="margin-top:5px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--ts-text-secondary);background:#F1EAE2;border-radius:100px;padding:2px 9px">{{ t.cmdV1Note }}</div>
+        <div style="margin-top:5px;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);background:#F1EAE2;border-radius:100px;padding:2px 9px">{{ t.cmdV1Note }}</div>
       </div>
       <button onClick="{{ closeCmd }}" aria-label="{{ t.close }}" style="margin-left:auto;width:32px;height:32px;border:none;border-radius:8px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center;align-self:flex-start" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
         <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
@@ -1409,7 +1409,7 @@ input[type=range]{accent-color:var(--ts-primary)}
       </sc-if>
       <div style="display:flex;gap:18px;margin-top:16px;flex-wrap:wrap">
         <div>
-          <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:6px">{{ t.outputL }}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:6px">{{ t.outputL }}</div>
           <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
             <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
               <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
@@ -1417,7 +1417,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           </div>
         </div>
         <div style="flex:1;min-width:150px">
-          <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:6px">{{ t.cmdPurposeL }}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:6px">{{ t.cmdPurposeL }}</div>
           <select value="{{ cmdPurpose }}" onChange="{{ cmdPurposeChange }}" aria-label="{{ t.cmdPurposeL }}" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 10px;font-size:13px;color:#1E1C1A;background:#fff" style-focus="border:1px solid var(--ts-primary);outline:none">
             <sc-for list="{{ purposeOpts }}" as="p" hint-placeholder-count="7">
               <option value="{{ p.value }}">{{ p.label }}</option>
@@ -1426,15 +1426,15 @@ input[type=range]{accent-color:var(--ts-primary)}
         </div>
       </div>
       <div style="margin-top:16px">
-        <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.cmdExamples }}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.cmdExamples }}</div>
         <div style="display:flex;flex-wrap:wrap;gap:7px">
           <sc-for list="{{ cmdChips }}" as="c" hint-placeholder-count="5">
-            <button onClick="{{ c.pick }}" style="border:1px solid var(--ts-border-decor);border-radius:100px;background:#F7F4EF;color:#1E1C1A;font-size:12px;font-weight:600;padding:6px 12px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary);background:#fff" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ c.label }}</button>
+            <button onClick="{{ c.pick }}" style="border:1px solid var(--ts-border-decor);border-radius:100px;background:#F7F4EF;color:#1E1C1A;font-size:13px;font-weight:600;padding:6px 12px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary);background:#fff" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ c.label }}</button>
           </sc-for>
         </div>
       </div>
       <div style="margin-top:16px">
-        <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.cmdFilterL }}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.cmdFilterL }}</div>
         <div role="group" aria-label="{{ t.cmdFilterL }}" style="display:flex;flex-wrap:wrap;gap:7px">
           <sc-for list="{{ featureFilterChips }}" as="f" hint-placeholder-count="3">
             <button onClick="{{ f.toggle }}" role="checkbox" aria-checked="{{ f.on }}" style="{{ f.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -1488,7 +1488,7 @@ input[type=range]{accent-color:var(--ts-primary)}
           <button onClick="{{ it.pick }}" aria-label="{{ it.name }}" style="text-align:left;background:#fff;border:1px solid var(--ts-border-decor);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1);display:flex;flex-direction:column" style-hover="border:1px solid var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <span style="position:relative;display:block;background:#F7F4EF;border-bottom:1px solid #E8DFD6;padding:10px">
               <sc-if value="{{ it.isPreset }}" hint-placeholder-val="{{ false }}">
-                <span style="position:absolute;top:14px;right:14px;z-index:1;font-size:10px;font-weight:700;color:#fff;background:var(--ts-primary);border-radius:100px;padding:2px 8px">{{ it.tag }}</span>
+                <span style="position:absolute;top:14px;right:14px;z-index:1;font-size:11.5px;font-weight:700;color:#fff;background:var(--ts-primary);border-radius:100px;padding:2px 8px">{{ it.tag }}</span>
               </sc-if>
               <sc-if value="{{ it.hasThumb }}" hint-placeholder-val="{{ false }}">
               <img src="{{ it.thumb }}" alt="" style="display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:6px;background:#fff;border:1px solid #E3D9CE">
@@ -1496,7 +1496,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             </span>
             <span style="padding:11px 13px;display:flex;flex-direction:column;gap:4px">
               <span style="font-size:13.5px;font-weight:800;color:#1E1C1A">{{ it.name }}</span>
-              <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ts-text-secondary)">
+              <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ts-text-secondary)">
                 <svg width="11" height="11" viewBox="0 0 24 24" style="flex:none"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.6"></path><circle cx="9" cy="12" r="1" fill="currentColor"></circle><circle cx="12" cy="12" r="1" fill="currentColor"></circle><circle cx="15" cy="12" r="1" fill="currentColor"></circle></svg>
                 {{ t.formatsL }}: {{ it.formats }}
               </span>
@@ -1570,7 +1570,7 @@ input[type=range]{accent-color:var(--ts-primary)}
     <sc-if value="{{ phaseNotError }}" hint-placeholder-val="{{ false }}">
       <div style="background:#1E1C1A;border-radius:12px;padding:18px;box-shadow:inset -51px -65px 191px rgba(58,58,58,0.15)">
         <canvas ref="{{ padRef }}" style="display:block;width:100%;border-radius:6px"></canvas>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;color:var(--ts-text-secondary);font-size:11.5px;font-weight:600">
+        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;color:var(--ts-text-secondary);font-size:12.5px;font-weight:600">
           <span style="width:7px;height:7px;border-radius:100px;background:var(--ts-success);display:inline-block"></span>
           DotPad 320 · {{ gridLabel }} · {{ dotCount }} {{ t.dots }}
         </div>
@@ -1611,7 +1611,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             <svg width="13" height="13" viewBox="0 0 24 24"><path d="M4 9a8 8 0 0 1 14-4M20 5v4h-4M20 15a8 8 0 0 1-14 4M4 19v-4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             {{ t.reSend }}
           </button>
-          <div style="font-size:11px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.6px;text-transform:uppercase;text-align:left;margin-bottom:9px">{{ t.nextStep }}</div>
+          <div style="font-size:12.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.6px;text-transform:uppercase;text-align:left;margin-bottom:9px">{{ t.nextStep }}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;text-align:left">
             <button onClick="{{ successSaveDrive }}" style="display:flex;align-items:center;gap:9px;height:46px;padding:0 13px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:12.5px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)">
               <svg width="16" height="16" viewBox="0 0 24 24" style="flex:none"><path d="M6 4h10l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 4v5h7V4M8 20v-6h8v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1652,7 +1652,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 
     <div style="display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start">
       <div>
-        <div style="font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px">{{ t.paperPreview }}</div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px">{{ t.paperPreview }}</div>
         <div style="background:#F1EAE2;border:1px solid #E8DFD6;border-radius:10px;padding:14px;display:grid;place-items:center">
           <canvas ref="{{ embossRef }}" aria-label="{{ t.paperPreview }}" style="display:block;width:100%;border-radius:3px;box-shadow:0 4px 6px -2px rgba(10,13,18,0.05),0 12px 16px -4px rgba(10,13,18,0.1)"></canvas>
         </div>
@@ -1661,8 +1661,8 @@ input[type=range]{accent-color:var(--ts-primary)}
         <div>
           <sc-for list="{{ exportGroups }}" as="grp" hint-placeholder-count="2">
             <div style="margin-bottom:14px">
-              <div style="font-size:11.5px;font-weight:800;color:#1E1C1A;margin-bottom:2px">{{ grp.title }}</div>
-              <div style="font-size:11px;color:var(--ts-text-secondary);margin-bottom:8px;line-height:1.4">{{ grp.sub }}</div>
+              <div style="font-size:12.5px;font-weight:800;color:#1E1C1A;margin-bottom:2px">{{ grp.title }}</div>
+              <div style="font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:8px;line-height:1.4">{{ grp.sub }}</div>
               <div style="display:flex;gap:7px;flex-wrap:wrap">
                 <sc-for list="{{ grp.items }}" as="f" hint-placeholder-count="3">
                   <button onClick="{{ f.pick }}" style="border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-size:12.5px;font-weight:700;padding:8px 14px;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ f.label }}</button>
@@ -1722,7 +1722,7 @@ input[type=range]{accent-color:var(--ts-primary)}
               <svg width="14" height="14" viewBox="0 0 24 24" style="color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </sc-if>
           </span>
-          <span style="font-size:11.5px;color:var(--ts-text-secondary);font-weight:500">{{ t.locDriveSub }}</span>
+          <span style="font-size:12.5px;color:var(--ts-text-secondary);font-weight:500">{{ t.locDriveSub }}</span>
         </button>
         <button onClick="{{ pickLibrary }}" aria-pressed="{{ isLibrary }}" style="{{ libCardStyle }}">
           <span style="font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:7px">
@@ -1731,7 +1731,7 @@ input[type=range]{accent-color:var(--ts-primary)}
               <svg width="14" height="14" viewBox="0 0 24 24" style="color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </sc-if>
           </span>
-          <span style="font-size:11.5px;color:var(--ts-text-secondary);font-weight:500">{{ t.locLibSub }}</span>
+          <span style="font-size:12.5px;color:var(--ts-text-secondary);font-weight:500">{{ t.locLibSub }}</span>
         </button>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:10px">
@@ -1774,13 +1774,13 @@ input[type=range]{accent-color:var(--ts-primary)}
           <div style="border:1px solid var(--ts-border-decor);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column">
             <div style="aspect-ratio:3/2;background:#141210;display:grid;place-items:center;position:relative">
               <sc-if value="{{ c.hasThumb }}" hint-placeholder-val="{{ true }}"><img src="{{ c.thumb }}" alt="{{ c.name }}" style="width:100%;height:100%;object-fit:contain"></sc-if>
-              <span style="position:absolute;left:8px;top:8px;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,0.45);border-radius:5px;padding:2px 7px">{{ c.tag }}</span>
+              <span style="position:absolute;left:8px;top:8px;font-size:11.5px;font-weight:700;color:#fff;background:rgba(0,0,0,0.45);border-radius:5px;padding:2px 7px">{{ c.tag }}</span>
             </div>
             <div style="padding:11px 12px;display:flex;flex-direction:column;gap:8px">
               <div style="font-size:13px;font-weight:800;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</div>
-              <div style="font-size:11px;color:var(--ts-text-secondary)">{{ c.grid }}</div>
+              <div style="font-size:12.5px;color:var(--ts-text-secondary)">{{ c.grid }}</div>
               <div style="display:flex;gap:6px;margin-top:2px">
-                <button onClick="{{ c.open }}" aria-label="{{ c.aOpen }}" style="flex:1;height:32px;border:none;border-radius:7px;background:var(--ts-primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:1px">{{ t.libOpenCard }}</button>
+                <button onClick="{{ c.open }}" aria-label="{{ c.aOpen }}" style="flex:1;height:32px;border:none;border-radius:7px;background:var(--ts-primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:1px">{{ t.libOpenCard }}</button>
                 <button onClick="{{ c.send }}" aria-label="{{ c.aSend }}" title="{{ t.libSendCard }}" style="flex:none;width:32px;height:32px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
                   <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 </button>
@@ -1812,16 +1812,16 @@ input[type=range]{accent-color:var(--ts-primary)}
         <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
       </button>
     </div>
-    <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px">{{ t.kbSection }}</div>
+    <div style="font-size:13px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px">{{ t.kbSection }}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:24px">
       <sc-for list="{{ helpRows }}" as="hr" hint-placeholder-count="6">
         <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#1E1C1A">
-          <kbd style="border:1px solid var(--ts-border-decor);border-radius:4px;padding:2px 8px;font-size:11.5px;font-family:inherit;background:#F7F4EF;font-weight:700;white-space:nowrap">{{ hr.k }}</kbd>
+          <kbd style="border:1px solid var(--ts-border-decor);border-radius:4px;padding:2px 8px;font-size:12.5px;font-family:inherit;background:#F7F4EF;font-weight:700;white-space:nowrap">{{ hr.k }}</kbd>
           <span>{{ hr.d }}</span>
         </div>
       </sc-for>
     </div>
-    <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px">{{ t.srSection }}</div>
+    <div style="font-size:13px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px">{{ t.srSection }}</div>
     <div style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
       <div style="display:flex;gap:10px;font-size:13px;line-height:1.6;color:#1E1C1A">
         <svg width="16" height="16" viewBox="0 0 24 24" style="flex:none;margin-top:2px;color:var(--ts-primary)"><path d="M15 8a5 5 0 0 1 0 8M17.7 5a9 9 0 0 1 0 14M6 15H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2l3.5-4.5A.8.8 0 0 1 11 5v14a.8.8 0 0 1-1.5.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1921,7 +1921,7 @@ class Component extends DCLogic {
   //   Product names (Tactile Studio, Tactile Drive, Dot Library, DotPad) stay verbatim in both locales.
   // Inspector tab button style — active tab shows brand underline, inactive is muted.
   tabStyle(active) {
-    return 'flex:1;height:36px;font-size:12.5px;font-weight:700;background:transparent;border:none;'
+    return 'flex:1;height:38px;font-size:13.5px;font-weight:700;background:transparent;border:none;'
       + 'border-bottom:2px solid ' + (active ? 'var(--ts-primary)' : 'transparent') + ';'
       + 'color:' + (active ? '#1E1C1A' : 'var(--ts-text-secondary)') + ';cursor:pointer;'
       + 'transition:color 0.15s ease,border-color 0.15s ease';
@@ -4271,10 +4271,10 @@ class Component extends DCLogic {
     const hubCard = p.hubCard ?? 'banner';
     const dpVar = p.dotpadPanel ?? 'modal';
     const retVar = p.returnStyle ?? 'bar';
-    const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
+    const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
-    const pinBtn = kind => ({ flex: 1, height: 34, borderRadius: 8, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 11.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
+    const pinBtn = kind => ({ flex: 1, height: 34, borderRadius: 8, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
     const locCard = on => ({ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 4, padding: '14px 16px', borderRadius: 8, cursor: 'pointer', background: on ? 'rgba(var(--ts-primary-rgb),0.06)' : '#fff', border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', color: '#1E1C1A' });
     const pill2 = on => ({ height: 34, padding: '0 14px', borderRadius: 8, border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: on ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: on ? '#B93E15' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 });
     const tplGroups = t.tplGroups.map((label, i) => ({ label, key: ['recommended', 'education', 'diagrams', 'elements', 'conversion', 'museum'][i] }));
@@ -4307,7 +4307,7 @@ class Component extends DCLogic {
     const primaryTools = ['cursor', 'pen', 'eraser'].map(mkTool);
     const selectTool = mkTool('select');
     const textTool = mkTool('text');
-    const segBtn = on => ({ flex: 1, height: 30, borderRadius: 7, border: 'none', background: on ? '#1E1C1A' : 'transparent', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 11.5, cursor: 'pointer', transition: 'background 0.12s ease' });
+    const segBtn = on => ({ flex: 1, height: 30, borderRadius: 7, border: 'none', background: on ? '#1E1C1A' : 'transparent', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 12.5, cursor: 'pointer', transition: 'background 0.12s ease' });
     const textSizeOpts = [['small', t.txtSizeS], ['medium', t.txtSizeM], ['large', t.txtSizeL2]].map(a => ({ key: a[0], label: a[1], active: st.textSize === a[0], pick: () => this.setState({ textSize: a[0] }), style: segBtn(st.textSize === a[0]) }));
     const textOrientOpts = [['horizontal', t.txtOrientH], ['vertical', t.txtOrientV]].map(a => ({ key: a[0], label: a[1], active: st.textOrient === a[0], pick: () => this.setState({ textOrient: a[0] }), style: segBtn(st.textOrient === a[0]) }));
     const textStyleOpts = [['filled', t.txtStyleFill], ['outline', t.txtStyleOutline]].map(a => ({ key: a[0], label: a[1], active: st.textStyle === a[0], pick: () => this.setState({ textStyle: a[0] }), style: segBtn(st.textStyle === a[0]) }));
@@ -4316,7 +4316,7 @@ class Component extends DCLogic {
     const menuRow = sel => ({ display: 'flex', alignItems: 'center', gap: 11, width: '100%', minHeight: 44, padding: '6px 12px 6px 10px', borderRadius: 9, border: 'none', background: sel ? 'rgba(var(--ts-primary-rgb),0.09)' : 'transparent', cursor: 'pointer', transition: 'background 0.13s ease' });
     const menuGlyph = sel => ({ display: 'grid', placeItems: 'center', width: 24, height: 24, flex: 'none', color: sel ? 'var(--ts-primary)' : '#7C7871' });
     const menuText = sel => ({ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: sel ? 800 : 600, color: sel ? '#B93E15' : '#1E1C1A' });
-    const menuKeyCap = { fontSize: 10, fontWeight: 800, color: '#C9BBAF', flex: 'none' };
+    const menuKeyCap = { fontSize: 11.5, fontWeight: 800, color: '#C9BBAF', flex: 'none' };
     const shapeTools = shapeIds.map(id => {
       const sel = st.tool === id;
       return { id, label: nm(id), key: keys[id], aria: nm(id) + ' (' + keys[id] + ')', iconEl: this.icon(id, 19), pick: () => this.pickTool(id), rowStyle: menuRow(sel), iconStyle: menuGlyph(sel), textStyle: menuText(sel), keyStyle: menuKeyCap };
@@ -4354,7 +4354,7 @@ class Component extends DCLogic {
     const mkStatus = (print) => ({
       label: print ? t.statusPrint : t.statusEdit,
       icon: print ? 'M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z' : 'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',
-      style: { alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, borderRadius: 100, padding: '3px 10px', background: print ? 'rgba(var(--ts-primary-rgb),0.12)' : '#EFE7DE', color: print ? '#B93E15' : '#1E1C1A' }
+      style: { alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12.5, fontWeight: 700, borderRadius: 100, padding: '3px 10px', background: print ? 'rgba(var(--ts-primary-rgb),0.12)' : '#EFE7DE', color: print ? '#B93E15' : '#1E1C1A' }
     });
     const pKind = ['bar', 'star', 'wave'], pGrid = [[60, 40], [60, 40], [96, 64]], pPrint = [true, false, false];
     // P2c: relative "edited" time from the real save timestamp. Entries saved
@@ -4628,7 +4628,7 @@ class Component extends DCLogic {
       dpBleLabel: st.connBusy === 'ble' ? t.dpConnectingBle : t.dpConnBle,
       dpUsbLabel: st.connBusy === 'usb' ? t.dpConnectingUsb : t.dpConnUsb,
       dpStatusText: st.connFailed ? t.dpConnFailed : (st.connected ? t.dpVia(st.connType === 'usb' ? 'USB' : 'BLE') : t.dpDisconnected),
-      dpStatusStyle: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, borderRadius: 100, padding: '3px 10px', background: st.connected ? 'rgba(11,136,0,0.10)' : (st.connFailed ? 'rgba(218,18,13,0.07)' : 'rgba(140,131,119,0.08)'), color: st.connected ? '#0B7500' : (st.connFailed ? 'var(--ts-danger)' : 'var(--ts-text-secondary)') },
+      dpStatusStyle: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, borderRadius: 100, padding: '3px 10px', background: st.connected ? 'rgba(11,136,0,0.10)' : (st.connFailed ? 'rgba(218,18,13,0.07)' : 'rgba(140,131,119,0.08)'), color: st.connected ? '#0B7500' : (st.connFailed ? 'var(--ts-danger)' : 'var(--ts-text-secondary)') },
       connectBle: () => this.connectDot('ble'), connectUsb: () => this.connectDot('usb'), disconnectDot: () => this.disconnectDot(),
       livePreview: st.livePreview, liveStateLabel: st.livePreview ? t.dpLiveOn : t.dpLiveOff,
       toggleLive: () => this.toggleLive(),
@@ -4693,7 +4693,7 @@ class Component extends DCLogic {
       closeRail: () => this.setState({ railMenu: null }),
       hideTip: () => this.hideTip(),
       tip: st.tip,
-      tipStyle: st.tip ? { position: 'fixed', top: st.tip.top, left: st.tip.left, transform: 'translate(-50%, -100%)', zIndex: 90, display: 'inline-flex', alignItems: 'center', background: '#1E1C1A', color: '#fff', fontSize: 12, fontWeight: 600, borderRadius: 8, padding: '6px 10px', boxShadow: '0 4px 6px -2px rgba(10,13,18,0.12),0 12px 16px -4px rgba(10,13,18,0.18)', pointerEvents: 'none', whiteSpace: 'nowrap', animation: 'tsTip 0.12s ease-out' } : null,
+      tipStyle: st.tip ? { position: 'fixed', top: st.tip.top, left: st.tip.left, transform: 'translate(-50%, -100%)', zIndex: 90, display: 'inline-flex', alignItems: 'center', background: '#1E1C1A', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 8, padding: '6px 10px', boxShadow: '0 4px 6px -2px rgba(10,13,18,0.12),0 12px 16px -4px rgba(10,13,18,0.18)', pointerEvents: 'none', whiteSpace: 'nowrap', animation: 'tsTip 0.12s ease-out' } : null,
       railFlyoutStyle: st.railMenu ? Object.assign({ position: 'fixed', left: st.railMenu.left, zIndex: 80, width: 190, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' }, st.railMenu.up ? { bottom: st.railMenu.bottom, transformOrigin: 'left bottom' } : { top: st.railMenu.top, transformOrigin: 'left top' }) : null,
       // Floating toolbar (Photoshop-style movable pill): defaults to centered
       // over the bottom of the canvas; once dragged, toolbarPos pins it to
@@ -4729,7 +4729,7 @@ class Component extends DCLogic {
           n: nn, label: rowN[nn - 1] || String(nn), active, r2: nn >= 2, r3: nn >= 3,
           aria: (ctlL + ' ' + desc).trim(), title: desc,
           pick: () => { this.setState(eraser ? { eraserSize: nn } : { strokeSize: nn }); this.say(desc ? (ctlL + ': ' + desc) : ctlL); },
-          style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, height: 30, padding: '0 12px', borderRadius: 8, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12 },
+          style: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, height: 32, padding: '0 12px', borderRadius: 8, cursor: 'pointer', border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'var(--ts-primary)' : '#fff', color: active ? '#fff' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 13 },
           dotStyle: { width: dot + 'px', height: dot + 'px', borderRadius: '50%', background: 'currentColor', flex: 'none' }
         };
       }),
@@ -4759,7 +4759,7 @@ class Component extends DCLogic {
           thumbStyle: 'width:100%;aspect-ratio:' + st.gridW + '/' + st.gridH + ';border-radius:5px;border:1px solid var(--ts-border-decor);background:#fff;display:block;'
             + (th ? 'object-fit:contain' : ''),
           capStyle: 'display:flex;align-items:center;justify-content:space-between;gap:6px',
-          numStyle: 'font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;color:' + (sel ? 'var(--ts-primary)' : '#1E1C1A'),
+          numStyle: 'font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:' + (sel ? 'var(--ts-primary)' : '#1E1C1A'),
           deleteDisabled: !canDelete,
           deleteAria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (st.lang === 'ko' ? ' 삭제' : ' delete'),
           deletePick: () => {
@@ -4768,8 +4768,8 @@ class Component extends DCLogic {
             this.setState({ confirmOpen: true, confirmKind: 'delpage' });
           },
           deleteStyle: {
-            position: 'absolute', top: 6, right: 6, width: 22, height: 22, flex: 'none',
-            border: '1px solid var(--ts-border-decor)', borderRadius: 6, boxSizing: 'border-box',
+            position: 'absolute', top: 6, right: 6, width: 26, height: 26, flex: 'none',
+            border: '1px solid var(--ts-border-decor)', borderRadius: 7, boxSizing: 'border-box',
             background: 'rgba(255,255,255,0.94)', color: canDelete ? 'var(--ts-text-secondary)' : '#C9BBAF',
             display: 'grid', placeItems: 'center', cursor: canDelete ? 'pointer' : 'not-allowed',
             boxShadow: '0 1px 3px rgba(16,24,40,0.14)'
@@ -4810,7 +4810,7 @@ class Component extends DCLogic {
           lineStyle: { flex: 1, minWidth: 20, height: 2, margin: '0 8px', borderRadius: 2, background: state === 'done' ? 'var(--ts-primary)' : '#E8DFD6' },
           dotStyle: {
             width: 24, height: 24, borderRadius: 100, display: 'grid', placeItems: 'center', flex: 'none',
-            fontSize: 12, fontWeight: 800,
+            fontSize: 13, fontWeight: 800,
             background: state === 'todo' ? '#fff' : 'var(--ts-primary)',
             color: state === 'todo' ? 'var(--ts-text-secondary)' : '#fff',
             border: state === 'todo' ? '1.5px solid var(--ts-border-decor)' : (state === 'current' ? '1.5px solid var(--ts-primary)' : '1.5px solid var(--ts-primary)'),
@@ -4895,7 +4895,7 @@ class Component extends DCLogic {
         { key: 'replace', label: t.applyReplace },
         { key: 'new', label: t.applyNewPage }
       ].map(o => { const active = st.impApply === o.key; return { key: o.key, label: o.label, active, pick: () => this.setState({ impApply: o.key }),
-        style: { flex: 1, height: 38, padding: '0 8px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 12, border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : 'var(--ts-text-secondary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 } }; }),
+        style: { flex: 1, height: 38, padding: '0 8px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 13, border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : 'var(--ts-text-secondary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 } }; }),
       impApplyBtnLabel: st.impApply === 'new' ? t.applyNewPage : st.impApply === 'replace' ? t.applyReplace : t.applyMerge,
       retouchHint: st.retouchHint,
       dismissRetouch: () => this.setState({ retouchHint: false }),
@@ -4913,7 +4913,7 @@ class Component extends DCLogic {
         { key: 'current', label: t.cmdApplyCur },
         { key: 'new', label: t.cmdApplyNew }
       ].map(o => { const active = st.cmdApply === o.key; return { key: o.key, label: o.label, active, pick: () => this.setState({ cmdApply: o.key }),
-        style: { flex: 1, height: 34, padding: '0 8px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 12, border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : 'var(--ts-text-secondary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }; }),
+        style: { flex: 1, height: 34, padding: '0 8px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 13, border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : 'var(--ts-text-secondary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }; }),
       closeCmd: () => this.setState({ cmdOpen: false }),
       cmdPrompt: st.cmdPrompt, cmdPromptChange: e => this.setState({ cmdPrompt: e.target.value, cmdError: false }),
       cmdGrid: st.cmdGrid, cmdGridChange: e => this.setState({ cmdGrid: e.target.value }),
@@ -4939,7 +4939,7 @@ class Component extends DCLogic {
           return {
             key: d.key, label: d.label, count: d.count, on,
             toggle: () => { const cur = (this.state.cmdFeatureFilter || []).slice(); const i = cur.indexOf(d.key); if (i === -1) cur.push(d.key); else cur.splice(i, 1); this.setState({ cmdFeatureFilter: cur }); },
-            style: 'display:inline-flex;align-items:center;gap:7px;border:1px solid ' + (on ? 'var(--ts-primary)' : 'var(--ts-border-decor)') + ';border-radius:100px;background:' + (on ? 'rgba(var(--ts-primary-rgb),0.08)' : '#F7F4EF') + ';color:' + (on ? '#B93E15' : '#1E1C1A') + ';font-size:12px;font-weight:600;padding:6px 13px;cursor:pointer',
+            style: 'display:inline-flex;align-items:center;gap:7px;border:1px solid ' + (on ? 'var(--ts-primary)' : 'var(--ts-border-decor)') + ';border-radius:100px;background:' + (on ? 'rgba(var(--ts-primary-rgb),0.08)' : '#F7F4EF') + ';color:' + (on ? '#B93E15' : '#1E1C1A') + ';font-size:13px;font-weight:600;padding:6px 13px;cursor:pointer',
             boxStyle: 'width:15px;height:15px;flex:none;border-radius:4px;display:grid;place-items:center;border:1.5px solid ' + (on ? 'var(--ts-primary)' : 'var(--ts-border-functional)') + ';background:' + (on ? 'var(--ts-primary)' : '#fff') + ';color:#fff',
           };
         });
@@ -4953,7 +4953,7 @@ class Component extends DCLogic {
         { key: 'newdoc', label: t.tplNewDoc },
         { key: 'newpage', label: t.tplNewPage }
       ].map(o => { const active = st.tplApply === o.key; return { key: o.key, label: o.label, active, pick: () => this.setState({ tplApply: o.key }),
-        style: { height: 30, padding: '0 12px', borderRadius: 100, cursor: 'pointer', fontWeight: 700, fontSize: 12, border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : 'var(--ts-text-secondary)' } }; }),
+        style: { height: 30, padding: '0 12px', borderRadius: 100, cursor: 'pointer', fontWeight: 700, fontSize: 13, border: active ? '1.5px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: active ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: active ? '#B93E15' : 'var(--ts-text-secondary)' } }; }),
       tplTabs: tplGroups.map(g => ({ label: g.label, key: g.key, active: st.tplGroup === g.key, pick: () => this.setState({ tplGroup: g.key }),
         style: { padding: '7px 13px', borderRadius: 100, border: st.tplGroup === g.key ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: st.tplGroup === g.key ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: st.tplGroup === g.key ? '#B93E15' : 'var(--ts-text-secondary)', fontWeight: st.tplGroup === g.key ? 800 : 600, fontSize: 12.5, whiteSpace: 'nowrap', cursor: 'pointer' } })),
       tplItems: (tplData[st.tplGroup] || []).map(it => ({
