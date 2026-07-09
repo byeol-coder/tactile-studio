@@ -100,6 +100,7 @@ if ('caches' in window) {
   --ts-danger:#DA120D;
   --ts-success:#0B8800;
   --ts-bg-warm:#F7F4EF;
+  --ts-brand-logo-h:32px;          /* brand wordmark lockup height — shared by editor + home headers */
 }
 html,body{margin:0;padding:0;background:#F7F4EF}
 *{box-sizing:border-box}
@@ -120,7 +121,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-topbar-button,.ts-topbar-action,.ts-topbar-pill{min-height:44px!important;height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center;gap:8px!important;white-space:nowrap;flex:0 0 auto;box-sizing:border-box}
 .ts-topbar-action,.ts-topbar-pill{border-radius:12px!important;padding-left:14px!important;padding-right:14px!important}
 .ts-topbar-primary{background:var(--ts-primary)!important;color:#fff!important;border:none!important;font-weight:800!important;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.10)}
-.ts-brand-logo{height:24px;width:auto;display:block;flex:none}
+.ts-brand-logo{height:var(--ts-brand-logo-h);width:auto;display:block;flex:none}
 .ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 6px}
 .ts-rail-history{width:44px!important;height:44px!important;border-radius:12px!important}
 .ts-project-name{min-width:0!important;width:clamp(96px,14vw,220px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -855,7 +856,7 @@ input[type=range]{accent-color:var(--ts-primary)}
 <div data-screen-label="Home" style="min-height:100vh;display:flex;flex-direction:column;background:var(--ts-bg,#F8F6EF)">
   <div style="height:5px;background:var(--ts-primary);flex:none"></div>
   <header style="flex:none;display:flex;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--ts-border-decor);background:#fff">
-    <img src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:24px;width:auto;flex:none">
+    <img src="assets/tactile-studio-logo.svg" alt="Tactile Studio" style="height:var(--ts-brand-logo-h);width:auto;flex:none">
     <div style="flex:1"></div>
     <button onClick="{{ homeNew60 }}" style="height:40px;padding:0 16px;border:none;border-radius:10px;background:var(--ts-primary);color:#fff;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:background .16s ease,transform .1s ease" style-hover="background:#D64A1C" style-active="background:#B93E15;transform:translateY(1px)" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
