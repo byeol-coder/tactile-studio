@@ -3773,12 +3773,37 @@ class Component extends DCLogic {
   // bars, thin→thick (the standard "line weight" icon). Deliberately NOT a
   // single line — a single line reads as the Line *tool* (see ICONS.line)
   // sitting right next to it, which is confusing when Pen is the active tool.
-  strokeGroupIcon(size) {
+  // `activeN` (1/2/3) lights the matching bar and dims the other two, so the
+  // toolbar button reflects the current stroke size the same way shapeGroup
+  // swaps in the active shape's icon. Called without activeN (or with 0) it
+  // renders all three bars at full strength — the neutral "line weight" glyph.
+  strokeGroupIcon(size, activeN) {
     const sz = size || 20;
+    const on = Math.max(0, Math.min(3, activeN || 0));
+    const dim = n => (on === 0 || on === n) ? 1 : 0.32;
     return React.createElement('svg', { width: sz, height: sz, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
-      React.createElement('line', { x1: 5, y1: 7, x2: 19, y2: 7, stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' }),
-      React.createElement('line', { x1: 5, y1: 12.5, x2: 19, y2: 12.5, stroke: 'currentColor', strokeWidth: 3, strokeLinecap: 'round' }),
-      React.createElement('line', { x1: 5, y1: 18, x2: 19, y2: 18, stroke: 'currentColor', strokeWidth: 4.6, strokeLinecap: 'round' }));
+      React.createElement('line', { x1: 5, y1: 7, x2: 19, y2: 7, stroke: 'currentColor', strokeOpacity: dim(1), strokeWidth: 1.6, strokeLinecap: 'round' }),
+      React.createElement('line', { x1: 5, y1: 12.5, x2: 19, y2: 12.5, stroke: 'currentColor', strokeOpacity: dim(2), strokeWidth: 3, strokeLinecap: 'round' }),
+      React.createElement('line', { x1: 5, y1: 18, x2: 19, y2: 18, stroke: 'currentColor', strokeOpacity: dim(3), strokeWidth: 4.6, strokeLinecap: 'round' }));
+  }
+  // Eraser footprint preview (1/2/3 = small/medium/large). The eraser clears
+  // an n×n block of tactile pins, so a growing rounded square reads truer than
+  // a line. Used for each dropdown row when the eraser is the active tool.
+  eraserIcon(n, size) {
+    const sz = size || 20, k = Math.max(1, Math.min(3, n || 1));
+    const s = 7 + k * 3.6, o = (24 - s) / 2;
+    return React.createElement('svg', { width: sz, height: sz, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+      React.createElement('rect', { x: o, y: o, width: s, height: s, rx: 2.6, stroke: 'currentColor', strokeWidth: 2, fill: 'currentColor', fillOpacity: 0.14 }));
+  }
+  // Toolbar-button glyph for the eraser-size context: three nested squares,
+  // the one matching activeN lit and the others dimmed — the block analogue of
+  // strokeGroupIcon's stacked bars, so the button reflects the current size the
+  // same way. activeN 0/undefined renders all three at full strength.
+  eraserGroupIcon(size, activeN) {
+    const sz = size || 20, on = Math.max(0, Math.min(3, activeN || 0));
+    const dim = n => (on === 0 || on === n) ? 1 : 0.3;
+    const sq = n => { const s = 7 + n * 3.6, o = (24 - s) / 2; return React.createElement('rect', { key: n, x: o, y: o, width: s, height: s, rx: 2.2, stroke: 'currentColor', strokeOpacity: dim(n), strokeWidth: 1.8, fill: 'none' }); };
+    return React.createElement('svg', { width: sz, height: sz, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' }, sq(1), sq(2), sq(3));
   }
   outputDef(key) { return this.OUTPUTS.find(o => o.key === (key || this.state.output)) || this.OUTPUTS[0]; }
   setOutput(key) {
@@ -4686,7 +4711,7 @@ class Component extends DCLogic {
     const strokeRowLabels = t.rowN || ['1', '2', '3'];
     const strokeGroup = {
       active: strokeToolActiveNow, aria: strokeLabelNow + (strokeSizeNow ? ' — ' + (strokeRowLabels[strokeSizeNow - 1] || strokeSizeNow) : ''),
-      iconEl: this.strokeGroupIcon(21),
+      iconEl: strokeIsEraserNow ? this.eraserGroupIcon(21, strokeSizeNow) : this.strokeGroupIcon(21, strokeSizeNow),
       style: railStyle(st.railMenu && st.railMenu.kind === 'stroke'),
       toggle: e => this.toggleRail('stroke', e),
       onEnter: e => this.showTip(strokeLabelNow, '', e)
@@ -5133,7 +5158,7 @@ class Component extends DCLogic {
             this.say(desc ? (ctlL + ': ' + desc) : ctlL);
           },
           rowStyle: menuRow(active), iconStyle: menuGlyph(active), textStyle: menuText(active),
-          iconEl: this.strokeIcon(nn, 19)
+          iconEl: eraser ? this.eraserIcon(nn, 19) : this.strokeIcon(nn, 19)
         };
       }),
       // pages (v1 simple multi-page document)
