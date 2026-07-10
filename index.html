@@ -2001,7 +2001,9 @@ class Component extends DCLogic {
     const text = String(rawText || '').slice(0, 32);
     if (!text.trim()) return false;
     const o = opts || {};
-    const rows = o.size === 'small' ? 7 : o.size === 'large' ? 16 : 11;
+    const baseRows = o.size === 'small' ? 7 : o.size === 'large' ? 16 : 11;
+    const hasHangul = /[\u1100-\u11ff\u3130-\u318f\uac00-\ud7af]/.test(text);
+    const rows = hasHangul ? Math.round(baseRows * 1.35) : baseRows;
     const vertical = o.orient === 'vertical';
     const outline = o.style === 'outline';
     const { gridW, gridH } = this.state;
@@ -2009,18 +2011,29 @@ class Component extends DCLogic {
     const gapMain = Math.max(1, Math.round(rows * 0.12));
     const spaceAdv = Math.round(rows * 0.5);
     const renderGlyph = ch => {
+      const SCALE = 3, COVER_T = 0.42;
       const cv = document.createElement('canvas');
       const ctx = cv.getContext('2d');
-      const font = "700 " + rows + "px 'Pretendard Variable', Pretendard, sans-serif";
+      const font = "700 " + (rows * SCALE) + "px 'Pretendard Variable', Pretendard, sans-serif";
       ctx.font = font;
       const m = ctx.measureText(ch);
-      const w = Math.max(1, Math.ceil(m.width) + 2), h = rows + 3;
-      cv.width = w; cv.height = h;
+      const w = Math.max(1, Math.ceil(m.width / SCALE) + 2), h = rows + 3;
+      cv.width = w * SCALE; cv.height = h * SCALE;
       const c2 = cv.getContext('2d');
       c2.font = font; c2.textBaseline = 'top';
-      c2.fillStyle = '#000'; c2.strokeStyle = '#000'; c2.lineWidth = 1;
-      if (outline) c2.strokeText(ch, 1, 1); else c2.fillText(ch, 1, 1);
-      return { data: c2.getImageData(0, 0, w, h).data, w: w, h: h };
+      c2.fillStyle = '#000'; c2.strokeStyle = '#000'; c2.lineWidth = SCALE;
+      if (outline) c2.strokeText(ch, SCALE, SCALE); else c2.fillText(ch, SCALE, SCALE);
+      const source = c2.getImageData(0, 0, cv.width, cv.height).data;
+      const data = new Uint8Array(w * h);
+      for (let py = 0; py < h; py++) for (let px = 0; px < w; px++) {
+        let ink = 0;
+        for (let sy = 0; sy < SCALE; sy++) for (let sx = 0; sx < SCALE; sx++) {
+          const srcX = px * SCALE + sx, srcY = py * SCALE + sy;
+          ink += source[(srcY * cv.width + srcX) * 4 + 3] / 255;
+        }
+        data[py * w + px] = ink / (SCALE * SCALE) >= COVER_T ? 1 : 0;
+      }
+      return { data: data, w: w, h: h };
     };
     this.snapshot();
     let penX = gx, penY = gy, placed = 0;
@@ -2028,7 +2041,7 @@ class Component extends DCLogic {
       if (ch === ' ' || ch === '\n') { if (vertical) penY += spaceAdv; else penX += spaceAdv; continue; }
       const g = renderGlyph(ch);
       for (let py = 0; py < g.h; py++) for (let px = 0; px < g.w; px++) {
-        if (g.data[(py * g.w + px) * 4 + 3] > 110) {
+        if (g.data[py * g.w + px]) {
           const tx = penX + px, ty = penY + py;
           if (tx >= 0 && ty >= 0 && tx < gridW && ty < gridH) { this.cells[this.idx(tx, ty)] = 1; placed++; }
         }
