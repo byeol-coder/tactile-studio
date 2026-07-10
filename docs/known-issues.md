@@ -36,3 +36,24 @@ Net effect: of the three originally-deferred items, liblouis is now genuinely, f
 ## 4. `window.TW.DP` 싱글턴의 단일 key-handler 슬롯 (참고, 미변경)
 
 `vendor/tw/dotpad.js`의 `DP.onKey(fn)`은 슬롯이 하나뿐이라 마지막에 등록한 핸들러만 유효하며, `_vis` 플래그로 보호되는 `visibilitychange` 리스너는 페이지 생애주기 동안 한 번만 등록되고 제거되지 않는다(싱글턴 수명과 일치하도록 설계됨). `src/device/dotpad/browser-adapter.ts`는 이 제약을 그대로 인정하고, 모듈 스코프에서 "현재 어떤 어댑터 인스턴스가 그 슬롯을 소유하는지"를 추적해 `dispose()`가 다른 살아있는 인스턴스의 등록을 절대 지우지 않도록만 보장한다 — 싱글턴 자체의 설계를 바꾸지 않는다.
+
+## 5. Phase 5 scope note — reusable React editor (partial, by design)
+
+Phase 5 (`feat(studio-ui): compose reusable React editor`) delivers a real, working, tested React editor shell: `EditorStore` (framework-agnostic, wraps Phase 2/3 core+codecs), `TactileStudioEditor`/`TactileStudioProvider`/hooks, `StudioCanvas` (verbatim-ported `drawMain`/`evCell` pixel math and pointer wiring), a minimal `Toolbar`, and a development shell. Per the migration principle "do not perform a one-shot rewrite" / "work in small, reviewable phases," the following are deliberately **not yet** ported and are tracked for a Phase 5 continuation:
+
+- Full Figma icon set, pen/eraser thickness dropdowns, shape-tool flyout menu
+- Page panel (thumbnails, drag-reorder, Add/Delete/Duplicate UI)
+- Inspector (device panel, cleanup/thicken/denoise controls, page metadata, narration/braille fields)
+- Dialogs (import wizard, export menu, confirm dialogs)
+- DotPad panel UI (connect button, live-preview toggle, test output)
+- Corpus/command-panel search UI ("명령어로 만들기")
+- `poly` and `text` tool pointer-gesture wiring (selectable in the toolbar, but `StudioCanvas.onPointerDown` intentionally no-ops for them — see the file's header comment)
+- Accessibility label wiring beyond `aria-label`/`aria-pressed` on the buttons that do exist (tooltips, live-region announcements, focus trapping, keyboard shortcuts)
+
+None of this is a regression — the original monolith (`index.html`) is untouched and continues to ship with all of the above intact. The React layer is new, additive, and does not yet replace it in the shipped app.
+
+### Testing note (jsdom limitation, documented not silently worked around)
+
+`jsdom` (this project's test environment) implements neither `CanvasRenderingContext2D` nor `PointerEvent`. Tests handle this honestly:
+- `StudioCanvas`'s `draw()` no-ops when `getContext('2d')` returns `null` — tests verify wiring (pointer → store mutations, one undo entry per stroke) rather than pixel output, consistent with how the Phase 3 glyph-rasterizer seam was handled.
+- Pointer-event tests construct a `MouseEvent` with the `pointerdown`/`pointermove`/`pointerup` type strings (React dispatches by type string, not by `instanceof PointerEvent`) since `window.PointerEvent` doesn't exist under jsdom — confirmed via `'PointerEvent' in window` → `false`.

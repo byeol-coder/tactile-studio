@@ -1,0 +1,8 @@
+// src/react — Phase 5 public React surface.
+export { TactileStudioEditor } from './TactileStudioEditor.js';
+export { TactileStudioProvider, useEditorStoreContext } from './TactileStudioProvider.js';
+export { useEditorStore } from './hooks/useEditorStore.js';
+export { useTool } from './hooks/useTool.js';
+export { useHistory } from './hooks/useHistory.js';
+export { usePages } from './hooks/usePages.js';
+export * from './types/public-api.js';
