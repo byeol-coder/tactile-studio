@@ -281,7 +281,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       </sc-for>
     </div>
   </sc-if>
-  <div class="ts-workspace" style="flex:1;display:flex;min-height:0">
+  <div class="ts-workspace" style="flex:1;display:flex;min-height:0;position:relative">
 
     <!-- Pages panel (PowerPoint-style slide list): each page renders as a card with
          a full-width thumbnail (correct grid aspect ratio) and a caption row below.
@@ -539,7 +539,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
     </div>
 
     <sc-if value="{{ inspectorShown }}" hint-placeholder-val="{{ true }}">
-      <aside class="ts-side-panel" aria-label="{{ t.dpPanelTitle }}" data-screen-label="DotPad Output panel" style="width:256px;flex:none;background:#fff;border-left:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow-y:auto">
+      <aside id="ts-dotpad-panel" class="ts-side-panel" aria-label="{{ t.dpPanelTitle }}" data-screen-label="DotPad Output panel" style="width:256px;flex:none;background:#fff;border-left:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow-y:auto">
         <div style="display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #F2ECE4">
           <button class="ts-topbar-action" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" title="{{ t.export }}" style="flex:1;min-width:0;font-size:13px;border:1px solid var(--ts-border-decor);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -549,8 +549,8 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <div style="display:flex;align-items:center;gap:4px;padding:0 8px 0 4px;border-bottom:1px solid #F2ECE4">
           <button onClick="{{ setInspProps }}" role="tab" aria-selected="{{ inspTabProps }}" style="{{ inspTabPropsStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspProps }}</button>
           <button onClick="{{ setInspDevice }}" role="tab" aria-selected="{{ inspTabDevice }}" style="{{ inspTabDeviceStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspDevice }}</button>
-          <button onClick="{{ toggleInspector }}" aria-label="{{ t.close }}" title="{{ t.close }}" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center;flex:none" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <button onClick="{{ toggleInspector }}" aria-label="{{ t.dpCollapse }}" title="{{ t.dpCollapse }}" aria-expanded="{{ inspectorOpen }}" aria-controls="ts-dotpad-panel" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center;flex:none" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </div>
 
@@ -771,6 +771,14 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         </div>
         </sc-if>
       </aside>
+    </sc-if>
+
+    <!-- Persistent reopen handle: lives OUTSIDE the sc-if/aside so it survives the
+         panel collapse. Anchored to the workspace's right edge, above the canvas. -->
+    <sc-if value="{{ inspectorHidden }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ toggleInspector }}" aria-label="{{ t.dpExpand }}" title="{{ t.dpExpand }}" aria-expanded="{{ inspectorOpen }}" aria-controls="ts-dotpad-panel" style="position:absolute;top:50%;right:0;transform:translateY(-50%);z-index:50;width:40px;min-height:48px;padding:12px 0;border:1px solid var(--ts-border-decor);border-right:none;border-radius:10px 0 0 10px;background:#fff;color:var(--ts-text-secondary);display:grid;place-items:center;cursor:pointer;box-shadow:-4px 0 12px -6px rgba(16,24,40,0.24)" style-hover="color:var(--ts-primary);border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
     </sc-if>
   </div>
 
@@ -1689,7 +1697,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', 
+      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', 
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', 
       dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
@@ -1810,7 +1818,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', 
+      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', 
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', 
       dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
@@ -4668,6 +4676,7 @@ class Component extends DCLogic {
       retryConn: () => this.retryDotpad(),
       // ---- DotPad Output inspector ----
       inspectorOpen: st.inspectorOpen,
+      inspectorHidden: !st.inspectorOpen,
       toggleInspector: () => this.setState(s => ({ inspectorOpen: !s.inspectorOpen })),
       inspectorTab: st.inspectorTab,
       inspTabProps: st.inspectorTab === 'props',
