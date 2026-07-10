@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { createHash } from 'node:crypto';
 import {
   loadVendorTW, loadCorpus, loadStudioClass, makeInstance,
-  seededCells, cellsToBitsPlain, readRepoFile, extractXdcSource,
+  seededCells, patternCells, cellsToBitsPlain, readRepoFile, extractXdcSource,
 } from '../../tools/harness.mjs';
 import corpusFix from '../fixtures/baseline/corpus-fixtures.json';
 import dtmsFix from '../fixtures/baseline/dtms-build.json';
@@ -74,12 +74,11 @@ describe('grid post-processing fx (thickenBits / denoiseBits)', () => {
   });
 });
 
-describe('buildLibraryAsset — CURRENT behavior (known issue, see docs/known-issues.md)', () => {
-  // banaPrintCheck is called by deriveGraphicFeatures but never defined in the
-  // shipped sources, so buildLibraryAsset throws on current main. This test
-  // pins that behavior; fixing the bug must be a separate reviewed change that
-  // consciously regenerates this fixture.
-  it('throws TypeError: this.banaPrintCheck is not a function', () => {
+describe('buildLibraryAsset — Library Asset v1 export (banaPrintCheck fixed)', () => {
+  // banaPrintCheck was missing on earlier mains (buildLibraryAsset threw); it
+  // is now implemented, and this fixture was consciously regenerated with
+  // that fix (see docs/known-issues.md). Dates are frozen via fixedNow.
+  it('produces a byte-identical Library Asset v1 payload', () => {
     const w = 60, h = 40;
     const page1 = seededCells(w, h, 11);
     const inst = makeInstance(Component, {
@@ -89,11 +88,24 @@ describe('buildLibraryAsset — CURRENT behavior (known issue, see docs/known-is
       pageAudio: { 0: { brl: '⠁⠃⠉' } },
       pageVectors: {},
     });
-    expect(libAsset.throws).toBe(true);
-    let err: any = null;
-    try { proto.buildLibraryAsset.call(inst, '회귀 픽스처'); } catch (e) { err = e; }
-    expect(err?.name).toBe(libAsset.errorName);
-    expect(err?.message).toBe(libAsset.errorMessage);
+    expect(libAsset.throws).toBe(false);
+    const asset = proto.buildLibraryAsset.call(inst, '회귀 픽스처');
+    expect(asset).toEqual((libAsset as any).asset);
+    expect(JSON.stringify(asset)).toBe(JSON.stringify((libAsset as any).asset));
+  });
+
+  it('banaPrintCheck flags empty / too-dense / isolated-heavy pages', () => {
+    const inst = makeInstance(Component);
+    const w = 60, h = 40;
+    const empty = proto.banaPrintCheck.call(inst, new Uint8Array(w * h), w, h);
+    expect(empty.pass).toBe(false);
+    expect(empty.issues).toContain('empty');
+    const dense = proto.banaPrintCheck.call(inst, patternCells(w, h, 'all-on'), w, h);
+    expect(dense.pass).toBe(false);
+    expect(dense.issues).toContain('tooDense');
+    const ok = proto.banaPrintCheck.call(inst, seededCells(w, h, 11), w, h);
+    expect(ok.pass).toBe(true);
+    expect(ok.issues).toEqual([]);
   });
 });
 

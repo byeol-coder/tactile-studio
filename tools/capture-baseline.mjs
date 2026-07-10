@@ -140,13 +140,9 @@ write('encode-96x64.json', encodeSuite(96, 64));
 }
 
 // ── 7. Library Asset v1 export (buildLibraryAsset, frozen Date) ─────────────
-// KNOWN ISSUE (documented in docs/known-issues.md, NOT fixed in Phase 1):
-// deriveGraphicFeatures calls this.banaPrintCheck(), which is not defined
-// anywhere in the shipped sources, so buildLibraryAsset currently throws a
-// TypeError on main. exportFormat('JSON') catches it and shows "Export
-// failed". We capture that *current* behavior exactly — the fixture asserts
-// the throw. When the bug is fixed (as a separate, reviewed change), this
-// fixture must be consciously regenerated alongside that fix.
+// Captures the current fixed Library Asset v1 export exactly. The previous
+// Phase 1 baseline pinned the missing banaPrintCheck TypeError; after the
+// dedicated fix, this fixture is regenerated as the successful payload.
 {
   const w = 60, h = 40;
   const page1 = seededCells(w, h, 11);

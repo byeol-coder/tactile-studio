@@ -1793,7 +1793,7 @@ class Component extends DCLogic {
       impErrLoad: '이미지를 불러오지 못했어요. 10MB 이하의 PNG 또는 JPG로 다시 시도해 주세요.',
       advTests: '고급 장치 테스트', advTestsHint: '아래는 DotPad 하드웨어 점검용입니다. 일반 편집에는 필요하지 않습니다.',
       retouchHintMsg: 'AI 변환 결과입니다. 펜·지우개·채우기 등 도구로 세부를 수정하세요.',
-      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', 
+      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', banaPass: 'BANA 인쇄 기준을 충족합니다.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', 
       preview: 'DotPad 미리보기', sendNow: '지금 전송', sending: 'DotPad로 전송 중…', sent: '전송 완료', sentSub: 'DotPad에서 촉각 그래픽이 출력되고 있습니다.',
       errTitle: 'DotPad에 연결할 수 없습니다', errSub: '케이블 또는 블루투스 연결을 확인한 뒤 다시 시도해주세요.',
       saveTitle: '저장', saveLocL: '저장 위치', locDriveSub: '내 촉각 파일 보관함', locLibSub: '팀과 공유하는 라이브러리',
@@ -1920,7 +1920,7 @@ class Component extends DCLogic {
       impErrLoad: 'Couldn\u2019t load this image. Please try a PNG or JPG under 10MB.',
       advTests: 'Advanced device tests', advTestsHint: 'The controls below are for checking DotPad hardware. They are not needed for normal editing.',
       retouchHintMsg: 'This is the AI conversion result. Refine details with the Pen, Eraser, Fill and other tools.',
-      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', 
+      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', banaPass: 'Meets BANA print-standard minimums.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', 
       preview: 'DotPad preview', sendNow: 'Send now', sending: 'Sending to DotPad…', sent: 'Sent to DotPad', sentSub: 'Your graphic is now rendering on the DotPad.',
       errTitle: "Can't reach DotPad", errSub: 'Check the cable or Bluetooth connection and try again.',
       saveTitle: 'Save', saveLocL: 'Save to', locDriveSub: 'Your tactile file storage', locLibSub: 'Shared team library',
@@ -4393,6 +4393,20 @@ class Component extends DCLogic {
   // Every page's graphic is DTMS hex from the byte-identical encoder.
   // Derive TGIL-style device flags from the graphic itself (not hand-set), so
   // filters/search stay honest. Judged on the first page.
+  // BANA print-standard minimums — informational, pin-grid approximation.
+  // Reuses convQuality's metrics (single source of truth): an embossable page
+  // must not be empty, must not exceed emboss density limits, and must not be
+  // dominated by isolated single dots (below BANA's minimum distinct-element
+  // size, they don't emboss legibly). Callers consume `pass` today; the metric
+  // fields feed the emboss-export detail view (TGIL integration stage 2).
+  banaPrintCheck(cells, w, h) {
+    const q = this.convQuality(cells, w, h);
+    const issues = [];
+    if (!q.dots) issues.push('empty');
+    if (q.density > 0.40) issues.push('tooDense');
+    if (q.dots > 0 && q.isolated / q.dots > 0.25) issues.push('manyIsolated');
+    return { pass: issues.length === 0, issues, dots: q.dots, density: q.density, isolated: q.isolated };
+  }
   //  · dotpadCompatible: renders on a DotPad grid (native DTMS specs)
   //  · dotpadOptimized : reads well on-screen (convQuality 'readable')
   //  · embossable      : meets BANA print minimums (banaPrintCheck)
