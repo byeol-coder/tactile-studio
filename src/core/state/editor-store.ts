@@ -26,7 +26,9 @@ import type { StudioDocument, CellGrid, HistoryEntry, PageMap } from '../types.j
 import { activeCells, addPage as coreAddPage, deletePageAt as coreDeletePageAt, movePage as coreMovePage, setGrid as coreSetGrid, goToPage as coreGoToPage } from '../document/document.js';
 import { HistoryStack, makeEntry, entryCells } from '../history/history.js';
 import { flipHoriz, flipVert, invertAll, clearAll } from '../grid/grid.js';
-import type { ToolId, EditorSnapshot, SelectionRect } from './types.js';
+import { reindexMapInsert } from '../page/page-maps.js';
+import { decodeDtms60x40Hex } from '../../codecs/dtms/dtms.js';
+import type { ToolId, EditorSnapshot, SelectionRect, BraillePreview } from './types.js';
 
 export interface PageAudioEntry {
   desc?: string;
@@ -58,6 +60,10 @@ export class EditorStore {
   private listeners = new Set<() => void>();
   private snapshotCache: EditorSnapshot;
   private opts: EditorStoreOptions;
+  private brailleLang = 'ko-g2';
+  private brailleBusy = false;
+  private braillePreview: BraillePreview | null = null;
+  private brailleApplyToken = 0; // guards against a stale async response landing after a page switch
 
   constructor(initialDocument: StudioDocument, opts: EditorStoreOptions = {}) {
     this.doc = initialDocument;
@@ -92,6 +98,9 @@ export class EditorStore {
       canRedo: this.history.redoStack.length > 0,
       dirty: this.dirty,
       rev: this.rev,
+      brailleLang: this.brailleLang,
+      brailleBusy: this.brailleBusy,
+      braillePreview: this.braillePreview,
     };
   }
 
@@ -297,10 +306,118 @@ export class EditorStore {
     this.notify();
   }
 
+  /** monolith seedCorpusResult(result, mode): load a corpus search hit onto
+   *  the canvas. `mode: 'new'` inserts a fresh page right after the active
+   *  one (like addPage, but seeded with the hit's cells instead of blank);
+   *  `mode: 'replace'` snapshots and replaces the active page's cells.
+   *  Always resizes to 60×40 first if needed (corpus data is 60×40-native).
+   *  DEFERRED (documented, not silently dropped): the monolith's
+   *  `corpusCtx` multi-page navigation context (so a UI could offer
+   *  prev/next through sibling pages of the same corpus record) — this
+   *  method loads the hit's single specified page only. */
+  loadCorpusResult(hex: string, mode: 'new' | 'replace', title?: string) {
+    const cells = decodeDtms60x40Hex(hex);
+    if (!cells) return false;
+    const gridChanged = this.doc.grid.w !== 60 || this.doc.grid.h !== 40;
+    if (gridChanged) this.setGrid(60, 40);
+    if (mode === 'new') {
+      const at = this.doc.pageIndex + 1;
+      this.doc.pages.splice(at, 0, cells);
+      this.doc.pageAudio = reindexMapInsert(this.doc.pageAudio, at);
+      this.doc.pageVectors = reindexMapInsert(this.doc.pageVectors, at) as PageMap<unknown[]>;
+      this.doc.pageIndex = at;
+      if (title != null) this.doc.title = title;
+      this.history.clear();
+      this.selRect = null;
+      this.rev++;
+      this.setDirty(true);
+      this.notify();
+    } else {
+      this.snapshotForUndo();
+      this.doc.pages[this.doc.pageIndex] = cells;
+      if (title != null) this.doc.title = title;
+      this.selRect = null;
+      this.rev++;
+      this.setDirty(true);
+      this.notify();
+    }
+    return true;
+  }
+
   /** Host-facing: clears the dirty flag after a successful save(), without
    *  touching document content or history. */
   markSaved() {
     this.setDirty(false);
     this.notify();
   }
+
+  // ── braille "Apply" (verbatim port of the monolith's applyField) ─────────
+
+  setBrailleLang(lang: string) {
+    this.brailleLang = lang;
+    this.notify();
+  }
+
+  /**
+   * monolith applyField(field): translate the CURRENT page's desc/narration
+   * text to braille via the injected service, store the applied text +
+   * timestamp + unicode braille onto that page's audio metadata, and expose
+   * the result as `braillePreview` on the snapshot. The monolith always
+   * derives the braille SOURCE text as desc-first-then-narration regardless
+   * of which field triggered Apply — ported verbatim, not a bug.
+   *
+   * Guards against a stale response landing after the user has switched
+   * pages mid-flight (an incrementing token, same idea as the monolith's
+   * `if (this.state.pageIndex !== i) return` checks).
+   */
+  async applyBraille(field: 'desc' | 'narration', service: BrailleServiceLike): Promise<void> {
+    const i = this.doc.pageIndex;
+    if (this.brailleBusy) return; // one Apply at a time, like the monolith
+    const audio = this.getPageAudio(i);
+    const text = field === 'desc' ? (audio.desc || '') : (audio.narration || '');
+    if (!text.trim()) return;
+    const src = audio.desc || audio.narration || '';
+    const token = ++this.brailleApplyToken;
+    this.brailleBusy = true;
+    this.braillePreview = null;
+    this.notify();
+    try {
+      const r = await service.translate(src, this.brailleLang);
+      if (token !== this.brailleApplyToken || this.doc.pageIndex !== i) {
+        // page switched or a newer Apply started mid-flight — drop this response
+        if (token === this.brailleApplyToken) { this.brailleBusy = false; this.notify(); }
+        return;
+      }
+      if (!r || !r.ok) {
+        this.brailleBusy = false;
+        this.braillePreview = { ok: false, unicode: '', cells: 0, reason: r?.reason };
+        this.notify();
+        return;
+      }
+      const cur = this.getPageAudio(i);
+      const stamp = Date.now();
+      const patch = field === 'desc'
+        ? { descApplied: text, descAt: stamp, brl: r.unicode }
+        : { narrApplied: text, narrAt: stamp, brl: r.unicode };
+      (this.doc.pageAudio as PageMap<PageAudioEntry>)[i] = { ...cur, ...patch };
+      this.brailleBusy = false;
+      this.braillePreview = { ok: true, unicode: r.unicode, cells: r.cells };
+      this.setDirty(true);
+      this.notify();
+    } catch (e) {
+      if (token !== this.brailleApplyToken) return;
+      this.brailleBusy = false;
+      this.braillePreview = { ok: false, unicode: '', cells: 0, reason: String((e as Error)?.message || e) };
+      this.notify();
+    }
+  }
+}
+
+/** Minimal structural shape EditorStore needs from a braille service — core/
+ *  must not import react/types/public-api.ts's BrailleService (core never
+ *  depends on the react layer), so this is defined independently. The two
+ *  are structurally compatible by design; TypeScript checks that at the
+ *  call site (react/hooks or wherever a real BrailleService is passed in). */
+export interface BrailleServiceLike {
+  translate(text: string, langKey: string): Promise<{ ok: boolean; unicode: string; cells: number; reason?: string }>;
 }

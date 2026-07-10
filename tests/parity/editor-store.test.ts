@@ -247,3 +247,99 @@ describe('EditorStore — markSaved', () => {
     expect(store.getSnapshot().canUndo).toBe(true); // markSaved doesn't touch history
   });
 });
+
+describe('EditorStore — loadCorpusResult (seedCorpusResult port)', () => {
+  it('mode "new" inserts a page right after the active one, resizing to 60x40 if needed', () => {
+    const store = new EditorStore(createDocument('doc', 28, 40));
+    const hex = '1'.repeat(600); // valid 600-hex, arbitrary pattern
+    const ok = store.loadCorpusResult(hex, 'new', 'corpus hit');
+    expect(ok).toBe(true);
+    expect(store.getSnapshot().gridW).toBe(60);
+    expect(store.getSnapshot().gridH).toBe(40);
+    expect(store.getSnapshot().pageCount).toBe(2);
+    expect(store.getSnapshot().pageIndex).toBe(1);
+    expect(store.getSnapshot().canUndo).toBe(false); // history cleared, like addPage
+  });
+
+  it('mode "replace" snapshots and replaces the active page (undoable)', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    const before = store.getActiveCells().slice();
+    const hex = '2'.repeat(600);
+    const ok = store.loadCorpusResult(hex, 'replace');
+    expect(ok).toBe(true);
+    expect(store.getSnapshot().canUndo).toBe(true);
+    store.undo();
+    expect(Array.from(store.getActiveCells())).toEqual(Array.from(before));
+  });
+
+  it('returns false for invalid hex without mutating the document', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    const calls: number[] = [];
+    store.subscribe(() => calls.push(1));
+    expect(store.loadCorpusResult('not-valid-hex', 'replace')).toBe(false);
+    expect(calls.length).toBe(0);
+  });
+});
+
+describe('EditorStore — applyBraille (applyField port)', () => {
+  it('translates desc-first-then-narration text and stores brl/appliedAt on the page', async () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.setPageDesc('안녕하세요');
+    const service = { translate: vi.fn().mockResolvedValue({ ok: true, unicode: '⠣⠒⠉', cells: 3 }) };
+    await store.applyBraille('desc', service);
+    expect(service.translate).toHaveBeenCalledWith('안녕하세요', 'ko-g2');
+    expect(store.getPageAudio(0).brl).toBe('⠣⠒⠉');
+    expect(store.getPageAudio(0).descApplied).toBe('안녕하세요');
+    expect(store.getSnapshot().braillePreview).toEqual({ ok: true, unicode: '⠣⠒⠉', cells: 3 });
+    expect(store.getSnapshot().brailleBusy).toBe(false);
+  });
+
+  it('falls back to narration text as the braille SOURCE when desc is empty (verbatim monolith behavior)', async () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.setPageNarration('나레이션 텍스트');
+    const service = { translate: vi.fn().mockResolvedValue({ ok: true, unicode: '⠝', cells: 1 }) };
+    await store.applyBraille('narration', service);
+    expect(service.translate).toHaveBeenCalledWith('나레이션 텍스트', 'ko-g2');
+    expect(store.getPageAudio(0).narrApplied).toBe('나레이션 텍스트');
+  });
+
+  it('does nothing when the target field is empty', async () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    const service = { translate: vi.fn(async () => ({ ok: true, unicode: '', cells: 0 })) };
+    await store.applyBraille('desc', service);
+    expect(service.translate).not.toHaveBeenCalled();
+  });
+
+  it('sets a failed braillePreview (never falls back to raw text) when the service reports failure', async () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.setPageDesc('text');
+    const service = { translate: vi.fn().mockResolvedValue({ ok: false, unicode: '', cells: 0, reason: 'unknown-lang' }) };
+    await store.applyBraille('desc', service);
+    expect(store.getSnapshot().braillePreview).toEqual({ ok: false, unicode: '', cells: 0, reason: 'unknown-lang' });
+    expect(store.getPageAudio(0).brl).toBeUndefined();
+  });
+
+  it('ignores a stale response after the page has changed mid-flight', async () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.addPage();
+    store.setActivePage(0);
+    store.setPageDesc('page zero text');
+    let resolveFn: (v: { ok: boolean; unicode: string; cells: number }) => void;
+    const service = { translate: vi.fn(() => new Promise<{ ok: boolean; unicode: string; cells: number }>((r) => { resolveFn = r; })) };
+    const applyPromise = store.applyBraille('desc', service);
+    store.setActivePage(1); // switch pages before the translate() resolves
+    resolveFn!({ ok: true, unicode: '⠺', cells: 1 });
+    await applyPromise;
+    expect(store.getPageAudio(0).brl).toBeUndefined(); // stale response dropped
+  });
+
+  it('setBrailleLang updates the snapshot and is used by the next applyBraille call', async () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.setBrailleLang('ueb-g1');
+    expect(store.getSnapshot().brailleLang).toBe('ueb-g1');
+    store.setPageDesc('hello');
+    const service = { translate: vi.fn().mockResolvedValue({ ok: true, unicode: '⠓', cells: 1 }) };
+    await store.applyBraille('desc', service);
+    expect(service.translate).toHaveBeenCalledWith('hello', 'ueb-g1');
+  });
+});

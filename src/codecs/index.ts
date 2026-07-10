@@ -9,4 +9,7 @@ export * from './image/image.js';
 export * from './tactile-text/tactile-text.js';
 export * from './grid-fx/grid-fx.js';
 export * from './quality/quality.js';
+export * from './corpus/types.js';
+export * from './corpus/corpus-search.js';
+export * from './svg/svg.js';
 export * as brailleNode from './braille/liblouis-node.js';

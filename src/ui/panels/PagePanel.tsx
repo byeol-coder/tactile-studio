@@ -1,14 +1,18 @@
 // src/ui/panels/PagePanel.tsx
 //
-// Page list + add/delete/move controls. DEFERRED (documented): thumbnails
-// and drag-and-drop reordering — this pass provides Move up/down buttons
-// (keyboard-operable) instead of a drag handle, and a plain numbered list
-// instead of rendered thumbnails.
+// Page list with thumbnails, add/delete/move-up-down buttons (kept for
+// keyboard/screen-reader operability), and pointer-based drag-and-drop
+// reordering via a grip handle. Native HTML5 drag-and-drop (dragstart/
+// dragover/drop) is deliberately NOT used — jsdom has no DragEvent
+// implementation (mirrors the earlier PointerEvent gap), and a pointer-based
+// implementation is directly testable with the same firePointerEvent-style
+// pattern used elsewhere in this codebase.
 
-import React from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { usePages } from '../../react/hooks/usePages.js';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import type { StudioLabels } from '../../react/types/public-api.js';
+import { PageThumbnail } from './PageThumbnail.js';
 
 export interface PagePanelProps {
   labels?: StudioLabels;
@@ -16,9 +20,52 @@ export interface PagePanelProps {
 
 export function PagePanel({ labels }: PagePanelProps) {
   const { pageIndex, pageCount, addPage, deletePageAt, movePage } = usePages();
-  const { store } = useEditorStore();
+  const { snapshot, store } = useEditorStore();
   const pagesLabel = (labels?.pagesLabel as string) || 'Pages';
   const addLabel = (labels?.addPage as string) || 'Add page';
+  const doc = store.getDocument();
+
+  const itemRefs = useRef<Map<number, HTMLLIElement>>(new Map());
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragFromRef = useRef<number | null>(null);
+
+  const computeTargetIndex = useCallback((clientY: number): number => {
+    let target = 0;
+    for (const [i, el] of itemRefs.current.entries()) {
+      const r = el.getBoundingClientRect();
+      const mid = r.top + r.height / 2;
+      if (clientY >= mid) target = i + 1;
+    }
+    return Math.max(0, Math.min(pageCount - 1, target));
+  }, [pageCount]);
+
+  const onHandlePointerDown = (i: number) => (e: React.PointerEvent) => {
+    e.preventDefault();
+    dragFromRef.current = i;
+    setDragFrom(i);
+    setDragOverIndex(i);
+    try { (e.target as Element).setPointerCapture?.(e.pointerId); } catch { /* optimization only */ }
+  };
+
+  useEffect(() => {
+    if (dragFrom == null) return;
+    const onMove = (e: PointerEvent) => setDragOverIndex(computeTargetIndex(e.clientY));
+    const onUp = (e: PointerEvent) => {
+      const from = dragFromRef.current;
+      const to = computeTargetIndex(e.clientY);
+      if (from != null && to !== from) movePage(from, to);
+      dragFromRef.current = null;
+      setDragFrom(null);
+      setDragOverIndex(null);
+    };
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+    return () => {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    };
+  }, [dragFrom, computeTargetIndex, movePage]);
 
   return (
     <div role="region" aria-label={pagesLabel} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 160 }}>
@@ -26,21 +73,39 @@ export function PagePanel({ labels }: PagePanelProps) {
         <span style={{ fontSize: 13, fontWeight: 600 }}>{pagesLabel}</span>
         <button type="button" aria-label={addLabel} title={addLabel} onClick={() => addPage()} style={{ width: 26, height: 26, borderRadius: 7, border: 'none', background: 'transparent', cursor: 'pointer' }}>＋</button>
       </div>
-      <ul role="list" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <ul role="list" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {Array.from({ length: pageCount }, (_, i) => i).map((i) => (
-          <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <li
+            key={i}
+            ref={(el) => { if (el) itemRefs.current.set(i, el); else itemRefs.current.delete(i); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 2,
+              outline: dragOverIndex === i && dragFrom != null && dragFrom !== i ? '2px dashed var(--ts-primary, #C43D00)' : 'none',
+              opacity: dragFrom === i ? 0.5 : 1,
+            }}
+          >
+            <button
+              type="button"
+              aria-label={`Reorder page ${i + 1}`}
+              title="Drag to reorder"
+              onPointerDown={onHandlePointerDown(i)}
+              style={{ cursor: 'grab', border: 'none', background: 'transparent', padding: 2 }}
+            >
+              ⠿
+            </button>
             <button
               type="button"
               aria-current={i === pageIndex ? 'true' : undefined}
               onClick={() => store.setActivePage(i)}
               style={{
-                flex: 1, textAlign: 'left', padding: '6px 8px', borderRadius: 6, border: 'none',
+                flex: 1, display: 'flex', alignItems: 'center', gap: 6, textAlign: 'left', padding: '4px 6px', borderRadius: 6, border: 'none',
                 background: i === pageIndex ? 'var(--ts-primary, #C43D00)' : 'transparent',
                 color: i === pageIndex ? '#FFFFFF' : 'var(--ts-ink, #1E1C1A)',
                 cursor: 'pointer',
               }}
             >
-              {i + 1}
+              <PageThumbnail cells={doc.pages[i]} gridW={snapshot.gridW} gridH={snapshot.gridH} />
+              <span>{i + 1}</span>
             </button>
             <button type="button" aria-label="Move up" title="Move up" disabled={i === 0} onClick={() => movePage(i, i - 1)} style={{ opacity: i === 0 ? 0.3 : 1 }}>↑</button>
             <button type="button" aria-label="Move down" title="Move down" disabled={i === pageCount - 1} onClick={() => movePage(i, i + 1)} style={{ opacity: i === pageCount - 1 ? 0.3 : 1 }}>↓</button>

@@ -83,6 +83,22 @@ export function loadCorpus() {
   return ctx.window.DTMS_CORPUS;
 }
 
+// Load corpus.js + corpus-search.js together and return the live shipped
+// search functions (window.searchCorpus/nearMatches/normalizeCorpusQuery/
+// corpusFeatureCounts), already bound to the loaded corpus data.
+export function loadCorpusSearch() {
+  const ctx = makeWindowContext();
+  vm.runInContext(readRepoFile('corpus.js'), ctx, { filename: 'corpus.js' });
+  vm.runInContext(readRepoFile('corpus-search.js'), ctx, { filename: 'corpus-search.js' });
+  return {
+    corpus: ctx.window.DTMS_CORPUS,
+    searchCorpus: ctx.window.searchCorpus,
+    nearMatches: ctx.window.nearMatches,
+    normalizeCorpusQuery: ctx.window.normalizeCorpusQuery,
+    featureCounts: ctx.window.corpusFeatureCounts,
+  };
+}
+
 // ── x-dc Component class loading ─────────────────────────────────────────────
 // The x-dc block declares `class Component extends DCLogic { … }`.
 // We provide a minimal DCLogic base so the class can be *defined* (methods are

@@ -1,20 +1,26 @@
 // src/ui/inspector/Inspector.tsx
 //
 // DEFERRED (documented in known-issues.md #5): device panel section (see
-// DotPadPanel instead, composed separately by TactileStudioEditor), braille
-// "Apply" conversion + preview (needs a wired BrailleService — plain
-// autosave text only in this pass).
+// DotPadPanel instead, composed separately by TactileStudioEditor).
 
 import React from 'react';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
-import type { StudioLabels, GridFxService } from '../../react/types/public-api.js';
+import type { StudioLabels, GridFxService, BrailleService } from '../../react/types/public-api.js';
+
+const BRAILLE_LANGS = [
+  { key: 'ko-g2', label: 'Korean (Grade 2)' },
+  { key: 'ko-g1', label: 'Korean (Grade 1)' },
+  { key: 'ueb-g1', label: 'UEB (Grade 1)' },
+  { key: 'ueb-g2', label: 'UEB (Grade 2)' },
+];
 
 export interface InspectorProps {
   labels?: StudioLabels;
   gridFx?: GridFxService;
+  braille?: BrailleService;
 }
 
-export function Inspector({ labels, gridFx }: InspectorProps) {
+export function Inspector({ labels, gridFx, braille }: InspectorProps) {
   const { snapshot, store } = useEditorStore();
   const audio = store.getPageAudio(snapshot.pageIndex);
 
@@ -31,6 +37,17 @@ export function Inspector({ labels, gridFx }: InspectorProps) {
           rows={2}
           style={{ width: '100%', resize: 'vertical' }}
         />
+        {braille && (
+          <button
+            type="button"
+            disabled={snapshot.brailleBusy || !(audio.desc || '').trim()}
+            onClick={() => store.applyBraille('desc', braille)}
+            aria-label={((labels?.applyBraille as string) || 'Apply braille') + ' (description)'}
+            style={{ marginTop: 4 }}
+          >
+            {snapshot.brailleBusy ? ((labels?.applying as string) || 'Applying…') : ((labels?.applyBraille as string) || 'Apply braille')}
+          </button>
+        )}
       </div>
       <div>
         <label htmlFor="ts-page-narr" style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
@@ -43,7 +60,38 @@ export function Inspector({ labels, gridFx }: InspectorProps) {
           rows={2}
           style={{ width: '100%', resize: 'vertical' }}
         />
+        {braille && (
+          <button
+            type="button"
+            disabled={snapshot.brailleBusy || !(audio.narration || '').trim()}
+            onClick={() => store.applyBraille('narration', braille)}
+            aria-label={((labels?.applyBraille as string) || 'Apply braille') + ' (narration)'}
+            style={{ marginTop: 4 }}
+          >
+            {snapshot.brailleBusy ? ((labels?.applying as string) || 'Applying…') : ((labels?.applyBraille as string) || 'Apply braille')}
+          </button>
+        )}
       </div>
+
+      {braille && (
+        <div>
+          <label htmlFor="ts-braille-lang" style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
+            {(labels?.inspBrailleLang as string) || 'Braille language'}
+          </label>
+          <select id="ts-braille-lang" value={snapshot.brailleLang} onChange={(e) => store.setBrailleLang(e.target.value)}>
+            {BRAILLE_LANGS.map((l) => (
+              <option key={l.key} value={l.key}>{(labels?.[`brailleLang${l.key}`] as string) || l.label}</option>
+            ))}
+          </select>
+          <div aria-live="polite" style={{ fontSize: 12, marginTop: 4 }}>
+            {snapshot.braillePreview == null
+              ? ((labels?.braillePreviewEmpty as string) || 'Enter a braille description and Apply to preview the converted result.')
+              : snapshot.braillePreview.ok
+                ? `${snapshot.braillePreview.unicode} (${snapshot.braillePreview.cells} cells)`
+                : ((labels?.braillePreviewFail as string) || 'Translation failed — the braille line will not be sent.')}
+          </div>
+        </div>
+      )}
 
       {gridFx && (
         <div>

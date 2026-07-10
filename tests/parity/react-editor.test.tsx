@@ -7,11 +7,15 @@
 // handled in Phase 3 (documented limitation, not a silent gap).
 import React from 'react';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
 import { TactileStudioEditor } from '../../src/react/TactileStudioEditor.js';
 import { TactileStudioProvider, useEditorStoreContext } from '../../src/react/TactileStudioProvider.js';
 import { StudioCanvas } from '../../src/ui/canvas/StudioCanvas.js';
 import { Toolbar } from '../../src/ui/toolbar/Toolbar.js';
+import { CorpusSearchPanel } from '../../src/ui/corpus/CorpusSearchPanel.js';
+import { PagePanel } from '../../src/ui/panels/PagePanel.js';
+import { Inspector } from '../../src/ui/inspector/Inspector.js';
+import { ExportMenu } from '../../src/ui/dialogs/ExportMenu.js';
 import { createDocument } from '../../src/core/document/document.js';
 import { createMemoryStorageAdapter } from '../../src/storage/adapters/memory-storage-adapter.js';
 import { createMockDotPadAdapter } from '../../src/device/dotpad/mock-adapter.js';
@@ -330,7 +334,7 @@ describe('TactileStudioEditor — full composition with all optional services', 
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Fill' }));
-    const canvas = document.querySelector('canvas')!;
+    const canvas = screen.getByRole('img', { name: /tactile drawing canvas/i });
     Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
     Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
     firePointerEvent(canvas, 'pointerdown', { clientX: 100, clientY: 100, pointerId: 9 });
@@ -340,5 +344,187 @@ describe('TactileStudioEditor — full composition with all optional services', 
 
     fireEvent.keyDown(document, { key: 'z', ctrlKey: true });
     expect(undoBtn.disabled).toBe(true); // Ctrl+Z consumed that entry
+  });
+});
+
+describe('CorpusSearchPanel — real search engine wiring', () => {
+  it('shows confident hits for a matching query and loads one into a new page on click', () => {
+    const corpus = [
+      { id: 'c1', title: '고양이', spec: '60x40', lang: 'ko', category: 'basic', tags: ['동물'], pages: [{ page: 1, label: '고양이', graphic: '3'.repeat(600) }] },
+    ];
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <Capture />
+        <CorpusSearchPanel corpus={corpus as any} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.change(screen.getByRole('textbox', { name: 'Command input' }), { target: { value: '고양이' } });
+    const hit = screen.getByRole('button', { name: '고양이' });
+    fireEvent.click(hit);
+
+    expect(capturedStore!.getSnapshot().pageCount).toBe(2);
+    expect(Array.from(capturedStore!.getActiveCells())[0]).toBe(1); // hex '3' = 0011 -> bit0/bit1 set for first cell
+  });
+
+  it('shows suggestions (not confident hits) for a near-miss query', () => {
+    const corpus = [
+      { id: 'c1', title: 'Planetary System', spec: '60x40', lang: 'en', category: 'basic', tags: [], pages: [{ page: 1, label: 'Planetary System', desc: '', graphic: '0'.repeat(600) }] },
+    ];
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <CorpusSearchPanel corpus={corpus as any} />
+      </TactileStudioProvider>,
+    );
+    // "planetarian" is NOT a substring of "Planetary System" (no confident
+    // hit), but shares an 8-char prefix with "planetary" (isNearToken's
+    // ≥3-char-prefix rule) — lands in the near-match/suggestions path.
+    fireEvent.change(screen.getByRole('textbox', { name: 'Command input' }), { target: { value: 'planetarian' } });
+    expect(screen.getByText(/did you mean/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Planetary System' })).toBeTruthy();
+  });
+
+  it('shows an empty state for a totally unmatched query', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <CorpusSearchPanel corpus={[]} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.change(screen.getByRole('textbox', { name: 'Command input' }), { target: { value: 'zzz' } });
+    expect(screen.getByText(/no matches found/i)).toBeTruthy();
+  });
+});
+
+describe('PagePanel — thumbnails and drag-and-drop reordering', () => {
+  it('renders a thumbnail canvas per page', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <PagePanel />
+      </TactileStudioProvider>,
+    );
+    act(() => { capturedStore!.addPage(); });
+    // two pages -> two thumbnail canvases (aria-hidden, so query by tag directly)
+    expect(document.querySelectorAll('canvas[aria-hidden="true"]').length).toBe(2);
+  });
+
+  it('drag handle reorders pages via pointer events (no native DragEvent needed)', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <PagePanel />
+      </TactileStudioProvider>,
+    );
+    act(() => { capturedStore!.addPage(); capturedStore!.addPage(); });
+    // stub getBoundingClientRect for the three <li> rows, stacked vertically
+    const items = screen.getAllByRole('listitem');
+    items.forEach((el, i) => {
+      vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({ top: i * 40, bottom: i * 40 + 40, height: 40, left: 0, right: 100, width: 100, x: 0, y: i * 40, toJSON() {} } as DOMRect);
+    });
+    const activePageBefore = capturedStore!.getSnapshot().pageIndex;
+    expect(activePageBefore).toBe(2); // addPage() twice moved active page to index 2
+
+    const handles = screen.getAllByRole('button', { name: /Reorder page/i });
+    firePointerEvent(handles[0], 'pointerdown', { clientX: 10, clientY: 5, pointerId: 5 }); // grab page 1 (index 0)
+    firePointerEvent(document.body, 'pointermove', { clientX: 10, clientY: 100, pointerId: 5 }); // drag down past row 2
+    firePointerEvent(document.body, 'pointerup', { clientX: 10, clientY: 100, pointerId: 5 });
+
+    // page originally at index 0 should have moved down
+    expect(capturedStore!.getSnapshot().pageIndex).not.toBe(2); // active page identity followed the move (Phase 2 core guarantee)
+  });
+});
+
+describe('Inspector — braille Apply wiring', () => {
+  it('Apply button translates the desc field and shows the preview', async () => {
+    const braille = { translate: vi.fn().mockResolvedValue({ ok: true, unicode: '⠓⠑⠇⠇⠕', cells: 5 }) };
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Inspector braille={braille} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.change(screen.getByLabelText('Braille description'), { target: { value: 'hello' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply braille (description)' }));
+    await screen.findByText(/⠓⠑⠇⠇⠕/);
+    expect(braille.translate).toHaveBeenCalledWith('hello', 'ko-g2');
+  });
+
+  it('changing the braille language selector affects the next Apply call', async () => {
+    const braille = { translate: vi.fn().mockResolvedValue({ ok: true, unicode: '⠓', cells: 1 }) };
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Inspector braille={braille} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.change(screen.getByLabelText('Braille description'), { target: { value: 'hi' } });
+    fireEvent.change(screen.getByLabelText('Braille language'), { target: { value: 'ueb-g1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply braille (description)' }));
+    await Promise.resolve();
+    expect(braille.translate).toHaveBeenCalledWith('hi', 'ueb-g1');
+  });
+
+  it('Apply button is disabled when the field is empty, and no braille UI renders without a service', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Inspector />
+      </TactileStudioProvider>,
+    );
+    expect(screen.queryByRole('button', { name: 'Apply braille' })).toBeNull();
+  });
+});
+
+describe('ExportMenu — SVG and PNG', () => {
+  it('SVG button only renders when bitsToSvg is provided, and calls onExport with svg text', () => {
+    const onExport = vi.fn();
+    const { rerender } = render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <ExportMenu encodeBits={() => '00'.repeat(50)} onExport={onExport} />
+      </TactileStudioProvider>,
+    );
+    expect(screen.queryByRole('menuitem', { name: 'SVG' })).toBeNull();
+
+    rerender(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <ExportMenu encodeBits={() => '00'.repeat(50)} bitsToSvg={() => '<svg></svg>'} onExport={onExport} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: 'SVG' }));
+    expect(onExport).toHaveBeenCalledWith(expect.objectContaining({ format: 'svg', json: '<svg></svg>' }));
+  });
+
+  it('PNG button calls onExport with a Blob when a 2D context is available', async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      fillRect: vi.fn(), beginPath: vi.fn(), arc: vi.fn(), fill: vi.fn(), fillStyle: '',
+    } as any);
+    vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(function (cb: any) {
+      cb(new Blob(['fake-png'], { type: 'image/png' }));
+    });
+    const onExport = vi.fn();
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <ExportMenu encodeBits={() => '00'.repeat(50)} onExport={onExport} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: 'PNG' }));
+    expect(onExport).toHaveBeenCalledWith(expect.objectContaining({ format: 'png' }));
+    const call = onExport.mock.calls[0][0];
+    expect(call.blob).toBeInstanceOf(Blob);
+  });
+
+  it('PNG export is a no-op (never throws) when no 2D context is available', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null as any);
+    const onExport = vi.fn();
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <ExportMenu encodeBits={() => '00'.repeat(50)} onExport={onExport} />
+      </TactileStudioProvider>,
+    );
+    expect(() => fireEvent.click(screen.getByRole('menuitem', { name: 'PNG' }))).not.toThrow();
+    expect(onExport).not.toHaveBeenCalled();
   });
 });

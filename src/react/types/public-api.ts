@@ -19,6 +19,7 @@
 import type { StudioDocument } from '../../core/types.js';
 import type { StudioStorageAdapter } from '../../storage/adapters/types.js';
 import type { TactileDisplayAdapter } from '../../device/dotpad/types.js';
+import type { CorpusRecord } from '../../codecs/corpus/types.js';
 
 /** Host-provided braille service — a narrower surface than the full
  *  liblouis-node module (host may back this with the browser TSBraille
@@ -59,6 +60,11 @@ export interface StudioServices {
   imageProcessing?: ImageProcessingService;
   gridFx?: GridFxService;
   encodeBits?: EncodeBitsFn;
+  bitsToSvg?: (bits: boolean[][], cols: number, rows: number, opts?: { cell?: number; dotR?: number; title?: string }) => string;
+  /** Static corpus data (typically the host's own real corpus.js, read from
+   *  window.DTMS_CORPUS) — enables the corpus/command-panel search UI. No
+   *  corpus data is bundled with or duplicated inside this package. */
+  corpus?: CorpusRecord[];
 }
 
 /** Every user-facing string the editor needs. The host owns language

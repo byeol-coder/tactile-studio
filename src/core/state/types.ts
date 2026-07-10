@@ -35,6 +35,13 @@ export interface CursorState {
   cy: number;
 }
 
+export interface BraillePreview {
+  ok: boolean;
+  unicode: string;
+  cells: number;
+  reason?: string;
+}
+
 /** Read-only snapshot handed to React via useSyncExternalStore. Never mutate
  *  fields on a snapshot directly — go through the store's command methods,
  *  which produce a new snapshot and notify subscribers. */
@@ -55,4 +62,7 @@ export interface EditorSnapshot {
   /** bumped on every cell mutation so canvas-only consumers can redraw
    *  without decoding the whole document (mirrors the monolith's `rev`). */
   rev: number;
+  brailleLang: string;
+  brailleBusy: boolean;
+  braillePreview: BraillePreview | null;
 }

@@ -63,14 +63,21 @@ Closed most of the initial pass's deferred list:
 ### Still deferred (documented, not silently dropped)
 
 - Shape-tool flyout grouping (line/rect/ellipse/poly under one button), the thickness dropdown's dot-swatch styling
-- Page thumbnails and drag-and-drop reordering (Move up/down buttons only)
-- Confirm-before-delete for pages (deletes immediately; no `ConfirmDialog` wired to it yet, though the component exists)
-- Braille "Apply" conversion + preview (desc/narration are plain autosave text; no `BrailleService` wired)
+- Confirm-before-delete for pages (deletes immediately; `ConfirmDialog` exists but isn't wired to this action yet)
 - Image file import (needs `ImageProcessingService` wiring + crop-selection UI)
-- SVG/PNG export (PNG needs a real `canvas.toBlob`; SVG needs a `bitsToSVG` port)
-- Corpus/command-panel search UI ("명령어로 만들기")
-- Full Figma-exact spacing/typography, custom tooltip positioning, focus-trap dialogs, live-region announcements beyond the DotPad status line's `aria-live`
-- Confirm dialog is built (`ConfirmDialog.tsx`) but not yet wired into any destructive action
+- Full Figma-exact spacing/typography, custom tooltip positioning, focus-trap dialogs, live-region announcements beyond the DotPad status line's and braille preview's `aria-live`
+- Corpus context navigation (the monolith's `corpusCtx` — prev/next through sibling pages of the same multi-page corpus record); `EditorStore.loadCorpusResult` loads the hit's single specified page only
+
+### Phase 5 continuation round 2 — corpus search, thumbnails/drag-reorder, braille Apply, SVG/PNG export
+
+Closed the remaining items from the list above at the time:
+
+- **Corpus search**: `codecs/corpus/corpus-search.ts` is a verbatim TypeScript port of the shipped `corpus-search.js` (a real, deterministic, rule-based scoring engine — title/tag/category matching, bilingual aliases and synonyms, a fuzzy near-match "did you mean" path — not a placeholder), parity-tested against the live shipped module with real corpus.js data. `CorpusSearchPanel` wires it to `EditorStore.loadCorpusResult` (a new command mirroring `seedCorpusResult`: decode the hit's DTMS hex, resize to 60×40 if needed, insert as a new page or replace the active one). The corpus data itself is host-supplied via `services.corpus`, never bundled.
+- **Page thumbnails**: `PageThumbnail.tsx`, a small real canvas rendering per page (same dot convention as `StudioCanvas`, tiny scale) — same jsdom limitation as the main canvas (no-ops under `getContext('2d') === null`, tests verify wiring/sizing).
+- **Drag-and-drop reordering**: pointer-based (not native HTML5 `DragEvent` — jsdom doesn't implement that either, mirroring the earlier `PointerEvent` gap), via a grip handle in `PagePanel`, calling `EditorStore.movePage`. Move-up/down buttons are kept alongside for keyboard/screen-reader operability.
+- **Braille "Apply" + preview**: `EditorStore.applyBraille` is a verbatim-semantics port of the monolith's `applyField` (desc-first-then-narration source text regardless of which field triggered Apply, one-Apply-at-a-time busy guard, a stale-response guard for a page switch mid-flight) wired to a host-supplied `BrailleService` in `Inspector`. Never falls back to sending raw text on failure, matching the vendor README's absolute rule.
+- **SVG export**: `codecs/svg/svg.ts` orchestrates the injected vendor `TW.bitsToSVG` (same injection pattern as `encodeBits`) — parity-tested against the live shipped function.
+- **PNG export**: implemented for real (not deferred) via an offscreen `canvas.toBlob`, since — like the text-tool glyph rasterizer — there's no vendor function to inject and no meaningful cross-engine baseline to parity-test a rendered bitmap against outside a real browser. Documented as such, not silently faked.
 
 ## 6. Phase 6 — product-ownership audit (`refactor(studio-integration): remove product ownership`)
 

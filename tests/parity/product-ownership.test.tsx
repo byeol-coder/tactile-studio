@@ -167,7 +167,7 @@ describe('Phase 6 — host-configurable surface (labels/theme/services/callbacks
         onDirtyChange={onDirtyChange}
       />,
     );
-    const canvas = container.querySelector('canvas')!;
+    const canvas = screen.getByRole('img', { name: /tactile drawing canvas/i });
     Object.defineProperty(canvas, 'width', { value: 120, configurable: true });
     Object.defineProperty(canvas, 'height', { value: 120, configurable: true });
     const evt = new MouseEvent('pointerdown', { clientX: 60, clientY: 60, button: 0, bubbles: true, cancelable: true });
