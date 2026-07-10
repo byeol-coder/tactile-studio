@@ -1,0 +1,6 @@
+{
+  "fixedNow": 1767225600000,
+  "throws": true,
+  "errorName": "TypeError",
+  "errorMessage": "this.banaPrintCheck is not a function"
+}

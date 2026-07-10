@@ -1,0 +1,41 @@
+{
+  "cases": [
+    {
+      "seed": 11,
+      "identical": true,
+      "decodedPinCount": 861
+    },
+    {
+      "seed": 42,
+      "identical": true,
+      "decodedPinCount": 855
+    },
+    {
+      "seed": 20260101,
+      "identical": true,
+      "decodedPinCount": 877
+    }
+  ],
+  "invalids": [
+    {
+      "case": 0,
+      "returnsNull": true
+    },
+    {
+      "case": 1,
+      "returnsNull": true
+    },
+    {
+      "case": 2,
+      "returnsNull": true
+    },
+    {
+      "case": 3,
+      "returnsNull": true
+    },
+    {
+      "case": 4,
+      "returnsNull": true
+    }
+  ]
+}

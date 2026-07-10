@@ -1,0 +1,197 @@
+{
+  "totalRecords": 11,
+  "records": [
+    {
+      "id": "dtms-삼국시대-영토-변화",
+      "title": "삼국시대 영토 변화",
+      "spec": "60x40",
+      "pageCount": 6,
+      "pages": [
+        {
+          "page": 1,
+          "graphicSha256": "90b128af05a194ddce835cd6d5898aea35aff94ac4e7d8b192b8d6b73bb84df3",
+          "graphicLength": 600,
+          "decodedPinCount": 321
+        },
+        {
+          "page": 2,
+          "graphicSha256": "8c2db8b711f01a33e808595af3fb6068d2fe272dfd731f59bf4bba71fda79c61",
+          "graphicLength": 600,
+          "decodedPinCount": 635
+        },
+        {
+          "page": 3,
+          "graphicSha256": "84d59dce821b94f7abc1b37e44d2d8e2e36b67edc27c857d9bbdb1d2786e0080",
+          "graphicLength": 600,
+          "decodedPinCount": 332
+        },
+        {
+          "page": 4,
+          "graphicSha256": "c81baa1c57d271cbc991c2c8a02167a094aa6c9507f79a93703bff295ad84700",
+          "graphicLength": 600,
+          "decodedPinCount": 165
+        },
+        {
+          "page": 5,
+          "graphicSha256": "9e692b551682307bc1d64183f53665b1f850962bd24b59d369f011636b897dd1",
+          "graphicLength": 600,
+          "decodedPinCount": 214
+        },
+        {
+          "page": 6,
+          "graphicSha256": "f5da3a71c8bdf074f45f04602f13f4d297d8df91d65078d83bf3a904e3e33695",
+          "graphicLength": 600,
+          "decodedPinCount": 168
+        }
+      ]
+    },
+    {
+      "id": "dtms-한반도",
+      "title": "한반도",
+      "spec": "60x40",
+      "pageCount": 12,
+      "pages": [
+        {
+          "page": 1,
+          "graphicSha256": "8b7bc25c8bf16c7c32784720d6c2706a70d9742aa9e674265b3a59a9dee70049",
+          "graphicLength": 600,
+          "decodedPinCount": 305
+        },
+        {
+          "page": 2,
+          "graphicSha256": "7bd38ea04d8c5bd52eda76dca1bbe7c985ce14cc9044226cde6c7fd415967511",
+          "graphicLength": 600,
+          "decodedPinCount": 835
+        },
+        {
+          "page": 3,
+          "graphicSha256": "aefb86e27f11bc30ff54246a0eda6b520e74959559f9736061697011345cdf4b",
+          "graphicLength": 600,
+          "decodedPinCount": 1147
+        },
+        {
+          "page": 4,
+          "graphicSha256": "1fa5f0be7852e9b9d8ff19f59b8daa17e859ccae8dc352fb518086ea39f15e93",
+          "graphicLength": 600,
+          "decodedPinCount": 1027
+        },
+        {
+          "page": 5,
+          "graphicSha256": "8a79ea31582f100cd275ee78f13f4ab793015e6690aed86e57b80cc5d61d4d5f",
+          "graphicLength": 600,
+          "decodedPinCount": 816
+        },
+        {
+          "page": 6,
+          "graphicSha256": "6b40ea475ab37cd81d5b60679b7b7bb66e46fd24f220434c025b2823c91700b5",
+          "graphicLength": 600,
+          "decodedPinCount": 330
+        },
+        {
+          "page": 7,
+          "graphicSha256": "aa842f55c8ee03fb1ea0d782a5b7c513f6fb5690868cca755d8ef4ac05296d93",
+          "graphicLength": 600,
+          "decodedPinCount": 155
+        },
+        {
+          "page": 8,
+          "graphicSha256": "5d99bd9b4cba029fc89ac58cf7dfe4f6862891468ec6a8a84b246f3bdc1b1cb6",
+          "graphicLength": 600,
+          "decodedPinCount": 269
+        },
+        {
+          "page": 9,
+          "graphicSha256": "9293815c5787f707562c36ca26fa874881fe845b8e369ac4721bd793cfe9ae2e",
+          "graphicLength": 600,
+          "decodedPinCount": 350
+        },
+        {
+          "page": 10,
+          "graphicSha256": "0384b5f7e36ce1d4d84ba09213316d149df283e52ac6e3acdfe861b720dab68e",
+          "graphicLength": 600,
+          "decodedPinCount": 342
+        },
+        {
+          "page": 11,
+          "graphicSha256": "2842283b05726ed965fe638041a7b063bd5ad8f7fad83b043ffe4febef85462e",
+          "graphicLength": 600,
+          "decodedPinCount": 312
+        },
+        {
+          "page": 12,
+          "graphicSha256": "69d7a64fe76f27d64729ff0d76203a03b8303c0c297cb8cb82cfd31fb221bfa5",
+          "graphicLength": 600,
+          "decodedPinCount": 195
+        }
+      ]
+    },
+    {
+      "id": "dtms-세포-구조",
+      "title": "세포 구조",
+      "spec": "60x40",
+      "pageCount": 10,
+      "pages": [
+        {
+          "page": 1,
+          "graphicSha256": "17845edf05397a08d3126ca7bc18a9eeb574a1c0b3facfeb3130dfbf2882c6b9",
+          "graphicLength": 600,
+          "decodedPinCount": 778
+        },
+        {
+          "page": 2,
+          "graphicSha256": "58971dc1f268cb8e4eed7a4bd15a4456afd01749c2b7ac9f6fa19a3799c295e6",
+          "graphicLength": 600,
+          "decodedPinCount": 480
+        },
+        {
+          "page": 3,
+          "graphicSha256": "5e23d705adf910a92f6bba144a6f2a01145ed4277fe7bd7748c736bd24aec779",
+          "graphicLength": 600,
+          "decodedPinCount": 406
+        },
+        {
+          "page": 4,
+          "graphicSha256": "8fad523503e6aff257dea2cf0f0cac48a3eb8418a91b7c0d6f2b051a917f283d",
+          "graphicLength": 600,
+          "decodedPinCount": 527
+        },
+        {
+          "page": 5,
+          "graphicSha256": "810d22d75eaa6e562d71b3877f470adff54f5655e808e11f1bed667dca226021",
+          "graphicLength": 600,
+          "decodedPinCount": 608
+        },
+        {
+          "page": 6,
+          "graphicSha256": "d2c58f9f1f7dbe7aac57b66aa1e32179bc97bc5caecb6010184cff47ace1fabb",
+          "graphicLength": 600,
+          "decodedPinCount": 496
+        },
+        {
+          "page": 7,
+          "graphicSha256": "46a152ccf0fef371de97b2ae3702e3dec452d2ef049866f423f3867c8f0ee60e",
+          "graphicLength": 600,
+          "decodedPinCount": 518
+        },
+        {
+          "page": 8,
+          "graphicSha256": "5dd22c366e4ddce3e4c9ae9309d7ec0483aa5a74a197fcc5e7b10f5003ed7a70",
+          "graphicLength": 600,
+          "decodedPinCount": 579
+        },
+        {
+          "page": 9,
+          "graphicSha256": "8d0f6de0faf2d44aace96cb797112dfed27e96d38085b4f4d3ad8eb7e414c9b8",
+          "graphicLength": 600,
+          "decodedPinCount": 500
+        },
+        {
+          "page": 10,
+          "graphicSha256": "fc34519c097e414f1797979d72662974f9b7e7466ca66609dd21e96846fd3cac",
+          "graphicLength": 600,
+          "decodedPinCount": 778
+        }
+      ]
+    }
+  ]
+}
