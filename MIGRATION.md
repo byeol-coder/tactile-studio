@@ -1,0 +1,49 @@
+# Migration history and compatibility guarantees
+
+This document chronicles the incremental migration from the buildless `text/x-dc` CDN-runtime application (`index.html` / `support.js` / `vendor/`) toward a reusable React component (`<TactileStudioEditor>`), phase by phase, and states exactly what compatibility has been proven — and how.
+
+For the current architecture, see [`ARCHITECTURE.md`](./ARCHITECTURE.md). For integrating the component, see [`INTEGRATION.md`](./INTEGRATION.md). For a living list of known gaps and scope decisions, see [`docs/known-issues.md`](./docs/known-issues.md).
+
+## Migration principles (recap)
+
+- The vanilla app is the **source of truth for behavior**. It is not rewritten in one shot; every phase is a small, independently reviewable commit.
+- Compatibility-critical algorithms (`dotBit = lx*4+ly` pin packing, 600-hex DTMS encoding, undo/redo semantics, page reindexing, etc.) are **verbatim ports**, proven with tests that compare against the live shipped implementation — not just unit tests of the new code in isolation.
+- Anything not yet proven compatible is documented as deferred, not silently skipped or faked.
+- `index.html`/`support.js`/`vendor/` remain byte-for-byte unchanged unless a phase is explicitly a documented bugfix — enforced by a SHA-256 fingerprint regression test that fails the whole suite if a single character changes.
+
+## Phase-by-phase history
+
+| Phase | Commit | Summary |
+|---|---|---|
+| 1 | `chore(studio): add TypeScript and regression test foundation` | TypeScript (strict, `noEmit`) + Vitest. A `node:vm`-based harness (`tools/harness.mjs`) loads the *actual* `text/x-dc` script block and `vendor/tw/pins.js` from disk and runs them for real — no reimplementation. Captured frozen baseline fixtures (`tests/fixtures/baseline/`) proving `dotBit = lx*4+ly`, 600-hex (60×40) and 1536-hex (96×64) encoding, decode round-trips, corpus data hashes. Along the way, discovered a real, pre-existing bug: `banaPrintCheck` was called but never defined anywhere in the shipped sources, so `buildLibraryAsset()` always threw. |
+| fix | `fix(studio): implement missing banaPrintCheck for BANA print check` | A deliberately separate commit (per the "document confirmed bugs separately, don't mix fixes into migration commits" rule) implementing the missing method by reusing `convQuality`'s metrics, plus the `banaPass` i18n string that was also missing. Library-Asset-v1 fixtures regenerated to the now-working output. |
+| 2 | `refactor(studio-core): extract document, grid and history` | `src/core/{document,grid,geometry,history,page}` — page CRUD, grid resampling, Bresenham/rect/ellipse rasterizers, brush footprints, flood fill, the 60-entry undo/redo stack. Verbatim ports, parity-tested against the live shipped methods with scripted operation traces. |
+| 3 | `refactor(studio-core): extract codecs and tactile processing` | `src/codecs/{dtms,vector,library-asset-v1,document}` — DTMS decode (hardcoded 60×40/600-hex, exactly like production — a valid 96×64/1536-char hex is correctly *rejected*, not generalized), the full raster→vector pipeline (connected components, contour tracing, RDP simplification, shape classification — fully pure), Library Asset v1 build/parse, and the local "saved shelf" serialization. |
+| 3b | `refactor(studio-core): extract canvas/WASM codecs (image, tactile-text, braille)` | Closed the three items the previous phase deferred as canvas/WASM-dependent. **liblouis is asm.js, not WASM** — plain JavaScript — so `src/codecs/braille/liblouis-node.ts` loads the *real* vendored engine and the *real* 18 table files directly in Node (needed one fix: inject a `require()` via `node:module`, since Emscripten's own environment detection checks for it and it's absent under ESM). Image conversion's actual algorithm (`_cvGray`/`_cvOtsu`/`_cvDown`/`_cvSobel`/`_cvDilate`/`_cvRemoveSmall`) operates on already-decoded pixel arrays, so it's fully pure and fully extracted. Text-tool glyph rasterization is the one piece left as an injected dependency — font hinting/anti-aliasing are rendering-engine-specific, so claiming pixel parity there without a real browser would be exactly the "fake compatibility" the migration principles warn against. |
+| 4 | `refactor(studio-device): introduce DotPad and storage adapters` | `src/device/dotpad` (a thin wrapper around the *real* `window.TW.DP` singleton, plus a fully-functional mock adapter) and `src/storage/adapters` (host-implemented `StudioStorageAdapter`, plus a real localStorage-backed adapter for the local saved-shelf). Confirmed by direct source inspection that `DotPadSDK.displayAllUp`/`displayAllDown` really exist at runtime (no `.d.ts` existed to check against). |
+| 5 | `feat(studio-ui): compose reusable React editor` (2 commits) | `EditorStore` (framework-agnostic, `useSyncExternalStore`-compatible), `TactileStudioEditor`/`Provider`/hooks, `StudioCanvas` (verbatim-ported pixel math and pointer mapping), icons (verbatim SVG path data), Toolbar, PagePanel, Inspector, DotPadPanel, import/export dialogs, poly and text tool wiring (text via a real canvas-based glyph rasterizer). One explicit **non-verbatim** design decision: stroke drawing batches React notifications per-gesture instead of per-pointermove, per the migration spec's own performance requirements — documented in `ARCHITECTURE.md`. |
+| 6 | `refactor(studio-integration): remove product ownership` | An **audit**, not a code change — the React layer was built without router/auth/Supabase/i18n ownership from the start, so there was nothing to remove. Codified as a regression-guarding test suite (`tests/parity/product-ownership.test.tsx`). Also added a real Vite 5.4 dev server for the development shell, proving the whole dependency graph actually bundles (`vite build`, 60 modules) and serves (smoke-tested with `curl`). |
+| 7 | `docs(studio): add architecture and integration documentation` | This document, `ARCHITECTURE.md`, `INTEGRATION.md`, and the README pointer — no code changes. |
+
+## What's been proven compatible, and how
+
+| Guarantee | Proof |
+|---|---|
+| `dotBit = lx*4+ly`, 2×4 packing, EA cell order | Single-dot probes for all 8 bit positions, comparing the exact packed byte, against the live shipped encoder |
+| 600-hex (60×40) / 1536-hex (96×64) DTMS output | Pattern + seeded-random page hex, byte-identical to the shipped encoder; a 96×64 hex is confirmed *rejected* by the 60×40 decoder, not silently generalized |
+| `decode(encode(x)) === x` | Round-trip tests for DTMS and Library Asset v1 |
+| Undo/redo semantics (60-entry cap, redo-clearing snapshot) | A 70-snapshot scripted trace compared exactly to a frozen baseline captured from the shipped `Component.prototype` |
+| Page add/delete/move + metadata reindexing | An 11-step scripted operation trace, including buffer-identity tracking and audio/vector map reindexing, matched exactly to the shipped implementation |
+| Shape rasterization (line/rect/ellipse/brush/flood-fill) | Ordered hit-sequence comparison against the live shipped methods, not just the extracted code in isolation |
+| Vectorization (connected components → contour trace → RDP → shape classify) | Full object-array equality against the live shipped `vectorizeGrid`, several seeded/pattern inputs |
+| Image conversion numerics (grayscale/Otsu/downscale/Sobel/dilate/remove-small) | SHA-256 of full output arrays, synthetic RGBA sources, live cross-check against the shipped `_cv*` methods |
+| Braille translation | **Real** liblouis engine + real tables running in Node, not a mock — the same vendored engine file, loaded and exercised directly |
+| `banaPrintCheck`/`convQuality` | Extracted as `codecs/quality`, parity-tested against the live shipped (now-fixed) methods |
+| Local saved-shelf serialization | Byte-identical JSON against the shipped `saveLibrary`/`loadLibrary`, including the 96×64-keeps-thumbnail-only edge case |
+| No router/auth/Supabase/i18n ownership in the React layer | `tests/parity/product-ownership.test.tsx` — embeds the editor inside a mock host route, asserts no navigation/login/session UI, no `navigator.language` reads, no `history.pushState` calls |
+
+As of the last commit: **123 passing tests**, full TypeScript strict-mode typecheck, and a working Vite 5.4 production build of the development shell.
+
+## What's explicitly NOT yet done
+
+See [`docs/known-issues.md`](./docs/known-issues.md) for the living, detailed list. In short: corpus/command-panel search, full Figma-exact toolbar styling (shape-tool flyout, thickness dropdown popover), page thumbnails and drag-and-drop reordering, confirm-before-delete for pages, braille "Apply"/preview wiring, image-file import, PNG/SVG export, and packaging `<TactileStudioEditor>` as a distributable library. None of these are regressions — the vanilla app still has all of them, untouched.

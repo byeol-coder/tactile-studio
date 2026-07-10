@@ -63,8 +63,9 @@ export interface StudioServices {
 
 /** Every user-facing string the editor needs. The host owns language
  *  switching entirely — Studio never detects browser language or ships an
- *  internal toggle (see docs/ARCHITECTURE notes). Optional fields fall back
- *  to the English defaults in react/labels-default.ts. */
+ *  internal toggle. Optional fields fall back to English defaults defined
+ *  inline in each consuming component (e.g. Toolbar.tsx's DEFAULT_TOOL_NAMES) —
+ *  there is no single central labels-default module. */
 export interface StudioLabels {
   toolNames?: Partial<Record<string, string>>;
   toolDesc?: Partial<Record<string, string>>;
