@@ -209,13 +209,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 .ts-page-item:hover .ts-page-handle,.ts-page-item:focus-within .ts-page-handle,.ts-page-handle[data-dragging="true"]{opacity:1}
 .ts-page-handle:hover{color:var(--ts-primary);border-color:var(--ts-primary)}
 .ts-page-handle:focus-visible{outline:2px solid var(--ts-primary);outline-offset:1px}
-/* Advanced device test: pin-action buttons as a compact control group.
-   The DotPad panel is a fixed ~256px, too narrow for three icon+label buttons
-   in one row (KO "전체 올리기" alone needs ~103px). So Raise/Lower share the top
-   row as equal columns and Invert spans the full width below — every KO/EN label
-   stays on one line with no wrapping or clipping. */
-.ts-pin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
-.ts-pin-grid>:last-child{grid-column:1/-1}
+/* Advanced device test: three equal-width pin-action buttons. Each button
+   stacks its icon above the label (see pinBtn) so the KO/EN text fits on one
+   line inside the fixed ~256px inspector panel without overflowing neighbours. */
+.ts-pin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
 .ts-page-handle[data-dragging="true"]{cursor:grabbing}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
@@ -4526,7 +4523,7 @@ class Component extends DCLogic {
     const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
-    const pinBtn = kind => ({ minWidth: 0, height: 46, padding: '0 10px', borderRadius: 11, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
+    const pinBtn = kind => ({ minWidth: 0, height: 58, padding: '0 4px', borderRadius: 11, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
     const locCard = on => ({ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 4, padding: '14px 16px', borderRadius: 8, cursor: 'pointer', background: on ? 'rgba(var(--ts-primary-rgb),0.06)' : '#fff', border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', color: '#1E1C1A' });
     const pill2 = on => ({ height: 34, padding: '0 14px', borderRadius: 8, border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: on ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: on ? '#B93E15' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 });
     const tplGroups = t.tplGroups.map((label, i) => ({ label, key: ['recommended', 'education', 'diagrams', 'elements', 'conversion', 'museum'][i] }));
