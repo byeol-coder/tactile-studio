@@ -22,10 +22,18 @@
 // single monolith snapshot()+direct-mutation+bump() sequence would produce —
 // only the number/timing of React notifications differs.
 
-import type { StudioDocument, CellGrid, HistoryEntry } from '../types.js';
-import { activeCells, addPage as coreAddPage, deletePageAt as coreDeletePageAt, movePage as coreMovePage, setGrid as coreSetGrid } from '../document/document.js';
+import type { StudioDocument, CellGrid, HistoryEntry, PageMap } from '../types.js';
+import { activeCells, addPage as coreAddPage, deletePageAt as coreDeletePageAt, movePage as coreMovePage, setGrid as coreSetGrid, goToPage as coreGoToPage } from '../document/document.js';
 import { HistoryStack, makeEntry, entryCells } from '../history/history.js';
+import { flipHoriz, flipVert, invertAll, clearAll } from '../grid/grid.js';
 import type { ToolId, EditorSnapshot, SelectionRect } from './types.js';
+
+export interface PageAudioEntry {
+  desc?: string;
+  narration?: string;
+  brl?: string;
+  [key: string]: unknown;
+}
 
 export type Unsubscribe = () => void;
 
@@ -203,6 +211,86 @@ export class EditorStore {
     const r = coreSetGrid(this.doc, w, h);
     if (!r.changed) return;
     if (r.historyCleared) this.history.clear();
+    this.selRect = null;
+    this.rev++;
+    this.setDirty(true);
+    this.notify();
+  }
+
+  /** monolith goPage(i): switch the active page (always clears history, a
+   *  checkpoint boundary — distinct from movePage, which preserves it). */
+  setActivePage(i: number) {
+    const r = coreGoToPage(this.doc, i);
+    if (!r.changed) return;
+    if (r.historyCleared) this.history.clear();
+    this.selRect = null;
+    this.rev++;
+    this.notify();
+  }
+
+  /** One-shot pure grid transform (clearAll/invertAll/flipHoriz/flipVert):
+   *  snapshot + replace-in-place + bump + notify, atomically. `fn` receives
+   *  the CURRENT cells and must return a full replacement buffer (Phase 2
+   *  core/grid functions are pure — they don't mutate their input). */
+  private applyPureGridOp(fn: (cells: CellGrid, w: number, h: number) => CellGrid) {
+    this.snapshotForUndo();
+    const { w, h } = this.doc.grid;
+    const next = fn(activeCells(this.doc), w, h);
+    this.doc.pages[this.doc.pageIndex] = next;
+    this.rev++;
+    this.setDirty(true);
+    this.notify();
+  }
+
+  clearAll() { this.applyPureGridOp((cells) => clearAll(cells)); }
+  invertAll() { this.applyPureGridOp((cells) => invertAll(cells)); }
+  flipHoriz() { this.applyPureGridOp((cells, w, h) => flipHoriz(cells, w, h)); }
+  flipVert() { this.applyPureGridOp((cells, w, h) => flipVert(cells, w, h)); }
+
+  /** Grid post-processing (thicken/denoise) — `fn` is injected by the caller
+   *  (see codecs/grid-fx), never reimplemented here; this method only wires
+   *  it into the same one-shot-mutation transaction shape as the ops above. */
+  applyGridFxOp(fn: (cells: CellGrid, w: number, h: number) => CellGrid) {
+    this.applyPureGridOp(fn);
+  }
+
+  // ── page metadata (desc / narration — autosave text, no braille "Apply"
+  //    conversion yet; see docs/known-issues.md) ────────────────────────────
+
+  getPageAudio(i: number = this.doc.pageIndex): PageAudioEntry {
+    return (this.doc.pageAudio as PageMap<PageAudioEntry>)[i] || {};
+  }
+
+  setPageDesc(text: string) {
+    const i = this.doc.pageIndex;
+    const cur = this.getPageAudio(i);
+    (this.doc.pageAudio as PageMap<PageAudioEntry>)[i] = { ...cur, desc: text };
+    this.setDirty(true);
+    this.notify();
+  }
+
+  setPageNarration(text: string) {
+    const i = this.doc.pageIndex;
+    const cur = this.getPageAudio(i);
+    (this.doc.pageAudio as PageMap<PageAudioEntry>)[i] = { ...cur, narration: text };
+    this.setDirty(true);
+    this.notify();
+  }
+
+  /** monolith importAssetFile's page-replacement step: load a fresh set of
+   *  pages as the whole document (clean undo checkpoint — history cleared,
+   *  pageAudio/pageVectors reset, active page becomes page 0). Does NOT
+   *  resample to a target grid size — the caller's pages must already match
+   *  `this.doc.grid`, exactly like the monolith's `if (gridW!==60...)
+   *  setGrid(60,40)` guard the import dialog performs before calling in. */
+  loadPages(pages: CellGrid[], title?: string) {
+    if (!pages.length) return;
+    this.doc.pages = pages;
+    this.doc.pageAudio = {};
+    this.doc.pageVectors = {};
+    this.doc.pageIndex = 0;
+    if (title != null) this.doc.title = title;
+    this.history.clear();
     this.selRect = null;
     this.rev++;
     this.setDirty(true);

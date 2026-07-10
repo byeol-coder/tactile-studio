@@ -46,8 +46,8 @@ export function metaOf(v: unknown): Record<string, unknown> | null {
 
 // ── build (export) ──────────────────────────────────────────────────────────
 
-export type BanaCheck = (cells: CellGrid, w: number, h: number) => { pass: boolean };
-export type ConvQuality = (cells: CellGrid, w: number, h: number) => { key: string };
+export type BanaCheckFn = (cells: CellGrid, w: number, h: number) => { pass: boolean };
+export type ConvQualityFn = (cells: CellGrid, w: number, h: number) => { key: string };
 
 export interface PageAudioEntry {
   desc?: unknown;
@@ -130,7 +130,7 @@ const VALID_CATEGORIES = ['science', 'language', 'geography', 'math', 'basic'];
 /** monolith deriveGraphicFeatures */
 export function deriveGraphicFeatures(
   cells: CellGrid, w: number, h: number,
-  convQuality: ConvQuality, banaCheck: BanaCheck,
+  convQuality: ConvQualityFn, banaCheck: BanaCheckFn,
 ): GraphicFeatures {
   const NATIVE: Record<string, boolean> = { '60x40': true, '96x64': true, '28x40': true };
   const compatible = !!NATIVE[`${w}x${h}`];
@@ -146,7 +146,7 @@ export function deriveGraphicFeatures(
  */
 export function buildLibraryAssetV1(
   input: BuildLibraryAssetInput,
-  deps: { encodeBits: TwEncodeBits; convQuality: ConvQuality; banaCheck: BanaCheck; now: number },
+  deps: { encodeBits: TwEncodeBits; convQuality: ConvQualityFn; banaCheck: BanaCheckFn; now: number },
 ): LibraryAssetV1 {
   const { name, gridW: w, gridH: h, lang, brailleLang, activeCells, pages: docPages, pageAudio, pageVectors, corpusCtx: ctx } = input;
   const hexOf = (cellBuf: CellGrid) => encodeDtmsHex(deps.encodeBits, cellBuf, w, h);

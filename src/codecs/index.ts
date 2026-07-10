@@ -7,4 +7,6 @@ export * from './library-asset-v1/library-asset-v1.js';
 export * from './document/local-library.js';
 export * from './image/image.js';
 export * from './tactile-text/tactile-text.js';
+export * from './grid-fx/grid-fx.js';
+export * from './quality/quality.js';
 export * as brailleNode from './braille/liblouis-node.js';

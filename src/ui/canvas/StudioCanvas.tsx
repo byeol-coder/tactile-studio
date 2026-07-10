@@ -6,28 +6,29 @@
 //   cellPx(): gridW<=28?20 : <=60?13 : <=84?7 : 9
 //   active dot  #1E1C1A radius 0.36*c   inactive dot #E3D9CE radius 0.1*c
 //   preview     rgba(196,61,0,0.85)     selection    #C43D00 dashed [5,4]
-//   keyboard cursor stroke #C43D00 width 2
+//   keyboard cursor stroke #C43D00 width 2     poly points  #C43D00 r=0.3*c
 //
-// PERFORMANCE: drag/preview state (the in-progress shape outline, the
-// "last painted cell" for brush interpolation) lives in a local ref, NOT the
-// store — so dragging a shape or painting a stroke redraws only this
-// component's own canvas, on its own rAF loop, without notifying the store's
-// other subscribers (toolbar, page panel, undo/redo buttons). The store only
+// PERFORMANCE: drag/preview state (in-progress shape outline, brush
+// interpolation, in-progress poly points) lives in local refs, NOT the store
+// — dragging/clicking redraws only this component's own canvas, on its own
+// rAF loop, without notifying the store's other subscribers. The store only
 // learns about the change once, via mutateActiveCells/endStroke, when the
-// gesture completes. This is the "do not rerender the whole editor per pin
-// update" requirement from the migration spec — the final pixels and undo
-// entry are identical to a single monolith snapshot()+mutate+bump() call.
+// gesture completes.
 //
-// DEFERRED (documented, not silently skipped): the 'poly' and 'text' tools
-// are selectable but have no pointer-gesture wiring yet — poly needs
-// multi-click point collection + Escape-to-cancel + a fill rasterizer this
-// phase doesn't yet port, and text needs the textPopover UI. Tracked for a
-// Phase 5 continuation alongside the toolbar/inspector/dialogs work.
+// 'poly': verbatim port of updatePolyPreview()/closePoly() — click adds a
+// point, Enter or double-click closes the loop (line-per-edge, brushed),
+// Escape cancels. 'text': click opens a minimal inline popover; Enter
+// commits via codecs/tactile-text's stampTextLayout with a REAL browser
+// canvas glyph rasterizer (browser-glyph-rasterizer.ts) — injectable via
+// props for tests, since jsdom has no real 2D canvas (documented, see
+// docs/known-issues.md #5 and #2).
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import { line, rectOutline, ellipseOutline, makeBrush, floodFill } from '../../core/geometry/raster.js';
 import { cellIndex, inBounds } from '../../core/grid/grid.js';
+import { stampTextLayout, type GlyphRasterizer } from '../../codecs/tactile-text/tactile-text.js';
+import { browserGlyphRasterizer } from './browser-glyph-rasterizer.js';
 
 function cellPx(gridW: number): number {
   return gridW <= 28 ? 20 : gridW <= 60 ? 13 : gridW <= 84 ? 7 : 9;
@@ -42,13 +43,17 @@ type DragState =
 export interface StudioCanvasProps {
   /** ARIA label for the canvas (host-supplied, since Studio owns no i18n). */
   ariaLabel?: string;
+  /** Overrides the real canvas-based glyph rasterizer — for tests only. */
+  glyphRasterizer?: GlyphRasterizer;
 }
 
-export function StudioCanvas({ ariaLabel }: StudioCanvasProps) {
+export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasterizer }: StudioCanvasProps) {
   const { snapshot, store } = useEditorStore();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dragRef = useRef<DragState>(null);
   const rafRef = useRef<number | null>(null);
+  const polyRef = useRef<{ points: Array<[number, number]>; preview: Set<number> }>({ points: [], preview: new Set() });
+  const [textPopover, setTextPopover] = useState<{ gx: number; gy: number; left: number; top: number; value: string } | null>(null);
 
   const c = cellPx(snapshot.gridW);
   const { gridW, gridH } = snapshot;
@@ -81,6 +86,20 @@ export function StudioCanvas({ ariaLabel }: StudioCanvasProps) {
       drag.preview.forEach((i) => {
         const x = i % gridW, y = (i / gridW) | 0;
         g.beginPath(); g.arc(x * c + c / 2, y * c + c / 2, c * 0.36, 0, Math.PI * 2); g.fill();
+      });
+    }
+
+    if (polyRef.current.preview.size) {
+      g.fillStyle = 'rgba(196,61,0,0.85)';
+      polyRef.current.preview.forEach((i) => {
+        const x = i % gridW, y = (i / gridW) | 0;
+        g.beginPath(); g.arc(x * c + c / 2, y * c + c / 2, c * 0.36, 0, Math.PI * 2); g.fill();
+      });
+    }
+    if (polyRef.current.points.length) {
+      g.fillStyle = '#C43D00';
+      polyRef.current.points.forEach(([x, y]) => {
+        g.beginPath(); g.arc(x * c + c / 2, y * c + c / 2, c * 0.3, 0, Math.PI * 2); g.fill();
       });
     }
 
@@ -119,6 +138,58 @@ export function StudioCanvas({ ariaLabel }: StudioCanvasProps) {
   }, [c, gridW, gridH]);
 
   const strokeSizeFor = (tool: string) => (tool === 'eraser' ? snapshot.eraserSize : snapshot.strokeSize);
+
+  // ── poly: verbatim port of updatePolyPreview()/closePoly() ────────────────
+  const updatePolyPreview = useCallback(() => {
+    const s = new Set<number>();
+    const base = (px: number, py: number) => { if (inBounds(gridW, gridH, px, py)) s.add(cellIndex(gridW, px, py)); };
+    const add = makeBrush(base, snapshot.strokeSize);
+    const pts = polyRef.current.points;
+    for (let i = 0; i + 1 < pts.length; i++) line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], add);
+    pts.forEach(([x, y]) => add(x, y));
+    polyRef.current.preview = s;
+    scheduleDragRedraw();
+  }, [gridW, gridH, snapshot.strokeSize, scheduleDragRedraw]);
+
+  const closePoly = useCallback(() => {
+    const pts = polyRef.current.points;
+    if (pts.length < 2) { polyRef.current = { points: [], preview: new Set() }; scheduleDragRedraw(); return; }
+    store.mutateActiveCells((cells) => {
+      const base = (px: number, py: number) => { if (inBounds(gridW, gridH, px, py)) cells[cellIndex(gridW, px, py)] = 1; };
+      const add = makeBrush(base, snapshot.strokeSize);
+      for (let i = 0; i < pts.length; i++) {
+        const [x0, y0] = pts[i], [x1, y1] = pts[(i + 1) % pts.length];
+        line(x0, y0, x1, y1, add);
+      }
+    });
+    polyRef.current = { points: [], preview: new Set() };
+  }, [gridW, snapshot.strokeSize, store]);
+
+  const cancelPoly = useCallback(() => {
+    polyRef.current = { points: [], preview: new Set() };
+    scheduleDragRedraw();
+  }, [scheduleDragRedraw]);
+
+  useEffect(() => {
+    if (snapshot.tool !== 'poly') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && polyRef.current.points.length) { e.preventDefault(); closePoly(); }
+      else if (e.key === 'Escape' && polyRef.current.points.length) { e.preventDefault(); cancelPoly(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [snapshot.tool, closePoly, cancelPoly]);
+
+  // ── text: minimal inline popover, commits via stampTextLayout ─────────────
+  const commitText = useCallback(() => {
+    if (!textPopover) return;
+    const value = textPopover.value;
+    setTextPopover(null);
+    if (!value.trim()) return;
+    store.mutateActiveCells((cells) => {
+      stampTextLayout(cells, gridW, gridH, value, textPopover.gx, textPopover.gy, {}, glyphRasterizer);
+    });
+  }, [textPopover, gridW, gridH, store, glyphRasterizer]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (e.button !== 0) return;
@@ -160,8 +231,20 @@ export function StudioCanvas({ ariaLabel }: StudioCanvasProps) {
       store.setCursor(x, y);
       return;
     }
-    // 'poly' / 'text': deferred, see file header — tool is selectable but
-    // pointerdown here is intentionally a no-op until that sub-step lands.
+
+    if (tool === 'poly') {
+      polyRef.current.points.push([x, y]);
+      updatePolyPreview();
+      store.setCursor(x, y);
+      return;
+    }
+
+    if (tool === 'text') {
+      const rect = canvasRef.current!.getBoundingClientRect();
+      setTextPopover({ gx: x, gy: y, left: Math.min(e.clientX, rect.right - 40), top: Math.min(e.clientY + 12, (typeof window !== 'undefined' ? window.innerHeight : 600) - 60), value: '' });
+      store.setCursor(x, y);
+      return;
+    }
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -202,17 +285,38 @@ export function StudioCanvas({ ariaLabel }: StudioCanvasProps) {
     // 'sel' needs no commit — setSelRect was already called live during the drag.
   };
 
+  const onDoubleClick = () => { if (snapshot.tool === 'poly') closePoly(); };
+
   return (
-    <canvas
-      ref={canvasRef}
-      tabIndex={0}
-      role="img"
-      aria-label={ariaLabel}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      style={{ display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated' }}
-    />
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <canvas
+        ref={canvasRef}
+        tabIndex={0}
+        role="img"
+        aria-label={ariaLabel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onDoubleClick={onDoubleClick}
+        style={{ display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated' }}
+      />
+      {textPopover && (
+        <div style={{ position: 'fixed', left: textPopover.left, top: textPopover.top, zIndex: 50, background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 6 }}>
+          <input
+            autoFocus
+            value={textPopover.value}
+            onChange={(e) => setTextPopover({ ...textPopover, value: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.preventDefault(); commitText(); }
+              else if (e.key === 'Escape') { e.preventDefault(); setTextPopover(null); }
+            }}
+            onBlur={commitText}
+            aria-label="Tactile text"
+            style={{ font: 'inherit' }}
+          />
+        </div>
+      )}
+    </div>
   );
 }

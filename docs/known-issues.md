@@ -37,23 +37,43 @@ Net effect: of the three originally-deferred items, liblouis is now genuinely, f
 
 `vendor/tw/dotpad.js`의 `DP.onKey(fn)`은 슬롯이 하나뿐이라 마지막에 등록한 핸들러만 유효하며, `_vis` 플래그로 보호되는 `visibilitychange` 리스너는 페이지 생애주기 동안 한 번만 등록되고 제거되지 않는다(싱글턴 수명과 일치하도록 설계됨). `src/device/dotpad/browser-adapter.ts`는 이 제약을 그대로 인정하고, 모듈 스코프에서 "현재 어떤 어댑터 인스턴스가 그 슬롯을 소유하는지"를 추적해 `dispose()`가 다른 살아있는 인스턴스의 등록을 절대 지우지 않도록만 보장한다 — 싱글턴 자체의 설계를 바꾸지 않는다.
 
-## 5. Phase 5 scope note — reusable React editor (partial, by design)
+## 5. Phase 5 scope note — reusable React editor
 
-Phase 5 (`feat(studio-ui): compose reusable React editor`) delivers a real, working, tested React editor shell: `EditorStore` (framework-agnostic, wraps Phase 2/3 core+codecs), `TactileStudioEditor`/`TactileStudioProvider`/hooks, `StudioCanvas` (verbatim-ported `drawMain`/`evCell` pixel math and pointer wiring), a minimal `Toolbar`, and a development shell. Per the migration principle "do not perform a one-shot rewrite" / "work in small, reviewable phases," the following are deliberately **not yet** ported and are tracked for a Phase 5 continuation:
+### Phase 5 initial pass
 
-- Full Figma icon set, pen/eraser thickness dropdowns, shape-tool flyout menu
-- Page panel (thumbnails, drag-reorder, Add/Delete/Duplicate UI)
-- Inspector (device panel, cleanup/thicken/denoise controls, page metadata, narration/braille fields)
-- Dialogs (import wizard, export menu, confirm dialogs)
-- DotPad panel UI (connect button, live-preview toggle, test output)
+Delivered a real, tested React editor shell: `EditorStore` (framework-agnostic, wraps Phase 2/3 core+codecs), `TactileStudioEditor`/`TactileStudioProvider`/hooks, `StudioCanvas` (verbatim-ported `drawMain`/`evCell` pixel math and pointer wiring), a minimal `Toolbar`, and a development shell.
+
+### Phase 5 continuation — icons, panels, dialogs, poly/text, DotPad
+
+Closed most of the initial pass's deferred list:
+
+- **Icon set**: `src/ui/icons/icons.ts` is a verbatim copy of the monolith's `ICONS` map (SVG path data), rendered via `<Icon>`/`<IconButton>`. No `undo`/`redo` icon exists in that map (the monolith's `aUndo`/`aRedo` announcements exist but no path data was found for them, likely Tabler Icons per the target stack, not yet sourced) — those two buttons use plain glyphs (↶ ↷), documented in code rather than inventing icon paths.
+- **Pen/eraser thickness**: a plain segmented 1/2/3 control (not the dot-swatch dropdown popover) wired to `store.setStrokeSize`/`setEraserSize`.
+- **Clear/invert/flip**: wired to the already-ported Phase 2 `core/grid` functions via new `EditorStore` commands (`clearAll`/`invertAll`/`flipHoriz`/`flipVert`).
+- **Page panel**: list + Add/Delete/Move-up/Move-down + click-to-switch, via a new `goToPage` core operation (verbatim port of the monolith's `goPage`, which clears history on every page switch — confirmed by direct source read) and `EditorStore.setActivePage`. No page-duplication feature exists in the monolith (confirmed by search) — none was invented.
+- **Inspector**: page metadata (desc/narration) as plain autosave text fields (`EditorStore.setPageDesc`/`setPageNarration`), and cleanup (thicken/denoise) wired through a new `codecs/grid-fx` module (injected `TW.thickenBits`/`denoiseBits`, never reimplemented) plus a new host-facing `GridFxService`.
+- **New `codecs/quality`**: `convQuality`/`banaPrintCheck` extracted as their own pure module (previously only inline in the Phase-1-fix commit's `index.html`), parity-tested against the live shipped methods. Needed by the export dialog's Library Asset v1 `graphicFeatures`.
+- **Poly tool**: full pointer-gesture wiring — verbatim port of `updatePolyPreview()`/`closePoly()` (click adds a point, Enter or double-click closes the loop as line-per-edge, Escape cancels), confirmed against the monolith to be an *outline* tool (no fill rasterizer needed).
+- **Text tool**: `codecs/tactile-text`'s layout is now wired to a real browser canvas glyph rasterizer (`src/ui/canvas/browser-glyph-rasterizer.ts`, verbatim port of `stampText`'s `renderGlyph` closure) via a minimal inline popover. Injectable for tests (jsdom has no real canvas — same documented limitation as before); parity-tested with a synthetic rasterizer proving the layout math and store wiring.
+- **Import dialog**: file picker → `parseLibraryAssetPages` (Phase 3 codec) → `EditorStore.loadPages` (new command, mirrors `importAssetFile`'s page-replacement step: clean undo checkpoint, `pageAudio`/`pageVectors` reset).
+- **Export menu**: DTMS and Library Asset v1 export wired to the Phase 3 codecs + the new quality codec; produces JSON strings, leaves the actual file-download trigger (`Blob`/`URL.createObjectURL`) as a small UI-layer convenience, guarded for environments without it.
+- **DotPad panel**: connect/disconnect/status/send, wired to the Phase 4 `TactileDisplayAdapter` (works with the real browser adapter or the mock adapter identically).
+- **Keyboard shortcuts**: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z (and Ctrl+Y) redo, ignoring text-input targets.
+
+### Still deferred (documented, not silently dropped)
+
+- Shape-tool flyout grouping (line/rect/ellipse/poly under one button), the thickness dropdown's dot-swatch styling
+- Page thumbnails and drag-and-drop reordering (Move up/down buttons only)
+- Confirm-before-delete for pages (deletes immediately; no `ConfirmDialog` wired to it yet, though the component exists)
+- Braille "Apply" conversion + preview (desc/narration are plain autosave text; no `BrailleService` wired)
+- Image file import (needs `ImageProcessingService` wiring + crop-selection UI)
+- SVG/PNG export (PNG needs a real `canvas.toBlob`; SVG needs a `bitsToSVG` port)
 - Corpus/command-panel search UI ("명령어로 만들기")
-- `poly` and `text` tool pointer-gesture wiring (selectable in the toolbar, but `StudioCanvas.onPointerDown` intentionally no-ops for them — see the file's header comment)
-- Accessibility label wiring beyond `aria-label`/`aria-pressed` on the buttons that do exist (tooltips, live-region announcements, focus trapping, keyboard shortcuts)
+- Full Figma-exact spacing/typography, custom tooltip positioning, focus-trap dialogs, live-region announcements beyond the DotPad status line's `aria-live`
+- Confirm dialog is built (`ConfirmDialog.tsx`) but not yet wired into any destructive action
 
-None of this is a regression — the original monolith (`index.html`) is untouched and continues to ship with all of the above intact. The React layer is new, additive, and does not yet replace it in the shipped app.
+None of this is a regression — `index.html` is untouched and continues to ship with all of the above intact.
 
 ### Testing note (jsdom limitation, documented not silently worked around)
 
-`jsdom` (this project's test environment) implements neither `CanvasRenderingContext2D` nor `PointerEvent`. Tests handle this honestly:
-- `StudioCanvas`'s `draw()` no-ops when `getContext('2d')` returns `null` — tests verify wiring (pointer → store mutations, one undo entry per stroke) rather than pixel output, consistent with how the Phase 3 glyph-rasterizer seam was handled.
-- Pointer-event tests construct a `MouseEvent` with the `pointerdown`/`pointermove`/`pointerup` type strings (React dispatches by type string, not by `instanceof PointerEvent`) since `window.PointerEvent` doesn't exist under jsdom — confirmed via `'PointerEvent' in window` → `false`.
+`jsdom` implements neither `CanvasRenderingContext2D` nor `PointerEvent`. Tests handle this honestly: `StudioCanvas`'s `draw()` no-ops on a null context (tests verify wiring, not pixels); pointer tests construct `MouseEvent`s with pointer-event type strings (React dispatches by type, not `instanceof`); the text tool's tests inject a synthetic `GlyphRasterizer` rather than exercising the real canvas-based one.

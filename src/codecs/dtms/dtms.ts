@@ -56,6 +56,14 @@ export function cellsToBits(cells: CellGrid, w: number, h: number): boolean[][] 
   return bits;
 }
 
+/** bits[row][col] → flat Uint8Array(w*h) (verbatim port of the monolith's
+ *  bitsToCells bridge — the inverse of cellsToBits above). */
+export function bitsToCells(bits: boolean[][], w: number, h: number): CellGrid {
+  const out = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (bits[y] && bits[y][x]) out[y * w + x] = 1;
+  return out;
+}
+
 /** Encode via the injected vendor encoder — thin orchestration only, no
  *  reimplementation of the packing algorithm. */
 export function encodeDtmsHex(encodeBits: TwEncodeBits, cells: CellGrid, w: number, h: number): string {

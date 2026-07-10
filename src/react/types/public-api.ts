@@ -37,11 +37,28 @@ export interface ImageProcessingService {
   ): { cells: Uint8Array; removedDots: number };
 }
 
+/** Host-provided grid post-processing (thicken/denoise). Wraps the vendor
+ *  TW.thickenBits/denoiseBits functions — Studio never reimplements them,
+ *  it only orchestrates via codecs/grid-fx. */
+export interface GridFxService {
+  thicken(cells: Uint8Array, w: number, h: number, level: number): Uint8Array;
+  denoise(cells: Uint8Array, w: number, h: number): Uint8Array;
+}
+
+/** Host-provided DTMS pin encoding (the real vendor TW.encodeBits — Studio
+ *  never imports or reimplements it, see codecs/dtms). Required for DotPad
+ *  "send" and DTMS/Library-Asset-v1 export to function; the editor renders
+ *  fine without it, those two features are simply unavailable. Same shape
+ *  as codecs/dtms's TwEncodeBits (bits[row][col], not a cells buffer). */
+export type EncodeBitsFn = (bits: boolean[][], cols: number, rows: number) => string;
+
 export interface StudioServices {
   storage: StudioStorageAdapter;
   tactileDisplay?: TactileDisplayAdapter;
   braille?: BrailleService;
   imageProcessing?: ImageProcessingService;
+  gridFx?: GridFxService;
+  encodeBits?: EncodeBitsFn;
 }
 
 /** Every user-facing string the editor needs. The host owns language

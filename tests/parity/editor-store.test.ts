@@ -102,6 +102,80 @@ describe('EditorStore — one-shot mutations (fill/clear/invert/flip/shape commi
   });
 });
 
+describe('EditorStore — setActivePage (goPage port)', () => {
+  it('switches pages, clamps out-of-range, no-ops on the current page, and clears history', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.addPage();
+    store.addPage();
+    store.mutateActiveCells((cells) => { cells[0] = 1; });
+    expect(store.getSnapshot().canUndo).toBe(true);
+
+    store.setActivePage(0);
+    expect(store.getSnapshot().pageIndex).toBe(0);
+    expect(store.getSnapshot().canUndo).toBe(false); // page switch clears history
+
+    store.setActivePage(99); // clamped
+    expect(store.getSnapshot().pageIndex).toBe(2);
+
+    const calls: number[] = [];
+    store.subscribe(() => calls.push(1));
+    store.setActivePage(2); // no-op, already there
+    expect(calls.length).toBe(0);
+  });
+});
+
+describe('EditorStore — pure grid ops (clearAll/invertAll/flipHoriz/flipVert)', () => {
+  it('each op snapshots, replaces cells, and is undoable', () => {
+    const store = new EditorStore(createDocument('doc', 4, 4));
+    store.mutateActiveCells((cells) => { cells[0] = 1; cells[1] = 1; });
+
+    store.invertAll();
+    expect(store.getActiveCells()[0]).toBe(0);
+    expect(store.getActiveCells()[2]).toBe(1);
+    store.undo();
+    expect(store.getActiveCells()[0]).toBe(1);
+
+    store.clearAll();
+    expect(Array.from(store.getActiveCells()).every((v) => v === 0)).toBe(true);
+    store.undo();
+    expect(store.getActiveCells()[0]).toBe(1);
+  });
+
+  it('flipHoriz/flipVert match the Phase 2 core functions directly', () => {
+    const store = new EditorStore(createDocument('doc', 4, 4));
+    store.mutateActiveCells((cells) => { cells[0] = 1; }); // (0,0)
+    store.flipHoriz();
+    expect(store.getActiveCells()[3]).toBe(1); // (3,0)
+  });
+});
+
+describe('EditorStore — grid-fx (injected thicken/denoise)', () => {
+  it('applyGridFxOp wires an injected pure fn through the standard transaction', () => {
+    const store = new EditorStore(createDocument('doc', 4, 4));
+    const calls: number[] = [];
+    store.subscribe(() => calls.push(1));
+    store.applyGridFxOp((cells) => { const n = cells.slice(); n[5] = 1; return n; });
+    expect(calls.length).toBe(1);
+    expect(store.getActiveCells()[5]).toBe(1);
+    expect(store.getSnapshot().canUndo).toBe(true);
+  });
+});
+
+describe('EditorStore — page metadata (desc/narration autosave)', () => {
+  it('setPageDesc/setPageNarration store independent per-page text and mark dirty', () => {
+    const store = new EditorStore(createDocument('doc', 4, 4));
+    store.addPage();
+    store.setActivePage(0);
+    store.setPageDesc('page one desc');
+    store.setActivePage(1);
+    expect(store.getPageAudio(1).desc).toBeUndefined();
+    store.setPageNarration('page two narration');
+    expect(store.getPageAudio(0).desc).toBe('page one desc');
+    expect(store.getPageAudio(1).narration).toBe('page two narration');
+    expect(store.getSnapshot().dirty).toBe(true);
+  });
+});
+
 describe('EditorStore — page operations', () => {
   it('addPage/deletePageAt/movePage update pageCount/pageIndex and mark dirty', () => {
     const store = new EditorStore(createDocument('doc', 10, 10));

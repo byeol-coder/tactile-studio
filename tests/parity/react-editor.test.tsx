@@ -63,8 +63,9 @@ describe('TactileStudioEditor — mount/unmount safety', () => {
     expect(() => unmount()).not.toThrow();
   });
 
-  it('does not register duplicate DOM listeners across repeated mount/unmount cycles', () => {
+  it('registers exactly one keydown listener per mount and removes it on unmount (no leak/duplication across remounts)', () => {
     const addSpy = vi.spyOn(document, 'addEventListener');
+    const removeSpy = vi.spyOn(document, 'removeEventListener');
     for (let i = 0; i < 3; i++) {
       const { unmount } = render(
         <TactileStudioEditor
@@ -72,14 +73,17 @@ describe('TactileStudioEditor — mount/unmount safety', () => {
           services={{ storage: createMemoryStorageAdapter() }}
         />,
       );
+      // exactly one NEW keydown listener registered by this mount (useKeyboardShortcuts)
+      const keydownAdds = addSpy.mock.calls.filter((c) => c[0] === 'keydown');
+      expect(keydownAdds.length).toBe(i + 1);
       unmount();
+      const keydownRemoves = removeSpy.mock.calls.filter((c) => c[0] === 'keydown');
+      expect(keydownRemoves.length).toBe(i + 1);
+      // the listener function removed must be the exact same one that was added for THIS mount
+      expect(removeSpy.mock.calls[i][1]).toBe(addSpy.mock.calls.filter((c) => c[0] === 'keydown')[i][1]);
     }
-    // TactileStudioEditor itself registers no document-level listeners in
-    // this pass (StudioCanvas uses only React's own pointer-event props) —
-    // this test pins that invariant so a future change that adds one is
-    // forced to also add matching cleanup.
-    expect(addSpy).not.toHaveBeenCalled();
     addSpy.mockRestore();
+    removeSpy.mockRestore();
   });
 
   it('creates a fresh EditorStore per mount (no state leaks across remounts)', () => {
@@ -178,5 +182,163 @@ describe('StudioCanvas — pointer-to-store wiring (pen tool)', () => {
     const cells = capturedStore!.getActiveCells();
     expect(Array.from(cells).every((v) => v === 1)).toBe(true); // whole empty grid floods to 1
     expect((capturedStore as any).history.undoStack.length).toBe(1);
+  });
+});
+
+describe('StudioCanvas — poly tool wiring', () => {
+  it('clicking points then double-clicking closes the loop as one undo entry', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Capture />
+        <Toolbar />
+        <StudioCanvas />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Polygon' }));
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
+
+    firePointerEvent(canvas, 'pointerdown', { clientX: 20, clientY: 20, pointerId: 1 }); // (1,1)
+    firePointerEvent(canvas, 'pointerdown', { clientX: 100, clientY: 20, pointerId: 1 }); // (5,1)
+    firePointerEvent(canvas, 'pointerdown', { clientX: 100, clientY: 100, pointerId: 1 }); // (5,5)
+    fireEvent.doubleClick(canvas);
+
+    expect(capturedStore!.getSnapshot().canUndo).toBe(true);
+    expect((capturedStore as any).history.undoStack.length).toBe(1);
+    const cells = capturedStore!.getActiveCells();
+    expect(cells[1 * 10 + 1]).toBe(1); // a vertex is always plotted
+    expect(cells[1 * 10 + 5]).toBe(1);
+  });
+
+  it('Escape cancels an in-progress polygon without mutating the document', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Capture />
+        <Toolbar />
+        <StudioCanvas />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Polygon' }));
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
+    firePointerEvent(canvas, 'pointerdown', { clientX: 20, clientY: 20, pointerId: 1 });
+    firePointerEvent(canvas, 'pointerdown', { clientX: 100, clientY: 100, pointerId: 1 });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(capturedStore!.getSnapshot().canUndo).toBe(false);
+  });
+});
+
+describe('StudioCanvas — text tool wiring (synthetic glyph rasterizer)', () => {
+  it('opens a popover on click, commits via stampTextLayout on Enter', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const block = { data: new Uint8Array(9).fill(1), w: 3, h: 3 };
+
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 20, 20)}>
+        <Capture />
+        <Toolbar />
+        <StudioCanvas glyphRasterizer={() => block} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Tactile Text' }));
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 400, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 400, configurable: true });
+    firePointerEvent(canvas, 'pointerdown', { clientX: 40, clientY: 40, pointerId: 1 }); // (2,2)
+
+    const input = screen.getByRole('textbox', { name: 'Tactile text' });
+    fireEvent.change(input, { target: { value: 'A' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(capturedStore!.getSnapshot().canUndo).toBe(true);
+    const cells = capturedStore!.getActiveCells();
+    expect(cells[2 * 20 + 2]).toBe(1); // top-left of the synthetic 3x3 glyph block at (2,2)
+  });
+
+  it('Escape closes the popover without committing anything', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 20, 20)}>
+        <Capture />
+        <Toolbar />
+        <StudioCanvas glyphRasterizer={() => ({ data: new Uint8Array(1).fill(1), w: 1, h: 1 })} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Tactile Text' }));
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 400, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 400, configurable: true });
+    firePointerEvent(canvas, 'pointerdown', { clientX: 40, clientY: 40, pointerId: 1 });
+    const input = screen.getByRole('textbox', { name: 'Tactile text' });
+    fireEvent.change(input, { target: { value: 'X' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(screen.queryByRole('textbox', { name: 'Tactile text' })).toBeNull();
+    expect(capturedStore!.getSnapshot().canUndo).toBe(false);
+  });
+});
+
+describe('TactileStudioEditor — full composition with all optional services', () => {
+  it('renders PagePanel, Inspector, and DotPadPanel when services are provided, and they are wired to the same store', () => {
+    const storage = createMemoryStorageAdapter();
+    const tactileDisplay = createMockDotPadAdapter();
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage, tactileDisplay, encodeBits: () => '00'.repeat(150) }}
+      />,
+    );
+
+    // PagePanel: add a page via its own "+" button, Toolbar/PagePanel share one store
+    fireEvent.click(screen.getByRole('button', { name: 'Add page' }));
+    expect(screen.getByRole('button', { name: '2' })).toBeTruthy();
+
+    // Inspector: editing the description field updates the store (no crash, value reflected)
+    const descBox = screen.getByLabelText('Braille description') as HTMLTextAreaElement;
+    fireEvent.change(descBox, { target: { value: 'hello' } });
+    expect(descBox.value).toBe('hello');
+
+    // DotPadPanel: shows disconnected state initially, Connect button present
+    expect(screen.getByText(/not connected/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Connect' })).toBeTruthy();
+  });
+
+  it('renders without DotPadPanel/Inspector-gridFx when those services are omitted', () => {
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: createMemoryStorageAdapter() }}
+      />,
+    );
+    expect(screen.queryByRole('button', { name: 'Connect' })).toBeNull();
+    expect(screen.queryByText(/thinner/i)).toBeNull();
+  });
+
+  it('Ctrl+Z keyboard shortcut calls undo through the real DOM listener', () => {
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: createMemoryStorageAdapter() }}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Fill' }));
+    const canvas = document.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
+    firePointerEvent(canvas, 'pointerdown', { clientX: 100, clientY: 100, pointerId: 9 });
+
+    const undoBtn = screen.getByRole('button', { name: 'Undo' }) as HTMLButtonElement;
+    expect(undoBtn.disabled).toBe(false); // the flood created one undo entry
+
+    fireEvent.keyDown(document, { key: 'z', ctrlKey: true });
+    expect(undoBtn.disabled).toBe(true); // Ctrl+Z consumed that entry
   });
 });

@@ -5,4 +5,5 @@ export { useEditorStore } from './hooks/useEditorStore.js';
 export { useTool } from './hooks/useTool.js';
 export { useHistory } from './hooks/useHistory.js';
 export { usePages } from './hooks/usePages.js';
+export { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 export * from './types/public-api.js';

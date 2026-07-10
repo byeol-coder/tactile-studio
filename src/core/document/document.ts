@@ -92,3 +92,14 @@ export function setGrid(doc: StudioDocument, w: number, h: number): PageOpResult
   doc.grid = { w, h };
   return { changed: true, historyCleared: true };
 }
+
+/** monolith goPage(i): switch the active page. Clamps `i`, no-ops if
+ *  unchanged, ALWAYS clears history (unlike movePage, which preserves it —
+ *  page switching is a checkpoint, not a reversible edit). */
+export function goToPage(doc: StudioDocument, i: number): PageOpResult {
+  const n = doc.pages.length;
+  const clamped = Math.max(0, Math.min(n - 1, i));
+  if (clamped === doc.pageIndex) return { changed: false, historyCleared: false };
+  doc.pageIndex = clamped;
+  return { changed: true, historyCleared: true };
+}
