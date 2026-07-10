@@ -72,7 +72,19 @@ Closed most of the initial pass's deferred list:
 - Full Figma-exact spacing/typography, custom tooltip positioning, focus-trap dialogs, live-region announcements beyond the DotPad status line's `aria-live`
 - Confirm dialog is built (`ConfirmDialog.tsx`) but not yet wired into any destructive action
 
-None of this is a regression — `index.html` is untouched and continues to ship with all of the above intact.
+## 6. Phase 6 — product-ownership audit (`refactor(studio-integration): remove product ownership`)
+
+Phase 6 asked to remove Studio's ownership of routing, authentication, Supabase, and internal language switching, and to verify embedding inside a parent React route. Since the React layer (Phases 5) was built from scratch under those exact constraints from the start, there was nothing to *remove* — this phase is an **audit**, codified as a regression-guarding test suite (`tests/parity/product-ownership.test.tsx`, 9 tests) rather than a code change:
+
+- **Grep across `src/`** for `react-router-dom`/`HashRouter`/`BrowserRouter`/`useNavigate`/`Supabase`/`supabase` found only comments stating what is *not* done (e.g. "no Supabase import") — zero actual imports or usages. `package.json` has no router or Supabase dependency.
+- **No authentication code**: no login/logout/session/token handling anywhere; the one `session` string match is an unrelated comment about localStorage being "session-only" (ephemeral), not user sessions.
+- **No internal i18n**: grep for `navigator.language`/language-keyed `localStorage` found only comments; `Toolbar`'s labels come entirely from the `labels` prop with English fallbacks (see Phase 5 continuation).
+- **Embedding test**: `TactileStudioEditor` mounts correctly as a plain child of a `HostRoute` stand-in (simulating a Tactile World `react-router-dom` route), renders no navigation of its own, and never calls `history.pushState` or reads `navigator.language`.
+- **Host-configurable surface confirmed by test**: `theme` values land as CSS custom properties on the root element; `labels` override English defaults; `onChange`/`onDirtyChange` fire on edits; the editor works with only a `StudioStorageAdapter` (no `tactileDisplay`/`braille`/`imageProcessing`/`gridFx` required).
+
+### New in this phase: a real Vite 5.4 dev server for the development shell
+
+Added `vite.config.ts` (rooted at `dev/`, deliberately isolated from the repo-root vanilla `index.html`) plus `dev/index.html`/`dev/main.tsx` bootstrapping `<DevApp>`. This is a genuinely stronger verification than `tsc --noEmit` alone: `vite build` successfully bundles the full dependency graph (core → codecs → device → storage → react → ui → app/development-shell), 60 modules, and `vite` (dev server) was smoke-tested serving real HMR-wrapped modules over HTTP. The output bundle contains zero references to `DTMS_CORPUS`/`liblouisBuild`/`DotPadSDK` (confirmed by grep) — proving the new React layer pulls in none of the vanilla app's vendor/corpus code. `dist/` is gitignored; this is not yet a packaging config for distributing `<TactileStudioEditor>` itself (no library-mode build/externals) — that remains Phase 7 (or later) work.
 
 ### Testing note (jsdom limitation, documented not silently worked around)
 

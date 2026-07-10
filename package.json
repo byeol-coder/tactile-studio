@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Tactile Studio — migrating from a buildless x-dc CDN runtime to a React + Vite TypeScript monorepo (core/codecs/device/storage extracted; React editor shell in progress)",
+  "description": "Tactile Studio \u2014 migrating from a buildless x-dc CDN runtime to a React + Vite TypeScript monorepo (core/codecs/device/storage extracted; React editor shell in progress)",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -13,7 +13,9 @@
     "check:contrast": "node scripts/check-contrast.mjs",
     "capture:core-baseline": "node tools/capture-core-baseline.mjs",
     "capture:codecs-baseline": "node tools/capture-codecs-baseline.mjs",
-    "capture:codecs-b-baseline": "node --experimental-strip-types tools/capture-codecs-b-baseline.mjs"
+    "capture:codecs-b-baseline": "node --experimental-strip-types tools/capture-codecs-b-baseline.mjs",
+    "dev": "vite",
+    "build:dev-shell": "vite build"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
@@ -25,6 +27,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "~5.6",
+    "vite": "^5.4.21",
     "vitest": "^2.1.9"
   }
 }
