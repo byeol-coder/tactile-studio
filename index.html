@@ -4322,7 +4322,7 @@ class Component extends DCLogic {
       const strokeMenuOpenHere = hasStrokeMenu && sel && !!(st.railMenu && st.railMenu.kind === 'stroke');
       return {
         id, label: nm(id), key: keys[id], selected: sel, iconEl: this.icon(id, 21),
-        aria: nm(id) + ' (' + keys[id] + ')',
+        aria: keys[id] ? nm(id) + ' (' + keys[id] + ')' : nm(id),
         pick: hasStrokeMenu ? (e => this.pickToolAndStroke(id, e)) : (() => this.pickTool(id)),
         onEnter: e => this.showTip(nm(id), keys[id], e),
         sel: sel ? '1' : '0',
