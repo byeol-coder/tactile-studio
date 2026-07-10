@@ -12,14 +12,14 @@
 //   - host-configurable services/labels/theme via props
 //   - typed public API
 //
-// STILL DEFERRED (docs/known-issues.md #5): shape-tool flyout grouping,
-// thickness-dropdown popover styling, full Figma spacing/tooltips,
-// focus-trap dialogs, live-region announcements beyond aria-live on the
-// DotPad status line, confirm-before-delete for pages (ConfirmDialog exists
-// but isn't wired to page deletion yet), image-file import.
+// STILL DEFERRED (docs/known-issues.md #5): shape-tool flyout grouping
+// styling polish beyond the functional flyout now in place, full Figma-exact
+// spacing/typography, custom tooltip positioning (native title="" tooltips
+// used instead).
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { TactileStudioProvider } from './TactileStudioProvider.js';
+import { useEditorStore } from './hooks/useEditorStore.js';
 import { StudioCanvas } from '../ui/canvas/StudioCanvas.js';
 import { Toolbar } from '../ui/toolbar/Toolbar.js';
 import { PagePanel } from '../ui/panels/PagePanel.js';
@@ -28,8 +28,9 @@ import { DotPadPanel } from '../ui/dotpad/DotPadPanel.js';
 import { ImportDialog } from '../ui/dialogs/ImportDialog.js';
 import { ExportMenu } from '../ui/dialogs/ExportMenu.js';
 import { CorpusSearchPanel } from '../ui/corpus/CorpusSearchPanel.js';
+import { LiveRegion } from '../ui/live-region/LiveRegion.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
-import type { TactileStudioEditorProps } from './types/public-api.js';
+import type { TactileStudioEditorProps, StudioErrorLike } from './types/public-api.js';
 
 function themeStyle(theme?: Record<string, string | undefined>): React.CSSProperties {
   if (!theme) return {};
@@ -54,17 +55,58 @@ function triggerDownload(result: import('../ui/dialogs/ExportMenu.js').ExportRes
   URL.revokeObjectURL(url);
 }
 
+interface EditorBodyProps extends Pick<TactileStudioEditorProps, 'services' | 'labels'> {
+  onSave?: TactileStudioEditorProps['onSave'];
+  onError?: TactileStudioEditorProps['onError'];
+}
+
 /** Internal — must render inside TactileStudioProvider to reach the store. */
-function EditorBody({ services, labels }: Pick<TactileStudioEditorProps, 'services' | 'labels'>) {
+function EditorBody({ services, labels, onSave, onError }: EditorBodyProps) {
   useKeyboardShortcuts();
+  const { store } = useEditorStore();
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const reportError = (err: StudioErrorLike) => { onError?.(err); };
+
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const doc = store.getDocument();
+      const result = await services.storage.save(doc);
+      if (!result.ok) throw new Error(result.error || 'Save failed');
+      store.markSaved();
+      store.announce((labels?.saved as string) || 'Saved');
+      await onSave?.(doc);
+    } catch (e: any) {
+      reportError({ code: 'save-failed', message: e?.message || 'Save failed', cause: e });
+      store.announce((labels?.saveFailed as string) || 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Ctrl/Cmd+S triggers save, separate from useKeyboardShortcuts (undo/redo
+  // only) since save needs access to services/labels this hook doesn't have.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); handleSave(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.storage, labels]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <Toolbar labels={labels} />
         <span style={{ flex: 1 }} />
+        <button type="button" disabled={saving} onClick={handleSave}>{saving ? ((labels?.saving as string) || 'Saving…') : ((labels?.save as string) || 'Save')}</button>
         <button type="button" onClick={() => setImportOpen(true)}>{(labels?.impAssetTitle as string) || 'Import'}</button>
         <div style={{ position: 'relative' }}>
           <button type="button" onClick={() => setExportOpen((v) => !v)}>{(labels?.tExport as string) || 'Export'}</button>
@@ -89,11 +131,15 @@ function EditorBody({ services, labels }: Pick<TactileStudioEditorProps, 'servic
         <StudioCanvas ariaLabel={(labels?.canvasAria as string) || 'Tactile drawing canvas'} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Inspector labels={labels} gridFx={services.gridFx} braille={services.braille} />
-          {services.tactileDisplay && <DotPadPanel adapter={services.tactileDisplay} encodeBits={services.encodeBits} labels={labels} />}
+          {services.tactileDisplay && (
+            <DotPadPanel adapter={services.tactileDisplay} encodeBits={services.encodeBits} labels={labels} onError={reportError} />
+          )}
         </div>
       </div>
 
-      <ImportDialog open={importOpen} labels={labels} onClose={() => setImportOpen(false)} />
+      <LiveRegion />
+
+      <ImportDialog open={importOpen} labels={labels} onClose={() => setImportOpen(false)} imageProcessing={services.imageProcessing} />
     </div>
   );
 }
@@ -101,18 +147,10 @@ function EditorBody({ services, labels }: Pick<TactileStudioEditorProps, 'servic
 export function TactileStudioEditor({
   initialDocument, services, labels, theme, onChange, onSave, onDirtyChange, onError, className,
 }: TactileStudioEditorProps) {
-  // onSave/onError are host callbacks the editor doesn't call automatically
-  // yet (no save button/keyboard shortcut wired in this pass — see the
-  // Phase 5 scope note); kept as refs so a host can pass fresh closures every
-  // render without this component needing to resubscribe anything.
-  const onSaveRef = useRef(onSave);
-  const onErrorRef = useRef(onError);
-  useEffect(() => { onSaveRef.current = onSave; onErrorRef.current = onError; }, [onSave, onError]);
-
   return (
     <div className={className} style={{ ...themeStyle(theme), display: 'flex', flexDirection: 'column', gap: 8 }}>
       <TactileStudioProvider initialDocument={initialDocument} onChange={onChange} onDirtyChange={onDirtyChange}>
-        <EditorBody services={services} labels={labels} />
+        <EditorBody services={services} labels={labels} onSave={onSave} onError={onError} />
       </TactileStudioProvider>
     </div>
   );

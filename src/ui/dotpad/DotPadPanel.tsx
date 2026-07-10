@@ -11,15 +11,19 @@ import React, { useEffect, useState, useCallback } from 'react';
 import type { TactileDisplayAdapter, ConnectionState } from '../../device/dotpad/types.js';
 import { encodeDtmsHex, type TwEncodeBits } from '../../codecs/dtms/dtms.js';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
-import type { StudioLabels } from '../../react/types/public-api.js';
+import type { StudioLabels, StudioErrorLike } from '../../react/types/public-api.js';
 
 export interface DotPadPanelProps {
   adapter: TactileDisplayAdapter;
   encodeBits?: TwEncodeBits;
   labels?: StudioLabels;
+  /** Also reported to the host's top-level onError, in addition to the
+   *  inline error text below (which stays regardless, for sighted users
+   *  looking at the panel itself). */
+  onError?(error: StudioErrorLike): void;
 }
 
-export function DotPadPanel({ adapter, encodeBits, labels }: DotPadPanelProps) {
+export function DotPadPanel({ adapter, encodeBits, labels, onError }: DotPadPanelProps) {
   const { snapshot, store } = useEditorStore();
   const [state, setState] = useState<ConnectionState>(adapter.getConnectionState());
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +37,12 @@ export function DotPadPanel({ adapter, encodeBits, labels }: DotPadPanelProps) {
 
   const connect = async () => {
     setError(null);
-    try { await adapter.connect(); } catch (e: any) { setError(e?.message || 'Connection failed'); }
+    try {
+      await adapter.connect();
+    } catch (e: any) {
+      setError(e?.message || 'Connection failed');
+      onError?.({ code: e?.code || 'connect-failed', message: e?.message || 'Connection failed', cause: e });
+    }
     refresh();
   };
   const disconnect = async () => { await adapter.disconnect(); refresh(); };
@@ -46,6 +55,7 @@ export function DotPadPanel({ adapter, encodeBits, labels }: DotPadPanelProps) {
       await adapter.display(hex);
     } catch (e: any) {
       setError(e?.message || 'Send failed');
+      onError?.({ code: e?.code || 'send-failed', message: e?.message || 'Send failed', cause: e });
     }
   };
 

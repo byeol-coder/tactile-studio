@@ -1,5 +1,6 @@
 // src/ui/dialogs/ConfirmDialog.tsx
 import React, { useEffect, useRef } from 'react';
+import { useFocusTrap } from './useFocusTrap.js';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -13,10 +14,7 @@ export interface ConfirmDialogProps {
 
 export function ConfirmDialog({ open, title, message, confirmLabel = 'OK', cancelLabel = 'Cancel', onConfirm, onCancel }: ConfirmDialogProps) {
   const confirmRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (open) confirmRef.current?.focus();
-  }, [open]);
+  const containerRef = useFocusTrap<HTMLDivElement>(open, confirmRef);
 
   useEffect(() => {
     if (!open) return;
@@ -29,7 +27,7 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'OK', cance
 
   return (
     <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'grid', placeItems: 'center', zIndex: 100 }}>
-      <div role="alertdialog" aria-modal="true" aria-label={title} style={{ background: 'var(--ts-bg, #FFFFFF)', borderRadius: 12, padding: 20, minWidth: 280 }}>
+      <div ref={containerRef} role="alertdialog" aria-modal="true" aria-label={title} style={{ background: 'var(--ts-bg, #FFFFFF)', borderRadius: 12, padding: 20, minWidth: 280 }}>
         <div style={{ fontWeight: 600, marginBottom: 8 }}>{title}</div>
         {message && <div style={{ fontSize: 13, marginBottom: 16 }}>{message}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>

@@ -67,3 +67,37 @@ describe('featureCounts parity', () => {
     expect(featureCounts(corpus)).toEqual(shipped.featureCounts());
   });
 });
+
+describe('corpusCtxFor parity (multi-page navigation context)', () => {
+  it('matches the shipped corpusCtxFor exactly, incl. null for single-page/unknown records', async () => {
+    const { loadStudioClass, makeInstance } = await import('../../tools/harness.mjs');
+    const { corpusCtxFor } = await import('../../src/codecs/corpus/corpus-search.js');
+    const { Component } = loadStudioClass({ corpus });
+    const proto = Component.prototype;
+    const inst = makeInstance(Component);
+
+    const multiPageRecord = corpus.find((r: any) => Array.isArray(r.pages) && r.pages.length > 1)!;
+    expect(multiPageRecord).toBeTruthy();
+
+    const cases = [
+      { id: multiPageRecord.id, title: multiPageRecord.title, pageIndex: 1 },
+      { id: multiPageRecord.id, title: multiPageRecord.title }, // no pageIndex -> defaults to 0
+      { id: multiPageRecord.id, title: multiPageRecord.title, pageIndex: 999 }, // out of range -> 0
+      { id: 'not-a-real-id', title: 'nope' },
+    ];
+    for (const c of cases) {
+      const extracted = corpusCtxFor(corpus, c, 'some query');
+      inst.state = { cmdPrompt: 'some query' };
+      const live = proto.corpusCtxFor.call(inst, c);
+      expect(extracted).toEqual(live);
+    }
+
+    const singlePageRecord = corpus.find((r: any) => Array.isArray(r.pages) && r.pages.length === 1);
+    if (singlePageRecord) {
+      const c = { id: singlePageRecord.id, title: singlePageRecord.title, pageIndex: 0 };
+      expect(corpusCtxFor(corpus, c, '')).toBeNull();
+      inst.state = { cmdPrompt: '' };
+      expect(proto.corpusCtxFor.call(inst, c)).toBeNull();
+    }
+  });
+});

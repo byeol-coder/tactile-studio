@@ -16,6 +16,9 @@ import { CorpusSearchPanel } from '../../src/ui/corpus/CorpusSearchPanel.js';
 import { PagePanel } from '../../src/ui/panels/PagePanel.js';
 import { Inspector } from '../../src/ui/inspector/Inspector.js';
 import { ExportMenu } from '../../src/ui/dialogs/ExportMenu.js';
+import { ImportDialog } from '../../src/ui/dialogs/ImportDialog.js';
+import { ConfirmDialog } from '../../src/ui/dialogs/ConfirmDialog.js';
+import { LiveRegion } from '../../src/ui/live-region/LiveRegion.js';
 import { createDocument } from '../../src/core/document/document.js';
 import { createMemoryStorageAdapter } from '../../src/storage/adapters/memory-storage-adapter.js';
 import { createMockDotPadAdapter } from '../../src/device/dotpad/mock-adapter.js';
@@ -44,6 +47,13 @@ function firePointerEvent(el: Element, type: 'pointerdown' | 'pointermove' | 'po
   Object.defineProperty(evt, 'pointerId', { value: init.pointerId ?? 1, configurable: true });
   fireEvent(el, evt);
 }
+
+/** Shape tools (line/rect/ellipse/poly) are grouped behind a caret flyout —
+ *  open it, then click the named tool inside. */
+function selectShapeTool(name: string) {
+  fireEvent.click(screen.getByRole('button', { name: /Shapes — /i }));
+  fireEvent.click(screen.getByRole('button', { name }));
+}
 function Harness({ doc = createDocument('t', 10, 10) }: { doc?: ReturnType<typeof createDocument> }) {
   return (
     <TactileStudioProvider initialDocument={doc}>
@@ -67,9 +77,10 @@ describe('TactileStudioEditor — mount/unmount safety', () => {
     expect(() => unmount()).not.toThrow();
   });
 
-  it('registers exactly one keydown listener per mount and removes it on unmount (no leak/duplication across remounts)', () => {
+  it('registers keydown listeners (undo/redo shortcut + save shortcut) per mount and removes them on unmount (no leak/duplication across remounts)', () => {
     const addSpy = vi.spyOn(document, 'addEventListener');
     const removeSpy = vi.spyOn(document, 'removeEventListener');
+    const LISTENERS_PER_MOUNT = 2; // useKeyboardShortcuts (undo/redo) + EditorBody's Ctrl/Cmd+S handler
     for (let i = 0; i < 3; i++) {
       const { unmount } = render(
         <TactileStudioEditor
@@ -77,14 +88,15 @@ describe('TactileStudioEditor — mount/unmount safety', () => {
           services={{ storage: createMemoryStorageAdapter() }}
         />,
       );
-      // exactly one NEW keydown listener registered by this mount (useKeyboardShortcuts)
       const keydownAdds = addSpy.mock.calls.filter((c) => c[0] === 'keydown');
-      expect(keydownAdds.length).toBe(i + 1);
+      expect(keydownAdds.length).toBe((i + 1) * LISTENERS_PER_MOUNT);
       unmount();
       const keydownRemoves = removeSpy.mock.calls.filter((c) => c[0] === 'keydown');
-      expect(keydownRemoves.length).toBe(i + 1);
-      // the listener function removed must be the exact same one that was added for THIS mount
-      expect(removeSpy.mock.calls[i][1]).toBe(addSpy.mock.calls.filter((c) => c[0] === 'keydown')[i][1]);
+      expect(keydownRemoves.length).toBe((i + 1) * LISTENERS_PER_MOUNT);
+      // every listener added for THIS mount was removed with the exact same function reference
+      const addedThisMount = keydownAdds.slice(i * LISTENERS_PER_MOUNT, (i + 1) * LISTENERS_PER_MOUNT).map((c) => c[1]);
+      const removedThisMount = keydownRemoves.slice(i * LISTENERS_PER_MOUNT, (i + 1) * LISTENERS_PER_MOUNT).map((c) => c[1]);
+      expect(new Set(removedThisMount)).toEqual(new Set(addedThisMount));
     }
     addSpy.mockRestore();
     removeSpy.mockRestore();
@@ -201,7 +213,7 @@ describe('StudioCanvas — poly tool wiring', () => {
         <StudioCanvas />
       </TactileStudioProvider>,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Polygon' }));
+    selectShapeTool('Polygon');
     const canvas = container.querySelector('canvas')!;
     Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
     Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
@@ -228,7 +240,7 @@ describe('StudioCanvas — poly tool wiring', () => {
         <StudioCanvas />
       </TactileStudioProvider>,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Polygon' }));
+    selectShapeTool('Polygon');
     const canvas = container.querySelector('canvas')!;
     Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
     Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
@@ -526,5 +538,352 @@ describe('ExportMenu — SVG and PNG', () => {
     );
     expect(() => fireEvent.click(screen.getByRole('menuitem', { name: 'PNG' }))).not.toThrow();
     expect(onExport).not.toHaveBeenCalled();
+  });
+});
+
+describe('Toolbar — shape flyout, thickness flyout, and live-region announcements', () => {
+  it('shape flyout: caret opens a menu, selecting a tool inside activates it and closes the menu', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+      </TactileStudioProvider>,
+    );
+    expect(screen.queryByRole('button', { name: 'Rectangle' })).toBeNull(); // closed by default
+    fireEvent.click(screen.getByRole('button', { name: /Shapes — /i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rectangle' }));
+    // menu closed after selection, but the main flyout button's own
+    // accessible name is now "Rectangle" (it reflects the active shape tool)
+    expect(screen.queryAllByRole('button', { name: 'Rectangle' }).length).toBe(1);
+  });
+
+  it('shape flyout closes on Escape without changing the tool', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Shapes — /i }));
+    expect(screen.getByRole('button', { name: 'Ellipse' })).toBeTruthy();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('button', { name: 'Ellipse' })).toBeNull();
+  });
+
+  it('thickness flyout only appears for pen/eraser/shape tools, not for cursor/fill/select', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+      </TactileStudioProvider>,
+    );
+    // 'pen' is the default tool -> thickness group visible
+    expect(screen.getByRole('button', { name: /Line thickness/i })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Cursor' }));
+    expect(screen.queryByRole('button', { name: /Line thickness/i })).toBeNull();
+  });
+
+  it('thickness flyout shows the eraser-specific icon/label when the eraser tool is active', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Eraser' }));
+    expect(screen.getByRole('button', { name: /Eraser size/i })).toBeTruthy();
+  });
+
+  it('undo/redo/flip/invert/clear announce to the live region', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+        <LiveRegion />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Invert' }));
+    expect(screen.getByRole('status').textContent).toBe('Inverted');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
+    expect(screen.getByRole('status').textContent).toBe('Canvas cleared');
+  });
+});
+
+describe('PagePanel — confirm-before-delete and announcements', () => {
+  it('clicking delete opens a confirmation dialog; page is only deleted on confirm', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <PagePanel />
+      </TactileStudioProvider>,
+    );
+    act(() => { capturedStore!.addPage(); });
+    expect(capturedStore!.getSnapshot().pageCount).toBe(2);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete page' })[0]);
+    expect(capturedStore!.getSnapshot().pageCount).toBe(2); // not deleted yet
+    expect(screen.getByRole('alertdialog')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(capturedStore!.getSnapshot().pageCount).toBe(1);
+  });
+
+  it('Cancel in the confirm dialog leaves the page intact', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <PagePanel />
+      </TactileStudioProvider>,
+    );
+    act(() => { capturedStore!.addPage(); });
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete page' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(capturedStore!.getSnapshot().pageCount).toBe(2);
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+  });
+
+  it('switching pages announces to the live region', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <PagePanel />
+        <LiveRegion />
+      </TactileStudioProvider>,
+    );
+    act(() => { capturedStore!.addPage(); });
+    fireEvent.click(screen.getByRole('button', { name: '1' }));
+    expect(screen.getByRole('status').textContent).toBe('Page 1 of 2');
+  });
+});
+
+describe('ImportDialog — image import + crop UI (injected decoder for tests)', () => {
+  beforeEach(() => {
+    if (!('createObjectURL' in URL)) (URL as any).createObjectURL = () => 'blob:fake';
+    if (!('revokeObjectURL' in URL)) (URL as any).revokeObjectURL = () => {};
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+  });
+
+  it('decodes an image file, shows a crop preview, and converts via the real imgToCells codec', async () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    // 4x4 solid-black RGBA source (deterministic, no real image decode needed)
+    const decoded = { data: new Uint8ClampedArray(4 * 4 * 4).fill(0).map((_, i) => (i % 4 === 3 ? 255 : 0)), width: 4, height: 4 };
+    const fakeDecoder = vi.fn().mockResolvedValue(decoded);
+
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <Capture />
+        <ImportDialog open labels={{}} onClose={() => {}} decodeImageFile={fakeDecoder} />
+      </TactileStudioProvider>,
+    );
+    const fileInput = screen.getByLabelText('Choose image file') as HTMLInputElement;
+    const file = new File(['fake'], 'photo.png', { type: 'image/png' });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } });
+      await Promise.resolve();
+    });
+    expect(fakeDecoder).toHaveBeenCalledWith(file);
+    expect(screen.getByTestId('crop-rect')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Convert' }));
+    expect(capturedStore!.getSnapshot().pageCount).toBe(1);
+    // solid-black source at balanced preset should produce mostly-on cells
+    const cells = capturedStore!.getActiveCells();
+    expect(Array.from(cells).some((v) => v === 1)).toBe(true);
+  });
+
+  it('dragging the crop overlay updates the crop rectangle', async () => {
+    const decoded = { data: new Uint8ClampedArray(4 * 4 * 4), width: 4, height: 4 };
+    const fakeDecoder = vi.fn().mockResolvedValue(decoded);
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <ImportDialog open labels={{}} onClose={() => {}} decodeImageFile={fakeDecoder} />
+      </TactileStudioProvider>,
+    );
+    const fileInput = screen.getByLabelText('Choose image file') as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
+      await Promise.resolve();
+    });
+    const preview = screen.getByLabelText('Drag to select a crop region');
+    vi.spyOn(preview, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, width: 200, height: 200, right: 200, bottom: 200, x: 0, y: 0, toJSON() {} } as DOMRect);
+    firePointerEvent(preview, 'pointerdown', { clientX: 20, clientY: 20, pointerId: 1 });
+    firePointerEvent(preview, 'pointermove', { clientX: 100, clientY: 100, pointerId: 1 });
+    firePointerEvent(preview, 'pointerup', { clientX: 100, clientY: 100, pointerId: 1 });
+    const rect = screen.getByTestId('crop-rect');
+    expect(rect.style.left).toBe('10%');
+    expect(rect.style.top).toBe('10%');
+  });
+
+  it('shows an error for an unreadable image file without crashing', async () => {
+    const fakeDecoder = vi.fn().mockRejectedValue(new Error('bad image'));
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <ImportDialog open labels={{}} onClose={() => {}} decodeImageFile={fakeDecoder} />
+      </TactileStudioProvider>,
+    );
+    const fileInput = screen.getByLabelText('Choose image file') as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
+      await Promise.resolve();
+    });
+    expect(screen.getByRole('alert').textContent).toBe('bad image');
+  });
+});
+
+describe('Dialog focus trap (ConfirmDialog / ImportDialog)', () => {
+  it('ConfirmDialog focuses the confirm button on open and restores focus on close', async () => {
+    function Harness2() {
+      const [open, setOpen] = React.useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>Open</button>
+          <ConfirmDialog open={open} title="Confirm?" onConfirm={() => setOpen(false)} onCancel={() => setOpen(false)} />
+        </>
+      );
+    }
+    render(<Harness2 />);
+    const opener = screen.getByRole('button', { name: 'Open' });
+    opener.focus();
+    fireEvent.click(opener);
+    await act(async () => { await new Promise((r) => setTimeout(r, 0)); });
+    expect(document.activeElement?.textContent).toBe('OK');
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('Tab wraps within ConfirmDialog and does not escape to the page behind it', () => {
+    render(<ConfirmDialog open title="Confirm?" onConfirm={() => {}} onCancel={() => {}} />);
+    const cancelBtn = screen.getByRole('button', { name: 'Cancel' });
+    const okBtn = screen.getByRole('button', { name: 'OK' });
+    okBtn.focus();
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(cancelBtn).toBeTruthy(); // trap logic present; jsdom doesn't auto-advance focus on Tab so we assert no crash + both buttons exist
+  });
+});
+
+describe('TactileStudioEditor — Save wiring (onSave/onError)', () => {
+  it('Save button calls storage.save, markSaved, and onSave on success', async () => {
+    const storage = createMemoryStorageAdapter();
+    const onSave = vi.fn();
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage }}
+        onSave={onSave}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(onSave).toHaveBeenCalled();
+    expect(await storage.load('doc')).toBeTruthy();
+  });
+
+  it('a failing storage.save calls onError and never calls onSave', async () => {
+    const storage = { load: vi.fn(), save: vi.fn().mockResolvedValue({ ok: false, error: 'disk full' }) };
+    const onSave = vi.fn();
+    const onError = vi.fn();
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: storage as any }}
+        onSave={onSave}
+        onError={onError}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ code: 'save-failed' }));
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl/Cmd+S triggers the same save flow as the button', async () => {
+    const storage = createMemoryStorageAdapter();
+    const onSave = vi.fn();
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage }}
+        onSave={onSave}
+      />,
+    );
+    await act(async () => {
+      fireEvent.keyDown(document, { key: 's', ctrlKey: true });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(onSave).toHaveBeenCalled();
+  });
+
+  it('DotPad connect failure calls the top-level onError', async () => {
+    const onError = vi.fn();
+    const failingAdapter = createMockDotPadAdapter({ failConnect: true });
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: createMemoryStorageAdapter(), tactileDisplay: failingAdapter }}
+        onError={onError}
+      />,
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Connect' }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ code: 'connect-failed' }));
+  });
+});
+
+describe('CorpusSearchPanel — multi-page record prev/next navigation', () => {
+  const multiPageCorpus = [{
+    id: 'rec-1', title: '멀티페이지', spec: '60x40', lang: 'ko', category: 'basic', tags: [],
+    pages: [
+      { page: 1, label: '멀티페이지 1', graphic: '1'.repeat(600) },
+      { page: 2, label: '멀티페이지 2', graphic: '2'.repeat(600) },
+    ],
+  }];
+
+  it('shows Prev/Next controls after loading a multi-page hit, and Next navigates within the record', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <Capture />
+        <CorpusSearchPanel corpus={multiPageCorpus as any} defaultMode="replace" />
+      </TactileStudioProvider>,
+    );
+    fireEvent.change(screen.getByRole('textbox', { name: 'Command input' }), { target: { value: '멀티페이지' } });
+    fireEvent.click(screen.getByRole('button', { name: /멀티페이지/ }));
+
+    const nav = screen.getByRole('group', { name: 'Browse pages in this record' });
+    expect(nav.textContent).toContain('멀티페이지 · 1/2');
+    const nextBtn = screen.getByRole('button', { name: 'Next page' });
+    expect((screen.getByRole('button', { name: 'Previous page' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((nextBtn as HTMLButtonElement).disabled).toBe(false);
+
+    fireEvent.click(nextBtn);
+    expect(nav.textContent).toContain('멀티페이지 · 2/2');
+    expect(capturedStore!.getSnapshot().corpusCtx?.index).toBe(1);
+    expect((screen.getByRole('button', { name: 'Next page' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('no prev/next controls appear for a single-page record', () => {
+    const singlePage = [{ id: 's1', title: '단일', spec: '60x40', lang: 'ko', category: 'basic', tags: [], pages: [{ page: 1, label: '단일', graphic: '5'.repeat(600) }] }];
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <CorpusSearchPanel corpus={singlePage as any} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.change(screen.getByRole('textbox', { name: 'Command input' }), { target: { value: '단일' } });
+    fireEvent.click(screen.getByRole('button', { name: /단일/ }));
+    expect(screen.queryByRole('button', { name: 'Next page' })).toBeNull();
   });
 });

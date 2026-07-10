@@ -7,12 +7,17 @@
 // implementation (mirrors the earlier PointerEvent gap), and a pointer-based
 // implementation is directly testable with the same firePointerEvent-style
 // pattern used elsewhere in this codebase.
+//
+// Deleting a page asks for confirmation via ConfirmDialog (a destructive,
+// non-undoable action — page ops don't go through history). Every action
+// also calls store.announce() with host-labeled text for the live region.
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { usePages } from '../../react/hooks/usePages.js';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import type { StudioLabels } from '../../react/types/public-api.js';
 import { PageThumbnail } from './PageThumbnail.js';
+import { ConfirmDialog } from '../dialogs/ConfirmDialog.js';
 
 export interface PagePanelProps {
   labels?: StudioLabels;
@@ -24,11 +29,17 @@ export function PagePanel({ labels }: PagePanelProps) {
   const pagesLabel = (labels?.pagesLabel as string) || 'Pages';
   const addLabel = (labels?.addPage as string) || 'Add page';
   const doc = store.getDocument();
+  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
 
   const itemRefs = useRef<Map<number, HTMLLIElement>>(new Map());
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragFromRef = useRef<number | null>(null);
+
+  const announcePage = (i: number, n: number) => {
+    const tpl = (labels?.aPage as string) || 'Page {i} of {n}';
+    store.announce(tpl.replace('{i}', String(i)).replace('{n}', String(n)));
+  };
 
   const computeTargetIndex = useCallback((clientY: number): number => {
     let target = 0;
@@ -54,7 +65,10 @@ export function PagePanel({ labels }: PagePanelProps) {
     const onUp = (e: PointerEvent) => {
       const from = dragFromRef.current;
       const to = computeTargetIndex(e.clientY);
-      if (from != null && to !== from) movePage(from, to);
+      if (from != null && to !== from) {
+        movePage(from, to);
+        store.announce(((labels?.aPageMoved as string) || 'Page moved to position {n}').replace('{n}', String(to + 1)));
+      }
       dragFromRef.current = null;
       setDragFrom(null);
       setDragOverIndex(null);
@@ -65,13 +79,29 @@ export function PagePanel({ labels }: PagePanelProps) {
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
     };
-  }, [dragFrom, computeTargetIndex, movePage]);
+  }, [dragFrom, computeTargetIndex, movePage, store, labels]);
+
+  const confirmDelete = () => {
+    if (confirmDeleteIndex == null) return;
+    const i = confirmDeleteIndex;
+    setConfirmDeleteIndex(null);
+    deletePageAt(i);
+    store.announce((labels?.aPageDeleted as string) || 'Page deleted');
+  };
 
   return (
     <div role="region" aria-label={pagesLabel} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 160 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: 13, fontWeight: 600 }}>{pagesLabel}</span>
-        <button type="button" aria-label={addLabel} title={addLabel} onClick={() => addPage()} style={{ width: 26, height: 26, borderRadius: 7, border: 'none', background: 'transparent', cursor: 'pointer' }}>＋</button>
+        <button
+          type="button"
+          aria-label={addLabel}
+          title={addLabel}
+          onClick={() => { addPage(); announcePage(store.getDocument().pageIndex + 1, store.getDocument().pages.length); }}
+          style={{ width: 26, height: 26, borderRadius: 7, border: 'none', background: 'transparent', cursor: 'pointer' }}
+        >
+          ＋
+        </button>
       </div>
       <ul role="list" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {Array.from({ length: pageCount }, (_, i) => i).map((i) => (
@@ -96,7 +126,7 @@ export function PagePanel({ labels }: PagePanelProps) {
             <button
               type="button"
               aria-current={i === pageIndex ? 'true' : undefined}
-              onClick={() => store.setActivePage(i)}
+              onClick={() => { store.setActivePage(i); announcePage(i + 1, pageCount); }}
               style={{
                 flex: 1, display: 'flex', alignItems: 'center', gap: 6, textAlign: 'left', padding: '4px 6px', borderRadius: 6, border: 'none',
                 background: i === pageIndex ? 'var(--ts-primary, #C43D00)' : 'transparent',
@@ -107,12 +137,21 @@ export function PagePanel({ labels }: PagePanelProps) {
               <PageThumbnail cells={doc.pages[i]} gridW={snapshot.gridW} gridH={snapshot.gridH} />
               <span>{i + 1}</span>
             </button>
-            <button type="button" aria-label="Move up" title="Move up" disabled={i === 0} onClick={() => movePage(i, i - 1)} style={{ opacity: i === 0 ? 0.3 : 1 }}>↑</button>
-            <button type="button" aria-label="Move down" title="Move down" disabled={i === pageCount - 1} onClick={() => movePage(i, i + 1)} style={{ opacity: i === pageCount - 1 ? 0.3 : 1 }}>↓</button>
-            <button type="button" aria-label="Delete page" title="Delete page" disabled={pageCount <= 1} onClick={() => deletePageAt(i)} style={{ opacity: pageCount <= 1 ? 0.3 : 1 }}>✕</button>
+            <button type="button" aria-label="Move up" title="Move up" disabled={i === 0} onClick={() => { movePage(i, i - 1); store.announce(((labels?.aPageMoved as string) || 'Page moved to position {n}').replace('{n}', String(i))); }} style={{ opacity: i === 0 ? 0.3 : 1 }}>↑</button>
+            <button type="button" aria-label="Move down" title="Move down" disabled={i === pageCount - 1} onClick={() => { movePage(i, i + 1); store.announce(((labels?.aPageMoved as string) || 'Page moved to position {n}').replace('{n}', String(i + 2))); }} style={{ opacity: i === pageCount - 1 ? 0.3 : 1 }}>↓</button>
+            <button type="button" aria-label="Delete page" title="Delete page" disabled={pageCount <= 1} onClick={() => setConfirmDeleteIndex(i)} style={{ opacity: pageCount <= 1 ? 0.3 : 1 }}>✕</button>
           </li>
         ))}
       </ul>
+      <ConfirmDialog
+        open={confirmDeleteIndex != null}
+        title={(labels?.confirmDeletePageTitle as string) || 'Delete this page?'}
+        message={(labels?.confirmDeletePageMsg as string) || 'This cannot be undone.'}
+        confirmLabel={(labels?.delete as string) || 'Delete'}
+        cancelLabel={(labels?.cancel as string) || 'Cancel'}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDeleteIndex(null)}
+      />
     </div>
   );
 }

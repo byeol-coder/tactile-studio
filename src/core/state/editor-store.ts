@@ -28,7 +28,7 @@ import { HistoryStack, makeEntry, entryCells } from '../history/history.js';
 import { flipHoriz, flipVert, invertAll, clearAll } from '../grid/grid.js';
 import { reindexMapInsert } from '../page/page-maps.js';
 import { decodeDtms60x40Hex } from '../../codecs/dtms/dtms.js';
-import type { ToolId, EditorSnapshot, SelectionRect, BraillePreview } from './types.js';
+import type { ToolId, EditorSnapshot, SelectionRect, BraillePreview, CorpusNavContext } from './types.js';
 
 export interface PageAudioEntry {
   desc?: string;
@@ -64,6 +64,8 @@ export class EditorStore {
   private brailleBusy = false;
   private braillePreview: BraillePreview | null = null;
   private brailleApplyToken = 0; // guards against a stale async response landing after a page switch
+  private announceText = '';
+  private corpusCtx: CorpusNavContext | null = null;
 
   constructor(initialDocument: StudioDocument, opts: EditorStoreOptions = {}) {
     this.doc = initialDocument;
@@ -101,6 +103,8 @@ export class EditorStore {
       brailleLang: this.brailleLang,
       brailleBusy: this.brailleBusy,
       braillePreview: this.braillePreview,
+      announce: this.announceText,
+      corpusCtx: this.corpusCtx,
     };
   }
 
@@ -301,6 +305,7 @@ export class EditorStore {
     if (title != null) this.doc.title = title;
     this.history.clear();
     this.selRect = null;
+    this.corpusCtx = null;
     this.rev++;
     this.setDirty(true);
     this.notify();
@@ -311,11 +316,10 @@ export class EditorStore {
    *  one (like addPage, but seeded with the hit's cells instead of blank);
    *  `mode: 'replace'` snapshots and replaces the active page's cells.
    *  Always resizes to 60×40 first if needed (corpus data is 60×40-native).
-   *  DEFERRED (documented, not silently dropped): the monolith's
-   *  `corpusCtx` multi-page navigation context (so a UI could offer
-   *  prev/next through sibling pages of the same corpus record) — this
-   *  method loads the hit's single specified page only. */
-  loadCorpusResult(hex: string, mode: 'new' | 'replace', title?: string) {
+   *  `ctx`, if the record has more than one page, is stored as corpusCtx so
+   *  `corpusGoPage` can browse the record's OTHER pages without touching the
+   *  document's own page array (monolith: corpusCtxFor/corpusGoPage). */
+  loadCorpusResult(hex: string, mode: 'new' | 'replace', title?: string, ctx: CorpusNavContext | null = null) {
     const cells = decodeDtms60x40Hex(hex);
     if (!cells) return false;
     const gridChanged = this.doc.grid.w !== 60 || this.doc.grid.h !== 40;
@@ -329,6 +333,7 @@ export class EditorStore {
       if (title != null) this.doc.title = title;
       this.history.clear();
       this.selRect = null;
+      this.corpusCtx = ctx;
       this.rev++;
       this.setDirty(true);
       this.notify();
@@ -337,11 +342,53 @@ export class EditorStore {
       this.doc.pages[this.doc.pageIndex] = cells;
       if (title != null) this.doc.title = title;
       this.selRect = null;
+      this.corpusCtx = ctx;
       this.rev++;
       this.setDirty(true);
       this.notify();
     }
     return true;
+  }
+
+  /** monolith corpusGoPage(i): browse the active corpus record's OTHER
+   *  pages, replacing only the active page's cells (does not touch the
+   *  document's page array). Validates range, no-ops on the current index,
+   *  decodes the target page's DTMS hex (rejecting anything but a valid
+   *  600-hex page exactly like the shipped decoder), snapshots for undo,
+   *  and updates corpusCtx.index. Returns false without mutating anything
+   *  on any invalid input — never a partial/silent failure. */
+  corpusGoPage(i: number): boolean {
+    const ctx = this.corpusCtx;
+    if (!ctx || !Array.isArray(ctx.pages)) return false;
+    if (i < 0 || i >= ctx.pages.length || i === ctx.index) return false;
+    const page = ctx.pages[i];
+    const hex = page && (page.graphic || page.data);
+    const cells = decodeDtms60x40Hex(hex);
+    if (!cells) return false;
+    this.snapshotForUndo();
+    this.doc.pages[this.doc.pageIndex] = cells;
+    this.corpusCtx = { id: ctx.id, title: ctx.title, pages: ctx.pages, index: i, query: ctx.query };
+    this.selRect = null;
+    this.rev++;
+    this.setDirty(true);
+    this.notify();
+    return true;
+  }
+
+  /** Host-facing setter, e.g. to clear corpusCtx explicitly without loading
+   *  a new result. */
+  setCorpusCtx(ctx: CorpusNavContext | null) {
+    this.corpusCtx = ctx;
+    this.notify();
+  }
+
+  /** monolith say(msg): set the live-region announcement text. Core never
+   *  owns i18n, so the UI layer calls this with an already-localized string
+   *  (from the host's `labels`) after an action — core doesn't generate the
+   *  text itself. */
+  announce(msg: string) {
+    this.announceText = msg;
+    this.notify();
   }
 
   /** Host-facing: clears the dirty flag after a successful save(), without

@@ -343,3 +343,69 @@ describe('EditorStore — applyBraille (applyField port)', () => {
     expect(service.translate).toHaveBeenCalledWith('hello', 'ueb-g1');
   });
 });
+
+describe('EditorStore — corpusGoPage (multi-page corpus navigation)', () => {
+  const makeCtx = (overrides = {}) => ({
+    id: 'rec-1', title: 'Test Record', query: 'test',
+    pages: [
+      { page: 1, label: 'p1', graphic: '1'.repeat(600) },
+      { page: 2, label: 'p2', graphic: '2'.repeat(600) },
+      { page: 3, label: 'p3', graphic: '3'.repeat(600) },
+    ],
+    index: 0,
+    ...overrides,
+  });
+
+  it('navigates to a valid sibling page, replacing only the active page cells (undoable)', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    store.loadCorpusResult('1'.repeat(600), 'replace', 'Test Record', makeCtx() as any);
+    const before = store.getActiveCells().slice();
+
+    const ok = store.corpusGoPage(1);
+    expect(ok).toBe(true);
+    expect(store.getSnapshot().corpusCtx?.index).toBe(1);
+    expect(store.getActiveCells()).not.toEqual(before);
+    expect(store.getSnapshot().canUndo).toBe(true);
+
+    store.undo();
+    expect(Array.from(store.getActiveCells())).toEqual(Array.from(before));
+  });
+
+  it('rejects out-of-range or same-index navigation without mutating anything', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    store.loadCorpusResult('1'.repeat(600), 'replace', 'Test Record', makeCtx() as any);
+    expect(store.corpusGoPage(0)).toBe(false); // same index
+    expect(store.corpusGoPage(-1)).toBe(false);
+    expect(store.corpusGoPage(99)).toBe(false);
+  });
+
+  it('rejects a sibling page with invalid hex without mutating corpusCtx', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    const ctx = makeCtx({ pages: [{ page: 1, graphic: '1'.repeat(600) }, { page: 2, graphic: 'not-valid-hex' }] });
+    store.loadCorpusResult('1'.repeat(600), 'replace', 'Test Record', ctx as any);
+    expect(store.corpusGoPage(1)).toBe(false);
+    expect(store.getSnapshot().corpusCtx?.index).toBe(0);
+  });
+
+  it('returns false when no corpus context is active', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    expect(store.corpusGoPage(1)).toBe(false);
+  });
+
+  it('loadPages (asset import) clears an active corpusCtx', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    store.loadCorpusResult('1'.repeat(600), 'replace', 'Test Record', makeCtx() as any);
+    expect(store.getSnapshot().corpusCtx).not.toBeNull();
+    store.loadPages([new Uint8Array(2400)], 'imported');
+    expect(store.getSnapshot().corpusCtx).toBeNull();
+  });
+
+  it('setCorpusCtx sets/clears the context directly', () => {
+    const store = new EditorStore(createDocument('doc', 60, 40));
+    const ctx = makeCtx();
+    store.setCorpusCtx(ctx as any);
+    expect(store.getSnapshot().corpusCtx).toEqual(ctx);
+    store.setCorpusCtx(null);
+    expect(store.getSnapshot().corpusCtx).toBeNull();
+  });
+});

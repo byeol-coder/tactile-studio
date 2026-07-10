@@ -208,7 +208,23 @@ export function searchCorpus(corpus: CorpusRecord[], query: unknown, options: Co
   return scored.slice(0, limit).map((x) => x.result);
 }
 
-/** monolith window.corpusFeatureCounts() — TGIL-style filter counts. */
+/** monolith corpusCtxFor(result): builds the navigation context for a
+ *  multi-page corpus record so a UI can browse its other pages. Returns
+ *  null for single-page records (nothing to navigate) or an unknown id. */
+export function corpusCtxFor(
+  corpus: CorpusRecord[], result: { id: string; title?: string; pageIndex?: number },
+  query: string,
+): { id: string; title: string; pages: CorpusRecord['pages']; index: number; query: string } | null {
+  if (!result || !result.id) return null;
+  const rec = corpus.find((r) => r.id === result.id);
+  const pages = rec && Array.isArray(rec.pages) ? rec.pages : null;
+  if (!pages || pages.length <= 1) return null;
+  let index = typeof result.pageIndex === 'number' ? result.pageIndex : 0;
+  if (index < 0 || index >= pages.length) index = 0;
+  return { id: result.id, title: result.title || rec!.title || result.id, pages, index, query: (query || '').trim() };
+}
+
+/** monolith featureCounts() — TGIL-style filter counts. */
 export function featureCounts(corpus: CorpusRecord[]): CorpusFeatureCounts {
   const out: CorpusFeatureCounts = { dotpadCompatible: 0, dotpadOptimized: 0, embossable: 0, total: corpus.length };
   for (const rec of corpus) {

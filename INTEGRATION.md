@@ -58,8 +58,8 @@ This produces five independent ESM entry points — a host importing only `tacti
 | `theme` | `StudioTheme` | No | A map of CSS custom-property names to values, applied as inline styles on the editor's root element (e.g. `{ '--ts-primary': '#FF4F00' }`). |
 | `onChange` | `(document: StudioDocument) => void` | No | Called after every document mutation (drawing, page ops, import, cleanup fx, etc.). |
 | `onDirtyChange` | `(dirty: boolean) => void` | No | Called when the dirty flag flips. Use this to drive an "unsaved changes" indicator. |
-| `onSave` | `(document: StudioDocument) => Promise<void> \| void` | No | **Accepted but not yet called by anything in this codebase** — there is no save button or keyboard shortcut wired to it in this pass. See [Known gaps](#known-gaps-in-this-integration-surface). |
-| `onError` | `(error: StudioErrorLike) => void` | No | **Accepted but not yet called by anything in this codebase.** Device-adapter errors currently surface only inside `DotPadPanel`'s own inline error text, not through this callback. |
+| `onSave` | `(document: StudioDocument) => Promise<void> \| void` | No | Called after a successful save via the Save button or Ctrl/Cmd+S, once `services.storage.save()` resolves `{ ok: true }` and the dirty flag is cleared. |
+| `onError` | `(error: StudioErrorLike) => void` | No | Called on a failed save, and on DotPad connect/send failures (in addition to `DotPadPanel`'s own inline error text). Not yet called for every possible failure path — see [Known gaps](#known-gaps-in-this-integration-surface). |
 | `className` | `string` | No | Applied to the editor's root `<div>`. |
 
 ## Services (`StudioServices`)
@@ -71,7 +71,7 @@ interface StudioServices {
   storage: StudioStorageAdapter;          // required
   tactileDisplay?: TactileDisplayAdapter; // enables the DotPad panel (connect/send)
   braille?: BrailleService;               // enables Inspector's braille language selector + Apply buttons + preview
-  imageProcessing?: ImageProcessingService; // not yet consumed anywhere (see Known gaps)
+  imageProcessing?: ImageProcessingService; // optional override for ImportDialog's image conversion (defaults to the local pure codec)
   gridFx?: GridFxService;                 // enables Inspector's Thinner/Thicker/Remove-noise buttons
   encodeBits?: EncodeBitsFn;               // enables DotPad "send" and DTMS/Library-Asset-v1/SVG export
   bitsToSvg?: TwBitsToSvg;                 // enables ExportMenu's SVG button (PNG needs neither — real canvas.toBlob)
@@ -145,7 +145,15 @@ A real Node-side implementation exists at `codecs/braille/liblouis-node.ts` (loa
 
 ### `imageProcessing?: ImageProcessingService`
 
-This interface is typed but **nothing in the current UI calls it yet** — there is no image-import UI wired to it. Providing it today has no visible effect. It's a placeholder for the next round of feature work (see `docs/known-issues.md #5`).
+Optional override for `ImportDialog`'s image-file conversion algorithm. By default (no `imageProcessing` supplied), the dialog uses the local, pure, already-parity-tested `codecs/image` `imgToCells` directly — most hosts never need to provide this at all. Supply it only if you want to swap in a different conversion pipeline; the interface (including its `crop` parameter) matches `imgToCells`'s real capability exactly, so an override is a drop-in replacement, not a reduced-functionality path.
+
+```ts
+services={{ storage,
+  imageProcessing: { convert: (data, sw, sh, tw, th, opts, crop) => myOwnConverter(data, sw, sh, tw, th, opts, crop) },
+}}
+```
+
+Image FILE decoding itself (turning a `.png`/`.jpg` into raw pixels) is a separate, real browser step (`ImportDialog`'s internal `decodeImageFile` prop, defaulting to a real `File → <img> → canvas → RGBA` implementation) — not something `services` exposes, since it's not the tactile-conversion algorithm.
 
 ### `corpus?: CorpusRecord[]`
 
@@ -193,10 +201,9 @@ Tactile Studio never detects the browser's language or ships its own language to
 
 Being upfront about what this prop surface *looks* like it does versus what it *actually* does today:
 
-- `onSave` and `onError` are typed and accepted, but nothing in the shipped components calls them. There's no save button, no keyboard-shortcut-triggered save, and device-adapter errors surface only as inline text inside `DotPadPanel`, not through `onError`.
-- `imageProcessing` service is typed but unconsumed (see above); `braille` IS now consumed (Inspector's Apply buttons).
-- Deleting a page (`PagePanel`'s ✕ button) happens immediately, with no confirmation — `ConfirmDialog` exists as a component but isn't wired to this action yet.
-- Export (`ExportMenu`) produces DTMS, Library Asset v1, SVG (if `bitsToSvg` is supplied), and PNG (always available, real `canvas.toBlob`) — there's no `onExport` callback on `TactileStudioEditorProps`, just the `onExport` prop on `ExportMenu` itself that `TactileStudioEditor` wires to a built-in browser-download convenience; the host isn't separately notified of exports.
-- The corpus search UI loads only the single specific page a search hit points at — the vanilla app's multi-page "prev/next through this record's sibling pages" navigation context is not ported.
+- `onError` is called for save failures and DotPad connect/send failures, but not for every possible failure path (e.g. braille Apply failures surface only via `Inspector`'s inline preview text, not through `onError`).
+- Export (`ExportMenu`) produces DTMS, Library Asset v1, SVG (if `bitsToSvg` is supplied), and PNG (always available, real `canvas.toBlob`) — there's no separate host-facing export-completion callback on `TactileStudioEditorProps`, just `ExportMenu`'s own `onExport` prop that `TactileStudioEditor` wires to a built-in browser-download convenience.
+- Native HTML5 drag-and-drop is not used anywhere (jsdom doesn't implement `DragEvent`, mirroring the `PointerEvent` gap) — page reordering is pointer-based via a grip handle instead.
+- Hardware key-driven panning: `TactileDisplayAdapter.subscribeKeys` is wired at the adapter layer, but no UI component consumes device key events yet.
 
 See `docs/known-issues.md #5` for the complete, currently-accurate list of deferred UI work.

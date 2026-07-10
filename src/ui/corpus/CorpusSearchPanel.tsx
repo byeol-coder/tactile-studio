@@ -5,9 +5,15 @@
 // The host supplies the corpus data (typically by loading the real
 // corpus.js and reading window.DTMS_CORPUS) — this panel never bundles or
 // assumes a specific corpus source.
+//
+// Multi-page records: loading a hit from a record with more than one page
+// sets up a navigation context (verbatim port of corpusCtxFor/corpusGoPage)
+// so Prev/Next buttons can browse the record's OTHER pages without creating
+// new document pages — matching the monolith's browsing-before-committing
+// UX exactly.
 
 import React, { useMemo, useState } from 'react';
-import { searchCorpus, nearMatches } from '../../codecs/corpus/corpus-search.js';
+import { searchCorpus, nearMatches, corpusCtxFor } from '../../codecs/corpus/corpus-search.js';
 import type { CorpusRecord, CorpusSearchResult } from '../../codecs/corpus/types.js';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import type { StudioLabels } from '../../react/types/public-api.js';
@@ -20,7 +26,7 @@ export interface CorpusSearchPanelProps {
 }
 
 export function CorpusSearchPanel({ corpus, labels, defaultMode = 'new' }: CorpusSearchPanelProps) {
-  const { store } = useEditorStore();
+  const { snapshot, store } = useEditorStore();
   const [query, setQuery] = useState('');
 
   const { hits, suggestions } = useMemo(() => {
@@ -32,8 +38,13 @@ export function CorpusSearchPanel({ corpus, labels, defaultMode = 'new' }: Corpu
 
   const load = (r: CorpusSearchResult) => {
     const label = r.pageCount > 1 ? `${r.title} · ${r.pageNumber}` : r.title;
-    store.loadCorpusResult(r.graphic, defaultMode, label);
+    const ctx = corpusCtxFor(corpus, { id: r.id, title: r.title, pageIndex: r.pageIndex }, query);
+    store.loadCorpusResult(r.graphic, defaultMode, label, ctx);
   };
+
+  const ctx = snapshot.corpusCtx;
+  const goPrev = () => { if (ctx) store.corpusGoPage(ctx.index - 1); };
+  const goNext = () => { if (ctx) store.corpusGoPage(ctx.index + 1); };
 
   return (
     <div role="search" aria-label={(labels?.cmdPanelTitle as string) || 'Create with a command'} style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 240 }}>
@@ -71,6 +82,14 @@ export function CorpusSearchPanel({ corpus, labels, defaultMode = 'new' }: Corpu
       )}
       {query.trim() && hits.length === 0 && suggestions.length === 0 && (
         <div style={{ fontSize: 12, opacity: 0.7 }}>{(labels?.cmdEmpty as string) || 'No matches found.'}</div>
+      )}
+
+      {ctx && (
+        <div role="group" aria-label={(labels?.cmdPageNav as string) || 'Browse pages in this record'} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+          <button type="button" onClick={goPrev} disabled={ctx.index === 0} aria-label={(labels?.cmdPrevPage as string) || 'Previous page'}>◀</button>
+          <span>{ctx.title} · {ctx.index + 1}/{ctx.pages.length}</span>
+          <button type="button" onClick={goNext} disabled={ctx.index === ctx.pages.length - 1} aria-label={(labels?.cmdNextPage as string) || 'Next page'}>▶</button>
+        </div>
       )}
     </div>
   );

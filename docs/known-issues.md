@@ -62,11 +62,9 @@ Closed most of the initial pass's deferred list:
 
 ### Still deferred (documented, not silently dropped)
 
-- Shape-tool flyout grouping (line/rect/ellipse/poly under one button), the thickness dropdown's dot-swatch styling
-- Confirm-before-delete for pages (deletes immediately; `ConfirmDialog` exists but isn't wired to this action yet)
-- Image file import (needs `ImageProcessingService` wiring + crop-selection UI)
-- Full Figma-exact spacing/typography, custom tooltip positioning, focus-trap dialogs, live-region announcements beyond the DotPad status line's and braille preview's `aria-live`
-- Corpus context navigation (the monolith's `corpusCtx` — prev/next through sibling pages of the same multi-page corpus record); `EditorStore.loadCorpusResult` loads the hit's single specified page only
+- Full Figma-exact spacing/typography, custom tooltip positioning (native `title=""` tooltips used instead of the monolith's custom-positioned tip bubble)
+- `onSave`/top-level `onExport` semantics beyond what's now wired: `onSave` fires on every successful Save (button or Ctrl/Cmd+S); there's still no separate host-facing export-completion callback, just `ExportMenu`'s own `onExport` prop that `TactileStudioEditor` wires to a built-in download convenience
+- Hardware key-driven panning (`TactileDisplayAdapter.subscribeKeys` is wired at the adapter layer but no UI consumes key events yet)
 
 ### Phase 5 continuation round 2 — corpus search, thumbnails/drag-reorder, braille Apply, SVG/PNG export
 
@@ -78,6 +76,18 @@ Closed the remaining items from the list above at the time:
 - **Braille "Apply" + preview**: `EditorStore.applyBraille` is a verbatim-semantics port of the monolith's `applyField` (desc-first-then-narration source text regardless of which field triggered Apply, one-Apply-at-a-time busy guard, a stale-response guard for a page switch mid-flight) wired to a host-supplied `BrailleService` in `Inspector`. Never falls back to sending raw text on failure, matching the vendor README's absolute rule.
 - **SVG export**: `codecs/svg/svg.ts` orchestrates the injected vendor `TW.bitsToSVG` (same injection pattern as `encodeBits`) — parity-tested against the live shipped function.
 - **PNG export**: implemented for real (not deferred) via an offscreen `canvas.toBlob`, since — like the text-tool glyph rasterizer — there's no vendor function to inject and no meaningful cross-engine baseline to parity-test a rendered bitmap against outside a real browser. Documented as such, not silently faked.
+
+### Phase 5 continuation round 3 — shape/thickness flyouts, live-region announcements, confirm-before-delete, image import, corpus prev/next navigation
+
+Closed effectively all of the remaining deferred list:
+
+- **Shape-tool flyout + thickness dropdown**: `Toolbar` now groups line/rect/ellipse/poly behind one button + caret (verbatim UX port of the monolith's `shapeGroup` — the main button shows/reuses the last-selected shape tool), and pen/eraser/shape thickness is a similar flyout showing a `StrokeGroupIcon`/`EraserGroupIcon` (verbatim-ported stacked-bars/nested-squares glyphs reflecting the current 1/2/3 size) instead of always-visible buttons.
+- **Live-region announcements**: `EditorStore.announce()` (verbatim-intent port of `say()`) + a new `LiveRegion` component wired into `Toolbar` (tool select, undo/redo, flip/invert/clear) and `PagePanel` (add/switch/move/delete). Core stays i18n-free — components call `announce()` with host-labeled text, never core-generated strings.
+- **Focus-trap dialogs**: a shared `useFocusTrap` hook (Tab/Shift+Tab cycling confined to the dialog, focus restored to the trigger on close) applied to `ConfirmDialog` and `ImportDialog`.
+- **Confirm-before-delete for pages**: `PagePanel`'s ✕ button now opens `ConfirmDialog`; deletion only happens on confirm.
+- **Image file import**: a real (not deferred) browser image decoder (`browser-image-decoder.ts`, File → `<img>` → offscreen canvas → RGBA — same "genuinely browser-only, not parity-tested" category as the text-tool glyph rasterizer and PNG export) feeds the already-pure, already-parity-tested `codecs/image` `imgToCells`, with a pointer-drag crop-selection rectangle over an image preview in `ImportDialog`. `ImageProcessingService` (previously unconsumed) is now genuinely wired as an optional override of the default local codec, extended with a `crop` parameter to match.
+- **Corpus context navigation**: `corpusCtxFor`/`corpusGoPage` (verbatim ports) let `CorpusSearchPanel` show Prev/Next controls for a multi-page corpus record's OTHER pages without creating new document pages — parity-tested against the live shipped `corpusCtxFor` using real corpus data.
+- **Save wiring**: a Save button + Ctrl/Cmd+S now call `services.storage.save()`, then `EditorStore.markSaved()` and the host's `onSave` callback on success; failures call the host's `onError` (previously accepted but never invoked). `DotPadPanel`'s connect/send failures now also report to the top-level `onError`, in addition to their existing inline error text.
 
 ## 6. Phase 6 — product-ownership audit (`refactor(studio-integration): remove product ownership`)
 

@@ -35,6 +35,7 @@ export interface ImageProcessingService {
     srcData: Uint8ClampedArray, srcW: number, srcH: number,
     targetW: number, targetH: number,
     opts?: { preset?: string; threshold?: number; invert?: boolean },
+    crop?: { x: number; y: number; w: number; h: number } | null,
   ): { cells: Uint8Array; removedDots: number };
 }
 
