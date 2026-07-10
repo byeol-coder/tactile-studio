@@ -203,6 +203,13 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 }
 .ts-size-mobile{display:none}
 @media (max-width:1080px){.ts-size-mobile{display:flex}}
+/* Pages panel: reorder grip. Hidden until the item is hovered or keyboard-focused
+   (via :focus-within on the thumbnail), mirroring the delete control at top-right. */
+.ts-page-handle{position:absolute;top:6px;left:6px;width:26px;height:26px;box-sizing:border-box;display:grid;place-items:center;border:1px solid var(--ts-border-decor);border-radius:7px;background:rgba(255,255,255,0.94);color:var(--ts-text-secondary);box-shadow:0 1px 3px rgba(16,24,40,0.14);cursor:grab;opacity:0;touch-action:none;z-index:6;transition:opacity .12s ease,color .12s ease,border-color .12s ease}
+.ts-page-item:hover .ts-page-handle,.ts-page-item:focus-within .ts-page-handle,.ts-page-handle[data-dragging="true"]{opacity:1}
+.ts-page-handle:hover{color:var(--ts-primary);border-color:var(--ts-primary)}
+.ts-page-handle:focus-visible{outline:2px solid var(--ts-primary);outline-offset:1px}
+.ts-page-handle[data-dragging="true"]{cursor:grabbing}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
@@ -287,12 +294,13 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
       </div>
-      <div style="flex:1;overflow-y:auto;padding:2px 12px 12px;display:flex;flex-direction:column;gap:10px">
+      <div ref="{{ pagesRailRef }}" style="flex:1;overflow-y:auto;padding:2px 12px 12px;display:flex;flex-direction:column;gap:10px">
         <sc-for list="{{ pageList }}" as="p" hint-placeholder-count="2">
-          <div style="position:relative">
-            <button onClick="{{ p.pick }}" role="tab" aria-selected="{{ p.selected }}" aria-label="{{ p.aria }}" style="{{ p.style }}" style-hover="border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <div class="ts-page-item" data-page-index="{{ p.i }}" style="{{ p.wrapStyle }}">
+            <sc-if value="{{ p.dropBefore }}" hint-placeholder-val="{{ false }}"><div style="{{ p.indicatorTopStyle }}"></div></sc-if>
+            <button data-page-pick="1" onClick="{{ p.pick }}" onKeyDown="{{ p.onKey }}" onPointerDown="{{ p.dragDownCard }}" onPointerMove="{{ p.dragMove }}" onPointerUp="{{ p.dragUpCard }}" onPointerCancel="{{ p.dragCancel }}" role="tab" aria-selected="{{ p.selected }}" aria-label="{{ p.aria }}" style="{{ p.style }}" style-hover="border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
               <sc-if value="{{ p.hasThumb }}" hint-placeholder-val="{{ false }}">
-                <img src="{{ p.thumb }}" alt="" style="{{ p.thumbStyle }}">
+                <img src="{{ p.thumb }}" alt="" draggable="false" style="{{ p.thumbStyle }}">
               </sc-if>
               <div style="{{ p.capStyle }}">
                 <span style="{{ p.numStyle }}">{{ p.label }}</span>
@@ -301,9 +309,25 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
                 </sc-if>
               </div>
             </button>
+            <div class="ts-page-handle" data-dragging="{{ p.dragging }}" onPointerDown="{{ p.dragDownHandle }}" onPointerMove="{{ p.dragMove }}" onPointerUp="{{ p.dragUpHandle }}" onPointerCancel="{{ p.dragCancel }}" role="button" tabindex="-1" aria-haspopup="menu" aria-expanded="{{ p.menuOpen }}" aria-label="{{ p.handleAria }}" title="{{ p.handleAria }}">
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
+            </div>
             <button onClick="{{ p.deletePick }}" disabled="{{ p.deleteDisabled }}" aria-label="{{ p.deleteAria }}" title="{{ p.deleteAria }}" style="{{ p.deleteStyle }}" style-hover="background:#fff;border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
               <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
             </button>
+            <sc-if value="{{ p.menuOpen }}" hint-placeholder-val="{{ false }}">
+              <div role="menu" aria-label="{{ p.handleAria }}" style="{{ p.menuStyle }}">
+                <button role="menuitem" onClick="{{ p.moveUp }}" disabled="{{ p.upDisabled }}" style="{{ p.menuUpStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <span>{{ t.pageMoveUp }}</span>
+                </button>
+                <button role="menuitem" onClick="{{ p.moveDown }}" disabled="{{ p.downDisabled }}" style="{{ p.menuDownStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 5v14M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <span>{{ t.pageMoveDown }}</span>
+                </button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ p.dropAfter }}" hint-placeholder-val="{{ false }}"><div style="{{ p.indicatorBottomStyle }}"></div></sc-if>
           </div>
         </sc-for>
       </div>
@@ -317,6 +341,9 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
     </sc-if>
     <sc-if value="{{ railMenuOpen }}" hint-placeholder-val="{{ false }}">
       <button aria-label="{{ t.close }}" onClick="{{ closeRail }}" tabindex="-1" style="position:fixed;inset:0;z-index:78;background:transparent;border:none;cursor:default"></button>
+    </sc-if>
+    <sc-if value="{{ pageMenuOpen }}" hint-placeholder-val="{{ false }}">
+      <button aria-label="{{ t.close }}" onClick="{{ closePageMenu }}" tabindex="-1" style="position:fixed;inset:0;z-index:15;background:transparent;border:none;cursor:default"></button>
     </sc-if>
     <sc-if value="{{ shapeMenuOpen }}" hint-placeholder-val="{{ false }}">
       <div role="menu" aria-label="{{ t.shapesGroup }}" style="{{ railFlyoutStyle }}">
@@ -1536,7 +1563,7 @@ class Component extends DCLogic {
     a11yMode: false, saveStatus: '',
     gridW: 60, gridH: 40, rev: 0,
     strokeSize: 1, eraserSize: 1, canvasHover: false, lastShape: 'line',
-    pageIndex: 0, pageCount: 1,
+    pageIndex: 0, pageCount: 1, pageDrag: null, pageMenu: null,
     impApply: 'merge', cmdApply: 'current', tplApply: 'newdoc',
     confirmKind: 'newdoc',
     cx: 8, cy: 6,
@@ -1576,6 +1603,7 @@ class Component extends DCLogic {
     this.embossRef = React.createRef();
     this.heroRef = React.createRef();
     this.audioRef = React.createRef();
+    this.pagesRailRef = React.createRef();
     this.cells = new Uint8Array(60 * 40);
     this.pages = [this.cells];   // multi-page document; this.cells === this.pages[state.pageIndex]
     this.pageAudio = {};         // pageIndex → { src, mime, bytes, durationSec, narration } (DTMA, path-reference)
@@ -1624,6 +1652,7 @@ class Component extends DCLogic {
       txtSizeL: '크기', txtSizeS: '작게', txtSizeM: '보통', txtSizeL2: '크게', txtOrientL: '방향', txtOrientH: '가로', txtOrientV: '세로', txtStyleL: '스타일', txtStyleFill: '채움', txtStyleOutline: '윤곽선', txtNote: '점자가 아닌 인쇄용 묵자 글자입니다. 추가 후 점으로 편집·삭제할 수 있습니다.',
       strokeL: '선 두께', eraserL: '지우개 크기', rowN: ['1줄', '2줄', '3줄'],
       aPage: (n, tot) => `${tot}페이지 중 ${n}페이지`, aPageAdd: (n, tot) => `${n}페이지를 추가했습니다. 총 ${tot}페이지`, aPageDel: (n, tot) => `페이지를 삭제했습니다. 현재 ${n}페이지, 총 ${tot}페이지`,
+      aPageMoveUp: n => `${n}페이지를 위로 옮겼습니다.`, aPageMoveDown: n => `${n}페이지를 아래로 옮겼습니다.`, aPageFirst: '이미 첫 페이지입니다.', aPageLast: '이미 마지막 페이지입니다.', pageMoveUp: '위로 이동', pageMoveDown: '아래로 이동', pageReorder: n => `${n}페이지 순서 변경`,
       strokeDesc: ['정밀한 1줄 선', '표준 2줄 선', '굵은 3줄 선'], eraserDesc: ['작게 지우기', '표준 크기로 지우기', '넓게 지우기'],
       quick: '빠른 작업', qClear: '모두 지우기', qInvert: '반전', qFlipH: '좌우 반전', qFlipV: '상하 반전', moreOpts: '옵션 더보기',
       createMenu: '만들기', savedStatus: '저장됨', saveStatusSaving: '저장 중…', saveStatusError: '저장 실패', shapesGroup: '도형',
@@ -1744,6 +1773,7 @@ class Component extends DCLogic {
       txtSizeL: 'Size', txtSizeS: 'Small', txtSizeM: 'Medium', txtSizeL2: 'Large', txtOrientL: 'Direction', txtOrientH: 'Horizontal', txtOrientV: 'Vertical', txtStyleL: 'Style', txtStyleFill: 'Filled', txtStyleOutline: 'Outline', txtNote: 'Printed (묵자) lettering, not braille. Editable as dots after adding.',
       strokeL: 'Stroke width', eraserL: 'Eraser size', rowN: ['1 row', '2 rows', '3 rows'],
       aPage: (n, tot) => `Page ${n} of ${tot}`, aPageAdd: (n, tot) => `Page ${n} added. ${tot} pages total`, aPageDel: (n, tot) => `Page deleted. Now on page ${n}, ${tot} pages total`,
+      aPageMoveUp: n => `Page ${n} moved up.`, aPageMoveDown: n => `Page ${n} moved down.`, aPageFirst: 'Page is already first.', aPageLast: 'Page is already last.', pageMoveUp: 'Move up', pageMoveDown: 'Move down', pageReorder: n => `Reorder page ${n}`,
       strokeDesc: ['Precise 1-row stroke', 'Standard 2-row stroke', 'Bold 3-row stroke'], eraserDesc: ['Small eraser size', 'Standard eraser size', 'Wide eraser size'],
       quick: 'Quick actions', qClear: 'Clear all', qInvert: 'Invert', qFlipH: 'Flip H', qFlipV: 'Flip V', moreOpts: 'More options',
       createMenu: 'Create', savedStatus: 'Saved', saveStatusSaving: 'Saving…', saveStatusError: 'Save failed', shapesGroup: 'Shapes',
@@ -2522,8 +2552,8 @@ class Component extends DCLogic {
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); cancelAnimationFrame(this.heroRAF); }
-  componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
+  componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); this._restorePageFocus(); }
   // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
   onParentLocale(e) {
     if (window.parent === window) return;                    // 부모 없음(독립 실행) → 무시
@@ -3285,6 +3315,7 @@ class Component extends DCLogic {
     if (tag === 'INPUT' || tag === 'TEXTAREA') { if (e.key === 'Escape') e.target.blur(); return; }
     const t = this.T(), st = this.state;
     if (e.key === 'Escape') {
+      if (st.pageMenu != null) return this.setState({ pageMenu: null });
       if (st.textPopover) return this.setState({ textPopover: null });
       if (st.railMenu) return this.setState({ railMenu: null });
       if (st.menu) return this.setState({ menu: null });
@@ -3406,6 +3437,137 @@ class Component extends DCLogic {
   }
   deletePage() { this.deletePageAt(this.state.pageIndex); }
   resetPages(cells) { this.pages = [cells]; this.pageAudio = {}; this.pageVectors = {}; }
+  // ---------- page reordering (drag handle · overflow menu · Alt+Arrow) ----------
+  // Single source of truth: drag-and-drop, the Move up/down menu, and the keyboard
+  // shortcuts all route through movePage(). Pages are tracked by their stable
+  // Uint8Array buffer identity, so the active page stays selected across a move even
+  // as its array index changes; the index-keyed audio/vector metadata maps are
+  // remapped in lockstep so every page keeps its own attachments. The active page's
+  // undo/redo history is untouched — its buffer is the same object, only reindexed.
+  movePage(from, to) {
+    const n = this.pages.length;
+    if (from < 0 || from >= n) return false;
+    to = Math.max(0, Math.min(n - 1, to));
+    if (to === from) return false;
+    const active = this.pages[this.state.pageIndex];
+    const [moved] = this.pages.splice(from, 1);
+    this.pages.splice(to, 0, moved);
+    this.pageAudio = this._reindexPageMapMove(this.pageAudio, from, to);
+    this.pageVectors = this._reindexPageMapMove(this.pageVectors, from, to);
+    const ni = this.pages.indexOf(active);
+    this.cells = this.pages[ni];
+    this.setState({ pageIndex: ni, pageCount: n });
+    this.queueLivePreview();
+    this.queueBraillePreview();
+    return true;
+  }
+  // Step a page one slot up (dir -1) or down (dir +1) — the shared path for the
+  // menu and Alt+Arrow. Announces the outcome and keeps focus on the moved page.
+  movePageStep(from, dir) {
+    const t = this.T(), n = this.pages.length;
+    if (dir < 0 && from <= 0) return this.say(t.aPageFirst);
+    if (dir > 0 && from >= n - 1) return this.say(t.aPageLast);
+    const to = from + dir;
+    if (this.movePage(from, to)) {
+      this.say(dir < 0 ? t.aPageMoveUp(from + 1) : t.aPageMoveDown(from + 1));
+      this._focusPageIndex = to;
+    }
+  }
+  pageKeyDown(i, e) {
+    if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    this.movePageStep(i, e.key === 'ArrowUp' ? -1 : 1);
+  }
+  togglePageMenu(i) { this.setState(s => ({ pageMenu: s.pageMenu === i ? null : i })); }
+  // Drag-reorder: a pointer press on a thumbnail (mouse/pen) or the grip handle
+  // (any input) arms a drag; movement past a small threshold begins it, so a short
+  // press stays a plain click/tap. Touch presses on a thumbnail are left to the
+  // panel's native scroll — touch drag starts from the grip only.
+  pageDragDown(i, e, fromHandle) {
+    if (e.button != null && e.button > 0) return;
+    if (!fromHandle && e.pointerType === 'touch') return;
+    this._pageDragConsumed = false;
+    this._pageDrag = { from: i, startY: e.clientY, lastY: e.clientY, moved: false, autoDir: 0, el: e.currentTarget, pointerId: e.pointerId };
+    try { e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
+  }
+  pageDragMove(e) {
+    const d = this._pageDrag;
+    if (!d) return;
+    d.lastY = e.clientY;
+    if (!d.moved) {
+      if (Math.abs(e.clientY - d.startY) < 5) return;
+      d.moved = true;
+      if (this.state.pageMenu != null) this.setState({ pageMenu: null });
+      if (!this._pageRAF) this._pageRAF = requestAnimationFrame(() => this._pageScrollTick());
+    }
+    e.preventDefault();
+    this._pageDragUpdate(e.clientY);
+  }
+  // Recompute the insertion slot + edge auto-scroll direction from the pointer Y.
+  _pageDragUpdate(y) {
+    const d = this._pageDrag, c = this.pagesRailRef.current;
+    if (!d || !c) return;
+    const over = this._pageDropSlot(y);
+    const r = c.getBoundingClientRect(), EDGE = 30;
+    d.autoDir = y < r.top + EDGE ? -1 : (y > r.bottom - EDGE ? 1 : 0);
+    const cur = this.state.pageDrag;
+    if (!cur || cur.over !== over || cur.from !== d.from) this.setState({ pageDrag: { from: d.from, over: over } });
+  }
+  _pageDropSlot(y) {
+    const c = this.pagesRailRef.current;
+    if (!c) return 0;
+    const items = Array.prototype.slice.call(c.querySelectorAll('[data-page-index]'));
+    for (let k = 0; k < items.length; k++) {
+      const r = items[k].getBoundingClientRect();
+      if (y < r.top + r.height / 2) return k;
+    }
+    return items.length;
+  }
+  _pageScrollTick() {
+    const d = this._pageDrag, c = this.pagesRailRef.current;
+    if (!d || !d.moved) { this._pageRAF = null; return; }
+    if (c && d.autoDir) {
+      const before = c.scrollTop;
+      c.scrollTop = before + d.autoDir * 9;
+      if (c.scrollTop !== before) this._pageDragUpdate(d.lastY);
+    }
+    this._pageRAF = requestAnimationFrame(() => this._pageScrollTick());
+  }
+  pageDragUp(i, e) {
+    const d = this._pageDrag;
+    if (!d) return;
+    try { d.el.releasePointerCapture && d.el.releasePointerCapture(d.pointerId); } catch (err) { /* noop */ }
+    if (this._pageRAF) { cancelAnimationFrame(this._pageRAF); this._pageRAF = null; }
+    this._pageDrag = null;
+    if (this.state.pageDrag) this.setState({ pageDrag: null });
+    if (d.moved) {
+      this._pageDragConsumed = true;
+      const slot = this._pageDropSlot(e.clientY);
+      const to = slot > d.from ? slot - 1 : slot;
+      if (this.movePage(d.from, to)) {
+        const t = this.T();
+        this.say(to < d.from ? t.aPageMoveUp(d.from + 1) : t.aPageMoveDown(d.from + 1));
+      }
+    } else if (i != null) {
+      this.togglePageMenu(i);
+    }
+  }
+  pageDragCancel() {
+    const d = this._pageDrag;
+    if (!d) return;
+    try { d.el.releasePointerCapture && d.el.releasePointerCapture(d.pointerId); } catch (err) { /* noop */ }
+    if (this._pageRAF) { cancelAnimationFrame(this._pageRAF); this._pageRAF = null; }
+    this._pageDrag = null;
+    if (this.state.pageDrag) this.setState({ pageDrag: null });
+  }
+  _restorePageFocus() {
+    if (this._focusPageIndex == null) return;
+    const idx = this._focusPageIndex; this._focusPageIndex = null;
+    const c = this.pagesRailRef.current;
+    const el = c && c.querySelector('[data-page-index="' + idx + '"] [data-page-pick]');
+    if (el) el.focus();
+  }
   undo() {
     if (!this.undoStack.length) return;
     this.redoStack.push(this._histEntry());
@@ -4262,6 +4424,22 @@ class Component extends DCLogic {
     });
     this.pageVectors = next;
   }
+  // Remap an index-keyed page map for a move from → to (a single key deleted at
+  // `from` and re-inserted at `to`), mirroring the insert/delete helpers above so
+  // reordered pages keep the right audio/vector metadata.
+  _reindexPageMapMove(map, from, to) {
+    const next = {};
+    Object.keys(map || {}).forEach(k => {
+      const idx = +k;
+      let ni;
+      if (idx === from) ni = to;
+      else if (from < to && idx > from && idx <= to) ni = idx - 1;
+      else if (from > to && idx >= to && idx < from) ni = idx + 1;
+      else ni = idx;
+      next[ni] = map[k];
+    });
+    return next;
+  }
   // open / send a Tactile Drive file back into Studio
   // ── library persistence (localStorage; cells stored as 600-hex to stay small)
   static get LIB_KEY() { return 'ts.library.v1'; }
@@ -4616,6 +4794,7 @@ class Component extends DCLogic {
       cvEnter: () => this.setState({ canvasHover: true }), cvLeave: () => this.setState({ canvasHover: false }),
       cvWheel: e => this.cvWheel(e),
       viewportRef: this.viewportRef,
+      pagesRailRef: this.pagesRailRef,
       canvasPanDown: e => this.canvasPanDown(e), canvasPanMove: e => this.canvasPanMove(e), canvasPanUp: () => this.canvasPanUp(),
       zoomPct: Math.round(st.zoom * 100) + '%',
       zoomIn: () => this.zoomIn(), zoomOut: () => this.zoomOut(), zoomReset: () => this.zoomReset(),
@@ -4718,15 +4897,44 @@ class Component extends DCLogic {
       goPrevPage: () => this.goPage(st.pageIndex - 1),
       goNextPage: () => this.goPage(st.pageIndex + 1),
       addPageFn: () => this.addPage(),
+      pageMenuOpen: st.pageMenu != null,
+      closePageMenu: () => this.setState({ pageMenu: null }),
       pageList: (this.pages || []).map((cells, i) => {
         const th = this.thumbFrom(cells, st.gridW, st.gridH);
         const hasAudio = !!(this.pageAudio && this.pageAudio[i] && (this.pageAudio[i].url || this.pageAudio[i]._url || this.pageAudio[i].narration));
         const sel = i === st.pageIndex;
-        const canDelete = (this.pages || []).length > 1;
+        const total = (this.pages || []).length;
+        const canDelete = total > 1;
+        const pdrag = st.pageDrag;
+        const dragging = !!pdrag && pdrag.from === i;
+        const realDrop = !!pdrag && pdrag.over !== pdrag.from && pdrag.over !== pdrag.from + 1;
+        const indicator = 'position:absolute;left:0;right:0;height:3px;border-radius:3px;background:var(--ts-primary);box-shadow:0 0 0 1px rgba(255,255,255,0.85);pointer-events:none;z-index:5';
+        const canUp = i > 0, canDown = i < total - 1;
+        const menuItem = enabled => 'display:flex;align-items:center;gap:10px;width:100%;min-height:34px;padding:6px 10px;border:none;border-radius:7px;background:transparent;font-size:12.5px;font-weight:600;text-align:left;cursor:' + (enabled ? 'pointer' : 'not-allowed') + ';color:' + (enabled ? '#1E1C1A' : '#C9BBAF');
         return {
           i, n: i + 1, selected: sel,
           hasThumb: !!th, thumb: th || '', hasAudio,
-          pick: () => this.goPage(i),
+          pick: () => { if (this._pageDragConsumed) { this._pageDragConsumed = false; return; } this.goPage(i); },
+          onKey: e => this.pageKeyDown(i, e),
+          dragDownCard: e => this.pageDragDown(i, e, false),
+          dragUpCard: e => this.pageDragUp(null, e),
+          dragDownHandle: e => this.pageDragDown(i, e, true),
+          dragUpHandle: e => this.pageDragUp(i, e),
+          dragMove: e => this.pageDragMove(e),
+          dragCancel: () => this.pageDragCancel(),
+          dragging,
+          wrapStyle: 'position:relative' + (dragging ? ';opacity:0.5' : ''),
+          dropBefore: realDrop && pdrag.over === i,
+          dropAfter: realDrop && pdrag.over === total && i === total - 1,
+          indicatorTopStyle: indicator + ';top:-6px',
+          indicatorBottomStyle: indicator + ';bottom:-6px',
+          handleAria: (typeof t.pageReorder === 'function' ? t.pageReorder(i + 1) : 'Reorder page ' + (i + 1)),
+          menuOpen: st.pageMenu === i,
+          upDisabled: !canUp, downDisabled: !canDown,
+          moveUp: () => { this.setState({ pageMenu: null }); this.movePageStep(i, -1); },
+          moveDown: () => { this.setState({ pageMenu: null }); this.movePageStep(i, 1); },
+          menuStyle: 'position:absolute;top:34px;left:6px;min-width:150px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:10px;box-shadow:0 8px 8px -4px rgba(16,24,40,0.06),0 20px 24px -4px rgba(16,24,40,0.14);padding:4px;display:flex;flex-direction:column;gap:2px;z-index:20;animation:tsFly 0.12s ease-out',
+          menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown),
           aria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (sel ? (st.lang === 'ko' ? ' (현재)' : ' (current)') : ''),
           label: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1),
           style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:10px;cursor:pointer;text-align:left;'
