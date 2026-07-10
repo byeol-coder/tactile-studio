@@ -254,7 +254,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
-      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
+      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" aria-keyshortcuts="Shift+/" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
     </div>
   </div>
 
@@ -339,8 +339,11 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 
     <sc-if value="{{ tip }}" hint-placeholder-val="{{ false }}">
       <div role="tooltip" style="{{ tipStyle }}">
-        {{ tip.label }}
-        <sc-if value="{{ tip.key }}" hint-placeholder-val="{{ false }}"><span style="margin-left:9px;font-size:11.5px;font-weight:800;color:#C9BBAF;background:rgba(255,255,255,0.12);border-radius:4px;padding:1px 5px">{{ tip.key }}</span></sc-if>
+        <span style="display:inline-flex;align-items:center">
+          <span>{{ tip.label }}</span>
+          <sc-if value="{{ tip.key }}" hint-placeholder-val="{{ false }}"><span style="margin-left:9px;font-size:11.5px;font-weight:800;color:#C9BBAF;background:rgba(255,255,255,0.12);border-radius:4px;padding:1px 5px;white-space:nowrap">{{ tip.key }}</span></sc-if>
+        </span>
+        <sc-if value="{{ tip.desc }}" hint-placeholder-val="{{ false }}"><span style="display:block;margin-top:2px;font-size:11.5px;font-weight:500;color:#CFC6BB;max-width:200px;white-space:normal;line-height:1.35">{{ tip.desc }}</span></sc-if>
       </div>
     </sc-if>
     <sc-if value="{{ railMenuOpen }}" hint-placeholder-val="{{ false }}">
@@ -352,7 +355,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
     <sc-if value="{{ shapeMenuOpen }}" hint-placeholder-val="{{ false }}">
       <div role="menu" aria-label="{{ t.shapesGroup }}" style="{{ railFlyoutStyle }}">
         <sc-for list="{{ shapeTools }}" as="s" hint-placeholder-count="5">
-          <button role="menuitem" onClick="{{ s.pick }}" aria-label="{{ s.aria }}" style="{{ s.rowStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+          <button role="menuitem" onClick="{{ s.pick }}" aria-label="{{ s.aria }}" aria-keyshortcuts="{{ s.aks }}" style="{{ s.rowStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
             <span style="{{ s.iconStyle }}">{{ s.iconEl }}</span>
             <span style="{{ s.textStyle }}">{{ s.label }}</span>
             <span style="{{ s.keyStyle }}">{{ s.key }}</span>
@@ -464,11 +467,11 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
            a sibling of the scrollable viewport so it stays put on scroll,
            and above the floating tool pill so the two never overlap. -->
       <div role="group" aria-label="{{ t.zoomLabel }}" style="position:absolute;right:16px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
-        <button onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" title="{{ t.zoomOutL }} (Ctrl+-)" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <button onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" aria-keyshortcuts="{{ zoomOutKeys }}" onMouseEnter="{{ zoomOutTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomOutTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
-        <button onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" title="{{ t.zoomResetL }} (Ctrl+0)" style="min-width:48px;height:30px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
-        <button onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" title="{{ t.zoomInL }} (Ctrl+=)" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <button onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" aria-keyshortcuts="{{ zoomResetKeys }}" onMouseEnter="{{ zoomResetTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomResetTip }}" onBlur="{{ hideTip }}" style="min-width:48px;height:30px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
+        <button onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" aria-keyshortcuts="{{ zoomInKeys }}" onMouseEnter="{{ zoomInTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomInTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
       </div>
@@ -482,7 +485,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <svg width="6" height="16" viewBox="0 0 6 16" aria-hidden="true"><circle cx="1.2" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="14.6" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="14.6" r="1.2" fill="#B7AEA4"></circle></svg>
         </div>
         <sc-for list="{{ primaryTools }}" as="tl" hint-placeholder-count="3">
-          <button class="ts-rail-tool" data-sel="{{ tl.sel }}" onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-haspopup="{{ tl.haspopup }}" aria-expanded="{{ tl.expanded }}" aria-label="{{ tl.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <button class="ts-rail-tool" data-sel="{{ tl.sel }}" onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-haspopup="{{ tl.haspopup }}" aria-expanded="{{ tl.expanded }}" aria-label="{{ tl.aria }}" aria-keyshortcuts="{{ tl.aks }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             {{ tl.iconEl }}
             <sc-if value="{{ tl.hasStrokeMenu }}" hint-placeholder-val="{{ false }}">
               <span class="ts-rail-group-caret ts-rail-group-caret--static" aria-hidden="true">
@@ -497,7 +500,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <!-- Shapes: split control. Main region reuses the active/last shape tool;
              the corner caret (or long-press / re-click when active) opens the flyout. -->
         <div class="ts-rail-group" data-sel="{{ shapeGroup.sel }}">
-          <button class="ts-rail-group-main" onClick="{{ shapeGroup.mainClick }}" onPointerDown="{{ shapeGroup.pressDown }}" onPointerUp="{{ shapeGroup.pressUp }}" onPointerLeave="{{ shapeGroup.pressUp }}" onPointerCancel="{{ shapeGroup.pressUp }}" onMouseEnter="{{ shapeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ shapeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ shapeGroup.active }}" aria-label="{{ shapeGroup.aria }}">
+          <button class="ts-rail-group-main" onClick="{{ shapeGroup.mainClick }}" onPointerDown="{{ shapeGroup.pressDown }}" onPointerUp="{{ shapeGroup.pressUp }}" onPointerLeave="{{ shapeGroup.pressUp }}" onPointerCancel="{{ shapeGroup.pressUp }}" onMouseEnter="{{ shapeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ shapeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ shapeGroup.active }}" aria-label="{{ shapeGroup.aria }}" aria-keyshortcuts="{{ shapeGroup.aks }}">
             {{ shapeGroup.iconEl }}
           </button>
           <button class="ts-rail-group-caret" onClick="{{ shapeGroup.open }}" onMouseLeave="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ shapeMenuOpen }}" aria-label="{{ shapeGroup.caretAria }}">
@@ -518,19 +521,19 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
         </sc-if>
 
-        <button class="ts-rail-tool" data-sel="{{ selectTool.sel }}" onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <button class="ts-rail-tool" data-sel="{{ selectTool.sel }}" onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" aria-keyshortcuts="{{ selectTool.aks }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ selectTool.iconEl }}
         </button>
 
-        <button class="ts-rail-tool" data-sel="{{ textTool.sel }}" onClick="{{ textTool.pick }}" onMouseEnter="{{ textTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ textTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ textTool.selected }}" aria-label="{{ textTool.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <button class="ts-rail-tool" data-sel="{{ textTool.sel }}" onClick="{{ textTool.pick }}" onMouseEnter="{{ textTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ textTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ textTool.selected }}" aria-label="{{ textTool.aria }}" aria-keyshortcuts="{{ textTool.aks }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ textTool.iconEl }}
         </button>
 
         <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
-        <button class="ts-rail-history" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" title="{{ t.undo }} (Ctrl+Z)" style="{{ undoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <button class="ts-rail-history" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" aria-keyshortcuts="{{ undoKeys }}" onMouseEnter="{{ undoTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ undoTip }}" onBlur="{{ hideTip }}" style="{{ undoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
-        <button class="ts-rail-history" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" title="{{ t.redo }} (Ctrl+Shift+Z)" style="{{ redoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <button class="ts-rail-history" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" aria-keyshortcuts="{{ redoKeys }}" onMouseEnter="{{ redoTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ redoTip }}" onBlur="{{ hideTip }}" style="{{ redoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
 
@@ -592,25 +595,57 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </button>
             <sc-if value="{{ narrOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:11px">
-            <label style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspDesc }}</label>
-            <textarea onChange="{{ onPgDesc }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:#1E1C1A;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgDesc }}</textarea>
+            <label id="ts-desc-label" style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspDesc }}</label>
+            <textarea ref="{{ descRef }}" id="ts-desc-input" value="{{ pgDesc }}" aria-labelledby="ts-desc-label" aria-describedby="{{ descField.describedby }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" aria-busy="{{ descField.busy }}" onChange="{{ onPgDesc }}" onKeyDown="{{ onDescKey }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:#1E1C1A;margin-bottom:6px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px"></textarea>
+            <div style="display:flex;align-items:center;gap:8px;min-height:16px;margin-bottom:7px">
+              <span id="ts-desc-hint" style="flex:1;min-width:0;font-size:11.5px;color:var(--ts-text-secondary)">{{ applyHintText }}</span>
+              <sc-if value="{{ descField.showStatus }}" hint-placeholder-val="{{ false }}"><span id="ts-desc-status" role="status" aria-live="polite" style="flex:none;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px;{{ descField.colorStyle }}"><sc-if value="{{ descField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:10px;height:10px;border:2px solid currentColor;border-top-color:transparent;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>{{ descField.text }}</span></sc-if>
+              <sc-if value="{{ descField.isError }}" hint-placeholder-val="{{ false }}"><span id="ts-desc-status" role="alert" style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-danger)">{{ descField.text }}</span></sc-if>
+            </div>
+            <button onClick="{{ applyDesc }}" disabled="{{ descField.btnDisabled }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" style="{{ descField.btnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <sc-if value="{{ descField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:12px;height:12px;border:2px solid rgba(255,255,255,0.5);border-top-color:#fff;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>
+              {{ descField.label }}
+            </button>
 
-            <label style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
-            <select onChange="{{ onBrailleLang }}" value="{{ brailleLangValue }}" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:13px;font-family:inherit;color:#1E1C1A;background:#fff;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
+            <label id="ts-brl-lang-label" style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
+            <select onChange="{{ onBrailleLang }}" value="{{ brailleLangValue }}" aria-labelledby="ts-brl-lang-label" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:13px;font-family:inherit;color:#1E1C1A;background:#fff;margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
               <sc-for list="{{ brailleLangOptions }}" as="o" hint-placeholder-count="4">
                 <option value="{{ o.key }}">{{ o.label }}</option>
               </sc-for>
             </select>
 
-            <div aria-live="polite" style="padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;margin-bottom:4px">
-              <div style="font-size:15px;letter-spacing:0.06em;color:#1E1C1A;min-height:20px;word-break:break-all">{{ braillePreviewText }}</div>
-            </div>
-            <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-              <span style="font-size:12.5px;font-weight:700;{{ brailleCounterColor }}">{{ brailleCounterText }}</span>
-            </div>
+            <sc-if value="{{ braillePreviewEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:8px 10px;border:1px dashed var(--ts-border-decor);border-radius:8px;background:#FBF9F6;font-size:12px;color:var(--ts-text-secondary);line-height:1.45;margin-bottom:12px">{{ braillePreviewEmptyText }}</div>
+            </sc-if>
+            <sc-if value="{{ braillePreviewProcessing }}" hint-placeholder-val="{{ false }}">
+              <div role="status" aria-live="polite" aria-busy="true" style="display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;font-size:12px;color:var(--ts-text-secondary);margin-bottom:12px"><span aria-hidden="true" style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span>{{ braillePreviewProcessingText }}</div>
+            </sc-if>
+            <sc-if value="{{ braillePreviewError }}" hint-placeholder-val="{{ false }}">
+              <div role="alert" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ts-danger);border-radius:8px;background:#FCEFE9;margin-bottom:12px">
+                <span style="flex:1;min-width:0;font-size:12px;color:var(--ts-danger);line-height:1.4">{{ braillePreviewFailText }}</span>
+                <button onClick="{{ brailleRetry }}" style="flex:none;font-size:12px;font-weight:700;color:var(--ts-danger);background:#fff;border:1px solid var(--ts-danger);border-radius:7px;padding:4px 9px;cursor:pointer" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ brailleRetryLabel }}</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ braillePreviewSuccess }}" hint-placeholder-val="{{ true }}">
+              <div aria-live="polite" style="padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#FBF9F6;margin-bottom:4px">
+                <div style="font-size:15px;letter-spacing:0.06em;color:#1E1C1A;min-height:20px;word-break:break-all">{{ braillePreviewText }}</div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+                <span style="font-size:12.5px;font-weight:700;{{ brailleCounterColor }}">{{ brailleCounterText }}</span>
+              </div>
+            </sc-if>
 
-            <label style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
-            <textarea onChange="{{ onNarration }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:#1E1C1A;margin-bottom:12px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">{{ pgNarration }}</textarea>
+            <label id="ts-narr-label" style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
+            <textarea ref="{{ narrRef }}" id="ts-narr-input" value="{{ pgNarration }}" aria-labelledby="ts-narr-label" aria-describedby="{{ narrField.describedby }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" aria-busy="{{ narrField.busy }}" onChange="{{ onNarration }}" onKeyDown="{{ onNarrKey }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:#1E1C1A;margin-bottom:6px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px"></textarea>
+            <div style="display:flex;align-items:center;gap:8px;min-height:16px;margin-bottom:7px">
+              <span id="ts-narr-hint" style="flex:1;min-width:0;font-size:11.5px;color:var(--ts-text-secondary)">{{ applyHintText }}</span>
+              <sc-if value="{{ narrField.showStatus }}" hint-placeholder-val="{{ false }}"><span id="ts-narr-status" role="status" aria-live="polite" style="flex:none;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px;{{ narrField.colorStyle }}"><sc-if value="{{ narrField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:10px;height:10px;border:2px solid currentColor;border-top-color:transparent;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>{{ narrField.text }}</span></sc-if>
+              <sc-if value="{{ narrField.isError }}" hint-placeholder-val="{{ false }}"><span id="ts-narr-status" role="alert" style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-danger)">{{ narrField.text }}</span></sc-if>
+            </div>
+            <button onClick="{{ applyNarr }}" disabled="{{ narrField.btnDisabled }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" style="{{ narrField.btnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <sc-if value="{{ narrField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:12px;height:12px;border:2px solid rgba(255,255,255,0.5);border-top-color:#fff;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>
+              {{ narrField.label }}
+            </button>
             <div class="ts-inspector-divider" style="height:1px;background:var(--ts-border-functional);margin:2px 0 10px"></div>
             <div class="ts-inspector-subtitle" style="font-size:12.5px;color:var(--ts-text-secondary);font-weight:700;margin-bottom:8px">{{ t.inspAudioSub }}</div>
 
@@ -1533,12 +1568,17 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
       </button>
     </div>
-    <div style="font-size:13px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px">{{ t.kbSection }}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:24px">
-      <sc-for list="{{ helpRows }}" as="hr" hint-placeholder-count="6">
-        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#1E1C1A">
-          <kbd style="border:1px solid var(--ts-border-decor);border-radius:4px;padding:2px 8px;font-size:12.5px;font-family:inherit;background:#F7F4EF;font-weight:700;white-space:nowrap">{{ hr.k }}</kbd>
-          <span>{{ hr.d }}</span>
+    <div style="font-size:13px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:12px">{{ t.kbSection }}</div>
+    <div style="margin-bottom:20px">
+      <sc-for list="{{ helpGroups }}" as="grp" hint-placeholder-count="5">
+        <div style="font-size:11.5px;font-weight:800;color:var(--ts-primary);letter-spacing:0.4px;margin-bottom:8px">{{ grp.title }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px 24px;margin-bottom:16px">
+          <sc-for list="{{ grp.rows }}" as="hr" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#1E1C1A">
+              <kbd style="border:1px solid var(--ts-border-decor);border-radius:4px;padding:2px 8px;font-size:12.5px;font-family:inherit;background:#F7F4EF;font-weight:700;white-space:nowrap">{{ hr.k }}</kbd>
+              <span>{{ hr.d }}</span>
+            </div>
+          </sc-for>
         </div>
       </sc-for>
     </div>
@@ -1590,7 +1630,8 @@ class Component extends DCLogic {
     connected: true, connBusy: '', connFailed: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     narrOpen: false,
-    brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 },
+    brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 }, brBusy: false,
+    applyBusy: null, applyErr: null,
     saveOpen: false, savePhase: 'form', saveLoc: 'drive', libraryOpen: false,
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     toolbarPos: null,
@@ -1701,7 +1742,15 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', 
+      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
+      stUnsaved: '저장되지 않은 변경사항', stSaving: '저장 중…', stSaved: '✓ 저장됨', stError: '저장하지 못했습니다. 다시 시도', stSavedAt: (tm) => '✓ 저장됨 · ' + tm,
+      applyBraille: '점자 적용', applyNarr: '나레이션 적용', applyHint: (m) => m + ' + Enter로 적용',
+      applyDescOk: '점자 설명이 현재 페이지에 적용되었습니다.', applyNarrOk: '나레이션 텍스트가 현재 페이지에 적용되었습니다.', applyFail: '적용하지 못했습니다. 다시 시도하세요.',
+      aDescField: '점자 설명', aNarrField: '나레이션 텍스트',
+      toolDesc: { pen: '촉각 점을 그립니다', eraser: '촉각 점을 지웁니다', line: '직선을 그립니다', rect: '사각형을 그립니다', ellipse: '원을 그립니다', poly: '다각형을 그립니다', fill: '영역을 채웁니다', select: '영역을 선택합니다', text: '묵자·촉각 글자를 넣습니다', cursor: '키보드 커서로 점을 편집합니다' },
+      shapesDesc: '도형 도구를 선택합니다',
+      scToggleDot: '점 켜기·끄기', scNudge: '커서 이동', scClosePoly: '다각형 닫기', scApply: '설명·나레이션 적용', scHelp: '단축키 도움말', scEscape: '닫기·취소',
+      scgTools: '도구', scgCanvas: '캔버스', scgEditing: '편집', scgView: '보기', scgApply: '적용 및 출력', kbShortcutsTitle: '키보드 단축키',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', 
       dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
@@ -1759,8 +1808,6 @@ class Component extends DCLogic {
       srNote1: '모든 상태 변화(도구 선택, 점 토글, 전송)는 하단 패널의 라이브 영역(aria-live)으로 즉시 안내됩니다.',
       srNote2: '셀 상태는 항상 "점 있음 / 점 없음" 레이블로 전달되며, 색상만으로 상태를 표시하지 않습니다.',
       srNote3: '캔버스는 키보드만으로 편집할 수 있습니다 — 화살표 이동, 스페이스 토글, 도구 단축키.',
-      hRows: [['P / E', '펜 · 지우개'], ['L / R / O', '직선 · 사각형 · 원'], ['G / F / S', '다각형 · 채우기 · 선택'], ['T', '묵자 · 촉각 글자'], ['Enter', '다각형 닫기'], ['Ctrl+Z', '실행 취소'], ['Ctrl+Shift+Z', '다시 실행'], ['?', '이 안내 열기'], ['Esc', '닫기 · 취소']],
-      hRowsA11y: [['V', '커서 (접근성 모드)'], ['화살표', '커서 이동'], ['Space', '점 토글']],
       aToolSel: n => n + ' 도구 선택됨', aDotOn: (x, y) => '점 찍음 (' + x + ', ' + y + ')', aDotOff: (x, y) => '점 지움 (' + x + ', ' + y + ')',
       aUndo: '실행 취소됨', aRedo: '다시 실행됨', aClear: '모두 지웠습니다', aInvert: '반전했습니다', aFlipH: '좌우로 뒤집었습니다', aFlipV: '상하로 뒤집었습니다', aThicken: '선을 조정했습니다', aDenoise: '고립된 점을 제거했습니다', audAttached: '오디오를 첨부했습니다', audRemoved: '오디오를 제거했습니다', audErrType: '오디오 파일만 첨부할 수 있습니다.', audErrSize: '오디오는 25MB 이하만 첨부할 수 있습니다.',
       aTextAdded: '촉각 글자를 캔버스에 추가했습니다. 점으로 편집할 수 있습니다.', aTextEmpty: '입력한 글자가 없습니다.',
@@ -1822,7 +1869,15 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', 
+      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
+      stUnsaved: 'Unsaved changes', stSaving: 'Saving…', stSaved: '✓ Saved', stError: "Couldn't save. Try again", stSavedAt: (tm) => '✓ Saved · ' + tm,
+      applyBraille: 'Apply braille', applyNarr: 'Apply narration', applyHint: (m) => 'Press ' + m + ' + Enter to apply',
+      applyDescOk: 'Braille description applied to the current page.', applyNarrOk: 'Narration text applied to the current page.', applyFail: "Couldn't apply. Please try again.",
+      aDescField: 'Braille description', aNarrField: 'Narration text',
+      toolDesc: { pen: 'Draw tactile dots', eraser: 'Remove tactile dots', line: 'Draw a straight line', rect: 'Draw a rectangle', ellipse: 'Draw an ellipse', poly: 'Draw a polygon', fill: 'Fill an area', select: 'Select an area', text: 'Place tactile text', cursor: 'Edit dots with the keyboard' },
+      shapesDesc: 'Choose a shape tool',
+      scToggleDot: 'Toggle dot', scNudge: 'Move cursor', scClosePoly: 'Close polygon', scApply: 'Apply description / narration', scHelp: 'Keyboard help', scEscape: 'Close / cancel',
+      scgTools: 'Tools', scgCanvas: 'Canvas', scgEditing: 'Editing', scgView: 'View', scgApply: 'Apply & output', kbShortcutsTitle: 'Keyboard shortcuts',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', 
       dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
@@ -1880,8 +1935,6 @@ class Component extends DCLogic {
       srNote1: 'Every state change (tool selection, dot toggles, sending) is announced instantly via the live region (aria-live) in the bottom panel.',
       srNote2: 'Cell state is always conveyed with "Dot present / No dot" labels — never by color alone.',
       srNote3: 'The canvas is fully keyboard-editable — arrows to move, Space to toggle, letter keys for tools.',
-      hRows: [['P / E', 'Pen · Eraser'], ['L / R / O', 'Line · Rectangle · Ellipse'], ['G / F / S', 'Polygon · Fill · Select'], ['T', 'Tactile text'], ['Enter', 'Close polygon'], ['Ctrl+Z', 'Undo'], ['Ctrl+Shift+Z', 'Redo'], ['?', 'Open this guide'], ['Esc', 'Close · cancel']],
-      hRowsA11y: [['V', 'Cursor (Accessibility Mode)'], ['Arrows', 'Move cursor'], ['Space', 'Toggle dot']],
       aToolSel: n => n + ' tool selected', aDotOn: (x, y) => 'Dot placed (' + x + ', ' + y + ')', aDotOff: (x, y) => 'Dot erased (' + x + ', ' + y + ')',
       aUndo: 'Undone', aRedo: 'Redone', aClear: 'Canvas cleared', aInvert: 'Inverted', aFlipH: 'Flipped horizontally', aFlipV: 'Flipped vertically', aThicken: 'Adjusted line weight', aDenoise: 'Removed isolated dots', audAttached: 'Audio attached', audRemoved: 'Audio removed', audErrType: 'Only audio files can be attached.', audErrSize: 'Audio must be 25MB or smaller.',
       aTextAdded: 'Tactile text added to the canvas. You can edit it as dots.', aTextEmpty: 'No text was entered.',
@@ -1939,6 +1992,85 @@ class Component extends DCLogic {
     if (typeof value === 'function') return value(...args);
     if (typeof value === 'string') return value;
     return fallback;
+  }
+  // ── field-value normalization ──────────────────────────────────────────────
+  // A page's braille description / narration is normally a plain string, but a
+  // legacy or externally-authored project JSON may carry it as a *structured*
+  // record (e.g. { text, lang, grade }). Historically such a value reached a
+  // string context (a textarea's child, TSBraille.translate(), export) and was
+  // coerced by Object.prototype.toString into the literal "[object Object]".
+  // Always resolve the human-readable string here; never render an object.
+  _textOf(v) {
+    if (v == null) return '';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    if (typeof v === 'object') {
+      const s = v.text != null ? v.text
+        : v.value != null ? v.value
+        : v.content != null ? v.content
+        : v.ko != null ? v.ko
+        : v.label != null ? v.label : '';
+      return (typeof s === 'string') ? s : (typeof s === 'number' ? String(s) : '');
+    }
+    return '';
+  }
+  // Non-text metadata carried by a structured desc/narration value, so an
+  // export can round-trip it without loss (see importAssetFile).
+  _metaOf(v) {
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      const m = Object.assign({}, v);
+      delete m.text; delete m.value; delete m.content; delete m.ko; delete m.label;
+      return Object.keys(m).length ? m : null;
+    }
+    return null;
+  }
+  // ── platform + shortcut registry (single source of truth) ───────────────────
+  // Cmd on Apple platforms, Ctrl elsewhere. Used only for *display*; the actual
+  // handlers accept both (e.ctrlKey || e.metaKey) so behaviour is identical.
+  _isMac() {
+    try { return /Mac|iPhone|iPad|iPod/.test((navigator.platform || '') + ' ' + (navigator.userAgent || '')); }
+    catch (e) { return false; }
+  }
+  // Canonical tool→key map. Both the keyboard handler (onKey) and the toolbar /
+  // tooltip builders derive from this, so a shortcut is defined exactly once.
+  toolKeys() {
+    return { pen: 'P', eraser: 'E', line: 'L', rect: 'R', ellipse: 'O', poly: 'G', fill: 'F', select: 'S', text: 'T', cursor: 'V' };
+  }
+  // The full, localized shortcut registry. Drives the tooltips' key caps, the
+  // aria-keyshortcuts values, and the Keyboard-shortcuts help dialog — one
+  // definition, no drift. `cap` = visible key cap; `aks` = valid
+  // aria-keyshortcuts token(s); `ctx` = help-dialog group.
+  shortcutRegistry(t) {
+    t = t || this.T();
+    const mod = this._isMac() ? '⌘' : 'Ctrl';                 // ⌘ or Ctrl (display)
+    const TK = this.toolKeys();
+    const tn = id => (t.toolNames && t.toolNames[id]) || id;
+    const rows = [];
+    ['pen', 'eraser', 'line', 'rect', 'ellipse', 'poly', 'fill', 'select', 'text'].forEach(id =>
+      rows.push({ id, ctx: 'tools', cap: TK[id], aks: TK[id], name: tn(id) }));
+    if (this.state.a11yMode) rows.push({ id: 'cursor', ctx: 'tools', cap: TK.cursor, aks: TK.cursor, name: tn('cursor') });
+    rows.push({ id: 'toggleDot', ctx: 'canvas', cap: 'Space', aks: 'Space', name: t.scToggleDot });
+    rows.push({ id: 'nudge', ctx: 'canvas', cap: '← → ↑ ↓', aks: 'ArrowLeft ArrowRight ArrowUp ArrowDown', name: t.scNudge });
+    rows.push({ id: 'closePoly', ctx: 'canvas', cap: 'Enter', aks: 'Enter', name: t.scClosePoly });
+    rows.push({ id: 'undo', ctx: 'editing', cap: mod + 'Z', aks: 'Meta+Z Control+Z', name: t.undo });
+    rows.push({ id: 'redo', ctx: 'editing', cap: mod + '⇧Z', aks: 'Meta+Shift+Z Control+Shift+Z', name: t.redo });
+    rows.push({ id: 'zoomIn', ctx: 'view', cap: mod + '+', aks: 'Meta+= Control+=', name: t.zoomInL });
+    rows.push({ id: 'zoomOut', ctx: 'view', cap: mod + '−', aks: 'Meta+- Control+-', name: t.zoomOutL });
+    rows.push({ id: 'zoomReset', ctx: 'view', cap: mod + '0', aks: 'Meta+0 Control+0', name: t.zoomResetL });
+    rows.push({ id: 'help', ctx: 'view', cap: '?', aks: 'Shift+/', name: t.scHelp });
+    rows.push({ id: 'escape', ctx: 'view', cap: 'Esc', aks: 'Escape', name: t.scEscape });
+    rows.push({ id: 'applyField', ctx: 'apply', cap: mod + '↵', aks: 'Meta+Enter Control+Enter', name: t.scApply });
+    return rows;
+  }
+  // aria-keyshortcuts value for one registry id (empty string if none).
+  ariaKeyshortcuts(id) {
+    const r = this.shortcutRegistry().find(x => x.id === id);
+    return r ? r.aks : '';
+  }
+  // Visible key cap for one registry id (e.g. "⌘Z"). Empty string if none.
+  keyCap(id) {
+    const r = this.shortcutRegistry().find(x => x.id === id);
+    return r ? r.cap : '';
   }
   snapshot() {
     this.undoStack.push(this._histEntry());
@@ -2062,12 +2194,24 @@ class Component extends DCLogic {
     this.setState({ textPopover: null, textValue: '' });
     this.say(ok ? t.aTextAdded : t.aTextEmpty);
   }
-  showTip(label, key, ev) {
-    const r = ev.currentTarget.getBoundingClientRect();
-    const top = r.top - 10;
-    const left = Math.max(8, Math.min(r.left + r.width / 2, window.innerWidth - 90));
+  // Shared tooltip host. `opts.desc` is an optional secondary description line;
+  // `opts.place` ('top'|'bottom') hints placement and auto-flips near a viewport
+  // edge. Keyboard focus shows almost immediately; hover waits, to cut noise.
+  // The tip is inert (pointer-events:none, never a focus stop) — essential
+  // info lives in the accessible name / aria-keyshortcuts, not here.
+  showTip(label, key, ev, opts) {
+    opts = opts || {};
+    const el = ev.currentTarget; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const focusFast = ev.type === 'focus' || ev.type === 'focusin';
+    let place = opts.place || 'top';
+    if (place === 'top' && r.top < 60) place = 'bottom';          // no room above → flip
+    else if (place === 'bottom' && r.bottom > window.innerHeight - 60) place = 'top';
+    const top = place === 'bottom' ? r.bottom + 10 : r.top - 10;
+    const left = Math.max(70, Math.min(r.left + r.width / 2, window.innerWidth - 70));
     clearTimeout(this._tipT);
-    this._tipT = setTimeout(() => this.setState({ tip: { label, key, top, left } }), 320);
+    const payload = { label, key: key || '', desc: opts.desc || '', top, left, place };
+    this._tipT = setTimeout(() => this.setState({ tip: payload }), focusFast ? 90 : 320);
   }
   hideTip() { clearTimeout(this._tipT); if (this.state.tip) this.setState({ tip: null }); }
   toggleRail(kind, ev) {
@@ -2577,7 +2721,7 @@ class Component extends DCLogic {
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); this._restorePageFocus(); }
   // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
   onParentLocale(e) {
@@ -3336,10 +3480,16 @@ class Component extends DCLogic {
 
   // ---------- keyboard ----------
   onKey(e) {
+    // Never let a canvas shortcut fire while the user is typing into a field or
+    // while an IME composition session is active (Korean/Japanese/etc). Escape
+    // still blurs a focused field so keyboard users can return to the canvas.
     const tag = (e.target.tagName || '').toUpperCase();
-    if (tag === 'INPUT' || tag === 'TEXTAREA') { if (e.key === 'Escape') e.target.blur(); return; }
+    const editable = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable);
+    if (e.isComposing || e.keyCode === 229) return;
+    if (editable) { if (e.key === 'Escape') e.target.blur(); return; }
     const t = this.T(), st = this.state;
     if (e.key === 'Escape') {
+      if (st.tip) this.hideTip();   // dismiss any open tooltip first (does not consume Escape)
       if (st.pageMenu != null) return this.setState({ pageMenu: null });
       if (st.textPopover) return this.setState({ textPopover: null });
       if (st.railMenu) return this.setState({ railMenu: null });
@@ -3362,8 +3512,10 @@ class Component extends DCLogic {
     if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+' || e.code === 'NumpadAdd')) { e.preventDefault(); return this.zoomIn(); }
     if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract')) { e.preventDefault(); return this.zoomOut(); }
     if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); return this.zoomReset(); }
-    const tools = { p: 'pen', e: 'eraser', l: 'line', r: 'rect', o: 'ellipse', g: 'poly', f: 'fill', s: 'select', t: 'text' };
-    if (st.a11yMode) tools.v = 'cursor'; // cursor tool only exists in Accessibility Mode
+    // Tool shortcuts derive from the single canonical map (toolKeys) so the key
+    // that fires here is always the key shown in the tooltip / help dialog.
+    const TK = this.toolKeys(), tools = {};
+    for (const id in TK) { if (id === 'cursor' && !st.a11yMode) continue; tools[TK[id].toLowerCase()] = id; }
     const k = e.key.toLowerCase();
     if (!e.ctrlKey && !e.metaKey && tools[k]) { this.pickTool(tools[k]); return; }
     if (e.key === 'Enter' && this.polyPts.length) { e.preventDefault(); return this.closePoly(); }
@@ -3416,7 +3568,10 @@ class Component extends DCLogic {
     this.undoStack = []; this.redoStack = [];
     this.cells = this.pages[i];
     this.polyPts = []; this.preview = null;
-    this.setState({ pageIndex: i, pageCount: n, cx: 0, cy: 0, selRect: null });
+    // Transient Apply state is per-page; drop it so the incoming page derives
+    // its own status (saved/unsaved) from its own model, and refresh preview.
+    this.setState({ pageIndex: i, pageCount: n, cx: 0, cy: 0, selRect: null, applyBusy: null, applyErr: null, brBusy: false });
+    this.queueBraillePreview();
     this.queueLivePreview();
     this.queueBraillePreview(); // 페이지마다 설명/나레이션이 다르므로 갱신
     this.say(this.T().aPage(i + 1, n));
@@ -3812,8 +3967,20 @@ class Component extends DCLogic {
       this.pages = parsed.pages.map(p => p.cells);
       this.pageAudio = {};
       this.pageVectors = {};
+      // ROOT-CAUSE FIX: a page's desc/narration may arrive as a bare string OR
+      // a structured record ({ text, … }). Normalize to a string at the point
+      // of ingestion (so nothing downstream can coerce an object into
+      // "[object Object]"), while preserving any non-text metadata in a sidecar
+      // (descMeta/narrMeta) so a re-export round-trips it losslessly.
       parsed.pages.forEach((p, i) => {
-        if (p.narration || p.desc) this.pageAudio[i] = Object.assign({}, p.narration ? { narration: p.narration } : null, p.desc ? { desc: p.desc } : null);
+        const rec = {};
+        const dTxt = this._textOf(p.desc), dMeta = this._metaOf(p.desc);
+        const nTxt = this._textOf(p.narration), nMeta = this._metaOf(p.narration);
+        if (dTxt) rec.desc = dTxt;
+        if (dMeta) rec.descMeta = dMeta;
+        if (nTxt) rec.narration = nTxt;
+        if (nMeta) rec.narrMeta = nMeta;
+        if (Object.keys(rec).length) this.pageAudio[i] = rec;
       });
       this.cells = this.pages[0];
       this.undoStack = []; this.redoStack = [];
@@ -4247,11 +4414,18 @@ class Component extends DCLogic {
         page: i + 1,
         label: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].label) || (name + ' · ' + (i + 1)),
         desc: this.pageDesc(i) || ((ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].desc) || ''),
-        braille: (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].braille) || '',
+        // Prefer the braille the user explicitly Applied for this page (real
+        // converted Unicode), falling back to any corpus-supplied braille.
+        braille: (audioMap[i] && audioMap[i].brl) || (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].braille) || '',
         graphic: hexOf(cellBuf),
       };
       const a = audioMap[i];
-      if (a && a.narration) page.narration = a.narration;
+      const narr = this.pageNarr(i);
+      if (narr) page.narration = narr;
+      // Round-trip structured desc/narration metadata (grade, lang, …) so an
+      // imported record's non-text fields survive a re-export.
+      if (a && a.descMeta) page.desc = Object.assign({}, a.descMeta, { text: page.desc });
+      if (a && a.narrMeta && page.narration != null) page.narration = Object.assign({}, a.narrMeta, { text: narr });
       if (a && a.src) page.audio = { src: a.src, mime: a.mime || '', bytes: a.bytes || 0, durationSec: a.durationSec || 0 };
       // Optional/experimental (Vectorize lines, Beta) — additive-only field;
       // readers that don't know about it simply ignore it.
@@ -4324,6 +4498,9 @@ class Component extends DCLogic {
   setPageNarration(text) {
     const i = this.state.pageIndex, cur = this.pageAudio[i] || {};
     this.pageAudio = Object.assign({}, this.pageAudio, { [i]: Object.assign({}, cur, { narration: text }) });
+    // A fresh edit clears any prior Apply error for this field (autosave keeps
+    // the text; status derivation now reports "unsaved" until re-Applied).
+    if (this.state.applyErr === 'narr') this.setState({ applyErr: null });
     this.bump();
     this.queueBraillePreview();
   }
@@ -4370,20 +4547,136 @@ class Component extends DCLogic {
     }
   }
   // current page's braille-line description (independent of narration; see
-  // T().inspDescPh for the fallback relationship shown to the user)
+  // T().inspDescPh for the fallback relationship shown to the user).
+  // _textOf() resolves both plain-string and structured (legacy) values, so a
+  // description imported as { text, … } edits and renders as real text — never
+  // "[object Object]".
   pageDesc(i) {
-    const a = this.pageAudio[i];
-    return (a && typeof a.desc === 'string') ? a.desc : '';
+    return this._textOf(this.pageAudio[i] && this.pageAudio[i].desc);
+  }
+  // current page's narration text (same normalization as pageDesc)
+  pageNarr(i) {
+    return this._textOf(this.pageAudio[i] && this.pageAudio[i].narration);
   }
   setPageDesc(text) {
     const i = this.state.pageIndex, cur = this.pageAudio[i] || {};
     this.pageAudio = Object.assign({}, this.pageAudio, { [i]: Object.assign({}, cur, { desc: text }) });
+    if (this.state.applyErr === 'desc') this.setState({ applyErr: null });
     this.bump();
     this.queueBraillePreview();
   }
   setBrailleLang(key) {
     this.setState({ brailleLang: key });
     this.queueBraillePreview();
+  }
+  // ── explicit Apply (desc / narration) ───────────────────────────────────────
+  // Autosave already keeps the raw text on the page model on every keystroke.
+  // Apply is the explicit confirmation/retry: it runs the real braille
+  // conversion, records the converted Unicode + an applied-timestamp onto the
+  // page (so export/DotPad carry it), and — only after that succeeds — surfaces
+  // the toast + persistent "Saved" state. Duplicate submissions are ignored
+  // while one is in flight.
+  applyField(field) {
+    const t = this.T(), st = this.state, i = st.pageIndex;
+    if (st.applyBusy) return; // one Apply at a time — blocks rapid repeat clicks
+    const text = field === 'desc' ? this.pageDesc(i) : this.pageNarr(i);
+    if (!text.trim()) return; // nothing to apply
+    // The braille line always derives from description first, narration as
+    // fallback (matches _runBraillePreview and the DotPad send path).
+    const src = this.pageDesc(i) || this.pageNarr(i);
+    const lang = st.brailleLang;
+    this.setState({ applyBusy: field, applyErr: null, brBusy: true });
+    const fail = () => {
+      if (this.state.pageIndex !== i) { this.setState({ applyBusy: null, brBusy: false }); return; }
+      this.setState({ applyBusy: null, applyErr: field, brBusy: false, braillePreview: { ok: false, unicode: '', cells: 0 } });
+      const msg = t.applyFail; this.toastMsg(msg); this.say(msg);
+      this._refocusField(field);
+    };
+    if (!window.TSBraille) { fail(); return; }
+    window.TSBraille.preload().then(() => {
+      if (this.state.pageIndex !== i) { this.setState({ applyBusy: null, brBusy: false }); return; } // page switched mid-flight
+      const r = window.TSBraille.translate(src, lang);
+      if (!r || !r.ok) return fail();
+      const cur = this.pageAudio[i] || {};
+      const stamp = Date.now();
+      const patch = field === 'desc'
+        ? { descApplied: text, descAt: stamp, brl: r.unicode }
+        : { narrApplied: text, narrAt: stamp, brl: r.unicode };
+      this.pageAudio = Object.assign({}, this.pageAudio, { [i]: Object.assign({}, cur, patch) });
+      this.setState({ applyBusy: null, applyErr: null, brBusy: false, braillePreview: r });
+      this.queueLivePreview();
+      const msg = field === 'desc' ? t.applyDescOk : t.applyNarrOk;
+      this.toastMsg(msg); this.say(msg);
+      this._refocusField(field);
+    }).catch(fail);
+  }
+  // Return focus to the field the user Applied (predictable focus, and keeps a
+  // pointer-click Apply from stranding focus on the button).
+  _refocusField(field) {
+    const ref = field === 'desc' ? this.descRef : this.narrRef;
+    try { if (ref && ref.current) ref.current.focus(); } catch (e) {}
+  }
+  // Derived per-field state for the inline status row: idle | unsaved | saving |
+  // saved | error. Pure function of the page model + transient apply flags.
+  fieldStatus(field) {
+    const st = this.state, i = st.pageIndex, a = this.pageAudio[i] || {};
+    const text = field === 'desc' ? this.pageDesc(i) : this.pageNarr(i);
+    if (st.applyBusy === field) return { status: 'saving' };
+    if (st.applyErr === field) return { status: 'error' };
+    if (!text.trim()) return { status: 'idle' };
+    const applied = field === 'desc' ? a.descApplied : a.narrApplied;
+    const at = field === 'desc' ? a.descAt : a.narrAt;
+    if (applied != null && applied === text) return { status: 'saved', at: at || null };
+    return { status: 'unsaved' };
+  }
+  // Textarea keydown: Cmd/Ctrl+Enter applies; plain Enter falls through to the
+  // browser (newline). Never acts during IME composition, so Korean input and
+  // candidate confirmation are untouched.
+  _fieldKey(e, field) {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      this.applyField(field);
+    }
+  }
+  // Localized clock for the "Saved · 1:42 PM" inline state.
+  _fmtTime(ms) {
+    try { return new Date(ms).toLocaleTimeString(this.state.lang === 'ko' ? 'ko-KR' : 'en-US', { hour: 'numeric', minute: '2-digit' }); }
+    catch (e) { return ''; }
+  }
+  // Template view-model for a field's inline status row.
+  _fieldUi(field, t, st) {
+    t = t || this.T();
+    const s = this.fieldStatus(field), status = s.status;
+    let text = '';
+    if (status === 'unsaved') text = t.stUnsaved;
+    else if (status === 'saving') text = t.stSaving;
+    else if (status === 'saved') text = s.at ? t.stSavedAt(this._fmtTime(s.at)) : t.stSaved;
+    else if (status === 'error') text = t.stError;
+    const isError = status === 'error';
+    const show = status !== 'idle';
+    const color = isError ? 'var(--ts-danger)' : (status === 'saved' ? '#2E7D32' : 'var(--ts-text-secondary)');
+    const i = this.state.pageIndex;
+    const val = field === 'desc' ? this.pageDesc(i) : this.pageNarr(i);
+    const disabled = status === 'saving' || !val.trim();
+    return {
+      status, text, show, isError,
+      showStatus: show && !isError,   // polite live region (unsaved/saving/saved)
+      busy: status === 'saving',
+      saved: status === 'saved',
+      colorStyle: 'color:' + color,
+      describedby: field === 'desc' ? 'ts-desc-hint ts-desc-status' : 'ts-narr-hint ts-narr-status',
+      label: field === 'desc' ? t.applyBraille : t.applyNarr,
+      btnDisabled: disabled,
+      btnStyle: {
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        width: '100%', height: 32, borderRadius: 8, fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+        border: '1px solid ' + (disabled ? 'var(--ts-border-functional)' : 'var(--ts-primary)'),
+        background: disabled ? '#F1EBE3' : 'var(--ts-primary)',
+        color: disabled ? '#B7AFA4' : '#fff',
+        cursor: disabled ? 'not-allowed' : 'pointer', marginBottom: 12,
+      },
+    };
   }
   // Debounced live Unicode-braille preview for the inspector. Loads the
   // engine lazily on first use (non-blocking — boot is unaffected) and
@@ -4392,21 +4685,24 @@ class Component extends DCLogic {
   // never flashes a stale preview onto the wrong page.
   queueBraillePreview() {
     clearTimeout(this._brT);
+    const text = this.pageDesc(this.state.pageIndex) || this.pageNarr(this.state.pageIndex);
+    // Reflect a "converting…" state immediately for non-empty input so the
+    // preview never claims stale content is current while we debounce.
+    if (text.trim() && !this.state.brBusy) this.setState({ brBusy: true });
     this._brT = setTimeout(() => this._runBraillePreview(), 220);
   }
   _runBraillePreview() {
     const pageIdx = this.state.pageIndex, lang = this.state.brailleLang;
-    const a = this.pageAudio[pageIdx];
-    const text = this.pageDesc(pageIdx) || (a && a.narration) || '';
-    if (!text) { this.setState({ braillePreview: { ok: true, unicode: '', cells: 0 } }); return; }
-    if (!window.TSBraille) { this.setState({ braillePreview: { ok: false, unicode: '', cells: 0 } }); return; }
+    const text = this.pageDesc(pageIdx) || this.pageNarr(pageIdx);
+    if (!text.trim()) { this.setState({ braillePreview: { ok: true, unicode: '', cells: 0 }, brBusy: false }); return; }
+    if (!window.TSBraille) { this.setState({ braillePreview: { ok: false, unicode: '', cells: 0 }, brBusy: false }); return; }
     window.TSBraille.preload().then(() => {
       if (this.state.pageIndex !== pageIdx || this.state.brailleLang !== lang) return; // stale
       const r = window.TSBraille.translate(text, lang);
-      this.setState({ braillePreview: r });
+      this.setState({ braillePreview: r, brBusy: false });
     }).catch(() => {
       if (this.state.pageIndex !== pageIdx || this.state.brailleLang !== lang) return;
-      this.setState({ braillePreview: { ok: false, unicode: '', cells: 0 } });
+      this.setState({ braillePreview: { ok: false, unicode: '', cells: 0 }, brBusy: false });
     });
   }
   // pageAudio is keyed by page index, not a real array — addPage/deletePage
@@ -4536,8 +4832,10 @@ class Component extends DCLogic {
       museum: [{ kind: 'flow', gw: 96, gh: 64, ko: '건물 파사드', en: 'Building facade' }, { kind: 'cat', gw: 96, gh: 64, ko: '유물 도해', en: 'Artifact' }, { kind: 'star', gw: 60, gh: 40, ko: '전시 안내 아이콘', en: 'Exhibit icon' }]
     };
 
-    const keys = { cursor: 'V', pen: 'P', eraser: 'E', line: 'L', rect: 'R', ellipse: 'O', poly: 'G', fill: 'F', select: 'S' };
+    // Single canonical tool→key map (also drives onKey + the help dialog).
+    const keys = this.toolKeys();
     const nm = id => (t.toolNames && t.toolNames[id]) || id;
+    const td = t.toolDesc || {};
     // Pen and Eraser are the two tools whose press also opens the contextual
     // size dropdown (see pickToolAndStroke); Cursor/Select/Text stay plain picks.
     const strokeToolIds = ['pen', 'eraser'];
@@ -4547,9 +4845,12 @@ class Component extends DCLogic {
       const strokeMenuOpenHere = hasStrokeMenu && sel && !!(st.railMenu && st.railMenu.kind === 'stroke');
       return {
         id, label: nm(id), key: keys[id], selected: sel, iconEl: this.icon(id, 21),
-        aria: keys[id] ? nm(id) + ' (' + keys[id] + ')' : nm(id),
+        // Accessible name is the tool name only; the shortcut is exposed
+        // separately via aria-keyshortcuts, so screen readers don't say the key
+        // twice ("Pen (P)… shortcut P").
+        aria: nm(id), aks: keys[id] || '',
         pick: hasStrokeMenu ? (e => this.pickToolAndStroke(id, e)) : (() => this.pickTool(id)),
-        onEnter: e => this.showTip(nm(id), keys[id], e),
+        onEnter: e => this.showTip(nm(id), keys[id], e, { desc: td[id], place: 'top' }),
         sel: sel ? '1' : '0',
         haspopup: hasStrokeMenu ? 'menu' : undefined,
         expanded: hasStrokeMenu ? strokeMenuOpenHere : undefined,
@@ -4574,21 +4875,21 @@ class Component extends DCLogic {
     const menuKeyCap = { fontSize: 11.5, fontWeight: 800, color: '#C9BBAF', flex: 'none' };
     const shapeTools = shapeIds.map(id => {
       const sel = st.tool === id;
-      return { id, label: nm(id), key: keys[id], aria: nm(id) + ' (' + keys[id] + ')', iconEl: this.icon(id, 19), pick: () => this.pickTool(id), rowStyle: menuRow(sel), iconStyle: menuGlyph(sel), textStyle: menuText(sel), keyStyle: menuKeyCap };
+      return { id, label: nm(id), key: keys[id], aria: nm(id), aks: keys[id] || '', iconEl: this.icon(id, 19), pick: () => this.pickTool(id), rowStyle: menuRow(sel), iconStyle: menuGlyph(sel), textStyle: menuText(sel), keyStyle: menuKeyCap };
     });
     const shapeMenuOpenNow = !!(st.railMenu && st.railMenu.kind === 'shape');
     const shapeShownTool = shapeActive ? st.tool : (st.lastShape || 'line');
     const shapeGroup = {
       active: shapeActive, sel: (shapeActive || shapeMenuOpenNow) ? '1' : '0',
       // Reflect the active / last-used shape tool so a plain click reuses it.
-      aria: (shapeActive ? nm(st.tool) : t.shapesGroup) + ' (' + keys[shapeShownTool] + ')',
+      aria: (shapeActive ? nm(st.tool) : t.shapesGroup), aks: keys[shapeShownTool] || '',
       caretAria: t.shapesGroup + ' — ' + t.moreOpts,
       iconEl: this.icon(shapeShownTool, 21),
       mainClick: e => this.shapeMainClick(e),
       open: e => this.toggleRail('shape', e),
       pressDown: e => this.railPressDown('shape', e),
       pressUp: () => this.railPressUp(),
-      onEnter: e => this.showTip(shapeActive ? nm(st.tool) : t.shapesGroup, keys[shapeShownTool] || '', e)
+      onEnter: e => this.showTip(shapeActive ? nm(st.tool) : t.shapesGroup, keys[shapeShownTool] || '', e, { desc: shapeActive ? td[st.tool] : t.shapesDesc, place: 'top' })
     };
     // Stroke-width dropdown: same toolbar-pill pattern as shapeGroup above,
     // reusing the existing strokeSize/eraserSize state (see strokeOpts below)
@@ -4687,6 +4988,16 @@ class Component extends DCLogic {
       output: st.output,
       outputChange: e => this.setOutput(e.target.value),
       doUndo: () => this.undo(), doRedo: () => this.redo(),
+      // Icon-only history / zoom controls: unified custom tooltip (label + real
+      // key cap) plus aria-keyshortcuts, replacing the platform-wrong native
+      // title strings. Caps come from the shortcut registry.
+      undoTip: (e) => this.showTip(t.undo, this.keyCap('undo'), e),
+      redoTip: (e) => this.showTip(t.redo, this.keyCap('redo'), e),
+      zoomInTip: (e) => this.showTip(t.zoomInL, this.keyCap('zoomIn'), e),
+      zoomOutTip: (e) => this.showTip(t.zoomOutL, this.keyCap('zoomOut'), e),
+      zoomResetTip: (e) => this.showTip(t.zoomResetL, this.keyCap('zoomReset'), e),
+      undoKeys: this.ariaKeyshortcuts('undo'), redoKeys: this.ariaKeyshortcuts('redo'),
+      zoomInKeys: this.ariaKeyshortcuts('zoomIn'), zoomOutKeys: this.ariaKeyshortcuts('zoomOut'), zoomResetKeys: this.ariaKeyshortcuts('zoomReset'),
       ...this.corpusNavProps(),
       undoBtnStyle: iconBtn(this.undoStack.length > 0), redoBtnStyle: iconBtn(this.redoStack.length > 0),
       toggleConn: () => this.toggleConnection(),
@@ -4716,11 +5027,23 @@ class Component extends DCLogic {
           fileName: (a && (a.fileName || a.src)) || '',
           url: (a && a._url) || '',
           dur: (a && a.durationSec) ? (a.durationSec + 's') : '',
-          narration: (a && a.narration) || '',
+          narration: this.pageNarr(st.pageIndex),
         };
       })(),
       pgDesc: this.pageDesc(st.pageIndex),
       onPgDesc: (e) => this.setPageDesc(e && e.target ? e.target.value : ''),
+      // Cmd/Ctrl+Enter applies; plain Enter inserts a newline; IME composition
+      // (Korean/Japanese/\u2026) is never interrupted. Enter mid-composition confirms
+      // the candidate, so we require the field-apply modifier for Apply.
+      onDescKey: (e) => this._fieldKey(e, 'desc'),
+      onNarrKey: (e) => this._fieldKey(e, 'narr'),
+      applyDesc: () => this.applyField('desc'),
+      applyNarr: () => this.applyField('narr'),
+      applyKeyshortcuts: this.ariaKeyshortcuts('applyField'),
+      applyHintText: t.applyHint(this._isMac() ? '\u2318' : 'Ctrl'),
+      descRef: this.descRef, narrRef: this.narrRef,
+      descField: this._fieldUi('desc', t, st),
+      narrField: this._fieldUi('narr', t, st),
       brailleLangValue: st.brailleLang,
       brailleLangOptions: [
         { key: 'ko-g2', label: t.brailleLangKoG2 },
@@ -4729,20 +5052,37 @@ class Component extends DCLogic {
         { key: 'ueb-g2', label: t.brailleLangUebG2 },
       ],
       onBrailleLang: (e) => this.setBrailleLang(e && e.target ? e.target.value : 'ko-g2'),
-      braillePreviewText: (() => {
-        const bp = st.braillePreview || { ok: true, unicode: '', cells: 0 };
-        const hasSrc = !!(this.pageDesc(st.pageIndex) || ((this.pageAudio || {})[st.pageIndex] || {}).narration);
-        if (!hasSrc) return t.braillePreviewEmpty;
-        if (!bp.ok) return t.braillePreviewFail;
-        return bp.unicode || '\u2800';
+      // Braille preview: one explicit state, so the UI never implies stale
+      // content is current (empty \u00b7 processing \u00b7 error \u00b7 success).
+      braillePreviewState: (() => {
+        const hasSrc = !!(this.pageDesc(st.pageIndex) || this.pageNarr(st.pageIndex));
+        if (!hasSrc) return 'empty';
+        if (st.brBusy) return 'processing';
+        return (st.braillePreview && st.braillePreview.ok) ? 'success' : 'error';
       })(),
+      braillePreviewEmpty: (() => !((this.pageDesc(st.pageIndex) || this.pageNarr(st.pageIndex))))(),
+      braillePreviewProcessing: (() => !!(st.brBusy && (this.pageDesc(st.pageIndex) || this.pageNarr(st.pageIndex))))(),
+      braillePreviewError: (() => {
+        const hasSrc = !!(this.pageDesc(st.pageIndex) || this.pageNarr(st.pageIndex));
+        return hasSrc && !st.brBusy && !(st.braillePreview && st.braillePreview.ok);
+      })(),
+      braillePreviewSuccess: (() => {
+        const hasSrc = !!(this.pageDesc(st.pageIndex) || this.pageNarr(st.pageIndex));
+        return hasSrc && !st.brBusy && !!(st.braillePreview && st.braillePreview.ok);
+      })(),
+      braillePreviewText: ((st.braillePreview && st.braillePreview.unicode) || '\u2800'),
+      braillePreviewEmptyText: t.braillePreviewEmpty,
+      braillePreviewProcessingText: t.braillePreviewProcessing,
+      braillePreviewFailText: t.braillePreviewFail,
+      brailleRetryLabel: t.brailleRetry,
+      brailleRetry: () => this.queueBraillePreview(),
       brailleCounterText: (() => {
         const bp = st.braillePreview || { ok: true, unicode: '', cells: 0 };
-        const hasSrc = !!(this.pageDesc(st.pageIndex) || ((this.pageAudio || {})[st.pageIndex] || {}).narration);
-        return (hasSrc && bp.ok) ? t.brailleCellsOf(bp.cells || 0, 20) : '';
+        const hasSrc = !!(this.pageDesc(st.pageIndex) || this.pageNarr(st.pageIndex));
+        return (hasSrc && bp.ok && !st.brBusy) ? t.brailleCellsOf(bp.cells || 0, 20) : '';
       })(),
       brailleCounterColor: 'color:' + (((st.braillePreview || {}).cells || 0) > 20 ? 'var(--ts-danger)' : 'var(--ts-text-secondary)'),
-      pgNarration: (() => { const a = (this.pageAudio || {})[st.pageIndex]; return (a && typeof a.narration === 'string') ? a.narration : ''; })(),
+      pgNarration: this.pageNarr(st.pageIndex),
       onAudioFile: (e) => { const f = e && e.target && e.target.files && e.target.files[0]; if (f) this.attachPageAudio(f); },
       onAudioRemove: () => this.removePageAudio(),
       onNarration: (e) => this.setPageNarration(e && e.target ? e.target.value : ''),
@@ -4869,7 +5209,7 @@ class Component extends DCLogic {
       closeRail: () => this.setState({ railMenu: null }),
       hideTip: () => this.hideTip(),
       tip: st.tip,
-      tipStyle: st.tip ? { position: 'fixed', top: st.tip.top, left: st.tip.left, transform: 'translate(-50%, -100%)', zIndex: 90, display: 'inline-flex', alignItems: 'center', background: '#1E1C1A', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 8, padding: '6px 10px', boxShadow: '0 4px 6px -2px rgba(10,13,18,0.12),0 12px 16px -4px rgba(10,13,18,0.18)', pointerEvents: 'none', whiteSpace: 'nowrap', animation: 'tsTip 0.12s ease-out' } : null,
+      tipStyle: st.tip ? { position: 'fixed', top: st.tip.top, left: st.tip.left, transform: st.tip.place === 'bottom' ? 'translate(-50%, 0)' : 'translate(-50%, -100%)', zIndex: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', maxWidth: 220, background: '#1E1C1A', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 8, padding: '6px 10px', boxShadow: '0 4px 6px -2px rgba(10,13,18,0.12),0 12px 16px -4px rgba(10,13,18,0.18)', pointerEvents: 'none', whiteSpace: 'nowrap', animation: this.heroReduced ? 'none' : 'tsTip 0.12s ease-out' } : null,
       railFlyoutStyle: st.railMenu ? Object.assign({ position: 'fixed', left: st.railMenu.left, zIndex: 80, width: 190, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' }, st.railMenu.up ? { bottom: st.railMenu.bottom, transformOrigin: 'left bottom' } : { top: st.railMenu.top, transformOrigin: 'left top' }) : null,
       // Floating toolbar (Photoshop-style movable pill): defaults to centered
       // over the bottom of the canvas; once dragged, toolbarPos pins it to
@@ -5272,8 +5612,7 @@ class Component extends DCLogic {
                 // fallback. Never sends untranslated text (translateToBraille
                 // returns null on any failure — see its definition for why).
                 const pageIdx = this.state.pageIndex;
-                const a = (this.pageAudio || {})[pageIdx];
-                const brailleText = this.pageDesc(pageIdx) || (a && a.narration) || '';
+                const brailleText = this.pageDesc(pageIdx) || this.pageNarr(pageIdx);
                 this.translateToBraille(brailleText).then(brailleHex => {
                   if (brailleHex && DP.outputText) {
                     DP.outputText(brailleHex).catch(() => {});
@@ -5366,7 +5705,19 @@ class Component extends DCLogic {
       // help / toast
       helpOpen: st.helpOpen,
       toggleHelp: () => this.setState(s => ({ helpOpen: !s.helpOpen })),
-      helpRows: [].concat(t.hRows || [], st.a11yMode ? (t.hRowsA11y || []) : []).map(r => ({ k: (r && r[0]) || '', d: (r && r[1]) || '' })),
+      // Help dialog: generated from the single shortcut registry and grouped by
+      // context, so every listed shortcut is real and no real shortcut is missed.
+      helpGroups: (() => {
+        const reg = this.shortcutRegistry(t);
+        const groups = [
+          { key: 'tools', title: t.scgTools }, { key: 'canvas', title: t.scgCanvas },
+          { key: 'editing', title: t.scgEditing }, { key: 'view', title: t.scgView },
+          { key: 'apply', title: t.scgApply },
+        ];
+        return groups
+          .map(g => ({ title: g.title, rows: reg.filter(r => r.ctx === g.key).map(r => ({ k: r.cap, d: r.name })) }))
+          .filter(g => g.rows.length);
+      })(),
       canvasAria: st.a11yMode && t.canvasAriaA11y ? t.canvasAriaA11y : t.canvasAria,
       toastOn: !!st.toast, toast: st.toast,
       stopProp: e => e.stopPropagation()
