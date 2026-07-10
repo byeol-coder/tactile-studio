@@ -1,0 +1,102 @@
+{
+  "cases": [
+    {
+      "input": null,
+      "textOf": "",
+      "metaOf": null
+    },
+    {
+      "input": "__undefined__",
+      "textOf": "",
+      "metaOf": null
+    },
+    {
+      "input": "",
+      "textOf": "",
+      "metaOf": null
+    },
+    {
+      "input": "plain string",
+      "textOf": "plain string",
+      "metaOf": null
+    },
+    {
+      "input": 42,
+      "textOf": "42",
+      "metaOf": null
+    },
+    {
+      "input": true,
+      "textOf": "true",
+      "metaOf": null
+    },
+    {
+      "input": {
+        "text": "from text"
+      },
+      "textOf": "from text",
+      "metaOf": null
+    },
+    {
+      "input": {
+        "value": "from value"
+      },
+      "textOf": "from value",
+      "metaOf": null
+    },
+    {
+      "input": {
+        "content": "from content"
+      },
+      "textOf": "from content",
+      "metaOf": null
+    },
+    {
+      "input": {
+        "ko": "한국어"
+      },
+      "textOf": "한국어",
+      "metaOf": null
+    },
+    {
+      "input": {
+        "label": "from label"
+      },
+      "textOf": "from label",
+      "metaOf": null
+    },
+    {
+      "input": {
+        "text": "with meta",
+        "grade": 2,
+        "lang": "ko"
+      },
+      "textOf": "with meta",
+      "metaOf": {
+        "grade": 2,
+        "lang": "ko"
+      }
+    },
+    {
+      "input": {
+        "other": "no known key"
+      },
+      "textOf": "",
+      "metaOf": {
+        "other": "no known key"
+      }
+    },
+    {
+      "input": [],
+      "textOf": "",
+      "metaOf": null
+    },
+    {
+      "input": {
+        "text": 5
+      },
+      "textOf": "5",
+      "metaOf": null
+    }
+  ]
+}

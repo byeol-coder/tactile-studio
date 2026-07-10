@@ -1,0 +1,45 @@
+{
+  "items": [
+    {
+      "name": "A",
+      "loc": "drive",
+      "grid": "60×40",
+      "thumb": "thumbA"
+    },
+    {
+      "name": "B",
+      "loc": "device",
+      "grid": "60×40",
+      "thumb": ""
+    },
+    {
+      "name": "C",
+      "loc": "drive",
+      "grid": "96×64",
+      "thumb": "thumbC"
+    }
+  ],
+  "saved": [
+    {
+      "name": "A",
+      "loc": "drive",
+      "grid": "60×40",
+      "thumb": "thumbA",
+      "hex": "40432f00d28274dc9000f9567f20b758204b876c40b8c403b0306815d212291942004051262a98a8f104e0121422430c1c605802625400350216694d02d5661c810a866c28824e021c8020d43d861f2c6029d64644294205090d2fe22214d4d4f6d8d40080c89ae18ba2c017c53c4b95851bc701002f76d21b01a800100f0534025ae12106630ac8a04f100000900a408450c6b03dc08112eac16120b48f0107485e208e0260a298901a254305001608009685a510eb70849002aacc016cb2762400a95162006748990b0880411094027526148a1422bada0c53a296c9925993b9b1284820d1204338f1535510a2f344144097ab14509020e872a29038442243202112c128881ca57802453c200de359e5a04020c1c01c28d009a534900306133a62860918409c50e1beb231"
+    },
+    {
+      "name": "B",
+      "loc": "device",
+      "grid": "60×40",
+      "thumb": "",
+      "hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "name": "C",
+      "loc": "drive",
+      "grid": "96×64",
+      "thumb": "thumbC",
+      "hex": ""
+    }
+  ]
+}

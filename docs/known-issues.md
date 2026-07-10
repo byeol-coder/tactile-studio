@@ -17,7 +17,17 @@
 - 회귀 픽스처: `tests/fixtures/baseline/library-asset-v1.json` 은 `{ throws: true, errorName: "TypeError", … }` 형태로 현재 동작을 고정
 - 조치 계획: Phase 2(코어 추출)와 무관한 별도 fix 커밋에서 `banaPrintCheck` 구현(BANA 인쇄 최소 규격 검사) 복원 또는 안전한 폴백 결정 → 그 커밋에서 픽스처를 성공 케이스로 재캡처
 
-## 2. DotPad SDK `.d.ts` 불일치 (참고)
+## 2. Phase 3 scope note — deferred codecs (canvas/WASM dependent)
+
+Phase 3 (`refactor(studio-core): extract codecs and tactile processing`) extracted every **pure** codec: DTMS decode + injected encode, Library Asset v1 build/parse, the raster→vector pipeline, and the local `ts.library.v1` saved-shelf serialization. The following were inspected but **not** extracted in this phase, because they require a browser `<canvas>` (`imgToCells`, `stampText`'s glyph rasterization) or the liblouis WASM module (`window.TSBraille`), and this migration environment has no jsdom/OffscreenCanvas or WASM runtime available for a byte-for-byte capture:
+
+- `imgToCells` (image → pin conversion; Otsu/Sauvola thresholding, edge mode, dilate/denoise cleanup)
+- `stampText` (묵자 print-text rasterization; 3× supersampled canvas glyph rendering, Hangul 1.35× size boost)
+- `window.TSBraille` integration (liblouis 점역; `preload()`/`translate()`/`padOrTruncate()`)
+
+Plan: extract these in a follow-up Phase 3 sub-step using jsdom + `node-canvas` (or a headless-browser capture step) so glyph/threshold outputs can be captured and compared exactly, per the "no fake compatibility" rule — capturing them without a real canvas would silently diverge from production. Until then, the original implementations remain untouched and continue shipping as-is.
+
+## 3. DotPad SDK `.d.ts` 불일치 (참고)
 
 - `displayAllUp` / `displayAllDown` 은 번들된 SDK 런타임에는 존재하지만 타입 선언에는 없음.
 - Phase 4(디바이스 어댑터)에서 실제 SDK 파일을 검사해 존재 여부를 재확인하고, 존재가 확인된 메서드만 어댑터 인터페이스의 optional 멤버로 노출한다.
