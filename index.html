@@ -123,6 +123,21 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 6px}
 .ts-divider.ts-left-divider{height:26px}
 .ts-rail-history{width:44px!important;height:44px!important;border-radius:12px!important}
+/* Grouped tool buttons (shapes / stroke width): the main icon stays the primary
+   focus; a small corner caret is the secondary "has more options" affordance.
+   Replaces the old floating circular dropdown badge. Selected state is toggled
+   via [data-sel] (not inline background) so :hover feedback actually applies. */
+.ts-rail-group{position:relative;width:40px;height:40px;flex:none;border-radius:10px;transition:background 0.15s ease}
+.ts-rail-group:not([data-sel="1"]):hover{background:rgba(255,255,255,0.10)}
+.ts-rail-group[data-sel="1"]{background:var(--ts-primary)}
+.ts-rail-group-main{position:absolute;inset:0;width:100%;height:100%;display:grid;place-items:center;border:none;background:transparent;border-radius:10px;color:#B7AEA4;cursor:pointer;padding:0;transition:color 0.15s ease,transform 0.1s ease}
+.ts-rail-group[data-sel="1"] .ts-rail-group-main{color:#fff}
+.ts-rail-group-main:active{transform:scale(0.9)}
+.ts-rail-group-caret{position:absolute;right:2px;bottom:2px;width:14px;height:14px;display:grid;place-items:center;border:none;background:transparent;border-radius:5px;padding:0;cursor:pointer;color:#8A8177;transition:color 0.12s ease,background 0.12s ease}
+.ts-rail-group[data-sel="1"] .ts-rail-group-caret{color:rgba(255,255,255,0.85)}
+button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)}
+.ts-rail-group-caret--static{pointer-events:none}
+.ts-rail-group-main:focus-visible,.ts-rail-group-caret:focus-visible{outline:2px solid var(--ts-primary);outline-offset:2px}
 .ts-project-name{min-width:0!important;width:clamp(96px,14vw,220px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ts-output-zone{min-width:0;max-width:190px;overflow:hidden}
 .ts-output-zone select{min-width:0;max-width:150px}
@@ -319,10 +334,22 @@ input[type=range]{accent-color:var(--ts-primary)}
       <sc-if value="{{ topbarPill }}" hint-placeholder-val="{{ false }}">
         <span style="font-size:12.5px;font-weight:600;color:#B7AEA4;white-space:nowrap;flex:none">· {{ t.embedded }}</span>
       </sc-if>
-      <span class="ts-save-status" role="status" style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--ts-success);flex:none;white-space:nowrap">
-        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        <span class="ts-save-text">{{ t.savedStatus }}</span>
+      <!-- Save status: hidden in the normal state; surfaces only on meaningful
+           transitions (saving / saved-just-now / failed). No fake "always saved". -->
+      <sc-if value="{{ saveStatusShown }}" hint-placeholder-val="{{ false }}">
+      <span class="ts-save-status" role="status" aria-live="polite" style="{{ saveStatusStyle }}">
+        <sc-if value="{{ saveStatusSaving }}" hint-placeholder-val="{{ false }}">
+          <span style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span>
+        </sc-if>
+        <sc-if value="{{ saveStatusSaved }}" hint-placeholder-val="{{ true }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </sc-if>
+        <sc-if value="{{ saveStatusError }}" hint-placeholder-val="{{ false }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </sc-if>
+        <span class="ts-save-text">{{ saveStatusLabel }}</span>
       </span>
+      </sc-if>
     </div>
 
     <!-- RIGHT ZONE: create, device status, and utilities -->
@@ -411,7 +438,7 @@ input[type=range]{accent-color:var(--ts-primary)}
       <button aria-label="{{ t.close }}" onClick="{{ closeRail }}" tabindex="-1" style="position:fixed;inset:0;z-index:78;background:transparent;border:none;cursor:default"></button>
     </sc-if>
     <sc-if value="{{ shapeMenuOpen }}" hint-placeholder-val="{{ false }}">
-      <div role="menu" aria-label="{{ shapeGroup.aria }}" style="{{ railFlyoutStyle }}">
+      <div role="menu" aria-label="{{ t.shapesGroup }}" style="{{ railFlyoutStyle }}">
         <sc-for list="{{ shapeTools }}" as="s" hint-placeholder-count="5">
           <button role="menuitem" onClick="{{ s.pick }}" aria-label="{{ s.aria }}" style="{{ s.rowStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
             <span style="{{ s.iconStyle }}">{{ s.iconEl }}</span>
@@ -512,7 +539,7 @@ input[type=range]{accent-color:var(--ts-primary)}
             {{ t.a4Badge }}
           </span>
         </sc-if>
-        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ t.canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onPointerEnter="{{ cvEnter }}" onPointerLeave="{{ cvLeave }}" onDoubleClick="{{ cvDbl }}" style="{{ canvasStyle }}"></canvas>
+        <canvas ref="{{ canvasRef }}" tabIndex="0" role="img" aria-label="{{ canvasAria }}" onPointerDown="{{ cvDown }}" onPointerMove="{{ cvMove }}" onPointerUp="{{ cvUp }}" onPointerCancel="{{ cvUp }}" onPointerEnter="{{ cvEnter }}" onPointerLeave="{{ cvLeave }}" onDoubleClick="{{ cvDbl }}" style="{{ canvasStyle }}"></canvas>
         <sc-if value="{{ eraserGuideVisible }}" hint-placeholder-val="{{ false }}">
           <div aria-hidden="true" style="{{ eraserGuideStyle }}"></div>
         </sc-if>
@@ -555,20 +582,28 @@ input[type=range]{accent-color:var(--ts-primary)}
 
         <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
 
-        <button onClick="{{ shapeGroup.toggle }}" onMouseEnter="{{ shapeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ shapeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ shapeMenuOpen }}" aria-label="{{ shapeGroup.aria }}" style="{{ shapeGroup.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          {{ shapeGroup.iconEl }}
-          <span aria-hidden="true" style="position:absolute;right:2px;bottom:2px;width:13px;height:13px;border-radius:100px;background:rgba(255,255,255,0.14);display:grid;place-items:center">
-            <svg width="7" height="7" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#B7AEA4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          </span>
-        </button>
+        <!-- Shapes: split control. Main region reuses the active/last shape tool;
+             the corner caret (or long-press / re-click when active) opens the flyout. -->
+        <div class="ts-rail-group" data-sel="{{ shapeGroup.sel }}">
+          <button class="ts-rail-group-main" onClick="{{ shapeGroup.mainClick }}" onPointerDown="{{ shapeGroup.pressDown }}" onPointerUp="{{ shapeGroup.pressUp }}" onPointerLeave="{{ shapeGroup.pressUp }}" onPointerCancel="{{ shapeGroup.pressUp }}" onMouseEnter="{{ shapeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ shapeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ shapeGroup.active }}" aria-label="{{ shapeGroup.aria }}">
+            {{ shapeGroup.iconEl }}
+          </button>
+          <button class="ts-rail-group-caret" onClick="{{ shapeGroup.open }}" onMouseLeave="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ shapeMenuOpen }}" aria-label="{{ shapeGroup.caretAria }}">
+            <svg width="9" height="9" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+        </div>
 
         <sc-if value="{{ strokeToolActive }}" hint-placeholder-val="{{ true }}">
-          <button onClick="{{ strokeGroup.toggle }}" onMouseEnter="{{ strokeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ strokeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ strokeMenuOpen }}" aria-label="{{ strokeGroup.aria }}" style="{{ strokeGroup.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            {{ strokeGroup.iconEl }}
-            <span aria-hidden="true" style="position:absolute;right:2px;bottom:2px;width:13px;height:13px;border-radius:100px;background:rgba(255,255,255,0.14);display:grid;place-items:center">
-              <svg width="7" height="7" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#B7AEA4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <!-- Stroke width: a value picker, so the whole button opens the menu;
+               the corner caret is a static affordance matching the shapes group. -->
+          <div class="ts-rail-group" data-sel="{{ strokeGroup.sel }}">
+            <button class="ts-rail-group-main" onClick="{{ strokeGroup.toggle }}" onMouseEnter="{{ strokeGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ strokeGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ strokeMenuOpen }}" aria-label="{{ strokeGroup.aria }}">
+              {{ strokeGroup.iconEl }}
+            </button>
+            <span class="ts-rail-group-caret ts-rail-group-caret--static" aria-hidden="true">
+              <svg width="9" height="9" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </span>
-          </button>
+          </div>
         </sc-if>
 
         <button onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" style="{{ selectTool.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -685,6 +720,21 @@ input[type=range]{accent-color:var(--ts-primary)}
             </sc-if>
             </div>
             </sc-if>
+          </div>
+
+          <!-- Accessibility Mode: separate, opt-in keyboard-editing surface.
+               When on, the cursor tool returns to the toolbar and the arrow/Space
+               keyboard-nav guidance is exposed. Keyboard editing itself always works. -->
+          <div style="border-top:1px solid #F2ECE4;padding-top:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <div style="min-width:0">
+                <div style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ t.a11yModeL }}</div>
+                <div style="font-size:12.5px;color:var(--ts-text-secondary);line-height:1.4;margin-top:2px">{{ t.a11yModeHelp }}</div>
+              </div>
+              <button onClick="{{ toggleA11y }}" role="switch" aria-checked="{{ a11yMode }}" aria-label="{{ t.a11yModeL }}" style="{{ a11yTrackStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <span style="{{ a11yKnobStyle }}"></span>
+              </button>
+            </div>
           </div>
         </div>
         </sc-if>
@@ -1849,9 +1899,10 @@ input[type=range]{accent-color:var(--ts-primary)}
 class Component extends DCLogic {
   state = {
     screen: 'home', lang: 'ko', tool: 'pen',
+    a11yMode: false, saveStatus: '',
     homeView: 'recent',
     gridW: 60, gridH: 40, rev: 0,
-    strokeSize: 1, eraserSize: 1, canvasHover: false,
+    strokeSize: 1, eraserSize: 1, canvasHover: false, lastShape: 'line',
     pageIndex: 0, pageCount: 1,
     impApply: 'merge', cmdApply: 'current', tplApply: 'newdoc',
     confirmKind: 'newdoc',
@@ -1859,13 +1910,13 @@ class Component extends DCLogic {
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
     entry: false, importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
-    impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile',
+    impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile',
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, cropCursor: 'move', retouchHint: false, armedPreset: null,
     cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false, cmdFeatureFilter: [],
     tplOpen: false, tplGroup: 'recommended',
     confirmOpen: false,
-    connected: true, connType: 'ble', connBusy: '', connFailed: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
+    connected: true, connBusy: '', connFailed: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     narrOpen: false,
     brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 },
@@ -1928,9 +1979,9 @@ class Component extends DCLogic {
   }
   T(lang) {
     const ko = {
-      navHome: '홈', hubTitle: '안녕하세요, 샛별님.', hubSub: '촉각 콘텐츠를 만들고, 저장하고, DotPad로 보내보세요.',
-      create: '촉각 그래픽 만들기', createSub: '촉각 그래픽을 만들고, 이미지를 변환하고, DotPad로 전송하거나 점자용지 엠보싱 출력을 준비합니다.',
-      newBtn: '새로 만들기', startBlank: '빈 그리드', startBlankSub: '촉각 그리드에 직접 그립니다.',
+      navHome: '홈', 
+      create: '촉각 그래픽 만들기', 
+      
       homeTitle: '촉각 그래픽, 더 빠르게 만드세요', homeSub: '명령어·이미지·템플릿으로 만들고 DotPad나 A4 점자용지로 출력합니다. 시각장애 사용자를 위한 촉각 그래픽 제작 스튜디오입니다.',
       homeEyebrow: '촉각 그래픽 스튜디오', homeSampleCta: '샘플로 시작', homePreviewCap: '60×40 DotPad · 촉각 캔버스',
       homeTrustA11y: 'WCAG AA 접근성', homeTrustDot: 'DotPad 60×40 출력',
@@ -1939,17 +1990,17 @@ class Component extends DCLogic {
       navRecent: '최근', navProjects: '내 프로젝트', navTemplates: '템플릿', navLibrary: 'Dot Library', navDrive: 'Tactile Drive', navDemo: 'DotPad 데모', navTrash: '휴지통',
       homeTrashTitle: '휴지통', homeTrashEmpty: '휴지통이 비어 있습니다.',
       emptyGalleryTitle: '촉각 그래픽 만들기 시작하기', emptyGalleryDesc: '새 캔버스를 만들거나, 이미지를 가져오거나, 저장된 촉각 파일을 열어 DotPad 작업을 시작하세요.', emptyNewCanvas: '새 캔버스', emptyImportImage: '이미지 가져오기', homeTrashEmptyDesc: '삭제한 항목이 여기에 표시됩니다.',
-      flowInput: '입력 · 이미지·텍스트·템플릿', flowPreview: '촉각 미리보기', flowOutput: 'DotPad 출력',
+      
       homeNew60L: '새 60×40', homeNew60Sub: 'DotPad 기본 크기', homeNew96L: '새 96×64', homeNew96Sub: '대형 DotPad 크기',
       homeConvertL: '이미지 변환', homeConvertSub: '이미지를 촉각 점 그래픽으로 변환합니다.',
-      homeEmptyTitle: '아직 만든 촉각그래픽이 없습니다.', homeEmptySub: '아래에서 새로 시작하거나 이미지를 변환해 보세요.', homeOpenCard: '열기',
+      homeEmptyTitle: '아직 만든 촉각그래픽이 없습니다.', homeEmptySub: '아래에서 새로 시작하거나 이미지를 변환해 보세요.', 
       chImage: '이미지 변환', chCmd: '명령어 생성', chTpl: '템플릿', chDot: 'DotPad 출력', chEmboss: 'A4 엠보싱',
       startImage: '이미지 변환', startImageSub: '이미지를 촉각 점 그래픽으로 변환합니다.',
-      recent: '최근 파일', viewAll: '전체 보기',
-      returnBtn: 'Tactile World로 돌아가기', embedded: '임베드 모드', editorLabel: '현재 도구: Tactile Studio 편집기',
-      save: '저장', export: '내보내기', send: 'DotPad로 전송', sendShort: '전송',
-      connOn: 'DotPad 연결됨', connOff: '연결 안 됨', connToggleHint: '데모: 클릭하여 연결 상태 전환',
-      bannerErr: 'DotPad 연결이 끊어졌습니다. 케이블 또는 블루투스 상태를 확인해주세요.', retry: '다시 연결',
+      recent: '최근 파일', 
+      returnBtn: 'Tactile World로 돌아가기', embedded: '임베드 모드', 
+      save: '저장', export: '내보내기', send: 'DotPad로 전송', 
+      
+      retry: '다시 연결',
       untitled: '제목 없는 그래픽', fileNameL: '파일 이름',
       toolNames: { cursor: '커서', pen: '펜', eraser: '지우개', line: '직선', rect: '사각형', ellipse: '원', poly: '다각형', fill: '채우기', select: '선택', text: '묵자' },
       txtTitle: '묵자 입력', txtSub: '짧은 글자를 촉각 점으로 변환합니다.', txtPlaceholder: '예: x축, 제목, A, 1', txtAdd: '촉각 글자 추가', txtCancel: '취소',
@@ -1957,32 +2008,33 @@ class Component extends DCLogic {
       strokeL: '선 두께', eraserL: '지우개 크기', rowN: ['1줄', '2줄', '3줄'],
       aPage: (n, tot) => `${tot}페이지 중 ${n}페이지`, aPageAdd: (n, tot) => `${n}페이지를 추가했습니다. 총 ${tot}페이지`, aPageDel: (n, tot) => `페이지를 삭제했습니다. 현재 ${n}페이지, 총 ${tot}페이지`,
       strokeDesc: ['정밀한 1줄 선', '표준 2줄 선', '굵은 3줄 선'], eraserDesc: ['작게 지우기', '표준 크기로 지우기', '넓게 지우기'],
-      quick: '빠른 작업', qClear: '모두 지우기', qInvert: '반전', qFlipH: '좌우 반전', qFlipV: '상하 반전',
-      createMenu: '만들기', savedStatus: '저장됨', undoRedoL: '실행 취소 / 다시 실행', shapesGroup: '도형',
-      devSettings: '장치 설정 열기', devTest: '테스트 출력', devDisconnect: '연결 해제', devConnect: 'DotPad 연결',
+      quick: '빠른 작업', qClear: '모두 지우기', qInvert: '반전', qFlipH: '좌우 반전', qFlipV: '상하 반전', moreOpts: '옵션 더보기',
+      createMenu: '만들기', savedStatus: '저장됨', saveStatusSaving: '저장 중…', saveStatusError: '저장 실패', shapesGroup: '도형',
+      
       dpTestSent: 'DotPad로 테스트 패턴을 전송했습니다.', saveToLib: '라이브러리에 저장',
       pos: '위치', dotOn: '점 있음', dotOff: '점 없음', toolLabel: '도구', undo: '실행 취소', redo: '다시 실행', dots: '점', helpHint: '단축키 안내',
-      canvasAria: '촉각 그리드 편집기. 화살표 키로 이동하고 스페이스로 점을 토글합니다.',
+      canvasAria: '촉각 그리드 편집기.',
+      canvasAriaA11y: '촉각 그리드 편집기. 화살표 키로 이동하고 스페이스로 점을 토글합니다.',
       zoomLabel: '캔버스 확대/축소', zoomOutL: '축소', zoomInL: '확대', zoomResetL: '100%로 초기화',
-      heroAria: '이미지가 왼쪽에서 오른쪽으로 스캔되며 촉각 점 그래픽으로 변환되는 애니메이션',
-      entryTitle: '설명하고, 변환하고, 편집해 촉각 그래픽을 완성하세요.', entrySub: '명령어·이미지·템플릿으로 촉각 그래픽을 만들고, DotPad나 A4 점자용지로 출력하세요.',
+      
+      
       entCmd: '명령어로 만들기', entCmdBadge: '추천', entCmdSub: '설명만 입력하면 촉각 그래픽 초안을 자동으로 만들어줍니다.', entTpl: '템플릿에서 시작', entTplSub: '읽기 쉬운 촉각 스타터로 시작합니다.',
       cmdTitle: '명령어로 촉각 그래픽 만들기', cmdLabel: '명령어', cmdPh: '예: 수학 수업용 좌표평면을 만들어줘',
-      cmdGridL: '그리드 크기', cmdPurposeL: '용도(선택)', cmdAuto: '자동 인식', cmdExamples: '예시 명령어', cmdGen: '생성', cmdGening: '생성하는 중…',
+      cmdPurposeL: '용도(선택)', cmdExamples: '예시 명령어', cmdGen: '생성', cmdGening: '생성하는 중…',
       cmdEnterFirst: '명령어를 입력하세요.', cmdFilterL: '기기 적합성 필터', featCompat: 'DotPad 호환', featOpt: 'DotPad 최적화', featEmboss: '엠보싱 가능', cmdV1Note: 'v1 · 로컬 규칙 기반 생성 (실제 AI 아님)',
       cmdChips: ['수학 수업용 좌표평면', '수직선 그리기', '별 도형', '고양이 얼굴', '순서도 다이어그램'],
       purposes: ['자동 인식', '수업', '다이어그램', '지도', '사물', '박물관', '안내'],
       tplTitle: '스타터 템플릿 라이브러리', tplSub: '촉각 그래픽 제작을 위한 시작점을 선택하세요.',
       tplGroups: ['추천', '교육', '다이어그램', '촉각 요소', '이미지 변환', '박물관·문화유산'],
-      presetArmed: '이미지 변환 프리셋이 준비되었습니다 —', presetUse: '이미지 가져오기',
+      
       dither: '디더링', invert: '반전', use: '사용', off: '끔',
       presetChip: '변환 프리셋', presetNames: { outline: '윤곽선', highContrast: '고대비', silhouette: '실루엣' },
-      outputL: '출력 대상', canvasSizeL: '캔버스 크기 선택', outStripL: '지원 출력', outNames: { '60': '60×40 DotPad', '96': '96×64 DotPad', '28': '28×40 컴팩트', 'a4': 'A4 점자용지' },
+      outputL: '출력 대상', canvasSizeL: '캔버스 크기 선택', outNames: { '60': '60×40 DotPad', '96': '96×64 DotPad', '28': '28×40 컴팩트', 'a4': 'A4 점자용지' },
       outSubs: { '60': 'DotPad 기본 크기', '96': '대형 DotPad 크기', '28': '컴팩트 크기', 'a4': '인쇄용 크기' },
       aOutput: n => '출력 대상 변경: ' + n,
       a4Badge: 'A4 점자용지 · 엠보싱 출력', paperPreview: 'A4 점자용지 미리보기',
       exportTitle: '내보내기', exportSub: '파일로 저장하거나 점자용지 인쇄용으로 준비합니다.', exportOriginal: '원본 (편집·출력용)', exportOriginalSub: 'DotPad 전송·엠보싱에 쓰는 실제 데이터입니다.', exportPreview: '미리보기 (참고용)', exportPreviewSub: '화면·인쇄로 확인하는 이미지입니다.', aExported: '내보냈습니다', aExportUnavail: '내보내기를 사용할 수 없습니다',
-      fmtFile: '파일 형식', embossCard: 'A4 점자용지 (엠보싱)', embossCardSub: '인쇄용 촉각 파일로 내보냅니다',
+      embossCard: 'A4 점자용지 (엠보싱)', embossCardSub: '인쇄용 촉각 파일로 내보냅니다',
       embossExport: '엠보싱용 내보내기', exporting: '내보내는 중…', exportDone: '내보내기 완료',
       embossReadyMsg: '인쇄용 촉각 파일이 준비되었습니다. 점자용지에 엠보싱 출력할 수 있습니다.',
       incompatTitle: 'DotPad로 전송할 수 없는 형식입니다', incompatSub: 'A4 점자용지 문서는 DotPad 그리드로 변환한 뒤 전송하거나, 엠보싱용으로 내보낼 수 있습니다.',
@@ -1991,39 +2043,39 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', inspBrush: '브러시 크기', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspPage: '페이지', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioNone: '첨부된 오디오 없음 (25MB 이하)', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', dpDevice: 'DotPad', dpConnected: '연결됨', dpDisconnected: '연결 안 됨', dpConnFailed: '연결 실패',
-      dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'BLE로 연결', dpConnUsb: 'USB로 연결', dpDisconnect: '연결 해제', dpConnectingBle: 'BLE 연결 중…', dpConnectingUsb: 'USB 연결 중…',
+      dpPanelTitle: 'DotPad 출력', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 미리보기가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', 
+      dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', 
       dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
-      dpVia: c => '연결됨 · ' + c, dpChipDisc: 'DotPad · 연결 안 됨', dpOpenPanel: 'DotPad 출력 패널 열기',
-      aDpBle: 'BLE로 DotPad 연결', aDpUsb: 'USB로 DotPad 연결', aDpDisconnect: 'DotPad 연결 해제', aDpLive: '실시간 DotPad 미리보기 사용', aDpRaise: 'DotPad 핀 모두 올리기', aDpLower: 'DotPad 핀 모두 내리기', aDpInvert: 'DotPad 핀 반전',
+      
+      aDpLive: '실시간 DotPad 미리보기 사용', aDpRaise: 'DotPad 핀 모두 올리기', aDpLower: 'DotPad 핀 모두 내리기', aDpInvert: 'DotPad 핀 반전',
       aConnBle: 'BLE로 DotPad에 연결하는 중…', aConnUsb: 'USB로 DotPad에 연결하는 중…', aConnectFirst: '먼저 DotPad를 연결하세요.',
       aLiveOn: '실시간 미리보기를 켰습니다.', aLiveOff: '실시간 미리보기를 껐습니다.', aPinRaise: 'DotPad 핀을 모두 올렸습니다.', aPinLower: 'DotPad 핀을 모두 내렸습니다.', aPinInvert: 'DotPad 핀을 반전했습니다.',
       aCmdOk: '명령어로 촉각 그래픽 초안을 만들었습니다.', aCmdFallback: '명령을 정확히 인식하지 못해 기본 초안을 만들었습니다. 편집해서 완성하세요.',
       aCmdNoLib: '라이브러리에서 일치하는 항목을 찾지 못해 기본 초안을 만들었습니다. 편집해서 완성하세요.', aCmdNearHint: (names) => `라이브러리에 정확한 항목이 없어 기본 초안을 만들었습니다. 혹시 이걸 찾으셨나요? ${names}`,
       aTplLoaded: '템플릿을 편집기로 불러왔습니다.', aPresetArmed: '이미지 변환 프리셋이 준비되었습니다.',
       aImgNewPage: (n, tot) => `변환한 이미지를 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aCmdNewPage: (n, tot) => `명령어 초안을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aTplNewPage: (n, tot) => `템플릿을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`,
-      importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', vecViewL: '벡터화 보기', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
+      importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', vecViewL: '벡터화 보기 Beta', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
       impSteps: ['가져오기', '자르기', '검토', '편집'],
       impImportTitle: '이미지로 촉각 그래픽 만들기', impImportSub: '이미지를 가져오면 주요 윤곽과 구조를 분석해 DotPad용 촉각 그래픽으로 변환합니다.',
-      impDrop: '이미지를 끌어다 놓거나 파일을 선택하세요', impDropSecondary: '사진, 도표, 지도, 선화 이미지를 촉각 그래픽으로 변환할 수 있습니다.', impDropOr: '또는', impChooseFile: '파일 선택', impSample: '샘플 이미지로 체험하기',
+      impDrop: '이미지를 끌어다 놓거나 파일을 선택하세요', impDropSecondary: '사진, 도표, 지도, 선화 이미지를 촉각 그래픽으로 변환할 수 있습니다.', impChooseFile: '파일 선택', impSample: '샘플 이미지로 체험하기',
       impFormats: 'PNG · JPG · SVG · 최대 10MB',
-      impStepOf: n => 'Step ' + n + ' / 4', impFlowTitle: '진행 과정', impFlow1: '이미지 가져오기', impFlow2: '윤곽과 구조 변환', impFlow3: '검토 후 캔버스에 적용',
+      impStepOf: n => 'Step ' + n + ' / 4', 
       impReading: '이미지를 불러오는 중…', impLoaded: '이미지를 불러왔습니다', impSampleName: '샘플 — 고양이',
       impErrType: '지원하지 않는 파일 형식입니다. PNG, JPG, SVG 파일을 선택해주세요.', impErrSize: '파일이 너무 큽니다. 최대 10MB까지 지원합니다.',
       impNext: '다음', impCancel: '취소', impChooseToContinue: '이미지를 선택하면 다음 단계로 이동할 수 있습니다.',
       impCropTitle: '자르고 변환', impCropQ: '특정 영역을 먼저 자르시겠어요?',
       impCrop: '이미지 자르기', impCropDesc: '변환할 영역을 선택합니다', impFull: '전체 이미지 사용', impFullDesc: '이미지 전체를 변환합니다',
       impCropHint: '상자를 드래그해 이동하고, 모서리 손잡이로 크기를 조절하세요.',
-      impConvertTitle: 'AI 촉각 그래픽 변환', impConvertSub: '이미지의 형태를 촉각으로 인식하기 쉬운 점 패턴으로 변환합니다.',
-      impConverting: 'AI가 촉각 그래픽으로 변환하는 중…', impConvertDone: '변환 완료',
+      
+      
       impReviewTitle: '촉각 변환 미리보기', impReviewSub: '촉각 디테일 정도를 조정해 미리보기를 다듬은 뒤 편집기로 불러오세요. 세부 수정은 편집기 도구로 이어서 할 수 있습니다.',
-      vecToggleL: '벡터 라인 오브젝트 (베타)', vecToggleHelp: '촉각 변환 결과에서 편집 가능한 선 오브젝트를 만듭니다. 단순한 아이콘, 도표, 고대비 이미지에 가장 잘 맞아요.',
+      vecToggleL: '벡터 라인 오브젝트 (Beta)', vecToggleHelp: '원본 이미지가 아니라, 변환으로 생성된 촉각 점 그리드를 기준으로 편집 가능한 선·도형 오브젝트를 추출합니다. 단순한 아이콘, 도표, 고대비 이미지에 가장 잘 맞아요.',
       vecWarnMsg: '이 이미지는 벡터 조각이 너무 많이 생길 수 있어요. 대비를 높이거나 이미지를 더 단순하게 만들어 보세요.',
       vecCountOf: n => '오브젝트 ' + n + '개 생성됨',
-      vecTypeRect: '사각형', vecTypeEllipse: '원', vecTypePolyline: '폴리라인', vecTypeLine: '선', vecOnlyViewL: '닷 숨기고 벡터만 보기',
-      impResult: '촉각 결과', impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impReview: '미리보기 검토', impLoad: '편집기로 불러오기',
+      vecTypeRect: '사각형', vecTypeEllipse: '원', vecTypePolyline: '폴리라인', vecTypeLine: '선', 
+      impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impLoad: '편집기로 불러오기',
       presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일',
       presetSubBalanced: '일반 사진·그림용', presetSubOutline: '아이콘·사물·도형용', presetSubDiagram: '차트·지도·선화용', presetSubDetail: '디테일 보존(점 밀도↑)',
       qSparseMsg: '점이 너무 적어 촉각으로 읽기 어려울 수 있어요. 대상에 더 가깝게 자르거나 고디테일을 사용해 보세요.',
@@ -2034,45 +2086,45 @@ class Component extends DCLogic {
       impErrLoad: '이미지를 불러오지 못했어요. 10MB 이하의 PNG 또는 JPG로 다시 시도해 주세요.',
       advTests: '고급 장치 테스트', advTestsHint: '아래는 DotPad 하드웨어 점검용입니다. 일반 편집에는 필요하지 않습니다.',
       retouchHintMsg: 'AI 변환 결과입니다. 펜·지우개·채우기 등 도구로 세부를 수정하세요.',
-      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', aConverting: 'AI 촉각 변환을 시작했습니다',
+      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', 
       preview: 'DotPad 미리보기', sendNow: '지금 전송', sending: 'DotPad로 전송 중…', sent: '전송 완료', sentSub: 'DotPad에서 촉각 그래픽이 출력되고 있습니다.',
       errTitle: 'DotPad에 연결할 수 없습니다', errSub: '케이블 또는 블루투스 연결을 확인한 뒤 다시 시도해주세요.',
       saveTitle: '저장', saveLocL: '저장 위치', locDriveSub: '내 촉각 파일 보관함', locLibSub: '팀과 공유하는 라이브러리',
       saveBtn: '저장', savedTitle: '저장 완료', keepEditing: '계속 편집', nextStep: '다음 작업',
-      recentTitle: '최근 작업', recentHelper: '최근 작업한 촉각 그래픽을 이어서 편집하거나 DotPad로 출력해보세요.',
+      
       open: '열기', edit: '편집', sendCardBtn: 'DotPad로 보내기',
       statusEdit: '편집 가능', statusPrint: 'DotPad 출력 가능',
       fTypes: ['그래프', '도형', '파형'], fTimes: ['2일 전', '5일 전', '1주 전'],
-      imgType: '이미지 변환', createTitle: '새 촉각 그래픽 만들기', createSub2: '빈 캔버스 · 이미지 가져오기 · 템플릿',
-      libOpen: '라이브러리 열기', libOpenSub: '저장한 촉각 그래픽을 다시 열기', libTitle: '내 라이브러리', libEmpty: '아직 저장한 그래픽이 없습니다. 그래픽을 만들고 저장하면 여기에 모입니다.', libOpenCard: '열기', libSendCard: 'DotPad로 전송', libDeleteCard: '삭제', libDriveTag: '드라이브', libLibraryTag: '라이브러리', aLibDeleted: '삭제했습니다', openDrive: 'Tactile Drive 열기', importTitle2: '이미지 가져오기', importSub2: '이미지를 촉각 그래픽으로 변환',
+      imgType: '이미지 변환', 
+      libOpen: '라이브러리 열기', libOpenSub: '저장한 촉각 그래픽을 다시 열기', libTitle: '내 라이브러리', libEmpty: '아직 저장한 그래픽이 없습니다. 그래픽을 만들고 저장하면 여기에 모입니다.', libOpenCard: '열기', libSendCard: 'DotPad로 전송', libDeleteCard: '삭제', libDriveTag: '드라이브', libLibraryTag: '라이브러리', aLibDeleted: '삭제했습니다', openDrive: 'Tactile Drive 열기', 
       favAdd: '즐겨찾기 추가', favRemove: '즐겨찾기 해제', moreMenuL: '더보기', deleteL: '삭제',
       trashMoveTitle: '휴지통으로 이동할까요?', trashMoveSub: '나중에 휴지통에서 복원할 수 있습니다.', trashMoveBtn: '휴지통으로 이동',
       delPageTitle: '페이지를 삭제할까요?', delPageSub: '이 페이지의 내용과 나레이션 오디오가 함께 삭제됩니다. 되돌릴 수 없습니다.', delPageBtn: '페이지 삭제',
       permaDeleteTitle: '영구적으로 삭제할까요?', permaDeleteSub: '이 작업은 되돌릴 수 없습니다.', permaDeleteBtn: '영구 삭제',
       restoreL: '복원', permaDeleteL: '영구 삭제', aMovedTrash: '휴지통으로 이동했습니다', aRestored: '복원했습니다',
       homeTrashDeletedAt: '삭제됨',
-      langLabel: '언어 선택 (한국어 / 영어)',
+      
       savedDrive: 'Tactile Drive에 저장되었습니다.', savedLib: 'Dot Library에 저장되었습니다.',
       helpTitle: '키보드 · 스크린리더 안내', kbSection: '키보드 단축키', srSection: '스크린리더 · TTS', dragToolbar: '도구모음 이동',
       srNote1: '모든 상태 변화(도구 선택, 점 토글, 전송)는 하단 패널의 라이브 영역(aria-live)으로 즉시 안내됩니다.',
       srNote2: '셀 상태는 항상 "점 있음 / 점 없음" 레이블로 전달되며, 색상만으로 상태를 표시하지 않습니다.',
       srNote3: '캔버스는 키보드만으로 편집할 수 있습니다 — 화살표 이동, 스페이스 토글, 도구 단축키.',
-      hRows: [['V / P / E', '커서 · 펜 · 지우개'], ['L / R / O', '직선 · 사각형 · 원'], ['G / F / S', '다각형 · 채우기 · 선택'], ['T', '묵자 · 촉각 글자'], ['화살표', '커서 이동'], ['Space', '점 토글'], ['Enter', '다각형 닫기'], ['Ctrl+Z', '실행 취소'], ['Ctrl+Shift+Z', '다시 실행'], ['?', '이 안내 열기'], ['Esc', '닫기 · 취소']],
+      hRows: [['P / E', '펜 · 지우개'], ['L / R / O', '직선 · 사각형 · 원'], ['G / F / S', '다각형 · 채우기 · 선택'], ['T', '묵자 · 촉각 글자'], ['Enter', '다각형 닫기'], ['Ctrl+Z', '실행 취소'], ['Ctrl+Shift+Z', '다시 실행'], ['?', '이 안내 열기'], ['Esc', '닫기 · 취소']],
+      hRowsA11y: [['V', '커서 (접근성 모드)'], ['화살표', '커서 이동'], ['Space', '점 토글']],
       aToolSel: n => n + ' 도구 선택됨', aDotOn: (x, y) => '점 찍음 (' + x + ', ' + y + ')', aDotOff: (x, y) => '점 지움 (' + x + ', ' + y + ')',
       aUndo: '실행 취소됨', aRedo: '다시 실행됨', aClear: '모두 지웠습니다', aInvert: '반전했습니다', aFlipH: '좌우로 뒤집었습니다', aFlipV: '상하로 뒤집었습니다', aThicken: '선을 조정했습니다', aDenoise: '고립된 점을 제거했습니다', audAttached: '오디오를 첨부했습니다', audRemoved: '오디오를 제거했습니다', audErrType: '오디오 파일만 첨부할 수 있습니다.', audErrSize: '오디오는 25MB 이하만 첨부할 수 있습니다.',
       aTextAdded: '촉각 글자를 캔버스에 추가했습니다. 점으로 편집할 수 있습니다.', aTextEmpty: '입력한 글자가 없습니다.',
       aGrid: g => '그리드 크기 변경: ' + g, aConnOn: 'DotPad가 연결되었습니다', aConnOff: 'DotPad 연결이 끊어졌습니다', aConnFailed: 'DotPad 연결에 실패했습니다',
-      aSent: 'DotPad 전송 완료', aSendErr: 'DotPad 전송 실패', aReady: '캔버스 준비됨 — 화살표 키로 이동, 스페이스로 점 토글',
+      aSent: 'DotPad 전송 완료', aSendErr: 'DotPad 전송 실패', aReady: '캔버스 준비됨', aReadyA11y: '캔버스 준비됨 — 화살표 키로 이동, 스페이스로 점 토글',
       aLangSet: '언어를 한국어로 변경했습니다',
-      aConverted: '이미지를 촉각 그래픽으로 변환했습니다', aPoly: 'Enter 키로 다각형을 닫습니다', aFill: '영역을 채웠습니다',
+      aPoly: 'Enter 키로 다각형을 닫습니다', aFill: '영역을 채웠습니다',
       aShape: n => n + ' 그리기 완료', aSel: '영역 선택됨 — 드래그하여 이동', aMoved: '선택 영역을 이동했습니다',
       tExport: 'PNG로 내보냈습니다', tSavedDrive: 'Tactile Drive에 저장되었습니다', tSavedLib: 'Dot Library에 저장되었습니다',
-      justNow: '방금 전', agoMinSuffix: '분 전', agoHourSuffix: '시간 전', agoDaySuffix: '일 전', yesterday: '어제', fNames: ['막대 그래프', '별 도형', '삼각 파형'], fMeta: ['60×40 · 2일 전', '60×40 · 5일 전', '96×64 · 1주 전']
-    };
+      justNow: '방금 전', agoMinSuffix: '분 전', agoHourSuffix: '시간 전', agoDaySuffix: '일 전', yesterday: '어제', fNames: ['막대 그래프', '별 도형', '삼각 파형'], };
     const en = {
-      navHome: 'Home', hubTitle: 'Hello, Saetbyeol.', hubSub: 'Create, store, and send tactile content to DotPad.',
-      create: 'Create tactile graphic', createSub: 'Create tactile graphics, convert images, and send them to DotPad or prepare them for embossing.',
-      newBtn: 'New graphic', startBlank: 'Blank grid', startBlankSub: 'Draw directly on the tactile grid.',
+      navHome: 'Home', 
+      create: 'Create tactile graphic', 
+      
       homeTitle: 'Create tactile graphics, faster', homeSub: 'Build from a command, image, or template and output to DotPad or A4 braille paper. A tactile-graphics studio for blind and low-vision users.',
       homeEyebrow: 'Tactile Graphics Studio', homeSampleCta: 'Start from a sample', homePreviewCap: '60×40 DotPad · tactile canvas',
       homeTrustA11y: 'WCAG AA accessible', homeTrustDot: 'DotPad 60×40 output',
@@ -2081,17 +2133,17 @@ class Component extends DCLogic {
       navRecent: 'Recent', navProjects: 'My Projects', navTemplates: 'Templates', navLibrary: 'Dot Library', navDrive: 'Tactile Drive', navDemo: 'DotPad Demo', navTrash: 'Trash',
       homeTrashTitle: 'Trash', homeTrashEmpty: 'Trash is empty.',
       emptyGalleryTitle: 'Start creating tactile graphics', emptyGalleryDesc: 'Create a new canvas, import an image, or open an existing tactile file for Dot Pad.', emptyNewCanvas: 'New canvas', emptyImportImage: 'Import image', homeTrashEmptyDesc: 'Deleted items will show up here.',
-      flowInput: 'Input · image·text·template', flowPreview: 'Tactile preview', flowOutput: 'DotPad output',
+      
       homeNew60L: 'New 60×40', homeNew60Sub: 'DotPad default size', homeNew96L: 'New 96×64', homeNew96Sub: 'Large DotPad size',
       homeConvertL: 'Convert image', homeConvertSub: 'Turn an image into a tactile dot graphic.',
-      homeEmptyTitle: 'No tactile graphics yet.', homeEmptySub: 'Start a new one below or convert an image.', homeOpenCard: 'Open',
+      homeEmptyTitle: 'No tactile graphics yet.', homeEmptySub: 'Start a new one below or convert an image.', 
       chImage: 'Image conversion', chCmd: 'Command generation', chTpl: 'Templates', chDot: 'DotPad output', chEmboss: 'A4 embossing',
       startImage: 'Convert image', startImageSub: 'Turn an image into tactile dots.',
-      recent: 'Recent files', viewAll: 'View all',
-      returnBtn: 'Back to Tactile World', embedded: 'Embedded', editorLabel: 'Current tool: Tactile Studio editor',
-      save: 'Save', export: 'Export', send: 'Send to DotPad', sendShort: 'Send',
-      connOn: 'DotPad connected', connOff: 'Disconnected', connToggleHint: 'Demo: click to toggle connection',
-      bannerErr: 'DotPad is disconnected. Check the cable or Bluetooth status.', retry: 'Reconnect',
+      recent: 'Recent files', 
+      returnBtn: 'Back to Tactile World', embedded: 'Embedded', 
+      save: 'Save', export: 'Export', send: 'Send to DotPad', 
+      
+      retry: 'Reconnect',
       untitled: 'Untitled graphic', fileNameL: 'File name',
       toolNames: { cursor: 'Cursor', pen: 'Pen', eraser: 'Eraser', line: 'Line', rect: 'Rectangle', ellipse: 'Ellipse', poly: 'Polygon', fill: 'Fill', select: 'Select', text: 'Tactile Text' },
       txtTitle: 'Tactile Text', txtSub: 'Convert short text into tactile-dot lettering.', txtPlaceholder: 'e.g. x-axis, Title, A, 1', txtAdd: 'Add tactile label', txtCancel: 'Cancel',
@@ -2099,32 +2151,33 @@ class Component extends DCLogic {
       strokeL: 'Stroke width', eraserL: 'Eraser size', rowN: ['1 row', '2 rows', '3 rows'],
       aPage: (n, tot) => `Page ${n} of ${tot}`, aPageAdd: (n, tot) => `Page ${n} added. ${tot} pages total`, aPageDel: (n, tot) => `Page deleted. Now on page ${n}, ${tot} pages total`,
       strokeDesc: ['Precise 1-row stroke', 'Standard 2-row stroke', 'Bold 3-row stroke'], eraserDesc: ['Small eraser size', 'Standard eraser size', 'Wide eraser size'],
-      quick: 'Quick actions', qClear: 'Clear all', qInvert: 'Invert', qFlipH: 'Flip H', qFlipV: 'Flip V',
-      createMenu: 'Create', savedStatus: 'Saved', undoRedoL: 'Undo / Redo', shapesGroup: 'Shapes',
-      devSettings: 'Open device panel', devTest: 'Test output', devDisconnect: 'Disconnect', devConnect: 'Connect DotPad',
+      quick: 'Quick actions', qClear: 'Clear all', qInvert: 'Invert', qFlipH: 'Flip H', qFlipV: 'Flip V', moreOpts: 'More options',
+      createMenu: 'Create', savedStatus: 'Saved', saveStatusSaving: 'Saving…', saveStatusError: 'Save failed', shapesGroup: 'Shapes',
+      
       dpTestSent: 'Sent a test pattern to DotPad.', saveToLib: 'Save to library',
       pos: 'Position', dotOn: 'Dot present', dotOff: 'No dot', toolLabel: 'Tool', undo: 'Undo', redo: 'Redo', dots: 'dots', helpHint: 'Shortcuts',
-      canvasAria: 'Tactile grid editor. Move with arrow keys, toggle dots with Space.',
+      canvasAria: 'Tactile grid editor.',
+      canvasAriaA11y: 'Tactile grid editor. Move with arrow keys, toggle dots with Space.',
       zoomLabel: 'Zoom canvas', zoomOutL: 'Zoom out', zoomInL: 'Zoom in', zoomResetL: 'Reset to 100%',
-      heroAria: 'Animation of an image being scanned left to right and converted into a tactile dot graphic',
-      entryTitle: 'Describe, convert, edit, and output tactile graphics.', entrySub: 'Create tactile graphics from commands, images, or templates, then output to DotPad or A4 embossing paper.',
+      
+      
       entCmd: 'Generate from command', entCmdBadge: 'Recommended', entCmdSub: 'Create a tactile graphic draft from a description.', entTpl: 'Start from template', entTplSub: 'Use a readable tactile starter.',
       cmdTitle: 'Create a tactile graphic from a command', cmdLabel: 'Command', cmdPh: 'e.g. Create a coordinate plane for a math lesson',
-      cmdGridL: 'Grid size', cmdPurposeL: 'Purpose (optional)', cmdAuto: 'Auto-detect', cmdExamples: 'Example commands', cmdGen: 'Generate', cmdGening: 'Generating…',
+      cmdPurposeL: 'Purpose (optional)', cmdExamples: 'Example commands', cmdGen: 'Generate', cmdGening: 'Generating…',
       cmdEnterFirst: 'Enter a command first.', cmdFilterL: 'Device fitness filter', featCompat: 'DotPad compatible', featOpt: 'DotPad optimized', featEmboss: 'Embossable', cmdV1Note: 'v1 · local rule-based generation (not real AI)',
       cmdChips: ['Coordinate plane for math', 'Draw a number line', 'Star shape', 'Cat face', 'Flowchart diagram'],
       purposes: ['Auto-detect', 'Lesson', 'Diagram', 'Map', 'Object', 'Museum', 'Guide'],
       tplTitle: 'Starter template library', tplSub: 'Pick a starting point for tactile creation.',
       tplGroups: ['Recommended', 'Education', 'Diagrams', 'Tactile elements', 'Image conversion', 'Museum / Heritage'],
-      presetArmed: 'Image-conversion preset armed —', presetUse: 'Import image',
+      
       dither: 'Dithering', invert: 'Invert', use: 'On', off: 'Off',
       presetChip: 'Preset', presetNames: { outline: 'Outline', highContrast: 'High contrast', silhouette: 'Silhouette' },
-      outputL: 'Target output', canvasSizeL: 'Choose Canvas Size', outStripL: 'Supported output', outNames: { '60': '60×40 DotPad', '96': '96×64 DotPad', '28': '28×40 compact', 'a4': 'A4 braille paper' },
+      outputL: 'Target output', canvasSizeL: 'Choose Canvas Size', outNames: { '60': '60×40 DotPad', '96': '96×64 DotPad', '28': '28×40 compact', 'a4': 'A4 braille paper' },
       outSubs: { '60': 'Default DotPad size', '96': 'Large DotPad size', '28': 'Compact size', 'a4': 'Print-ready size' },
       aOutput: n => 'Target output changed: ' + n,
       a4Badge: 'A4 braille paper · embossing output', paperPreview: 'A4 braille paper preview',
       exportTitle: 'Export', exportSub: 'Save as a file, or prepare it for braille paper printing.', exportOriginal: 'Original (editable / output)', exportOriginalSub: 'The real data used for DotPad transmission and embossing.', exportPreview: 'Preview (reference)', exportPreviewSub: 'An image for viewing or reference printing.', aExported: 'Exported', aExportUnavail: 'Export unavailable',
-      fmtFile: 'File format', embossCard: 'A4 braille paper (embossing)', embossCardSub: 'Export as a print-ready tactile file',
+      embossCard: 'A4 braille paper (embossing)', embossCardSub: 'Export as a print-ready tactile file',
       embossExport: 'Export for embossing', exporting: 'Exporting…', exportDone: 'Export complete',
       embossReadyMsg: 'Your print-ready tactile file is prepared. It can be embossed onto braille paper.',
       incompatTitle: "This format can't be sent to DotPad", incompatSub: 'A4 braille-paper documents can be converted to a DotPad grid before sending, or exported for embossing.',
@@ -2133,39 +2186,39 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', inspBrush: 'Brush size', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspPage: 'Page', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioNone: 'No audio attached (≤25MB)', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', dpDevice: 'DotPad', dpConnected: 'Connected', dpDisconnected: 'Disconnected', dpConnFailed: 'Connection failed',
-      dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', dpConnBle: 'Connect BLE', dpConnUsb: 'Connect USB', dpDisconnect: 'Disconnect', dpConnectingBle: 'Connecting BLE…', dpConnectingUsb: 'Connecting USB…',
+      dpPanelTitle: 'DotPad Output', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'The braille preview will appear here.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', 
+      dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', 
       dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
-      dpVia: c => 'Connected · ' + c, dpChipDisc: 'DotPad · Disconnected', dpOpenPanel: 'Open DotPad Output panel',
-      aDpBle: 'Connect DotPad via BLE', aDpUsb: 'Connect DotPad via USB', aDpDisconnect: 'Disconnect DotPad', aDpLive: 'Enable live DotPad preview', aDpRaise: 'Raise all DotPad pins', aDpLower: 'Lower all DotPad pins', aDpInvert: 'Invert DotPad pins',
+      
+      aDpLive: 'Enable live DotPad preview', aDpRaise: 'Raise all DotPad pins', aDpLower: 'Lower all DotPad pins', aDpInvert: 'Invert DotPad pins',
       aConnBle: 'Connecting to DotPad via BLE…', aConnUsb: 'Connecting to DotPad via USB…', aConnectFirst: 'Connect DotPad first.',
       aLiveOn: 'Live preview enabled.', aLiveOff: 'Live preview disabled.', aPinRaise: 'Raised all DotPad pins.', aPinLower: 'Lowered all DotPad pins.', aPinInvert: 'Inverted DotPad pins.',
       aCmdOk: 'Created a tactile graphic draft from your command.', aCmdFallback: "Couldn't match your command exactly — created a starter draft you can edit.",
       aCmdNoLib: 'No matching library item — created a starter draft you can edit.', aCmdNearHint: (names) => `No exact library item — created a starter draft. Did you mean: ${names}`,
       aTplLoaded: 'Template loaded into the editor.', aPresetArmed: 'Image-conversion preset armed.',
       aImgNewPage: (n, tot) => `Converted image added on page ${n}. ${tot} pages total`, aCmdNewPage: (n, tot) => `Command draft added on page ${n}. ${tot} pages total`, aTplNewPage: (n, tot) => `Template added on page ${n}. ${tot} pages total`,
-      importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', vecViewL: 'Vectorized view', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
+      importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', vecViewL: 'Vectorized view Beta', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
       impSteps: ['Import', 'Crop', 'Review', 'Edit'],
       impImportTitle: 'Create Tactile Graphic from Image', impImportSub: 'Import an image and convert its key outlines and structure into a DotPad-ready tactile graphic.',
-      impDrop: 'Drop an image here or choose a file', impDropSecondary: 'Convert photos, diagrams, maps, and line drawings into tactile graphics.', impDropOr: 'or', impChooseFile: 'Choose File', impSample: 'Try Sample Image',
+      impDrop: 'Drop an image here or choose a file', impDropSecondary: 'Convert photos, diagrams, maps, and line drawings into tactile graphics.', impChooseFile: 'Choose File', impSample: 'Try Sample Image',
       impFormats: 'PNG · JPG · SVG · up to 10MB',
-      impStepOf: n => 'Step ' + n + ' / 4', impFlowTitle: 'What happens next?', impFlow1: 'Import image', impFlow2: 'Convert outlines and structure', impFlow3: 'Review and apply to canvas',
+      impStepOf: n => 'Step ' + n + ' / 4', 
       impReading: 'Reading image…', impLoaded: 'Image loaded', impSampleName: 'Sample — Cat',
       impErrType: 'Unsupported file type. Please choose a PNG, JPG, or SVG file.', impErrSize: 'File is too large. Maximum size is 10MB.',
       impNext: 'Next', impCancel: 'Cancel', impChooseToContinue: 'Choose an image to continue.',
       impCropTitle: 'Crop or convert', impCropQ: 'Do you want to crop a specific area first?',
       impCrop: 'Crop image', impCropDesc: 'Select the area to convert', impFull: 'Use full image', impFullDesc: 'Convert the whole image',
       impCropHint: 'Drag the box to move it, and use the corner handle to resize.',
-      impConvertTitle: 'AI tactile conversion', impConvertSub: 'Transforms the image into a dot pattern that is easy to read by touch.',
-      impConverting: 'Converting to a tactile graphic with AI…', impConvertDone: 'Conversion complete',
+      
+      
       impReviewTitle: 'Tactile preview', impReviewSub: 'Adjust the tactile detail level to refine the preview, then load it into the editor. You can keep retouching with the editor tools.',
-      vecToggleL: 'Vectorize lines (Beta)', vecToggleHelp: 'Creates editable line-like objects from the tactile conversion result. Best for simple icons, diagrams, and high-contrast images.',
+      vecToggleL: 'Vectorize lines (Beta)', vecToggleHelp: 'Extracts editable line/shape objects from the converted tactile dot grid — not from the original image. Best for simple icons, diagrams, and high-contrast images.',
       vecWarnMsg: 'This image may create too many vector fragments. Try increasing contrast or simplifying the image.',
       vecCountOf: n => n + ' object' + (n === 1 ? '' : 's') + ' generated',
-      vecTypeRect: 'Rectangle', vecTypeEllipse: 'Ellipse', vecTypePolyline: 'Polyline', vecTypeLine: 'Line', vecOnlyViewL: 'Hide dots, show vector only',
-      impResult: 'Tactile result', impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impReview: 'Review preview', impLoad: 'Load into editor',
+      vecTypeRect: 'Rectangle', vecTypeEllipse: 'Ellipse', vecTypePolyline: 'Polyline', vecTypeLine: 'Line', 
+      impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impLoad: 'Load into editor',
       presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail',
       presetSubBalanced: 'General photos & drawings', presetSubOutline: 'Icons, objects, shapes', presetSubDiagram: 'Charts, maps, line art', presetSubDetail: 'Keeps detail (denser)',
       qSparseMsg: 'This may be too sparse to read by touch. Crop closer to the subject or try High Detail.',
@@ -2176,41 +2229,41 @@ class Component extends DCLogic {
       impErrLoad: 'Couldn\u2019t load this image. Please try a PNG or JPG under 10MB.',
       advTests: 'Advanced device tests', advTestsHint: 'The controls below are for checking DotPad hardware. They are not needed for normal editing.',
       retouchHintMsg: 'This is the AI conversion result. Refine details with the Pen, Eraser, Fill and other tools.',
-      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', aConverting: 'AI tactile conversion started',
+      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', 
       preview: 'DotPad preview', sendNow: 'Send now', sending: 'Sending to DotPad…', sent: 'Sent to DotPad', sentSub: 'Your graphic is now rendering on the DotPad.',
       errTitle: "Can't reach DotPad", errSub: 'Check the cable or Bluetooth connection and try again.',
       saveTitle: 'Save', saveLocL: 'Save to', locDriveSub: 'Your tactile file storage', locLibSub: 'Shared team library',
       saveBtn: 'Save', savedTitle: 'Saved', keepEditing: 'Keep editing', nextStep: 'Next',
-      recentTitle: 'Recent work', recentHelper: 'Continue editing a recent tactile graphic, or send it to DotPad.',
+      
       open: 'Open', edit: 'Edit', sendCardBtn: 'Send to DotPad',
       statusEdit: 'Editable', statusPrint: 'Ready for DotPad',
       fTypes: ['Graph', 'Shape', 'Wave'], fTimes: ['2 days ago', '5 days ago', '1 week ago'],
-      imgType: 'Image', createTitle: 'Create new', createSub2: 'Blank · Import image · Template',
-      libOpen: 'Open library', libOpenSub: 'Reopen your saved tactile graphics', libTitle: 'My library', libEmpty: 'No saved graphics yet. Create and save a graphic and it will appear here.', libOpenCard: 'Open', libSendCard: 'Send to DotPad', libDeleteCard: 'Delete', libDriveTag: 'Drive', libLibraryTag: 'Library', aLibDeleted: 'Deleted', openDrive: 'Open Tactile Drive', importTitle2: 'Import image', importSub2: 'Convert an image into a tactile graphic',
+      imgType: 'Image', 
+      libOpen: 'Open library', libOpenSub: 'Reopen your saved tactile graphics', libTitle: 'My library', libEmpty: 'No saved graphics yet. Create and save a graphic and it will appear here.', libOpenCard: 'Open', libSendCard: 'Send to DotPad', libDeleteCard: 'Delete', libDriveTag: 'Drive', libLibraryTag: 'Library', aLibDeleted: 'Deleted', openDrive: 'Open Tactile Drive', 
       favAdd: 'Add to favorites', favRemove: 'Remove from favorites', moreMenuL: 'More options', deleteL: 'Delete',
       trashMoveTitle: 'Move to Trash?', trashMoveSub: 'You can restore it later from Trash.', trashMoveBtn: 'Move to Trash',
       delPageTitle: 'Delete this page?', delPageSub: "The page's content and narration audio will be removed. This can't be undone.", delPageBtn: 'Delete page',
       permaDeleteTitle: 'Delete permanently?', permaDeleteSub: "This action can't be undone.", permaDeleteBtn: 'Delete permanently',
       restoreL: 'Restore', permaDeleteL: 'Delete permanently', aMovedTrash: 'Moved to Trash', aRestored: 'Restored',
       homeTrashDeletedAt: 'Deleted',
-      langLabel: 'Select language (Korean / English)',
+      
       savedDrive: 'Saved to Tactile Drive.', savedLib: 'Saved to Dot Library.',
       helpTitle: 'Keyboard · screen reader guide', kbSection: 'Keyboard shortcuts', srSection: 'Screen reader · TTS', dragToolbar: 'Move toolbar',
       srNote1: 'Every state change (tool selection, dot toggles, sending) is announced instantly via the live region (aria-live) in the bottom panel.',
       srNote2: 'Cell state is always conveyed with "Dot present / No dot" labels — never by color alone.',
       srNote3: 'The canvas is fully keyboard-editable — arrows to move, Space to toggle, letter keys for tools.',
-      hRows: [['V / P / E', 'Cursor · Pen · Eraser'], ['L / R / O', 'Line · Rectangle · Ellipse'], ['G / F / S', 'Polygon · Fill · Select'], ['T', 'Tactile text'], ['Arrows', 'Move cursor'], ['Space', 'Toggle dot'], ['Enter', 'Close polygon'], ['Ctrl+Z', 'Undo'], ['Ctrl+Shift+Z', 'Redo'], ['?', 'Open this guide'], ['Esc', 'Close · cancel']],
+      hRows: [['P / E', 'Pen · Eraser'], ['L / R / O', 'Line · Rectangle · Ellipse'], ['G / F / S', 'Polygon · Fill · Select'], ['T', 'Tactile text'], ['Enter', 'Close polygon'], ['Ctrl+Z', 'Undo'], ['Ctrl+Shift+Z', 'Redo'], ['?', 'Open this guide'], ['Esc', 'Close · cancel']],
+      hRowsA11y: [['V', 'Cursor (Accessibility Mode)'], ['Arrows', 'Move cursor'], ['Space', 'Toggle dot']],
       aToolSel: n => n + ' tool selected', aDotOn: (x, y) => 'Dot placed (' + x + ', ' + y + ')', aDotOff: (x, y) => 'Dot erased (' + x + ', ' + y + ')',
       aUndo: 'Undone', aRedo: 'Redone', aClear: 'Canvas cleared', aInvert: 'Inverted', aFlipH: 'Flipped horizontally', aFlipV: 'Flipped vertically', aThicken: 'Adjusted line weight', aDenoise: 'Removed isolated dots', audAttached: 'Audio attached', audRemoved: 'Audio removed', audErrType: 'Only audio files can be attached.', audErrSize: 'Audio must be 25MB or smaller.',
       aTextAdded: 'Tactile text added to the canvas. You can edit it as dots.', aTextEmpty: 'No text was entered.',
       aGrid: g => 'Grid size changed: ' + g, aConnOn: 'DotPad connected', aConnOff: 'DotPad disconnected', aConnFailed: 'DotPad connection failed',
-      aSent: 'Sent to DotPad', aSendErr: 'Send to DotPad failed', aReady: 'Canvas ready — arrows to move, Space to toggle dots',
+      aSent: 'Sent to DotPad', aSendErr: 'Send to DotPad failed', aReady: 'Canvas ready', aReadyA11y: 'Canvas ready — arrows to move, Space to toggle dots',
       aLangSet: 'Language changed to English',
-      aConverted: 'Image converted to tactile graphic', aPoly: 'Press Enter to close the polygon', aFill: 'Region filled',
+      aPoly: 'Press Enter to close the polygon', aFill: 'Region filled',
       aShape: n => n + ' drawn', aSel: 'Region selected — drag to move', aMoved: 'Selection moved',
       tExport: 'Exported as PNG', tSavedDrive: 'Saved to Tactile Drive', tSavedLib: 'Saved to Dot Library',
-      justNow: 'just now', agoMinSuffix: ' min ago', agoHourSuffix: ' hr ago', agoDaySuffix: ' days ago', yesterday: 'Yesterday', fNames: ['Bar chart', 'Star shape', 'Triangle wave'], fMeta: ['60×40 · 2 days ago', '60×40 · 5 days ago', '96×64 · 1 week ago']
-    };
+      justNow: 'just now', agoMinSuffix: ' min ago', agoHourSuffix: ' hr ago', agoDaySuffix: ' days ago', yesterday: 'Yesterday', fNames: ['Bar chart', 'Star shape', 'Triangle wave'], };
     return (lang || this.state.lang) === 'ko' ? ko : en;
   }
 
@@ -2377,15 +2430,40 @@ class Component extends DCLogic {
   }
   hideTip() { clearTimeout(this._tipT); if (this.state.tip) this.setState({ tip: null }); }
   toggleRail(kind, ev) {
+    // Anchor off the whole group pill, not the tiny caret sub-button, so the
+    // flyout lines up with the tool regardless of which zone was clicked.
+    const anchor = (ev.currentTarget && ev.currentTarget.closest && ev.currentTarget.closest('.ts-rail-group')) || ev.currentTarget;
+    this.openRailFrom(kind, anchor);
+  }
+  openRailFrom(kind, anchor) {
     this.hideTip();
     const st = this.state;
     if (st.railMenu && st.railMenu.kind === kind) { this.setState({ railMenu: null }); return; }
-    const r = ev.currentTarget.getBoundingClientRect();
+    const r = anchor.getBoundingClientRect();
     // Toolbar is a floating pill anchored to the bottom of the canvas, so the
     // flyout always opens ABOVE the button, clamped to the viewport.
     this.setState({ railMenu: { kind, up: true, bottom: Math.max(8, window.innerHeight - r.top + 10), left: Math.max(8, Math.min(r.left, window.innerWidth - 198)) } });
   }
   closeRail() { this.setState({ railMenu: null }); }
+  // Long-press on a grouped tool opens its flyout (touch discoverability). The
+  // anchor node is captured synchronously since the timer fires after the event.
+  railPressDown(kind, ev) {
+    this._lpFired = false;
+    const anchor = (ev.currentTarget && ev.currentTarget.closest && ev.currentTarget.closest('.ts-rail-group')) || ev.currentTarget;
+    clearTimeout(this._lpT);
+    this._lpT = setTimeout(() => { this._lpFired = true; this.openRailFrom(kind, anchor); }, 480);
+  }
+  railPressUp() { clearTimeout(this._lpT); }
+  // Main click on the shapes group: reuse the last shape tool when the group is
+  // idle; when it is already the active tool (or already open), toggle the menu.
+  // A preceding long-press already opened the menu, so swallow that click.
+  shapeMainClick(ev) {
+    if (this._lpFired) { this._lpFired = false; return; }
+    const st = this.state;
+    const shapeActive = ['line', 'rect', 'ellipse', 'poly', 'fill'].indexOf(st.tool) !== -1;
+    if (shapeActive || (st.railMenu && st.railMenu.kind === 'shape')) this.toggleRail('shape', ev);
+    else this.pickTool(st.lastShape || 'line');
+  }
 
   line(x0, y0, x1, y1, cb) {
     let dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, err = dx + dy;
@@ -3624,7 +3702,8 @@ class Component extends DCLogic {
     if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+' || e.code === 'NumpadAdd')) { e.preventDefault(); return this.zoomIn(); }
     if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract')) { e.preventDefault(); return this.zoomOut(); }
     if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); return this.zoomReset(); }
-    const tools = { v: 'cursor', p: 'pen', e: 'eraser', l: 'line', r: 'rect', o: 'ellipse', g: 'poly', f: 'fill', s: 'select', t: 'text' };
+    const tools = { p: 'pen', e: 'eraser', l: 'line', r: 'rect', o: 'ellipse', g: 'poly', f: 'fill', s: 'select', t: 'text' };
+    if (st.a11yMode) tools.v = 'cursor'; // cursor tool only exists in Accessibility Mode
     const k = e.key.toLowerCase();
     if (!e.ctrlKey && !e.metaKey && tools[k]) { this.pickTool(tools[k]); return; }
     if (e.key === 'Enter' && this.polyPts.length) { e.preventDefault(); return this.closePoly(); }
@@ -3647,9 +3726,15 @@ class Component extends DCLogic {
     }
   }
 
+  // Canvas-ready announcement: the keyboard-nav hint only surfaces in Accessibility Mode.
+  _readyMsg() { const t = this.T(); return this.state.a11yMode && t.aReadyA11y ? t.aReadyA11y : t.aReady; }
   pickTool(id) {
+    if (id === 'cursor' && !this.state.a11yMode) return; // cursor tool is Accessibility-Mode-only
     if (this.state.tool !== 'poly' && this.polyPts.length) { this.polyPts = []; this.preview = null; }
-    this.setState({ tool: id, railMenu: null });
+    // Remember the last shape-group tool so the grouped button can re-select it
+    // on a plain click (Illustrator-style), while the caret opens the full menu.
+    const isShape = ['line', 'rect', 'ellipse', 'poly', 'fill'].indexOf(id) !== -1;
+    this.setState(isShape ? { tool: id, railMenu: null, lastShape: id } : { tool: id, railMenu: null });
     const t = this.T();
     this.say(t.aToolSel(t.toolNames[id]));
   }
@@ -3834,13 +3919,13 @@ class Component extends DCLogic {
   enterStudio(entry, imp) {
     this.setState({ screen: 'studio', entry, importOpen: !!imp, sendPhase: 'idle', savePhase: 'form' });
     if (imp) this.resetImport();
-    if (!entry) this.say(this.T().aReady);
+    if (!entry) this.say(this._readyMsg());
   }
   resetImport() {
     clearTimeout(this._readT);
     this._uploadSeq = (this._uploadSeq || 0) + 1;
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile', threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+    this.setState({ impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile', threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
   }
   // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
   _captureSource(bmp, w, h) {
@@ -3863,7 +3948,7 @@ class Component extends DCLogic {
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
     // NOTE: only temporary import state here — the document (fileName, cells,
     // undo) must not change until the user explicitly applies (applyImport).
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name });
+    this.setState({ impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: true, imgReady: false, impName: name });
     const fail = () => {
       if (token !== this._uploadSeq) return;
       this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
@@ -3895,7 +3980,7 @@ class Component extends DCLogic {
     const cnv = document.createElement('canvas'); cnv.width = 150; cnv.height = 130;
     const g = cnv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 150, 130); g.strokeStyle = '#000'; this.drawCat(g, 50);
     this._srcData = g.getImageData(0, 0, 150, 130).data; this._srcW = 150; this._srcH = 130; this._srcCanvas = cnv;
-    this.setState({ impStep: 'import', cropChoice: 'full', converting: false, convertDone: false, vectorizeEnabled: false, vecViewTab: 'tactile', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName });
+    this.setState({ impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, impErr: '', impLoading: false, imgReady: true, impName: t.impSampleName });
     this.drawImp();
   }
   // guard destructive new-document actions when the canvas has content
@@ -4182,7 +4267,7 @@ class Component extends DCLogic {
       this.setState({ connBusy: type, connFailed: false });
       this.say(t.aConnBle);
       DP.connect().then(ok => {
-        if (ok) this.setState(s => ({ connected: true, connType: 'ble', connBusy: '', connFailed: false, sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
+        if (ok) this.setState(s => ({ connected: true, connBusy: '', connFailed: false, sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
         else this.setState({ connBusy: '', connFailed: true }); // real attempt failed/unavailable
         this.say(ok ? t.aConnOn : t.aConnFailed);
         if (ok && this.state.livePreview) this.queueLivePreview(true, true);
@@ -4193,7 +4278,7 @@ class Component extends DCLogic {
     this.setState({ connBusy: type, connFailed: false });
     this.say(type === 'usb' ? t.aConnUsb : t.aConnBle);
     this._connBusyT = setTimeout(() => {
-      this.setState(s => ({ connected: true, connType: type, connBusy: '', sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
+      this.setState(s => ({ connected: true, connBusy: '', sendPhase: s.dotpadOpen ? 'idle' : s.sendPhase }));
       this.say(t.aConnOn);
     }, 1200);
   }
@@ -4332,6 +4417,7 @@ class Component extends DCLogic {
     const t = this.T(), name = this.state.fileName || t.untitled;
     const thumb = this.thumbFrom(this.cells, this.state.gridW, this.state.gridH);
     const cells = this.cells.slice();
+    let ok = true;
     this.setState(s => {
       const saved = [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH, savedAt: Date.now(), favorite: false }, ...s.saved];
       this.saveLibrary(saved);
@@ -4339,8 +4425,16 @@ class Component extends DCLogic {
     });
     // Saving to the shared library also emits a schema-v1 asset file (JSON) so it
     // can drop straight into build-corpus → the app corpus grows (WS1↔WS2 link).
-    if (this.state.saveLoc === 'library') this.exportLibraryAsset(name);
+    if (this.state.saveLoc === 'library') { try { this.exportLibraryAsset(name); } catch (e) { ok = false; } }
     this.say(this.state.saveLoc === 'drive' ? t.tSavedDrive : t.tSavedLib);
+    this._flashSaveStatus(ok ? 'saved' : 'error');
+  }
+  // Top-bar save indicator is meaningful-state-only: a transient "saved" that
+  // auto-clears, or a sticky "error" until the next save attempt.
+  _flashSaveStatus(kind) {
+    if (this._saveStatusTimer) { clearTimeout(this._saveStatusTimer); this._saveStatusTimer = null; }
+    this.setState({ saveStatus: kind });
+    if (kind !== 'error') this._saveStatusTimer = setTimeout(() => this.setState({ saveStatus: '' }), 2500);
   }
   // Serialize the whole document into a Tactile Library Asset v1 record.
   // Every page's graphic is DTMS hex from the byte-identical encoder.
@@ -4644,7 +4738,7 @@ class Component extends DCLogic {
     const out = (this.OUTPUTS.find(o => o.gw === gw && o.gh === gh) || this.OUTPUTS[0]).key;
     this.setState({ screen: 'studio', entry: false, output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle', corpusCtx: null });
     this.queueLivePreview();
-    this.say(this.T().aReady);
+    this.say(this._readyMsg());
   }
   sendCard(kind, gw, gh, cells, name) {
     this.openCard(kind, gw, gh, cells, name);
@@ -4699,7 +4793,10 @@ class Component extends DCLogic {
         hasStrokeMenu
       };
     };
-    const primaryTools = ['cursor', 'pen', 'eraser'].map(mkTool);
+    // Cursor is an Accessibility-Mode-only tool (keyboard-driven cell nav). The
+    // default toolbar is pointer-first — pen/eraser — since arrow/Space keyboard
+    // editing works regardless of the active tool. See a11yMode.
+    const primaryTools = (st.a11yMode ? ['cursor', 'pen', 'eraser'] : ['pen', 'eraser']).map(mkTool);
     const selectTool = mkTool('select');
     const textTool = mkTool('text');
     const segBtn = on => ({ flex: 1, height: 30, borderRadius: 7, border: 'none', background: on ? '#1E1C1A' : 'transparent', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 12.5, cursor: 'pointer', transition: 'background 0.12s ease' });
@@ -4716,12 +4813,19 @@ class Component extends DCLogic {
       const sel = st.tool === id;
       return { id, label: nm(id), key: keys[id], aria: nm(id) + ' (' + keys[id] + ')', iconEl: this.icon(id, 19), pick: () => this.pickTool(id), rowStyle: menuRow(sel), iconStyle: menuGlyph(sel), textStyle: menuText(sel), keyStyle: menuKeyCap };
     });
+    const shapeMenuOpenNow = !!(st.railMenu && st.railMenu.kind === 'shape');
+    const shapeShownTool = shapeActive ? st.tool : (st.lastShape || 'line');
     const shapeGroup = {
-      active: shapeActive, aria: t.shapesGroup + (shapeActive ? ' — ' + nm(st.tool) : ''),
-      iconEl: this.icon(shapeActive ? st.tool : 'shapes', 21),
-      style: railStyle(shapeActive || (st.railMenu && st.railMenu.kind === 'shape')),
-      toggle: e => this.toggleRail('shape', e),
-      onEnter: e => this.showTip(t.shapesGroup, '', e)
+      active: shapeActive, sel: (shapeActive || shapeMenuOpenNow) ? '1' : '0',
+      // Reflect the active / last-used shape tool so a plain click reuses it.
+      aria: (shapeActive ? nm(st.tool) : t.shapesGroup) + ' (' + keys[shapeShownTool] + ')',
+      caretAria: t.shapesGroup + ' — ' + t.moreOpts,
+      iconEl: this.icon(shapeShownTool, 21),
+      mainClick: e => this.shapeMainClick(e),
+      open: e => this.toggleRail('shape', e),
+      pressDown: e => this.railPressDown('shape', e),
+      pressUp: () => this.railPressUp(),
+      onEnter: e => this.showTip(shapeActive ? nm(st.tool) : t.shapesGroup, keys[shapeShownTool] || '', e)
     };
     // Stroke-width dropdown: same toolbar-pill pattern as shapeGroup above,
     // reusing the existing strokeSize/eraserSize state (see strokeOpts below)
@@ -4733,9 +4837,9 @@ class Component extends DCLogic {
     const strokeSizeNow = strokeIsEraserNow ? st.eraserSize : st.strokeSize;
     const strokeRowLabels = t.rowN || ['1', '2', '3'];
     const strokeGroup = {
-      active: strokeToolActiveNow, aria: strokeLabelNow + (strokeSizeNow ? ' — ' + (strokeRowLabels[strokeSizeNow - 1] || strokeSizeNow) : ''),
+      active: strokeToolActiveNow, sel: (st.railMenu && st.railMenu.kind === 'stroke') ? '1' : '0',
+      aria: strokeLabelNow + (strokeSizeNow ? ' — ' + (strokeRowLabels[strokeSizeNow - 1] || strokeSizeNow) : ''),
       iconEl: strokeIsEraserNow ? this.eraserGroupIcon(21, strokeSizeNow) : this.strokeGroupIcon(21, strokeSizeNow),
-      style: railStyle(st.railMenu && st.railMenu.kind === 'stroke'),
       toggle: e => this.toggleRail('stroke', e),
       onEnter: e => this.showTip(strokeLabelNow, '', e)
     };
@@ -5061,6 +5165,18 @@ class Component extends DCLogic {
       toggleLive: () => this.toggleLive(),
       liveTrackStyle: { position: 'relative', width: 40, height: 22, borderRadius: 100, flex: 'none', transition: 'background 0.16s ease', background: st.livePreview && st.connected ? 'var(--ts-primary)' : 'var(--ts-border-decor)', cursor: st.connected ? 'pointer' : 'not-allowed', opacity: st.connected ? 1 : 0.5, border: 'none', padding: 0 },
       liveKnobStyle: { position: 'absolute', top: 2, left: st.livePreview && st.connected ? 20 : 2, width: 18, height: 18, borderRadius: 100, background: '#fff', transition: 'left 0.16s ease', boxShadow: '0 1px 2px rgba(16,24,40,0.2)' },
+      // Save status indicator (top bar) — only rendered on meaningful states
+      saveStatusShown: !!st.saveStatus,
+      saveStatusSaving: st.saveStatus === 'saving',
+      saveStatusSaved: st.saveStatus === 'saved',
+      saveStatusError: st.saveStatus === 'error',
+      saveStatusLabel: st.saveStatus === 'saving' ? t.saveStatusSaving : st.saveStatus === 'error' ? t.saveStatusError : t.savedStatus,
+      saveStatusStyle: { display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, flex: 'none', whiteSpace: 'nowrap', color: st.saveStatus === 'error' ? 'var(--ts-danger)' : st.saveStatus === 'saving' ? 'var(--ts-text-secondary)' : 'var(--ts-success)' },
+      // Accessibility Mode toggle (Properties pane)
+      a11yMode: st.a11yMode,
+      toggleA11y: () => this.setState(s => { const on = !s.a11yMode; const patch = { a11yMode: on }; if (!on && s.tool === 'cursor') patch.tool = 'pen'; return patch; }),
+      a11yTrackStyle: { position: 'relative', width: 40, height: 22, borderRadius: 100, flex: 'none', transition: 'background 0.16s ease', background: st.a11yMode ? 'var(--ts-primary)' : 'var(--ts-border-decor)', cursor: 'pointer', border: 'none', padding: 0 },
+      a11yKnobStyle: { position: 'absolute', top: 2, left: st.a11yMode ? 20 : 2, width: 18, height: 18, borderRadius: 100, background: '#fff', transition: 'left 0.16s ease', boxShadow: '0 1px 2px rgba(16,24,40,0.2)' },
       pinsDisabled: !st.connected,
       pinRaise: () => this.pinAction('raise'), pinLower: () => this.pinAction('lower'), pinInvert: () => this.pinAction('invert'),
       pinRaiseStyle: pinBtn('raise'), pinLowerStyle: pinBtn('lower'), pinInvertStyle: pinBtn('invert'),
@@ -5614,7 +5730,8 @@ class Component extends DCLogic {
       // help / toast
       helpOpen: st.helpOpen,
       toggleHelp: () => this.setState(s => ({ helpOpen: !s.helpOpen })),
-      helpRows: (t.hRows || []).map(r => ({ k: (r && r[0]) || '', d: (r && r[1]) || '' })),
+      helpRows: [].concat(t.hRows || [], st.a11yMode ? (t.hRowsA11y || []) : []).map(r => ({ k: (r && r[0]) || '', d: (r && r[1]) || '' })),
+      canvasAria: st.a11yMode && t.canvasAriaA11y ? t.canvasAriaA11y : t.canvasAria,
       toastOn: !!st.toast, toast: st.toast,
       stopProp: e => e.stopPropagation()
     };
