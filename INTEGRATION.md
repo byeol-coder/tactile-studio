@@ -5,9 +5,9 @@ This guide is for developers embedding the reusable editor into a host applicati
 ## Quick example
 
 ```tsx
-import { TactileStudioEditor } from '<package>/react';
-import { createMemoryStorageAdapter } from '<package>/storage';
-import { createDocument } from '<package>/core';
+import { TactileStudioEditor } from 'tactile-studio/react';
+import { createMemoryStorageAdapter } from 'tactile-studio/storage';
+import { createDocument } from 'tactile-studio/core';
 
 function StudioPage() {
   const storage = useMemo(() => myHostStorageAdapter, []);
@@ -25,7 +25,28 @@ function StudioPage() {
 
 `<TactileStudioEditor>` renders correctly as a plain child of your own router's route component — it owns no routing, no authentication, and no internal language switching (verified in `tests/parity/product-ownership.test.tsx`). Mount it inside whatever page/route/layout your host app already uses.
 
-> **Packaging note:** this repository does not yet publish a built package (no `npm publish`-ready `dist/`, no library-mode Vite config). The import paths above (`<package>/react`, `<package>/storage`, `<package>/core`) are illustrative of the intended public surface (`src/react/index.ts`, `src/storage/index.ts`, `src/core/index.ts`) — until a packaging step exists, consume this repository as source (e.g. a workspace package or git submodule) rather than an npm dependency.
+> **Packaging note:** `npm run build:package` produces a real, working ESM build (`dist/lib/<entry>/index.js` + `dist/types/<entry>/index.d.ts` for each of `core`/`codecs`/`device`/`storage`/`react`), wired up via `package.json`'s `exports` map — the import paths above are real, not illustrative. This has been smoke-tested by building a standalone consumer app against the built output. The package is `private: true` and **not published to a registry yet** — consume it today as a workspace package, git dependency, or by copying `dist/` after running the build script; publishing to a registry is a small, separate step once a package name/registry is decided.
+
+## Building the package
+
+```sh
+npm run build:package   # runs build:lib then build:types
+# or individually:
+npm run build:lib       # vite build --config vite.lib.config.ts → dist/lib/
+npm run build:types     # tsc -p tsconfig.build.json → dist/types/
+```
+
+This produces five independent ESM entry points — a host importing only `tactile-studio/core` never pulls in React, `tactile-studio/storage`, or anything React-specific:
+
+| Subpath | Contents |
+|---|---|
+| `tactile-studio/core` | `StudioDocument`/`EditorStore`/grid/geometry/history — no React, no browser API |
+| `tactile-studio/codecs` | DTMS, Library Asset v1, vector, image, tactile-text, grid-fx, quality, corpus search, SVG — pure or injection-based, no React |
+| `tactile-studio/device` | `TactileDisplayAdapter` + browser/mock DotPad adapters |
+| `tactile-studio/storage` | `StudioStorageAdapter` + memory/local-library adapters |
+| `tactile-studio/react` | `TactileStudioEditor` and everything under `src/ui/` (re-exported transitively) |
+
+`react`/`react-dom` are `peerDependencies` (marked optional, since only the `react` entry needs them) — the build externalizes them, so your host's own React instance is what actually runs, never a bundled copy. `codecs/braille/liblouis-node` (Node-only — reads real files via `node:fs`) is likewise external to Node built-ins; import it only from Node-side code (build tooling, tests, SSR prep), not from browser bundles.
 
 ## Props (`TactileStudioEditorProps`)
 
@@ -49,10 +70,12 @@ Only `storage` is required. Everything else is optional — the editor renders a
 interface StudioServices {
   storage: StudioStorageAdapter;          // required
   tactileDisplay?: TactileDisplayAdapter; // enables the DotPad panel (connect/send)
-  braille?: BrailleService;               // not yet consumed anywhere (see Known gaps)
+  braille?: BrailleService;               // enables Inspector's braille language selector + Apply buttons + preview
   imageProcessing?: ImageProcessingService; // not yet consumed anywhere (see Known gaps)
   gridFx?: GridFxService;                 // enables Inspector's Thinner/Thicker/Remove-noise buttons
-  encodeBits?: EncodeBitsFn;               // enables DotPad "send" and DTMS/Library-Asset-v1 export
+  encodeBits?: EncodeBitsFn;               // enables DotPad "send" and DTMS/Library-Asset-v1/SVG export
+  bitsToSvg?: TwBitsToSvg;                 // enables ExportMenu's SVG button (PNG needs neither — real canvas.toBlob)
+  corpus?: CorpusRecord[];                 // enables the corpus/command-panel search UI
 }
 ```
 
@@ -108,9 +131,31 @@ services={{
 
 See `codecs/grid-fx/grid-fx.ts` and `codecs/dtms/dtms.ts` for the exact orchestration helpers (`thickenGrid`, `denoiseGrid`, `encodeDtmsHex`) — they do the `cellsToBits`/`bitsToCells` bridging for you; you only need to supply the raw vendor function.
 
-### `braille?: BrailleService` and `imageProcessing?: ImageProcessingService`
+### `braille?: BrailleService`
 
-These interfaces exist and are typed, but **nothing in the current UI calls them yet** — page-description/narration fields in the Inspector are plain autosave text with no braille "Apply"/preview step, and there is no image-import UI wired to `imageProcessing`. Providing them today has no visible effect. They're placeholders for the next round of feature work (see `docs/known-issues.md #5`).
+```ts
+interface BrailleService {
+  translate(text: string, langKey: string): Promise<{ ok: boolean; unicode: string; cells: number; reason?: string }>;
+}
+```
+
+Enables Inspector's braille language selector (Korean Grade 1/2, UEB Grade 1/2) and "Apply braille" buttons on the description and narration fields. `EditorStore.applyBraille` ports the vanilla app's `applyField` semantics: the braille source text is always description-first-then-narration (regardless of which field you clicked Apply on — that's the shipped behavior, not a bug), only one Apply runs at a time, and a page switch mid-flight discards a stale response rather than applying it to the wrong page. **Never falls back to sending raw text if translation fails** — the vendor liblouis README's absolute rule, preserved here too.
+
+A real Node-side implementation exists at `codecs/braille/liblouis-node.ts` (loads the actual vendored liblouis engine + tables) if you need braille translation in Node/SSR context; for the browser, wrap the vanilla app's `window.TSBraille` (or your own) to match the interface above.
+
+### `imageProcessing?: ImageProcessingService`
+
+This interface is typed but **nothing in the current UI calls it yet** — there is no image-import UI wired to it. Providing it today has no visible effect. It's a placeholder for the next round of feature work (see `docs/known-issues.md #5`).
+
+### `corpus?: CorpusRecord[]`
+
+Enables the corpus/command-panel search UI (`CorpusSearchPanel`), backed by a verbatim port of the vanilla app's real search engine (`codecs/corpus/corpus-search.ts` — deterministic title/tag/category scoring plus a fuzzy "did you mean" fallback, not a stub). Supply your own corpus data, typically by loading the same `corpus.js` the vanilla app uses and reading `window.DTMS_CORPUS`:
+
+```ts
+services={{ storage, corpus: window.DTMS_CORPUS }}
+```
+
+No corpus data is bundled with or duplicated inside this package.
 
 ## `theme: StudioTheme`
 
@@ -149,8 +194,9 @@ Tactile Studio never detects the browser's language or ships its own language to
 Being upfront about what this prop surface *looks* like it does versus what it *actually* does today:
 
 - `onSave` and `onError` are typed and accepted, but nothing in the shipped components calls them. There's no save button, no keyboard-shortcut-triggered save, and device-adapter errors surface only as inline text inside `DotPadPanel`, not through `onError`.
-- `braille` and `imageProcessing` services are typed but unconsumed (see above).
+- `imageProcessing` service is typed but unconsumed (see above); `braille` IS now consumed (Inspector's Apply buttons).
 - Deleting a page (`PagePanel`'s ✕ button) happens immediately, with no confirmation — `ConfirmDialog` exists as a component but isn't wired to this action yet.
-- Export (`ExportMenu`) produces DTMS and Library Asset v1 JSON and triggers a browser file download; there's no PNG or SVG export yet, and no `onExport` callback on `TactileStudioEditorProps` — the download is a self-contained browser convenience, not something the host is notified about.
+- Export (`ExportMenu`) produces DTMS, Library Asset v1, SVG (if `bitsToSvg` is supplied), and PNG (always available, real `canvas.toBlob`) — there's no `onExport` callback on `TactileStudioEditorProps`, just the `onExport` prop on `ExportMenu` itself that `TactileStudioEditor` wires to a built-in browser-download convenience; the host isn't separately notified of exports.
+- The corpus search UI loads only the single specific page a search hit points at — the vanilla app's multi-page "prev/next through this record's sibling pages" navigation context is not ported.
 
 See `docs/known-issues.md #5` for the complete, currently-accurate list of deferred UI work.

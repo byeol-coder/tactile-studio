@@ -126,11 +126,25 @@ Per the target architecture, `TactileStudioEditor` must work identically whether
 
 The same pattern applies to storage (`StudioStorageAdapter` — host-implemented, no Supabase import anywhere in this package) and to the vendored DTMS/grid-fx algorithms (`encodeBits`/`thickenBits`/`denoiseBits` are always parameters, never imports, inside `codecs/`).
 
+## Build system
+
+Three separate Vite configs, each with a distinct job — do not conflate them:
+
+| Config | Purpose | Touches vanilla app? |
+|---|---|---|
+| (none — vanilla app) | `index.html`/`support.js` are buildless by design; served as-is | This *is* the vanilla app |
+| `vite.config.ts` | Dev server for `app/development-shell` (`npm run dev` / `npm run build:dev-shell`), rooted at `dev/` | No — completely isolated root |
+| `vite.lib.config.ts` | Library-mode build of the five public entry points (`npm run build:lib`) | No |
+
+`npm run build:package` runs `build:lib` (Vite/Rollup, ESM output to `dist/lib/<entry>/index.js`) followed by `build:types` (`tsc -p tsconfig.build.json`, declaration-only emission to `dist/types/`, mirroring `src/`'s structure). `package.json`'s `exports` map ties each subpath (`<pkg>/core`, `<pkg>/codecs`, `<pkg>/device`, `<pkg>/storage`, `<pkg>/react`) to its built `.js` and `.d.ts`. `react`/`react-dom` are `peerDependencies` (marked optional, since only the `/react` entry needs them) — never bundled into the library output. Node built-ins used only by `codecs/braille/liblouis-node.ts` (`node:fs`, `node:module`, etc.) are external too — that module is for Node-side consumers, not for a browser bundle.
+
+
+
 ## Status
 
 As of the last commit in this migration:
 
-- **9 commits**, **123 passing tests** (`npm test`), full TypeScript strict-mode typecheck (`npm run typecheck`), and a working Vite 5.4 production build of the development shell (`npm run build:dev-shell`) — see [`MIGRATION.md`](./MIGRATION.md) for the phase-by-phase breakdown.
+- **11 commits**, **151 passing tests** (`npm test`), full TypeScript strict-mode typecheck (`npm run typecheck`), a working Vite 5.4 production build of the development shell (`npm run build:dev-shell`), and a working library-mode build (`npm run build:package`) — see [`MIGRATION.md`](./MIGRATION.md) for the phase-by-phase breakdown.
 - The vanilla app (`index.html`) is **untouched** since before this migration started, except for one isolated bugfix (a missing `banaPrintCheck` method — see `docs/known-issues.md #1`).
-- The React editor is **functional but not feature-complete** relative to the vanilla app. See `docs/known-issues.md #5` for the explicit list of what's deferred (corpus/command-panel search, full Figma-exact styling, PNG/SVG export, braille "Apply" preview, page thumbnails/drag-reorder, and a few others).
-- `<TactileStudioEditor>` is not yet packaged for distribution as a library (no `vite build --mode lib` config, no published package) — that's expected follow-on work once Tactile World's actual integration requirements (bundler, module format) are known.
+- The React editor covers drawing (all tools including poly/text), undo/redo, pages (with thumbnails and drag-reorder), corpus search, braille Apply/preview, DotPad connect/send, and DTMS/Library-Asset-v1/SVG/PNG export. See `docs/known-issues.md #5` for what's still deferred (shape-tool flyout grouping, confirm-before-delete, image-file import, full Figma-exact spacing/tooltips, and a few others).
+- `<TactileStudioEditor>` now has a real library-mode build: `npm run build:package` produces ESM output for all five entry points (`core`, `codecs`, `device`, `storage`, `react`) via `vite.lib.config.ts` plus full `.d.ts` declarations via `tsconfig.build.json`, wired up through `package.json`'s `exports` map (`<pkg>/core`, `<pkg>/codecs`, `<pkg>/device`, `<pkg>/storage`, `<pkg>/react`). React/ReactDOM are peer dependencies (external, not bundled). This was smoke-tested by building a standalone consumer app that imports directly from the built `dist/lib/` output (not `src/`) and compiles cleanly. Not yet published to a registry (`private: true` is intentional) — see [`INTEGRATION.md`](./INTEGRATION.md) for how to consume it as-is.

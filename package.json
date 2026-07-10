@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Tactile Studio \u2014 migrating from a buildless x-dc CDN runtime to a React + Vite TypeScript monorepo (core/codecs/device/storage extracted; React editor shell in progress)",
+  "description": "Tactile Studio — migrating from a buildless x-dc CDN runtime to a React + Vite TypeScript monorepo. This package field describes the NEW library surface (src/core, src/codecs, src/device, src/storage, src/react); the deployed vanilla app (index.html/support.js/vendor) is a separate, unrelated static site in the same repo. private:true is intentional — not yet published to a registry.",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -15,7 +15,10 @@
     "capture:codecs-baseline": "node tools/capture-codecs-baseline.mjs",
     "capture:codecs-b-baseline": "node --experimental-strip-types tools/capture-codecs-b-baseline.mjs",
     "dev": "vite",
-    "build:dev-shell": "vite build"
+    "build:dev-shell": "vite build",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build:package": "npm run build:lib && npm run build:types"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
@@ -29,5 +32,44 @@
     "typescript": "~5.6",
     "vite": "^5.4.21",
     "vitest": "^2.1.9"
+  },
+  "exports": {
+    "./core": {
+      "types": "./dist/types/core/index.d.ts",
+      "import": "./dist/lib/core/index.js"
+    },
+    "./codecs": {
+      "types": "./dist/types/codecs/index.d.ts",
+      "import": "./dist/lib/codecs/index.js"
+    },
+    "./device": {
+      "types": "./dist/types/device/index.d.ts",
+      "import": "./dist/lib/device/index.js"
+    },
+    "./storage": {
+      "types": "./dist/types/storage/index.d.ts",
+      "import": "./dist/lib/storage/index.js"
+    },
+    "./react": {
+      "types": "./dist/types/react/index.d.ts",
+      "import": "./dist/lib/react/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/lib",
+    "dist/types"
+  ],
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   }
 }
