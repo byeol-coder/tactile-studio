@@ -90,9 +90,9 @@ export function loadCorpus() {
 // `fixedNow` freezes Date inside the sandbox so methods that stamp timestamps
 // (e.g. buildLibraryAsset) become deterministic for fixtures.
 /**
- * @param {{ fixedNow?: number | null, tw?: any }} [opts]
+ * @param {{ fixedNow?: number | null, tw?: any, localStorage?: any }} [opts]
  */
-export function loadStudioClass({ fixedNow = null, tw = null } = {}) {
+export function loadStudioClass({ fixedNow = null, tw = null, localStorage = null } = {}) {
   const source = extractXdcSource();
   const FixedDate = fixedNow == null ? Date : class extends Date {
     constructor(...args) { args.length ? super(...args) : super(fixedNow); }
@@ -108,6 +108,12 @@ export function loadStudioClass({ fixedNow = null, tw = null } = {}) {
   }
   const ctx = makeWindowContext({ DCLogic, Date: FixedDate });
   if (tw) ctx.window.TW = tw;
+  // The class body is compiled+run INSIDE this vm context, so any free
+  // reference to `window` inside its methods (e.g. saveLibrary/loadLibrary)
+  // resolves through ctx.window forever — setting globalThis.window in the
+  // calling test has no effect on it. Storage-adapter parity tests must
+  // inject their fake localStorage here, not on the real global.
+  if (localStorage) ctx.window.localStorage = localStorage;
   const Component = vm.runInContext(`${source}\n;Component;`, ctx, { filename: 'index.html#x-dc' });
   return { Component, context: ctx };
 }

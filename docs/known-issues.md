@@ -27,7 +27,12 @@ The original Phase 3 scope note flagged three areas as deferred because they tou
 
 Net effect: of the three originally-deferred items, liblouis is now genuinely, fully verified; image conversion's actual algorithm is genuinely, fully verified; only glyph-level font rasterization inside `stampText` remains browser-only, and that is an inherent rendering-engine limitation rather than a scope gap.
 
-## 3. DotPad SDK `.d.ts` 불일치 (참고)
+## 3. DotPad SDK `.d.ts` 불일치 (Phase 4에서 직접 소스 검사로 확인됨)
 
-- `displayAllUp` / `displayAllDown` 은 번들된 SDK 런타임에는 존재하지만 타입 선언에는 없음.
-- Phase 4(디바이스 어댑터)에서 실제 SDK 파일을 검사해 존재 여부를 재확인하고, 존재가 확인된 메서드만 어댑터 인터페이스의 optional 멤버로 노출한다.
+- **확인 결과**: `vendor/tw/dotpad-sdk.js`를 직접 읽어 확인 — `class DotPadSDK`에 `displayAllUp(device=null)` / `displayAllDown(device=null)`가 실제로 정의되어 있고, 각각 연결된 기기(들)에 `displayTextData('FF'.repeat(...))` + `displayGraphicData('FF'.repeat(...))` (또는 `'00'.repeat(...)`)를 호출한다. 이 저장소에는 `.d.ts` 파일 자체가 없다 (find 결과 0건) — 별도 리포지토리(tw-app 모노레포)에서의 이슈로 추정.
+- **앱 레벨 사용**: `vendor/tw/dotpad.js`(`window.TW.DP` 싱글턴)는 `output`/`outputText`/`connect`/`disconnect`/`brailleCellCount`만 감싸고, `displayAllUp`/`displayAllDown`는 감싸지 않는다. index.html도 현재 이 둘을 호출하지 않는다 — 즉 지금까지는 보존해야 할 기존 UI 동작이 없다.
+- **Phase 4 처리**: `src/device/dotpad/browser-adapter.ts`의 `raiseAll()`/`lowerAll()`이 이 확인된 메서드를 `DP.sdk.displayAllUp(DP.device)` / `DP.sdk.displayAllDown(DP.device)`로 직접 호출한다(다른 모든 호출은 `DP`를 통함). 메서드 부재 시에는 `not-supported` 에러로 명확히 실패하며, 존재하지 않는 메서드를 새로 만들어내지 않는다.
+
+## 4. `window.TW.DP` 싱글턴의 단일 key-handler 슬롯 (참고, 미변경)
+
+`vendor/tw/dotpad.js`의 `DP.onKey(fn)`은 슬롯이 하나뿐이라 마지막에 등록한 핸들러만 유효하며, `_vis` 플래그로 보호되는 `visibilitychange` 리스너는 페이지 생애주기 동안 한 번만 등록되고 제거되지 않는다(싱글턴 수명과 일치하도록 설계됨). `src/device/dotpad/browser-adapter.ts`는 이 제약을 그대로 인정하고, 모듈 스코프에서 "현재 어떤 어댑터 인스턴스가 그 슬롯을 소유하는지"를 추적해 `dispose()`가 다른 살아있는 인스턴스의 등록을 절대 지우지 않도록만 보장한다 — 싱글턴 자체의 설계를 바꾸지 않는다.
