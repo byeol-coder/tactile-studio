@@ -209,6 +209,13 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 .ts-page-item:hover .ts-page-handle,.ts-page-item:focus-within .ts-page-handle,.ts-page-handle[data-dragging="true"]{opacity:1}
 .ts-page-handle:hover{color:var(--ts-primary);border-color:var(--ts-primary)}
 .ts-page-handle:focus-visible{outline:2px solid var(--ts-primary);outline-offset:1px}
+/* Advanced device test: pin-action buttons as a compact control group.
+   The DotPad panel is a fixed ~256px, too narrow for three icon+label buttons
+   in one row (KO "전체 올리기" alone needs ~103px). So Raise/Lower share the top
+   row as equal columns and Invert spans the full width below — every KO/EN label
+   stays on one line with no wrapping or clipping. */
+.ts-pin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.ts-pin-grid>:last-child{grid-column:1/-1}
 .ts-page-handle[data-dragging="true"]{cursor:grabbing}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
@@ -749,17 +756,17 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </button>
           <sc-if value="{{ advOpen }}" hint-placeholder-val="{{ true }}">
           <div style="margin-top:8px;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.45">{{ t.advTestsHint }}</div>
-          <div role="group" aria-label="{{ t.dpPins }}" style="display:flex;gap:7px;margin-top:10px">
+          <div class="ts-pin-grid" role="group" aria-label="{{ t.dpPins }}">
             <button onClick="{{ pinRaise }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpRaise }}" style="{{ pinRaiseStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0l-5 5m5-5l5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 19V6m0 0l-5 5m5-5l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               {{ t.dpRaise }}
             </button>
             <button onClick="{{ pinLower }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpLower }}" style="{{ pinLowerStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 5v13m0 0l-5-5m5 5l5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               {{ t.dpLower }}
             </button>
             <button onClick="{{ pinInvert }}" disabled="{{ pinsDisabled }}" aria-label="{{ t.aDpInvert }}" style="{{ pinInvertStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></circle></svg>
               {{ t.dpInvert }}
             </button>
           </div>
@@ -1701,7 +1708,7 @@ class Component extends DCLogic {
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', 
       dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
-      dpPins: '핀 테스트', dpRaise: '모두 올리기', dpLower: '모두 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
+      dpPins: '핀 테스트', dpRaise: '전체 올리기', dpLower: '전체 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
       
       aDpLive: '실시간 DotPad 미리보기 사용', aDpRaise: 'DotPad 핀 모두 올리기', aDpLower: 'DotPad 핀 모두 내리기', aDpInvert: 'DotPad 핀 반전',
       aConnBle: 'BLE로 DotPad에 연결하는 중…', aConnUsb: 'USB로 DotPad에 연결하는 중…', aConnectFirst: '먼저 DotPad를 연결하세요.',
@@ -4519,7 +4526,7 @@ class Component extends DCLogic {
     const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
-    const pinBtn = kind => ({ flex: 1, height: 34, borderRadius: 8, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
+    const pinBtn = kind => ({ minWidth: 0, height: 46, padding: '0 10px', borderRadius: 11, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
     const locCard = on => ({ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 4, padding: '14px 16px', borderRadius: 8, cursor: 'pointer', background: on ? 'rgba(var(--ts-primary-rgb),0.06)' : '#fff', border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', color: '#1E1C1A' });
     const pill2 = on => ({ height: 34, padding: '0 14px', borderRadius: 8, border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: on ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: on ? '#B93E15' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 });
     const tplGroups = t.tplGroups.map((label, i) => ({ label, key: ['recommended', 'education', 'diagrams', 'elements', 'conversion', 'museum'][i] }));
