@@ -12,7 +12,8 @@
     "check:xdc-syntax": "node tools/check-xdc-syntax.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "capture:core-baseline": "node tools/capture-core-baseline.mjs",
-    "capture:codecs-baseline": "node tools/capture-codecs-baseline.mjs"
+    "capture:codecs-baseline": "node tools/capture-codecs-baseline.mjs",
+    "capture:codecs-b-baseline": "node --experimental-strip-types tools/capture-codecs-b-baseline.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",

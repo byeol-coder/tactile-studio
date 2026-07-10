@@ -1,0 +1,50 @@
+{
+  "w": 60,
+  "h": 40,
+  "presets": {
+    "balanced": {
+      "cellsSha256": "9511463c66df45ca4f0ae1a7fb947fe9b44672eb6e256a5b3b88c35c68f7dfeb",
+      "box": {
+        "ox": 5,
+        "oy": 0,
+        "dw": 50,
+        "dh": 40
+      },
+      "removedDots": 0,
+      "dotCount": 471
+    },
+    "outline": {
+      "cellsSha256": "0f2034f82a6a67b2ae2449a683106ca7a14c26c6705ee28f2e7b11973cc43b2d",
+      "box": {
+        "ox": 5,
+        "oy": 0,
+        "dw": 50,
+        "dh": 40
+      },
+      "removedDots": 0,
+      "dotCount": 344
+    },
+    "diagram": {
+      "cellsSha256": "13cec1706bbb22522338628a70edbe29b5df10bc576db98a0544869ede613a68",
+      "box": {
+        "ox": 5,
+        "oy": 0,
+        "dw": 50,
+        "dh": 40
+      },
+      "removedDots": 0,
+      "dotCount": 134
+    },
+    "detail": {
+      "cellsSha256": "9511463c66df45ca4f0ae1a7fb947fe9b44672eb6e256a5b3b88c35c68f7dfeb",
+      "box": {
+        "ox": 5,
+        "oy": 0,
+        "dw": 50,
+        "dh": 40
+      },
+      "removedDots": 0,
+      "dotCount": 471
+    }
+  }
+}
