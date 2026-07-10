@@ -165,3 +165,30 @@ export function cellsToBitsPlain(cells, w, h) {
   }
   return bits;
 }
+
+// ── live-ish instance for parity tests (Phase 2) ────────────────────────────
+// Builds a Component instance carrying real editor state (pages/cells/maps)
+// with UI side effects neutralized: T() yields callable-empty i18n entries,
+// preview/braille queues are no-ops. Core logic under test is untouched.
+export function makeLiveInstance(Component, { gridW = 60, gridH = 40, pages = null, pageIndex = 0 } = {}) {
+  const inst = Object.create(Component.prototype);
+  inst.props = {};
+  inst.state = { gridW, gridH, pageIndex, pageCount: pages ? pages.length : 1, corpusCtx: null };
+  inst.setState = (patch) => {
+    const next = typeof patch === 'function' ? patch(inst.state) : patch;
+    Object.assign(inst.state, next);
+  };
+  inst.T = () => new Proxy({}, { get: () => (..._a) => '' });
+  inst.say = () => {};
+  inst.queueLivePreview = () => {};
+  inst.queueBraillePreview = () => {};
+  inst.pages = pages || [new Uint8Array(gridW * gridH)];
+  inst.cells = inst.pages[pageIndex];
+  inst.pageAudio = {};
+  inst.pageVectors = {};
+  inst.undoStack = [];
+  inst.redoStack = [];
+  inst.polyPts = [];
+  inst.preview = null;
+  return inst;
+}

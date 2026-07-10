@@ -3,14 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Tactile Studio — buildless x-dc app with TypeScript regression-test foundation (migration Phase 1)",
+  "description": "Tactile Studio \u2014 buildless x-dc app with TypeScript regression-test foundation (migration Phase 1)",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "capture:baseline": "node tools/capture-baseline.mjs",
     "check:xdc-syntax": "node tools/check-xdc-syntax.mjs",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "capture:core-baseline": "node tools/capture-core-baseline.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",

@@ -14,5 +14,5 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["tests/**/*.ts", "tools/**/*.mjs", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "tools/**/*.mjs", "vitest.config.ts"]
 }
