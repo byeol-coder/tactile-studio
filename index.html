@@ -4438,9 +4438,6 @@ class Component extends DCLogic {
 
     return {
       t,
-      // lang
-      setKo: () => this.setState({ lang: 'ko', announce: this.T('ko').aLangSet }), setEn: () => this.setState({ lang: 'en', announce: this.T('en').aLangSet }),
-      isKo: st.lang === 'ko', isEn: st.lang === 'en',
       // saved-file library (Create ▸ Open file)
       libraryCards,
       libraryOpen: st.libraryOpen,
