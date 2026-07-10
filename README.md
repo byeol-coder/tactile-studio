@@ -18,7 +18,7 @@ The previous Tactile Agent version is preserved at:
 
 ## React migration (in progress)
 
-Alongside the deployed app above, this repository also contains a new, incremental migration toward a reusable `<TactileStudioEditor>` React component (see `src/`) for embedding into Tactile World. **The deployed app described above is unaffected** — the migration has left `index.html`/`support.js`/`vendor/` untouched, verified by a fingerprint regression test on every commit.
+Alongside the deployed app above, this repository also contains a new, incremental migration toward a reusable `<TactileStudioEditor>` React component (see `src/`) for embedding into Tactile World. **The deployed app described above is unaffected** — the migration has left `index.html`/`support.js`/`vendor/` untouched, verified by a fingerprint regression test on every commit and enforced in CI (`.github/workflows/ci.yml`, separate from the Pages `deploy.yml`).
 
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — folder map, dependency direction, key design decisions
 - [`INTEGRATION.md`](./INTEGRATION.md) — how to mount `<TactileStudioEditor>` in a host app

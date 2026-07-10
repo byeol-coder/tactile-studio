@@ -138,6 +138,17 @@ Three separate Vite configs, each with a distinct job — do not conflate them:
 
 `npm run build:package` runs `build:lib` (Vite/Rollup, ESM output to `dist/lib/<entry>/index.js`) followed by `build:types` (`tsc -p tsconfig.build.json`, declaration-only emission to `dist/types/`, mirroring `src/`'s structure). `package.json`'s `exports` map ties each subpath (`<pkg>/core`, `<pkg>/codecs`, `<pkg>/device`, `<pkg>/storage`, `<pkg>/react`) to its built `.js` and `.d.ts`. `react`/`react-dom` are `peerDependencies` (marked optional, since only the `/react` entry needs them) — never bundled into the library output. Node built-ins used only by `codecs/braille/liblouis-node.ts` (`node:fs`, `node:module`, etc.) are external too — that module is for Node-side consumers, not for a browser bundle.
 
+### Continuous integration
+
+Two separate GitHub Actions workflows, matching the two-applications split above:
+
+| Workflow | Triggers on | Runs |
+|---|---|---|
+| `.github/workflows/deploy.yml` | push to `main` | contrast gate + token-integrity check, then deploys the vanilla app to GitHub Pages. Pre-dates this migration. |
+| `.github/workflows/ci.yml` | every push (any branch) + PRs targeting `main` | `typecheck` → x-dc syntax check → contrast gate → `test` (177 tests: regression fixtures + live-code parity) → `build:dev-shell` → `build:package`, then a final step that fails the build if `index.html`/`support.js`/`vendor/`/`corpus.js`/`corpus-search.js` were modified by anything upstream in the job — the same fingerprint-style guarantee the test suite already enforces, now also checked at the file level in CI. |
+
+`ci.yml` is what actually protects this migration going forward: every one of the compatibility/parity guarantees in [`MIGRATION.md`](./MIGRATION.md) is only as good as someone continuing to run the suite — this makes that automatic instead of best-effort.
+
 
 
 ## Status
