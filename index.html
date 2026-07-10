@@ -123,18 +123,24 @@ input[type=range]{accent-color:var(--ts-primary)}
 .ts-divider{width:1px;height:22px;background:#E3D9CE;flex:none;margin:0 6px}
 .ts-divider.ts-left-divider{height:26px}
 .ts-rail-history{width:44px!important;height:44px!important;border-radius:12px!important}
-/* Grouped tool buttons (shapes / stroke width): the main icon stays the primary
-   focus; a small corner caret is the secondary "has more options" affordance.
-   Replaces the old floating circular dropdown badge. Selected state is toggled
-   via [data-sel] (not inline background) so :hover feedback actually applies. */
+/* Toolbar tool buttons. Two shapes share one visual language:
+   - .ts-rail-tool  : a single-action button (pen / eraser / select / text / quick)
+   - .ts-rail-group : a grouped control (shapes / stroke width) with a caret sub-zone
+   The main icon stays the primary focus; a small corner caret is the secondary
+   "has more options" affordance (replacing the old floating circular badge).
+   Selected state is toggled via [data-sel] rather than inline background, so the
+   :hover feedback is uniform across every toolbar button instead of being masked
+   by inline styles. active / focus keep their existing per-button rules. */
+.ts-rail-tool{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;border:none;border-radius:10px;background:transparent;color:#B7AEA4;cursor:pointer;padding:0;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease}
 .ts-rail-group{position:relative;width:40px;height:40px;flex:none;border-radius:10px;transition:background 0.15s ease}
-.ts-rail-group:not([data-sel="1"]):hover{background:rgba(255,255,255,0.10)}
-.ts-rail-group[data-sel="1"]{background:var(--ts-primary)}
+.ts-rail-tool:not([data-sel="1"]):hover,.ts-rail-group:not([data-sel="1"]):hover{background:rgba(255,255,255,0.10)}
+.ts-rail-tool[data-sel="1"],.ts-rail-group[data-sel="1"]{background:var(--ts-primary)}
+.ts-rail-tool[data-sel="1"]{color:#fff}
 .ts-rail-group-main{position:absolute;inset:0;width:100%;height:100%;display:grid;place-items:center;border:none;background:transparent;border-radius:10px;color:#B7AEA4;cursor:pointer;padding:0;transition:color 0.15s ease,transform 0.1s ease}
 .ts-rail-group[data-sel="1"] .ts-rail-group-main{color:#fff}
 .ts-rail-group-main:active{transform:scale(0.9)}
 .ts-rail-group-caret{position:absolute;right:2px;bottom:2px;width:14px;height:14px;display:grid;place-items:center;border:none;background:transparent;border-radius:5px;padding:0;cursor:pointer;color:#8A8177;transition:color 0.12s ease,background 0.12s ease}
-.ts-rail-group[data-sel="1"] .ts-rail-group-caret{color:rgba(255,255,255,0.85)}
+.ts-rail-group[data-sel="1"] .ts-rail-group-caret,.ts-rail-tool[data-sel="1"] .ts-rail-group-caret{color:rgba(255,255,255,0.85)}
 button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)}
 .ts-rail-group-caret--static{pointer-events:none}
 .ts-rail-group-main:focus-visible,.ts-rail-group-caret:focus-visible{outline:2px solid var(--ts-primary);outline-offset:2px}
@@ -570,11 +576,11 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <svg width="6" height="16" viewBox="0 0 6 16" aria-hidden="true"><circle cx="1.2" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="14.6" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="14.6" r="1.2" fill="#B7AEA4"></circle></svg>
         </div>
         <sc-for list="{{ primaryTools }}" as="tl" hint-placeholder-count="3">
-          <button onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-haspopup="{{ tl.haspopup }}" aria-expanded="{{ tl.expanded }}" aria-label="{{ tl.aria }}" style="{{ tl.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <button class="ts-rail-tool" data-sel="{{ tl.sel }}" onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-haspopup="{{ tl.haspopup }}" aria-expanded="{{ tl.expanded }}" aria-label="{{ tl.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             {{ tl.iconEl }}
             <sc-if value="{{ tl.hasStrokeMenu }}" hint-placeholder-val="{{ false }}">
-              <span aria-hidden="true" style="position:absolute;right:2px;bottom:2px;width:13px;height:13px;border-radius:100px;background:rgba(255,255,255,0.14);display:grid;place-items:center">
-                <svg width="7" height="7" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#B7AEA4" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span class="ts-rail-group-caret ts-rail-group-caret--static" aria-hidden="true">
+                <svg width="9" height="9" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               </span>
             </sc-if>
           </button>
@@ -606,11 +612,11 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
         </sc-if>
 
-        <button onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" style="{{ selectTool.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <button class="ts-rail-tool" data-sel="{{ selectTool.sel }}" onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ selectTool.iconEl }}
         </button>
 
-        <button onClick="{{ textTool.pick }}" onMouseEnter="{{ textTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ textTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ textTool.selected }}" aria-label="{{ textTool.aria }}" style="{{ textTool.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <button class="ts-rail-tool" data-sel="{{ textTool.sel }}" onClick="{{ textTool.pick }}" onMouseEnter="{{ textTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ textTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ textTool.selected }}" aria-label="{{ textTool.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ textTool.iconEl }}
         </button>
 
@@ -623,7 +629,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         </button>
 
         <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
-        <button onClick="{{ quickGroup.toggle }}" onMouseEnter="{{ quickGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ quickGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ quickMenuOpen }}" aria-label="{{ quickGroup.aria }}" style="{{ quickGroup.style }}" style-hover="background:rgba(255,255,255,0.10)" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <button class="ts-rail-tool" data-sel="{{ quickGroup.sel }}" onClick="{{ quickGroup.toggle }}" onMouseEnter="{{ quickGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ quickGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ quickMenuOpen }}" aria-label="{{ quickGroup.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ quickGroup.iconEl }}
         </button>
       </div>
@@ -4770,11 +4776,6 @@ class Component extends DCLogic {
 
     const keys = { cursor: 'V', pen: 'P', eraser: 'E', line: 'L', rect: 'R', ellipse: 'O', poly: 'G', fill: 'F', select: 'S' };
     const nm = id => (t.toolNames && t.toolNames[id]) || id;
-    const railStyle = sel => ({
-      position: 'relative', width: 40, height: 40, borderRadius: 10, display: 'grid', placeItems: 'center',
-      border: 'none', cursor: 'pointer', background: sel ? 'var(--ts-primary)' : 'transparent',
-      color: sel ? '#fff' : '#B7AEA4', transition: 'background 0.15s ease, color 0.15s ease, transform 0.1s ease'
-    });
     // Pen and Eraser are the two tools whose press also opens the contextual
     // size dropdown (see pickToolAndStroke); Cursor/Select/Text stay plain picks.
     const strokeToolIds = ['pen', 'eraser'];
@@ -4787,7 +4788,7 @@ class Component extends DCLogic {
         aria: nm(id) + ' (' + keys[id] + ')',
         pick: hasStrokeMenu ? (e => this.pickToolAndStroke(id, e)) : (() => this.pickTool(id)),
         onEnter: e => this.showTip(nm(id), keys[id], e),
-        style: railStyle(sel),
+        sel: sel ? '1' : '0',
         haspopup: hasStrokeMenu ? 'menu' : undefined,
         expanded: hasStrokeMenu ? strokeMenuOpenHere : undefined,
         hasStrokeMenu
@@ -4845,7 +4846,7 @@ class Component extends DCLogic {
     };
     const quickGroup = {
       aria: t.quick, iconEl: this.icon('more', 21),
-      style: railStyle(st.railMenu && st.railMenu.kind === 'quick'),
+      sel: (st.railMenu && st.railMenu.kind === 'quick') ? '1' : '0',
       toggle: e => this.toggleRail('quick', e),
       onEnter: e => this.showTip(t.quick, '', e)
     };
