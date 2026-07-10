@@ -1532,7 +1532,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 <script type="text/x-dc" data-dc-script data-props="{&quot;dotpadPanel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;modal&quot;,&quot;sheet&quot;,&quot;dock&quot;],&quot;default&quot;:&quot;modal&quot;,&quot;section&quot;:&quot;Variants&quot;,&quot;tsType&quot;:&quot;'modal'|'sheet'|'dock'&quot;}}">
 class Component extends DCLogic {
   state = {
-    lang: 'ko', tool: 'pen',
+    lang: (function () { try { return new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ko'; } catch (e) { return 'ko'; } })(), tool: 'pen',
     a11yMode: false, saveStatus: '',
     gridW: 60, gridH: 40, rev: 0,
     strokeSize: 1, eraserSize: 1, canvasHover: false, lastShape: 'line',
@@ -2504,14 +2504,36 @@ class Component extends DCLogic {
         else if (code === 'PanningRight') this.goPage(this.state.pageIndex + 1);
       });
     }
+    // 언어 수신 브리지 — 부모(Tactile World)가 로케일을 소유한다. 여기서는 저장·감지 없이
+    // 검증된 postMessage 만 받아 반영한다(navigator.language·localStorage 사용 안 함).
+    this._parentOrigin = (() => {
+      try {
+        const ao = window.location.ancestorOrigins;
+        if (ao && ao.length) return ao[0];
+        if (document.referrer) return new URL(document.referrer).origin;
+      } catch (e) { /* noop */ }
+      return null;
+    })();
+    this._onLocale = (e) => this.onParentLocale(e);
+    window.addEventListener('message', this._onLocale);
     this.drawAll();
     this.heroSetup();
     this.heroReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); cancelAnimationFrame(this.heroRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); cancelAnimationFrame(this.heroRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); }
+  // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
+  onParentLocale(e) {
+    if (window.parent === window) return;                    // 부모 없음(독립 실행) → 무시
+    if (e.source !== window.parent) return;                  // 임베드한 프레임에서 온 것만
+    if (this._parentOrigin && e.origin !== this._parentOrigin) return;
+    const d = e.data;
+    if (!d || d.source !== 'tactile-world' || d.type !== 'locale-change') return;
+    if (d.locale !== 'ko' && d.locale !== 'en') return;
+    if (d.locale !== this.state.lang) this.setState({ lang: d.locale });
+  }
   syncAudioPreview() {
     const el = this.audioRef.current;
     if (!el) return;
