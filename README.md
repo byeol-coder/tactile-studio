@@ -30,7 +30,7 @@ Quick start for the new layer:
 ```sh
 npm install
 npm run typecheck   # TypeScript strict-mode check
-npm test            # 177 tests: regression fixtures + live-code parity checks
+npm test            # 185 tests: regression fixtures + live-code parity checks
 npm run dev          # Vite dev server for the development shell (mock services, sample doc)
 npm run build:dev-shell  # production build of the development shell
 npm run build:package    # library-mode ESM build + .d.ts for core/codecs/device/storage/react

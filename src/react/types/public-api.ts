@@ -106,6 +106,11 @@ export interface TactileStudioEditorProps {
   onSave?(document: StudioDocument): Promise<void> | void;
   onDirtyChange?(dirty: boolean): void;
   onError?(error: StudioErrorLike): void;
+  /** Called after an export completes and the browser download has been
+   *  triggered (DTMS/Library-Asset-v1/SVG/PNG). Informational only — the
+   *  host cannot cancel or modify the export from here; use it for
+   *  analytics/logging, not for altering export behavior. */
+  onExport?(result: { format: 'dtms' | 'library-asset-v1' | 'svg' | 'png'; filename: string }): void;
   /** Optional: render nothing until this resolves — lets a host defer mount
    *  until fonts/services are ready. Rarely needed; most hosts can omit it. */
   className?: string;

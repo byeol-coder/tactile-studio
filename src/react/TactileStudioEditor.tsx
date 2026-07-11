@@ -12,10 +12,9 @@
 //   - host-configurable services/labels/theme via props
 //   - typed public API
 //
-// STILL DEFERRED (docs/known-issues.md #5): shape-tool flyout grouping
-// styling polish beyond the functional flyout now in place, full Figma-exact
-// spacing/typography, custom tooltip positioning (native title="" tooltips
-// used instead).
+// STILL DEFERRED (docs/known-issues.md #5): full Figma-exact
+// spacing/typography and pixel-level visual polish that needs direct Figma
+// file access to verify.
 
 import React, { useState } from 'react';
 import { TactileStudioProvider } from './TactileStudioProvider.js';
@@ -30,6 +29,7 @@ import { ExportMenu } from '../ui/dialogs/ExportMenu.js';
 import { CorpusSearchPanel } from '../ui/corpus/CorpusSearchPanel.js';
 import { LiveRegion } from '../ui/live-region/LiveRegion.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
+import { useHardwareKeyPanning } from './hooks/useHardwareKeyPanning.js';
 import type { TactileStudioEditorProps, StudioErrorLike } from './types/public-api.js';
 
 function themeStyle(theme?: Record<string, string | undefined>): React.CSSProperties {
@@ -58,11 +58,13 @@ function triggerDownload(result: import('../ui/dialogs/ExportMenu.js').ExportRes
 interface EditorBodyProps extends Pick<TactileStudioEditorProps, 'services' | 'labels'> {
   onSave?: TactileStudioEditorProps['onSave'];
   onError?: TactileStudioEditorProps['onError'];
+  onExport?: TactileStudioEditorProps['onExport'];
 }
 
 /** Internal — must render inside TactileStudioProvider to reach the store. */
-function EditorBody({ services, labels, onSave, onError }: EditorBodyProps) {
+function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyProps) {
   useKeyboardShortcuts();
+  useHardwareKeyPanning(services.tactileDisplay);
   const { store } = useEditorStore();
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -116,7 +118,7 @@ function EditorBody({ services, labels, onSave, onError }: EditorBodyProps) {
                 encodeBits={services.encodeBits}
                 bitsToSvg={services.bitsToSvg}
                 labels={labels}
-                onExport={(r) => { triggerDownload(r); setExportOpen(false); }}
+                onExport={(r) => { triggerDownload(r); onExport?.({ format: r.format, filename: r.filename }); setExportOpen(false); }}
               />
             </div>
           )}
@@ -145,12 +147,12 @@ function EditorBody({ services, labels, onSave, onError }: EditorBodyProps) {
 }
 
 export function TactileStudioEditor({
-  initialDocument, services, labels, theme, onChange, onSave, onDirtyChange, onError, className,
+  initialDocument, services, labels, theme, onChange, onSave, onDirtyChange, onError, onExport, className,
 }: TactileStudioEditorProps) {
   return (
     <div className={className} style={{ ...themeStyle(theme), display: 'flex', flexDirection: 'column', gap: 8 }}>
       <TactileStudioProvider initialDocument={initialDocument} onChange={onChange} onDirtyChange={onDirtyChange}>
-        <EditorBody services={services} labels={labels} onSave={onSave} onError={onError} />
+        <EditorBody services={services} labels={labels} onSave={onSave} onError={onError} onExport={onExport} />
       </TactileStudioProvider>
     </div>
   );

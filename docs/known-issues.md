@@ -62,9 +62,7 @@ Closed most of the initial pass's deferred list:
 
 ### Still deferred (documented, not silently dropped)
 
-- Full Figma-exact spacing/typography, custom tooltip positioning (native `title=""` tooltips used instead of the monolith's custom-positioned tip bubble)
-- `onSave`/top-level `onExport` semantics beyond what's now wired: `onSave` fires on every successful Save (button or Ctrl/Cmd+S); there's still no separate host-facing export-completion callback, just `ExportMenu`'s own `onExport` prop that `TactileStudioEditor` wires to a built-in download convenience
-- Hardware key-driven panning (`TactileDisplayAdapter.subscribeKeys` is wired at the adapter layer but no UI consumes key events yet)
+- Full Figma-exact spacing/typography beyond the design tokens already in use (`--ts-primary`, `--ts-line`, `--ts-surface`, `--ts-ink`, `--ts-bg`, `--ts-danger`) — matching the design system pixel-for-pixel would need direct Figma file access to verify against, which this environment doesn't have. Custom tooltip *positioning* itself is now ported (see round 4 below); what's left here is purely visual fine-tuning (spacing, font sizes, exact color tokens beyond the six above).
 
 ### Phase 5 continuation round 2 — corpus search, thumbnails/drag-reorder, braille Apply, SVG/PNG export
 
@@ -88,6 +86,14 @@ Closed effectively all of the remaining deferred list:
 - **Image file import**: a real (not deferred) browser image decoder (`browser-image-decoder.ts`, File → `<img>` → offscreen canvas → RGBA — same "genuinely browser-only, not parity-tested" category as the text-tool glyph rasterizer and PNG export) feeds the already-pure, already-parity-tested `codecs/image` `imgToCells`, with a pointer-drag crop-selection rectangle over an image preview in `ImportDialog`. `ImageProcessingService` (previously unconsumed) is now genuinely wired as an optional override of the default local codec, extended with a `crop` parameter to match.
 - **Corpus context navigation**: `corpusCtxFor`/`corpusGoPage` (verbatim ports) let `CorpusSearchPanel` show Prev/Next controls for a multi-page corpus record's OTHER pages without creating new document pages — parity-tested against the live shipped `corpusCtxFor` using real corpus data.
 - **Save wiring**: a Save button + Ctrl/Cmd+S now call `services.storage.save()`, then `EditorStore.markSaved()` and the host's `onSave` callback on success; failures call the host's `onError` (previously accepted but never invoked). `DotPadPanel`'s connect/send failures now also report to the top-level `onError`, in addition to their existing inline error text.
+
+### Phase 5 continuation round 4 — custom tooltips, export-completion callback, hardware key panning
+
+Closed the last three items from the previous round's deferred list:
+
+- **Custom tooltip positioning**: `ui/tooltip/Tooltip.tsx` is a verbatim port of the monolith's `showTip()`/`hideTip()` (a positioned floating bubble, not native `title=""`) — same flip logic (top -> bottom when `r.top < 60`, back to top if bottom would overflow), same horizontal clamping, same show delays (320ms hover / 90ms keyboard focus per the monolith's `focusFast` distinction), same immediate hide. `IconButton` now uses it in place of `title=""` (native title removed to avoid a double tooltip; `aria-label` unchanged for accessibility).
+- **Export-completion callback**: `TactileStudioEditorProps` gained `onExport?(result: { format, filename }): void`, called after `ExportMenu`'s own `onExport` triggers the browser download. Informational only, matching the doc comment -- hosts can't alter export behavior from it.
+- **Hardware key-driven panning**: `useHardwareKeyPanning` (verbatim port of the monolith's `componentDidMount`'s `window.TW.DP.onKey` block) subscribes to `services.tactileDisplay.subscribeKeys` and maps `PanningLeft`/`PanningRight` to `EditorStore.setActivePage(pageIndex -/+ 1)` -- exactly what the monolith does, nothing more (no behavior invented for `PanningAll` or the function keys, since the monolith doesn't use them for panning either).
 
 ## 6. Phase 6 — product-ownership audit (`refactor(studio-integration): remove product ownership`)
 

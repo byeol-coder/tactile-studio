@@ -60,6 +60,7 @@ This produces five independent ESM entry points — a host importing only `tacti
 | `onDirtyChange` | `(dirty: boolean) => void` | No | Called when the dirty flag flips. Use this to drive an "unsaved changes" indicator. |
 | `onSave` | `(document: StudioDocument) => Promise<void> \| void` | No | Called after a successful save via the Save button or Ctrl/Cmd+S, once `services.storage.save()` resolves `{ ok: true }` and the dirty flag is cleared. |
 | `onError` | `(error: StudioErrorLike) => void` | No | Called on a failed save, and on DotPad connect/send failures (in addition to `DotPadPanel`'s own inline error text). Not yet called for every possible failure path — see [Known gaps](#known-gaps-in-this-integration-surface). |
+| `onExport` | `(result: { format, filename }) => void` | No | Called after an export completes and the browser download has been triggered. Informational only — can't alter or cancel the export. |
 | `className` | `string` | No | Applied to the editor's root `<div>`. |
 
 ## Services (`StudioServices`)
@@ -202,8 +203,7 @@ Tactile Studio never detects the browser's language or ships its own language to
 Being upfront about what this prop surface *looks* like it does versus what it *actually* does today:
 
 - `onError` is called for save failures and DotPad connect/send failures, but not for every possible failure path (e.g. braille Apply failures surface only via `Inspector`'s inline preview text, not through `onError`).
-- Export (`ExportMenu`) produces DTMS, Library Asset v1, SVG (if `bitsToSvg` is supplied), and PNG (always available, real `canvas.toBlob`) — there's no separate host-facing export-completion callback on `TactileStudioEditorProps`, just `ExportMenu`'s own `onExport` prop that `TactileStudioEditor` wires to a built-in browser-download convenience.
+- `TactileStudioEditorProps.onExport` fires after the built-in browser-download convenience runs — it's informational only, not a hook to intercept or replace that download.
 - Native HTML5 drag-and-drop is not used anywhere (jsdom doesn't implement `DragEvent`, mirroring the `PointerEvent` gap) — page reordering is pointer-based via a grip handle instead.
-- Hardware key-driven panning: `TactileDisplayAdapter.subscribeKeys` is wired at the adapter layer, but no UI component consumes device key events yet.
 
 See `docs/known-issues.md #5` for the complete, currently-accurate list of deferred UI work.

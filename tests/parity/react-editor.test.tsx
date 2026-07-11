@@ -18,6 +18,8 @@ import { Inspector } from '../../src/ui/inspector/Inspector.js';
 import { ExportMenu } from '../../src/ui/dialogs/ExportMenu.js';
 import { ImportDialog } from '../../src/ui/dialogs/ImportDialog.js';
 import { ConfirmDialog } from '../../src/ui/dialogs/ConfirmDialog.js';
+import { Tooltip } from '../../src/ui/tooltip/Tooltip.js';
+import { IconButton } from '../../src/ui/toolbar/IconButton.js';
 import { LiveRegion } from '../../src/ui/live-region/LiveRegion.js';
 import { createDocument } from '../../src/core/document/document.js';
 import { createMemoryStorageAdapter } from '../../src/storage/adapters/memory-storage-adapter.js';
@@ -885,5 +887,142 @@ describe('CorpusSearchPanel — multi-page record prev/next navigation', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Command input' }), { target: { value: '단일' } });
     fireEvent.click(screen.getByRole('button', { name: /단일/ }));
     expect(screen.queryByRole('button', { name: 'Next page' })).toBeNull();
+  });
+});
+
+describe('Tooltip — custom positioning (showTip/hideTip port)', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('shows above the trigger by default, after the hover delay (320ms)', () => {
+    render(
+      <Tooltip label="Pen tool" keyHint="P">
+        <button>Pen</button>
+      </Tooltip>,
+    );
+    const btn = screen.getByRole('button', { name: 'Pen' });
+    vi.spyOn(btn, 'getBoundingClientRect').mockReturnValue({ top: 200, bottom: 232, left: 100, right: 132, width: 32, height: 32, x: 100, y: 200, toJSON() {} } as DOMRect);
+    fireEvent.mouseEnter(btn);
+    expect(screen.queryByRole('tooltip')).toBeNull(); // not yet, still delayed
+    act(() => { vi.advanceTimersByTime(320); });
+    const tip = screen.getByRole('tooltip');
+    expect(tip.textContent).toContain('Pen tool');
+    expect(tip.textContent).toContain('P');
+    expect(tip.style.transform).toContain('-100%'); // placed above
+  });
+
+  it('flips to below when there is no room above (top < 60)', () => {
+    render(
+      <Tooltip label="Cursor">
+        <button>Cursor</button>
+      </Tooltip>,
+    );
+    const btn = screen.getByRole('button', { name: 'Cursor' });
+    vi.spyOn(btn, 'getBoundingClientRect').mockReturnValue({ top: 20, bottom: 52, left: 10, right: 42, width: 32, height: 32, x: 10, y: 20, toJSON() {} } as DOMRect);
+    fireEvent.mouseEnter(btn);
+    act(() => { vi.advanceTimersByTime(320); });
+    const tip = screen.getByRole('tooltip');
+    expect(tip.style.transform).toBe('translate(-50%, 0)'); // placed below
+  });
+
+  it('shows faster (90ms) on keyboard focus than on hover', () => {
+    render(
+      <Tooltip label="Eraser">
+        <button>Eraser</button>
+      </Tooltip>,
+    );
+    const btn = screen.getByRole('button', { name: 'Eraser' });
+    vi.spyOn(btn, 'getBoundingClientRect').mockReturnValue({ top: 200, bottom: 232, left: 100, right: 132, width: 32, height: 32, x: 100, y: 200, toJSON() {} } as DOMRect);
+    fireEvent.focus(btn);
+    act(() => { vi.advanceTimersByTime(90); });
+    expect(screen.getByRole('tooltip')).toBeTruthy();
+  });
+
+  it('hides immediately on mouse leave / blur, cancelling a pending show', () => {
+    render(
+      <Tooltip label="Fill">
+        <button>Fill</button>
+      </Tooltip>,
+    );
+    const btn = screen.getByRole('button', { name: 'Fill' });
+    vi.spyOn(btn, 'getBoundingClientRect').mockReturnValue({ top: 200, bottom: 232, left: 100, right: 132, width: 32, height: 32, x: 100, y: 200, toJSON() {} } as DOMRect);
+    fireEvent.mouseEnter(btn);
+    fireEvent.mouseLeave(btn);
+    act(() => { vi.advanceTimersByTime(320); });
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+});
+
+describe('IconButton — no native title (custom tooltip only, no double tooltip)', () => {
+  it('has an aria-label but no title attribute', () => {
+    render(<IconButton icon="pen" label="Pen" onClick={() => {}} />);
+    const btn = screen.getByRole('button', { name: 'Pen' });
+    expect(btn.getAttribute('title')).toBeNull();
+    expect(btn.getAttribute('aria-label')).toBe('Pen');
+  });
+});
+
+describe('TactileStudioEditor — hardware key panning (PanningLeft/Right -> page switch)', () => {
+  it('PanningLeft/PanningRight from the DotPad adapter switch document pages', async () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const adapter = createMockDotPadAdapter();
+
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: createMemoryStorageAdapter(), tactileDisplay: adapter }}
+      />,
+    );
+    // add a second page so there's somewhere to pan to/from
+    const provider = screen.getByRole('toolbar'); // sanity: editor rendered
+    expect(provider).toBeTruthy();
+
+    // Grab the store via a side-channel: re-render with a Capture component
+    // inside the same provider isn't possible from outside, so drive purely
+    // through the public UI + adapter instead.
+    fireEvent.click(screen.getByRole('button', { name: 'Add page' }));
+    expect(screen.getByRole('button', { name: '2' })).toBeTruthy();
+
+    act(() => { adapter.simulateKey('PanningLeft'); });
+    // after panning left from page 2, we should be back on page 1
+    const page1Btn = screen.getByRole('button', { name: '1' });
+    expect(page1Btn.getAttribute('aria-current')).toBe('true');
+
+    act(() => { adapter.simulateKey('PanningRight'); });
+    const page2Btn = screen.getByRole('button', { name: '2' });
+    expect(page2Btn.getAttribute('aria-current')).toBe('true');
+  });
+
+  it('ignores non-panning key codes', () => {
+    const adapter = createMockDotPadAdapter();
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: createMemoryStorageAdapter(), tactileDisplay: adapter }}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Add page' }));
+    expect(screen.getByRole('button', { name: '2' }).getAttribute('aria-current')).toBe('true');
+    act(() => { adapter.simulateKey('KeyFunction1'); });
+    expect(screen.getByRole('button', { name: '2' }).getAttribute('aria-current')).toBe('true'); // unchanged
+  });
+});
+
+describe('TactileStudioEditor — onExport callback', () => {
+  it('calls onExport after a DTMS export completes', async () => {
+    const onExport = vi.fn();
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: createMemoryStorageAdapter(), encodeBits: () => '00'.repeat(50) }}
+        onExport={onExport}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Export' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /DTMS/ }));
+    expect(onExport).toHaveBeenCalledWith(expect.objectContaining({ format: 'dtms' }));
   });
 });
