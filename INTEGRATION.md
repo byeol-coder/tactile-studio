@@ -30,7 +30,8 @@ function StudioPage() {
 ## Building the package
 
 ```sh
-npm run build:package   # runs build:lib then build:types
+npm run build           # build the dev shell, then the reusable package
+npm run build:package   # package only: runs build:lib then build:types
 # or individually:
 npm run build:lib       # vite build --config vite.lib.config.ts → dist/lib/
 npm run build:types     # tsc -p tsconfig.build.json → dist/types/
@@ -165,6 +166,10 @@ services={{ storage, corpus: window.DTMS_CORPUS }}
 ```
 
 No corpus data is bundled with or duplicated inside this package.
+
+## Library Asset v1 round-trip boundary
+
+The Library Asset v1 codec preserves structured description/narration metadata on pages, matching the legacy Studio's `_textOf`/`_metaOf` behavior. Arbitrary unknown top-level Library Asset v1 fields are not guaranteed to survive an import/export round trip. That is the current legacy behavior, not a React migration regression; hosts that need additional top-level metadata should keep it in their own storage boundary.
 
 ## `theme: StudioTheme`
 

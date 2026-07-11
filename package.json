@@ -15,6 +15,7 @@
     "capture:codecs-baseline": "node tools/capture-codecs-baseline.mjs",
     "capture:codecs-b-baseline": "node --experimental-strip-types tools/capture-codecs-b-baseline.mjs",
     "dev": "vite",
+    "build": "npm run build:dev-shell && npm run build:package",
     "build:dev-shell": "vite build",
     "build:lib": "vite build --config vite.lib.config.ts",
     "build:types": "tsc -p tsconfig.build.json",

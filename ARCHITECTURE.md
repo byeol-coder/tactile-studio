@@ -10,8 +10,8 @@ If you're integrating the editor into a host app, see [`INTEGRATION.md`](./INTEG
 |---|---|---|
 | Entry point | `index.html` (single file, ~5,700 lines of x-dc/React-via-CDN) | `src/react/TactileStudioEditor.tsx` |
 | Runtime | Buildless — `text/x-dc` script block compiled by `support.js`'s tiny runtime, React/ReactDOM loaded from `vendor/*.production.min.js` | React 18.3.1, built with Vite 5.4 |
-| Deployment | GitHub Pages (`byeol-coder.github.io/tactile-studio/`), also Vercel | Not yet packaged for distribution (see [Status](#status)) |
-| Status | **Ships today.** Untouched by this migration — every commit so far has left it byte-for-byte identical (enforced by a fingerprint regression test). | **In progress.** Real, tested, but does not yet have full feature parity — see [`docs/known-issues.md`](./docs/known-issues.md) for exactly what's implemented vs. deferred. |
+| Deployment | GitHub Pages (`byeol-coder.github.io/tactile-studio/`), also Vercel | Built as a private package from this repo (`npm run build:package`); not published to a registry |
+| Status | **Ships today.** Untouched by this migration — every commit so far has left it byte-for-byte identical (enforced by a fingerprint regression test). | **Handoff-ready React/TS layer.** Real, tested, and packaged; see [`docs/known-issues.md`](./docs/known-issues.md) for the remaining visual-polish note. |
 
 The vanilla app is the **source of truth for behavior**. Every module under `src/` is either a verbatim port (same algorithm, same edge cases, proven with parity tests against the live vanilla code) or a new, clearly-labeled addition (e.g. the `EditorStore`'s stroke-transaction API, which intentionally batches React notifications differently than the vanilla app's per-pointermove `setState` — see [`ARCHITECTURE.md#editorstore`](#editorstore-and-the-stroke-transaction-api)).
 
@@ -37,6 +37,8 @@ src/
     image/image.ts             imgToCells and its _cv* numerics — fully pure, no injection needed
     tactile-text/               stampTextLayout — pure layout; glyph rasterization is an injected GlyphRasterizer
     braille/liblouis-node.ts    Node-native adapter for the REAL vendored liblouis asm.js engine + tables
+    corpus/                     Rule-based corpus search/context navigation over host-supplied corpus.js data
+    svg/svg.ts                  SVG export orchestration around injected vendor TW.bitsToSVG
     grid-fx/grid-fx.ts          thickenGrid/denoiseGrid (injects vendor TW.thickenBits/denoiseBits)
     quality/quality.ts         convQuality, banaPrintCheck — fully pure, no injection needed
     document/local-library.ts  toSavedRecords/fromSavedRecords for the local "saved shelf" format
@@ -55,18 +57,24 @@ src/
   react/                   The public component surface
     TactileStudioEditor.tsx    Public entry point (see INTEGRATION.md)
     TactileStudioProvider.tsx  Owns one EditorStore per mount, via React Context
-    hooks/                     useEditorStore, useTool, useHistory, usePages, useKeyboardShortcuts
+    hooks/                     useEditorStore, useTool, useHistory, usePages, useKeyboardShortcuts,
+                               useHardwareKeyPanning (DotPad PanningLeft/Right → page switch)
     types/public-api.ts        TactileStudioEditorProps, StudioServices, StudioLabels, StudioTheme
 
   ui/                       Presentational components, all read/write the store via react/hooks
     canvas/StudioCanvas.tsx    Verbatim-ported pixel math (drawMain/evCell) + pointer→store wiring
     canvas/browser-glyph-rasterizer.ts  Real canvas-based text-tool glyph rendering
-    toolbar/                    Toolbar, IconButton
+    toolbar/                    Toolbar, IconButton, Flyout, GroupIcons for tool/thickness groups
+    tooltip/Tooltip.tsx         Custom positioned tooltip bubble (showTip/hideTip port)
     icons/                      Verbatim-ported ICONS SVG path data + <Icon>
     panels/PagePanel.tsx        Page list, add/delete/move, switch active page
-    inspector/Inspector.tsx     Page metadata (desc/narration), cleanup (thicken/denoise)
+    panels/PageThumbnail.tsx    Small canvas thumbnail for each page
+    inspector/Inspector.tsx     Page metadata (desc/narration), braille Apply/preview, cleanup (thicken/denoise)
+    corpus/CorpusSearchPanel.tsx  Search host-supplied corpus and load/replace pages
     dotpad/DotPadPanel.tsx      Connect/disconnect/status/send, wired to a TactileDisplayAdapter
-    dialogs/                    ImportDialog, ExportMenu, ConfirmDialog
+    dialogs/                    ImportDialog, ExportMenu, ConfirmDialog, useFocusTrap,
+                                browser-image-decoder (browser-only File→RGBA decode)
+    live-region/LiveRegion.tsx  Screen-reader announcements from EditorStore.announce()
 
   app/development-shell/    Local-only dev harness (mock services, sample doc) — NOT shipped to hosts
     DevApp.tsx
@@ -104,6 +112,8 @@ Rules enforced by construction (and audited in `tests/parity/product-ownership.t
 - `device/` and `storage/` are the *only* places allowed to reach for `window.DotPadSDK`/`window.TW.DP`/`window.localStorage` — everything above them talks to the `TactileDisplayAdapter`/`StudioStorageAdapter` interfaces only.
 - `react/` and `ui/` own no routing, authentication, or internal language switching — labels/theme/services are host-supplied props, full stop.
 
+Selection does not currently live in a separate `src/core/selection/` module. Selection state is represented in `core/state/types.ts` and `core/state/editor-store.ts`, while interaction rendering and pointer hit math are handled in `ui/canvas/StudioCanvas.tsx`. That is the intentional current structure.
+
 ## `EditorStore` and the stroke-transaction API
 
 `src/core/state/editor-store.ts` is deliberately framework-agnostic (no React import) so it can be unit-tested without a DOM and is compatible with React's `useSyncExternalStore` via its `subscribe`/`getSnapshot` methods.
@@ -124,7 +134,11 @@ Per the target architecture, `TactileStudioEditor` must work identically whether
 - talking to a real DotPad over Web Bluetooth (`device/dotpad/browser-adapter.ts`, wrapping the real `window.TW.DP` singleton — no reimplementation of connection/GATT/framing logic), or
 - running in a test or the development shell with no hardware at all (`device/dotpad/mock-adapter.ts`, a fully functional in-memory stand-in).
 
-The same pattern applies to storage (`StudioStorageAdapter` — host-implemented, no Supabase import anywhere in this package) and to the vendored DTMS/grid-fx algorithms (`encodeBits`/`thickenBits`/`denoiseBits` are always parameters, never imports, inside `codecs/`).
+The same pattern applies to storage (`StudioStorageAdapter` — host-implemented, no Supabase import anywhere in this package) and to the vendored DTMS/grid-fx/SVG algorithms (`encodeBits`/`thickenBits`/`denoiseBits`/`bitsToSVG` are always parameters, never imports, inside `codecs/`).
+
+The bundled DotPad SDK lives at `vendor/tw/dotpad-sdk.js`. Its source header identifies it as v3.0.0, but there is no separate SDK package manifest in this repository. `displayAllUp()` and `displayAllDown()` exist in the bundled SDK and are wrapped by the browser adapter without reimplementing SDK behavior.
+
+liblouis is bundled as an asm.js JavaScript build (`vendor/liblouis/build-no-tables-utf32.js`) plus table files under `vendor/liblouis/tables/`. No `.wasm` file is expected in the current implementation.
 
 ## Build system
 
@@ -136,7 +150,7 @@ Three separate Vite configs, each with a distinct job — do not conflate them:
 | `vite.config.ts` | Dev server for `app/development-shell` (`npm run dev` / `npm run build:dev-shell`), rooted at `dev/` | No — completely isolated root |
 | `vite.lib.config.ts` | Library-mode build of the five public entry points (`npm run build:lib`) | No |
 
-`npm run build:package` runs `build:lib` (Vite/Rollup, ESM output to `dist/lib/<entry>/index.js`) followed by `build:types` (`tsc -p tsconfig.build.json`, declaration-only emission to `dist/types/`, mirroring `src/`'s structure). `package.json`'s `exports` map ties each subpath (`<pkg>/core`, `<pkg>/codecs`, `<pkg>/device`, `<pkg>/storage`, `<pkg>/react`) to its built `.js` and `.d.ts`. `react`/`react-dom` are `peerDependencies` (marked optional, since only the `/react` entry needs them) — never bundled into the library output. Node built-ins used only by `codecs/braille/liblouis-node.ts` (`node:fs`, `node:module`, etc.) are external too — that module is for Node-side consumers, not for a browser bundle.
+`npm run build` runs the development-shell production build and then the package build. `npm run build:package` runs `build:lib` (Vite/Rollup, ESM output to `dist/lib/<entry>/index.js`) followed by `build:types` (`tsc -p tsconfig.build.json`, declaration-only emission to `dist/types/`, mirroring `src/`'s structure). `package.json`'s `exports` map ties each subpath (`<pkg>/core`, `<pkg>/codecs`, `<pkg>/device`, `<pkg>/storage`, `<pkg>/react`) to its built `.js` and `.d.ts`. `react`/`react-dom` are `peerDependencies` (marked optional, since only the `/react` entry needs them) — never bundled into the library output. Node built-ins used only by `codecs/braille/liblouis-node.ts` (`node:fs`, `node:module`, etc.) are external too — that module is for Node-side consumers, not for a browser bundle.
 
 ### Continuous integration
 
