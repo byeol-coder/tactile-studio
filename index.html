@@ -3513,6 +3513,7 @@ class Component extends DCLogic {
     if (tool === 'fill') {
       this.snapshot(); this.flood(x, y);
       this.say(t.aFill); this.setState({ cx: x, cy: y });
+      this.bump();   // flood() doesn't bump itself — content change, dirty + autosave
       return;
     }
     if (tool === 'select') {
