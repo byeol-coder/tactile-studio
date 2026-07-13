@@ -1037,41 +1037,30 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
         <p style="margin:0 0 18px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impReviewSub }}</p>
 
-        <!-- Crop choice + output size: used to be their own wizard step; merged
-             here since "crop or not" and "which output size" are conversion
-             inputs, not screens of their own. Choosing 자르기 reveals drag
-             handles on the Original preview below (same canvas, same handlers). -->
-        <p style="margin:0 0 10px;font-size:13px;color:var(--ts-text-secondary)">{{ t.impCropQ }}</p>
-        <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-          <button onClick="{{ pickCropCrop }}" aria-pressed="{{ cropIsCrop }}" style="{{ cropCardStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <span style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
-              <svg width="17" height="17" viewBox="0 0 24 24"><path d="M6 2v16a2 2 0 0 0 2 2h14M2 6h16a2 2 0 0 1 2 2v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              {{ t.impCrop }}
-              <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" style="margin-left:auto;color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </sc-if>
-            </span>
-            <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:500">{{ t.impCropDesc }}</span>
-          </button>
-          <button onClick="{{ pickCropFull }}" aria-pressed="{{ cropIsFull }}" style="{{ fullCardStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <span style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
-              <svg width="17" height="17" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 15l4-4 4 4 4-5 4 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              {{ t.impFull }}
-              <sc-if value="{{ cropIsFull }}" hint-placeholder-val="{{ true }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" style="margin-left:auto;color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </sc-if>
-            </span>
-            <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:500">{{ t.impFullDesc }}</span>
-          </button>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
-          <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
-          <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
-            <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
-              <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
-            </sc-for>
+        <!-- Crop choice + output size: a single compact row (was two big
+             cards with icon+title+description, plus a separate prompt
+             paragraph, plus a separate output-size row below — simplified to
+             match the output-size selector's own compact segmented style,
+             since crop-or-not defaults to "full" for most conversions and
+             doesn't need its own visual weight). Choosing 자르기 still reveals
+             the same drag handles on the Original preview below. -->
+        <div style="display:flex;align-items:center;gap:22px;margin-bottom:18px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.impCropQ }}</span>
+            <div role="group" aria-label="{{ t.impCropQ }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
+              <button onClick="{{ pickCropFull }}" aria-pressed="{{ cropIsFull }}" title="{{ t.impFull }} — {{ t.impFullDesc }}" style="{{ cropFullSegStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.impFullShort }}</button>
+              <button onClick="{{ pickCropCrop }}" aria-pressed="{{ cropIsCrop }}" title="{{ t.impCrop }} — {{ t.impCropDesc }}" style="{{ cropCropSegStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.impCropShort }}</button>
+            </div>
           </div>
-          <span style="font-size:13px;color:var(--ts-text-secondary)">{{ outName }}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
+            <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
+              <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
+                <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
+              </sc-for>
+            </div>
+            <span style="font-size:13px;color:var(--ts-text-secondary)">{{ outName }}</span>
+          </div>
         </div>
 
         <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -1830,7 +1819,7 @@ class Component extends DCLogic {
       impErrType: '지원하지 않는 파일 형식입니다. PNG, JPG, SVG 파일을 선택해주세요.', impErrSize: '파일이 너무 큽니다. 최대 10MB까지 지원합니다.',
       impNext: '다음', impCancel: '취소', impChooseToContinue: '이미지를 선택하면 다음 단계로 이동할 수 있습니다.',
       impCropTitle: '자르고 변환', impCropQ: '특정 영역을 먼저 자르시겠어요?',
-      impCrop: '이미지 자르기', impCropDesc: '변환할 영역을 선택합니다', impFull: '전체 이미지 사용', impFullDesc: '이미지 전체를 변환합니다',
+      impCrop: '이미지 자르기', impCropDesc: '변환할 영역을 선택합니다', impFull: '전체 이미지 사용', impFullDesc: '이미지 전체를 변환합니다', impCropShort: '자르기', impFullShort: '전체',
       impCropHint: '상자를 드래그해 이동하고, 모서리 손잡이로 크기를 조절하세요.',
       
       
@@ -1961,7 +1950,7 @@ class Component extends DCLogic {
       impErrType: 'Unsupported file type. Please choose a PNG, JPG, or SVG file.', impErrSize: 'File is too large. Maximum size is 10MB.',
       impNext: 'Next', impCancel: 'Cancel', impChooseToContinue: 'Choose an image to continue.',
       impCropTitle: 'Crop or convert', impCropQ: 'Do you want to crop a specific area first?',
-      impCrop: 'Crop image', impCropDesc: 'Select the area to convert', impFull: 'Use full image', impFullDesc: 'Convert the whole image',
+      impCrop: 'Crop image', impCropDesc: 'Select the area to convert', impFull: 'Use full image', impFullDesc: 'Convert the whole image', impCropShort: 'Crop', impFullShort: 'Full',
       impCropHint: 'Drag the box to move it, and use the corner handle to resize.',
       
       
@@ -5771,7 +5760,7 @@ class Component extends DCLogic {
       cropIsCrop: st.cropChoice === 'crop', cropIsFull: st.cropChoice === 'full',
       pickCropCrop: () => this.setState({ cropChoice: 'crop' }),
       pickCropFull: () => this.setState({ cropChoice: 'full' }),
-      cropCardStyle: locCard(st.cropChoice === 'crop'), fullCardStyle: locCard(st.cropChoice === 'full'),
+      cropFullSegStyle: seg(st.cropChoice === 'full'), cropCropSegStyle: seg(st.cropChoice === 'crop'),
       cropRef: this.cropRef,
       cropDown: e => this.cropDown(e), cropMove: e => this.cropMove(e), cropUp: () => this.cropUp(),
       cropCursor: st.cropChoice === 'crop' ? (st.cropCursor || 'move') : 'default',
