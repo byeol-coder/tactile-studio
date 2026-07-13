@@ -2823,6 +2823,27 @@ class Component extends DCLogic {
     if (density < 0.03) key = 'tooSparse'; else if (density > 0.40) key = 'tooDense'; else if (dots > 0 && isolated / dots > 0.25) key = 'manyIsolated';
     return { dots, density, isolated, key };
   }
+  // banaPrintCheck(cells, w, h): informational print-readiness check.
+  // FIX: this was CALLED (importAssetFile, deriveGraphicFeatures) but never
+  // defined anywhere in the file — every call threw "banaPrintCheck is not a
+  // function". In importAssetFile (inside a bare FileReader.onload, no
+  // try/catch around this point) that was an UNCAUGHT crash: loading any
+  // TGIL/asset JSON file hung forever with impLoading stuck true and no
+  // error shown. The library-save JSON auto-export and JSON export call
+  // sites happen to be wrapped in try/catch elsewhere, so those merely
+  // failed silently rather than crashing — but the pass/fail signal they
+  // depend on ("embossable") was always missing either way.
+  // IMPORTANT: this reuses convQuality()'s existing density/isolated-dot
+  // thresholds (already shipped elsewhere for conversion-quality feedback)
+  // rather than inventing new unverified numbers — it is a heuristic
+  // readability proxy, NOT a verified implementation of the full BANA 2022
+  // tactile-graphics print specification. The exact pass/fail bar should get
+  // a domain-expert review before this is treated as compliance output
+  // rather than a "does this look print-reasonable" sanity check.
+  banaPrintCheck(cells, w, h) {
+    const q = this.convQuality(cells, w, h);
+    return { pass: q.key === 'readable', key: q.key, density: q.density, isolated: q.isolated, dots: q.dots };
+  }
   presetChipStyle(sel) {
     return { flex: '1 1 0', minWidth: 0, textAlign: 'left', padding: '9px 11px', borderRadius: 9, cursor: 'pointer',
       border: sel ? '1.5px solid #C43D00' : '1.5px solid var(--ts-border-decor)', background: sel ? 'rgba(196,61,0,0.06)' : '#fff',
