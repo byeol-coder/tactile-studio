@@ -4146,8 +4146,12 @@ class Component extends DCLogic {
   }
   // guard destructive new-document actions when the canvas has content
   guardNewDoc(fn) {
-    let dots = 0; for (let i = 0; i < this.cells.length; i++) dots += this.cells[i];
-    if (dots > 0) { this._pendingDoc = fn; this.setState({ confirmOpen: true, confirmKind: 'newdoc' }); }
+    // Was: only checked the CURRENT page's dots. A multi-page document whose
+    // active page happened to be blank (e.g. a freshly-added page, or after
+    // navigating away from the drawn page) would then be replaced with zero
+    // confirmation, silently discarding every OTHER page. _hasContent() checks
+    // the whole document (all pages, plus any narration/desc/audio) instead.
+    if (this._hasContent()) { this._pendingDoc = fn; this.setState({ confirmOpen: true, confirmKind: 'newdoc' }); }
     else fn();
   }
   loadDoc(cells, name) {
