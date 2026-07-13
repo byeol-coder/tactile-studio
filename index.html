@@ -2900,7 +2900,7 @@ class Component extends DCLogic {
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearInterval(this._connWatchT); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearInterval(this._connWatchT); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); this._restorePageFocus(); }
   // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
   onParentLocale(e) {
@@ -2927,21 +2927,28 @@ class Component extends DCLogic {
     this.drawImp();
     this.drawEmboss();
   }
-  drawEmboss() {
-    const cv = this.embossRef.current; if (!cv || !this.state.embossOpen) return;
+  // Shared A4 paper layout renderer: draws the current page's dots onto ANY
+  // canvas at ANY width (margin/dot-size scale proportionally to PW), so the
+  // small on-screen preview (drawEmboss, PW=320) and a print-resolution export
+  // (exportEmbossPNG, PW=2480 ≈ A4 @ 300dpi) render the IDENTICAL layout —
+  // what you preview is exactly what gets exported, just at higher density.
+  _renderEmbossPage(cv, PW) {
     const { gridW: w, gridH: h } = this.state;
-    // A4 paper preview: portrait sheet, charcoal raised dots on paper white
-    const PW = 320, PH = Math.round(PW * 297 / 210);
+    const PH = Math.round(PW * 297 / 210);
     cv.width = PW; cv.height = PH;
     const g = cv.getContext('2d');
     g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, PW, PH);
-    const margin = 22;
+    const margin = PW * (22 / 320);   // same proportion the on-screen preview used
     const s = Math.min((PW - 2 * margin) / w, (PH - 2 * margin) / h);
     const offX = (PW - w * s) / 2, offY = (PH - h * s) / 2;
     g.fillStyle = '#1E1C1A';
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (this.cells[y * w + x]) {
       g.beginPath(); g.arc(offX + (x + 0.5) * s, offY + (y + 0.5) * s, Math.max(0.9, s * 0.34), 0, Math.PI * 2); g.fill();
     }
+  }
+  drawEmboss() {
+    const cv = this.embossRef.current; if (!cv || !this.state.embossOpen) return;
+    this._renderEmbossPage(cv, 320);
   }
   drawMain() {
     const cv = this.canvasRef.current; if (!cv) return;
@@ -4414,6 +4421,31 @@ class Component extends DCLogic {
     }
     cnv.toBlob((blob) => { if (blob && TW && TW.downloadBlob) TW.downloadBlob(blob, TW.safeName(name || 'preview', 'png')); }, 'image/png');
   }
+  // Real "export for embossing": renders the SAME A4 paper layout as the
+  // on-screen preview (_renderEmbossPage), but on an offscreen canvas at
+  // print resolution (2480×3508 ≈ A4 @ 300dpi) instead of the small preview
+  // size, then downloads it as a PNG. Returns a promise resolving to whether
+  // a file was actually produced, so the caller can show a real error state
+  // instead of a fake "done" when TW/downloadBlob isn't available.
+  exportEmbossPNG(name) {
+    const TW = window.TW;
+    if (!TW || !TW.downloadBlob || !TW.safeName) return Promise.resolve(false);
+    let cnv;
+    try {
+      cnv = document.createElement('canvas');
+      this._renderEmbossPage(cnv, 2480);
+    } catch (e) { return Promise.resolve(false); }
+    return new Promise((resolve) => {
+      try {
+        cnv.toBlob((blob) => {
+          try {
+            if (blob) { TW.downloadBlob(blob, TW.safeName(name || 'emboss', 'png')); resolve(true); }
+            else resolve(false);
+          } catch (e) { resolve(false); }
+        }, 'image/png');
+      } catch (e) { resolve(false); }
+    });
+  }
   queueLivePreview(immediate, force) {
     clearTimeout(this._liveT);
     if (!force && !this.state.livePreview) return;
@@ -5395,9 +5427,13 @@ class Component extends DCLogic {
       embossIdle: st.embossPhase === 'idle', embossExporting: st.embossPhase === 'exporting', embossDone: st.embossPhase === 'done',
       embossRef: this.embossRef,
       doEmboss: () => {
+        const name = st.fileName || t.untitled;
         this.setState({ embossPhase: 'exporting' });
-        clearTimeout(this._embT);
-        this._embT = setTimeout(() => { this.setState({ embossPhase: 'done' }); this.say(t.embossReadyMsg); }, 1400);
+        this.exportEmbossPNG(name).then(ok => {
+          this.setState({ embossPhase: ok ? 'done' : 'idle' });
+          if (ok) this.say(t.embossReadyMsg);
+          else this.toastMsg(t.aExportUnavail || 'Export unavailable');
+        });
       },
       exportGroups: [
         { title: t.exportOriginal, sub: t.exportOriginalSub, items: [
