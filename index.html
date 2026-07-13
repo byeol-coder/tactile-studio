@@ -1135,7 +1135,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <sc-if value="{{ impAdvOpen }}" hint-placeholder-val="{{ false }}">
             <label style="display:block;margin-top:14px;font-size:12.5px;font-weight:700;color:#1E1C1A">
               <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
-              <input type="range" min="10" max="90" step="10" value="{{ threshold }}" onChange="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
+              <input type="range" min="10" max="90" step="1" value="{{ threshold }}" onInput="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
             </label>
             <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
               <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
