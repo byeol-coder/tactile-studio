@@ -1033,10 +1033,16 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         </sc-if>
       </sc-if>
 
-      <!-- STEP 2 · CROP -->
-      <sc-if value="{{ impIsCrop }}" hint-placeholder-val="{{ false }}">
-        <p style="margin:0 0 16px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impCropQ }}</p>
-        <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+      <!-- STEP 3 · REVIEW -->
+      <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0 0 18px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impReviewSub }}</p>
+
+        <!-- Crop choice + output size: used to be their own wizard step; merged
+             here since "crop or not" and "which output size" are conversion
+             inputs, not screens of their own. Choosing 자르기 reveals drag
+             handles on the Original preview below (same canvas, same handlers). -->
+        <p style="margin:0 0 10px;font-size:13px;color:var(--ts-text-secondary)">{{ t.impCropQ }}</p>
+        <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
           <button onClick="{{ pickCropCrop }}" aria-pressed="{{ cropIsCrop }}" style="{{ cropCardStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <span style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
               <svg width="17" height="17" viewBox="0 0 24 24"><path d="M6 2v16a2 2 0 0 0 2 2h14M2 6h16a2 2 0 0 1 2 2v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1058,16 +1064,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:500">{{ t.impFullDesc }}</span>
           </button>
         </div>
-        <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:16/9;padding:14px">
-          <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
-        </div>
-        <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:10px;font-size:13px;color:var(--ts-text-secondary);display:flex;align-items:center;gap:7px">
-            <svg width="14" height="14" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none"><path d="M12 8v8M8 12h8M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
-            {{ t.impCropHint }}
-          </div>
-        </sc-if>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
           <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
           <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
             <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
@@ -1076,17 +1073,19 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
           <span style="font-size:13px;color:var(--ts-text-secondary)">{{ outName }}</span>
         </div>
-      </sc-if>
 
-      <!-- STEP 4 · REVIEW -->
-      <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
-        <p style="margin:0 0 18px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impReviewSub }}</p>
         <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
             <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
             <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:14px">
-              <canvas ref="{{ impOrigRef }}" aria-label="{{ t.original }}"></canvas>
+              <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
             </div>
+            <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:8px;font-size:12.5px;color:var(--ts-text-secondary);display:flex;align-items:center;gap:6px">
+                <svg width="13" height="13" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none"><path d="M12 8v8M8 12h8M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+                {{ t.impCropHint }}
+              </div>
+            </sc-if>
           </div>
           <div>
             <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">
@@ -1190,12 +1189,6 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             <svg width="15" height="15" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </sc-if>
-      </sc-if>
-      <sc-if value="{{ impIsCrop }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ impCropNext }}" style="height:40px;padding:0 22px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:7px" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-          {{ cropConfirmLabel }}
-          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </button>
       </sc-if>
       <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ impLoad }}" style="height:40px;padding:0 20px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
@@ -1828,7 +1821,7 @@ class Component extends DCLogic {
       aTplLoaded: '템플릿을 편집기로 불러왔습니다.', aPresetArmed: '이미지 변환 프리셋이 준비되었습니다.',
       aImgNewPage: (n, tot) => `변환한 이미지를 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aCmdNewPage: (n, tot) => `명령어 초안을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aTplNewPage: (n, tot) => `템플릿을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`,
       importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', vecViewL: '벡터화 보기 Beta', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
-      impSteps: ['가져오기', '자르기', '검토', '편집'],
+      impSteps: ['가져오기', '검토', '편집'],
       impImportTitle: '이미지로 촉각 그래픽 만들기', impImportSub: '이미지를 가져오면 주요 윤곽과 구조를 분석해 DotPad용 촉각 그래픽으로 변환합니다.',
       impDrop: '이미지를 끌어다 놓거나 파일을 선택하세요', impDropSecondary: '사진, 도표, 지도, 선화 이미지를 촉각 그래픽으로 변환할 수 있습니다.', impChooseFile: '파일 선택', impSample: '샘플 이미지로 체험하기',
       impFormats: 'PNG · JPG · SVG · 최대 10MB',
@@ -1959,7 +1952,7 @@ class Component extends DCLogic {
       aTplLoaded: 'Template loaded into the editor.', aPresetArmed: 'Image-conversion preset armed.',
       aImgNewPage: (n, tot) => `Converted image added on page ${n}. ${tot} pages total`, aCmdNewPage: (n, tot) => `Command draft added on page ${n}. ${tot} pages total`, aTplNewPage: (n, tot) => `Template added on page ${n}. ${tot} pages total`,
       importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', vecViewL: 'Vectorized view Beta', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
-      impSteps: ['Import', 'Crop', 'Review', 'Edit'],
+      impSteps: ['Import', 'Review', 'Edit'],
       impImportTitle: 'Create Tactile Graphic from Image', impImportSub: 'Import an image and convert its key outlines and structure into a DotPad-ready tactile graphic.',
       impDrop: 'Drop an image here or choose a file', impDropSecondary: 'Convert photos, diagrams, maps, and line drawings into tactile graphics.', impChooseFile: 'Choose File', impSample: 'Try Sample Image',
       impFormats: 'PNG · JPG · SVG · up to 10MB',
@@ -3368,7 +3361,7 @@ class Component extends DCLogic {
     // original image with optional crop overlay
     const oc = this.impOrigRef.current;
     if (oc && st.importOpen) {
-      this.drawSourcePreview(oc, st, st.impStep === 'crop');
+      this.drawSourcePreview(oc, st, st.impStep === 'review' && st.cropChoice === 'crop');
     }
   }
 
@@ -5204,7 +5197,7 @@ class Component extends DCLogic {
       };
     });
 
-    const impIdx = ['import', 'crop', 'review', 'edit'].indexOf(st.impStep);
+    const impIdx = ['import', 'review', 'edit'].indexOf(st.impStep);
     const cellVal = this.cells[this.idx(st.cx, st.cy)];
     let dots = 0; for (let i = 0; i < this.cells.length; i++) dots += this.cells[i];
     const phase = st.sendPhase;
@@ -5632,8 +5625,8 @@ class Component extends DCLogic {
           },
           labelStyle: { fontSize: 12.5, fontWeight: state === 'current' ? 800 : 600, color: state === 'todo' ? 'var(--ts-text-secondary)' : '#1E1C1A', whiteSpace: 'nowrap' } };
       }),
-      impIsImport: st.impStep === 'import', impIsCrop: st.impStep === 'crop', impIsReview: st.impStep === 'review',
-      impHeaderTitle: st.impStep === 'import' ? t.impImportTitle : st.impStep === 'crop' ? t.impCropTitle : t.impReviewTitle,
+      impIsImport: st.impStep === 'import', impIsReview: st.impStep === 'review',
+      impHeaderTitle: st.impStep === 'import' ? t.impImportTitle : t.impReviewTitle,
       impProgressLabel: (typeof t.impStepOf === 'function' ? t.impStepOf(impIdx + 1) : ('Step ' + (impIdx + 1) + ' / 5')) + ' · ' + ((t.impSteps || [])[impIdx] || ''),
       impBackLabel: st.impStep === 'import' ? t.impCancel : t.impBack,
       // step 1 upload
@@ -5707,7 +5700,7 @@ class Component extends DCLogic {
       onDropZoneKey: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (this.fileRef.current) this.fileRef.current.click(); } },
       onDropOver: e => { e.preventDefault(); },
       onDropZone: e => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; this.handleFile(f); },
-      impStep1Next: () => { if (st.imgReady) this.setState({ impStep: 'crop' }); },
+      impStep1Next: () => { if (st.imgReady) this.setState({ impStep: 'review' }); },
       // crop choice
       cropIsCrop: st.cropChoice === 'crop', cropIsFull: st.cropChoice === 'full',
       pickCropCrop: () => this.setState({ cropChoice: 'crop' }),
@@ -5718,10 +5711,8 @@ class Component extends DCLogic {
       cropCursor: st.cropChoice === 'crop' ? (st.cropCursor || 'move') : 'default',
       // conversion state
       // step navigation
-      impPickSample: () => this.setState({ impStep: 'crop', fileName: st.fileName ?? (st.lang === 'ko' ? '고양이' : 'Cat') }),
-      impCropNext: () => this.setState({ impStep: 'review' }),
       impBack: () => {
-        const order = ['import', 'crop', 'review'];
+        const order = ['import', 'review'];
         const i = order.indexOf(st.impStep);
         if (i <= 0) return this.setState({ importOpen: false });
         this.setState({ impStep: order[i - 1] });
@@ -5862,7 +5853,6 @@ class Component extends DCLogic {
       confirmCancelV: t.keepWork,
       confirmReplace: () => { const fn = this._pendingDoc; this._pendingDoc = null; this.setState({ confirmOpen: false }); if (fn) fn(); },
       confirmCancel: () => { this._pendingDoc = null; this.setState({ confirmOpen: false }); },
-      cropConfirmLabel: st.cropChoice === 'crop' ? t.impCropConfirm : t.impNext,
       // dotpad — the preview/send modal is opened from the right-pane connection section (dpSendAction → openSendFlow)
       dotpadOpen: st.dotpadOpen,
       phaseIncompat: phase === 'incompat',
