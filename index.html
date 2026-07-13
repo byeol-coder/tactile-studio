@@ -2895,7 +2895,7 @@ class Component extends DCLogic {
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); this._restorePageFocus(); }
   // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
   onParentLocale(e) {
@@ -4225,8 +4225,12 @@ class Component extends DCLogic {
     if (!prompt) { this.setState({ cmdError: true }); this.say(t.cmdEnterFirst); return; }
     this.setState({ cmdError: false, cmdGenerating: true });
     const o = this.outputDef(st.cmdGrid), gw = o.gw, gh = o.gh, mode = st.cmdApply || 'current';
-    clearTimeout(this._cmdT);
-    this._cmdT = setTimeout(() => {
+    // Runs synchronously: corpus lookup and local pattern-fill are both instant
+    // local computation, so there's no real async work to wait on. An earlier
+    // version wrapped this in an artificial 700ms delay to feel like
+    // "generation" — removed, since manufacturing a delay for work that's
+    // actually instant sits oddly next to the honest "v1 · not real AI" label.
+    {
       // Corpus first: a CONFIDENT hit (title/tag/category match) seeds the real
       // DTMS graphic. Failing that, Stage 5 lets a STRONG page-content match on the
       // top deterministic result (page-label / desc / braille, validated) load its
@@ -4265,7 +4269,7 @@ class Component extends DCLogic {
           this.toastMsg(t.aCmdNoLib);
         }
       }
-    }, 700);
+    }
   }
   syncRealConnection() {
     const DP = this.dpReal();
