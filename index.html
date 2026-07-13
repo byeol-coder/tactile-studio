@@ -1105,20 +1105,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </sc-for>
           </div>
         </div>
-        <label style="display:block;margin-top:18px;font-size:12.5px;font-weight:700;color:#1E1C1A">
-          <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
-          <input type="range" min="10" max="90" step="10" value="{{ threshold }}" onChange="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
-        </label>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
-          <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.6" fill="currentColor"></circle><circle cx="12" cy="6" r="1.6" fill="currentColor"></circle><circle cx="18" cy="6" r="1.6" fill="currentColor"></circle><circle cx="9" cy="12" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="6" cy="18" r="1.6" fill="currentColor"></circle><circle cx="18" cy="18" r="1.6" fill="currentColor"></circle></svg>
-            {{ t.dither }} · <b>{{ ditherState }}</b>
-          </button>
-          <button onClick="{{ toggleInvert }}" aria-pressed="{{ invertConv }}" style="{{ invStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
-            {{ t.invert }} · <b>{{ invState }}</b>
-          </button>
-        </div>
+        <!-- Quality feedback stays visible by default regardless of the
+             advanced disclosure below — it's the one signal that tells you
+             whether the preset alone already looks good, which is exactly
+             what most people need without ever opening "고급 설정". -->
         <sc-if value="{{ qAdv }}" hint-placeholder-val="{{ true }}">
           <div role="status" style="{{ qAdv.box }}">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 8v5M12 15.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="{{ qAdv.color }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1129,29 +1119,59 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
         </sc-if>
 
-        <!-- Vectorize lines (Beta) — optional, experimental, deliberately kept
-             secondary/below the fold of the main conversion controls above. -->
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #EFE7DE">
-          <button onClick="{{ toggleVectorize }}" aria-pressed="{{ vectorizeEnabled }}" style="{{ vecStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 8L13 14L20 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="8" r="1.6" fill="currentColor"></circle><circle cx="13" cy="14" r="1.6" fill="currentColor"></circle></svg>
-            {{ t.vecToggleL }}
+        <!-- Advanced settings (collapsed by default): threshold / dither /
+             invert are fine-tuning knobs ON TOP OF whichever preset is
+             active — a preset alone is enough for most conversions, so these
+             plus Vectorize (Beta) are tucked behind one disclosure instead of
+             always taking up space. Mirrors the existing advOpen/toggleAdv
+             disclosure pattern used in the DotPad panel for visual consistency. -->
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #EFE7DE">
+          <button onClick="{{ toggleImpAdv }}" aria-expanded="{{ impAdvOpen }}" style="display:flex;align-items:center;gap:8px;width:100%;min-height:38px;background:transparent;border:none;padding:2px 0;cursor:pointer;text-align:left" style-focus="outline:2px solid #C43D00;outline-offset:2px">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;transition:transform 0.15s ease;transform:rotate({{ impAdvCaret }})"><path d="M9 6l6 6-6 6" fill="none" stroke="var(--ts-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-size:12.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase">{{ t.impAdvL }}</span>
           </button>
-          <p style="margin:8px 0 0;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.5;max-width:520px">{{ t.vecToggleHelp }}</p>
-          <sc-if value="{{ vecAdv }}" hint-placeholder-val="{{ false }}">
-            <sc-if value="{{ vecAdv.tooFragmented }}" hint-placeholder-val="{{ false }}">
-              <div role="alert" style="display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(218,18,13,0.06);border:1px solid var(--ts-danger);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--ts-danger)">
-                <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                {{ t.vecWarnMsg }}
-              </div>
-            </sc-if>
-            <sc-if value="{{ vecAdv.hasObjects }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
-                <sc-for list="{{ vecAdv.chips }}" as="ch" hint-placeholder-count="3">
-                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#1F6FB2;background:rgba(31,111,178,0.09);border:1px solid rgba(31,111,178,0.28);border-radius:100px;padding:3px 10px">{{ ch.label }} {{ ch.count }}</span>
-                </sc-for>
-              </div>
-            </sc-if>
-            <div role="status" style="margin-top:8px;font-size:12px;color:var(--ts-text-secondary);font-weight:600">{{ vecAdv.countText }}</div>
+          <sc-if value="{{ impAdvOpen }}" hint-placeholder-val="{{ false }}">
+            <label style="display:block;margin-top:14px;font-size:12.5px;font-weight:700;color:#1E1C1A">
+              <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
+              <input type="range" min="10" max="90" step="10" value="{{ threshold }}" onChange="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
+            </label>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.6" fill="currentColor"></circle><circle cx="12" cy="6" r="1.6" fill="currentColor"></circle><circle cx="18" cy="6" r="1.6" fill="currentColor"></circle><circle cx="9" cy="12" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="6" cy="18" r="1.6" fill="currentColor"></circle><circle cx="18" cy="18" r="1.6" fill="currentColor"></circle></svg>
+                {{ t.dither }} · <b>{{ ditherState }}</b>
+              </button>
+              <button onClick="{{ toggleInvert }}" aria-pressed="{{ invertConv }}" style="{{ invStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+                {{ t.invert }} · <b>{{ invState }}</b>
+              </button>
+            </div>
+
+            <!-- Vectorize lines (Beta) — optional, experimental; now lives inside
+                 the same advanced disclosure rather than its own always-visible
+                 secondary section. -->
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid #EFE7DE">
+              <button onClick="{{ toggleVectorize }}" aria-pressed="{{ vectorizeEnabled }}" style="{{ vecStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 8L13 14L20 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="8" r="1.6" fill="currentColor"></circle><circle cx="13" cy="14" r="1.6" fill="currentColor"></circle></svg>
+                {{ t.vecToggleL }}
+              </button>
+              <p style="margin:8px 0 0;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.5;max-width:520px">{{ t.vecToggleHelp }}</p>
+              <sc-if value="{{ vecAdv }}" hint-placeholder-val="{{ false }}">
+                <sc-if value="{{ vecAdv.tooFragmented }}" hint-placeholder-val="{{ false }}">
+                  <div role="alert" style="display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(218,18,13,0.06);border:1px solid var(--ts-danger);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--ts-danger)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    {{ t.vecWarnMsg }}
+                  </div>
+                </sc-if>
+                <sc-if value="{{ vecAdv.hasObjects }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
+                    <sc-for list="{{ vecAdv.chips }}" as="ch" hint-placeholder-count="3">
+                      <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#1F6FB2;background:rgba(31,111,178,0.09);border:1px solid rgba(31,111,178,0.28);border-radius:100px;padding:3px 10px">{{ ch.label }} {{ ch.count }}</span>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <div role="status" style="margin-top:8px;font-size:12px;color:var(--ts-text-secondary);font-weight:600">{{ vecAdv.countText }}</div>
+              </sc-if>
+            </div>
           </sc-if>
         </div>
       </sc-if>
@@ -1664,7 +1684,7 @@ class Component extends DCLogic {
     confirmKind: 'newdoc',
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
-    importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
+    importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', impAdvOpen: false,
     impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile',
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, cropCursor: 'move', retouchHint: false, armedPreset: null,
@@ -1829,7 +1849,7 @@ class Component extends DCLogic {
       vecCountOf: n => '오브젝트 ' + n + '개 생성됨',
       vecTypeRect: '사각형', vecTypeEllipse: '원', vecTypePolyline: '폴리라인', vecTypeLine: '선', 
       impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impLoad: '편집기로 불러오기',
-      presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일',
+      presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일', impAdvL: '고급 설정',
       presetSubBalanced: '일반 사진·그림용', presetSubOutline: '아이콘·사물·도형용', presetSubDiagram: '차트·지도·선화용', presetSubDetail: '디테일 보존(점 밀도↑)',
       qSparseMsg: '점이 너무 적어 촉각으로 읽기 어려울 수 있어요. 대상에 더 가깝게 자르거나 고디테일을 사용해 보세요.',
       qDenseMsg: '점이 너무 많아 촉각으로 뭉쳐 보일 수 있어요. 깔끔한 다이어그램이나 강한 윤곽을 사용해 보세요.',
@@ -1960,7 +1980,7 @@ class Component extends DCLogic {
       vecCountOf: n => n + ' object' + (n === 1 ? '' : 's') + ' generated',
       vecTypeRect: 'Rectangle', vecTypeEllipse: 'Ellipse', vecTypePolyline: 'Polyline', vecTypeLine: 'Line', 
       impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impLoad: 'Load into editor',
-      presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail',
+      presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail', impAdvL: 'Advanced settings',
       presetSubBalanced: 'General photos & drawings', presetSubOutline: 'Icons, objects, shapes', presetSubDiagram: 'Charts, maps, line art', presetSubDetail: 'Keeps detail (denser)',
       qSparseMsg: 'This may be too sparse to read by touch. Crop closer to the subject or try High Detail.',
       qDenseMsg: 'This may be too dense for touch. Try Clean Diagram or Strong Outline.',
@@ -4096,7 +4116,7 @@ class Component extends DCLogic {
     clearTimeout(this._readT);
     this._uploadSeq = (this._uploadSeq || 0) + 1;
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
-    this.setState({ impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile', threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+    this.setState({ impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile', threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', impAdvOpen: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
   }
   // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
   _captureSource(bmp, w, h) {
@@ -5693,6 +5713,9 @@ class Component extends DCLogic {
       impErr: !!st.impErr, impErrMsg: st.impErr === 'type' ? t.impErrType : st.impErr === 'size' ? t.impErrSize : st.impErr === 'load' ? t.impErrLoad : st.impErr === 'assetFormat' ? t.aAssetBadFmt : '',
       convPreset: st.convPreset,
       presetLabel: t.presetL,
+      impAdvOpen: st.impAdvOpen,
+      toggleImpAdv: () => this.setState(x => ({ impAdvOpen: !x.impAdvOpen })),
+      impAdvCaret: st.impAdvOpen ? '90deg' : '0deg',
       convPresets: [
         { k: 'balanced', label: t.presetBalanced, sub: t.presetSubBalanced },
         { k: 'outline', label: t.presetOutline, sub: t.presetSubOutline },
