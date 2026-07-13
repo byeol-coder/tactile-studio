@@ -2587,6 +2587,7 @@ class Component extends DCLogic {
       this.setState({ output: out, cmdGenerating: false, cmdOpen: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: ctx });
     }
     this.say(this.corpusLoadMessage(result));
+    this.bump();   // new content loaded — dirty + autosave
     return true;
   }
   // Look up the full parent corpus record (all pages) by id — read-only access to
@@ -4154,6 +4155,7 @@ class Component extends DCLogic {
     this.undoStack = []; this.redoStack = [];
     this.setState({ importOpen: false, tplOpen: false, cmdOpen: false, confirmOpen: false, fileName: name, sendPhase: 'idle', pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, corpusCtx: null });
     this.queueLivePreview();
+    this.bump();   // new document loaded — dirty + autosave
   }
   // ── TGIL / library asset import (DTMS JSON or schema-v1 asset) ─────────────
   // Reads a downloaded tactile-graphic file and loads its 60×40 pages into the
@@ -4215,6 +4217,7 @@ class Component extends DCLogic {
       this.queueLivePreview();
       this.queueBraillePreview();
       this.say(this.callI18n(t.aAssetLoaded, '', this.pages.length) + ' ' + banaMsg);
+      this.bump();   // new document loaded — dirty + autosave
     };
     this.setState({ impLoading: true, impErr: '' });
     reader.readAsText(file);
@@ -4299,6 +4302,7 @@ class Component extends DCLogic {
         this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: null });
         this.say(intent ? t.aCmdOk : t.aCmdFallback);
       }
+      this.bump();   // new content loaded — dirty + autosave
       if (!intent) {
         // Optional recall aid: if the corpus has near candidates, suggest them
         // (visual toast only — does NOT replace the generated draft on canvas).
@@ -5091,6 +5095,7 @@ class Component extends DCLogic {
     this.setState({ output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle', corpusCtx: null });
     this.queueLivePreview();
     this.say(this._readyMsg());
+    this.bump();   // new document loaded — dirty + autosave
   }
   sendCard(kind, gw, gh, cells, name) {
     this.openCard(kind, gw, gh, cells, name);
@@ -5871,6 +5876,7 @@ class Component extends DCLogic {
             this.setState({ tplOpen: false, fileName: st.lang === 'ko' ? it.ko : it.en, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null });
             this.queueLivePreview();
             this.say(this.callI18n(t.aTplNewPage, '', at + 1, this.pages.length));
+            this.bump();   // new content loaded — dirty + autosave
           } else {
             this.guardNewDoc(() => {
               const out = (this.OUTPUTS.find(oo => oo.gw === it.gw && oo.gh === it.gh) || this.OUTPUTS[0]).key;
