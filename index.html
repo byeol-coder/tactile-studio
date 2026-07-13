@@ -337,6 +337,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </button>
             <sc-if value="{{ p.menuOpen }}" hint-placeholder-val="{{ false }}">
               <div role="menu" aria-label="{{ p.handleAria }}" style="{{ p.menuStyle }}">
+                <button role="menuitem" onClick="{{ p.duplicate }}" style="{{ p.menuDupStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><rect x="5" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect></svg>
+                  <span>{{ t.pageDuplicate }}</span>
+                </button>
                 <button role="menuitem" onClick="{{ p.moveUp }}" disabled="{{ p.upDisabled }}" style="{{ p.menuUpStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
                   <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   <span>{{ t.pageMoveUp }}</span>
@@ -772,11 +776,13 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </button>
           </sc-if>
 
-          <!-- connecting → disabled loading (guards against duplicate connect requests) -->
+          <!-- connecting → disabled loading (guards against duplicate connect requests).
+               Also covers the automatic reconnect watch (dpReconnecting) — same
+               spinner, dpConnStatusText supplies the right label for each case. -->
           <sc-if value="{{ dpPhaseConnecting }}" hint-placeholder-val="{{ false }}">
-            <button disabled="{{ dpPhaseConnecting }}" aria-label="{{ t.dpStateConnecting }}" style="{{ dpPrimaryBtnDisabledStyle }}">
+            <button disabled="{{ dpPhaseConnecting }}" aria-label="{{ dpConnStatusText }}" style="{{ dpPrimaryBtnDisabledStyle }}">
               <span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span>
-              {{ t.dpStateConnecting }}
+              {{ dpConnStatusText }}
             </button>
           </sc-if>
 
@@ -1683,7 +1689,7 @@ class Component extends DCLogic {
     cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false, cmdFeatureFilter: [],
     tplOpen: false, tplGroup: 'recommended',
     confirmOpen: false,
-    connected: true, connBusy: '', connFailed: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
+    connected: true, connBusy: '', connFailed: false, dpReconnecting: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     narrOpen: false,
     brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 }, brBusy: false,
@@ -1763,6 +1769,7 @@ class Component extends DCLogic {
       strokeL: '선 두께', eraserL: '지우개 크기', rowN: ['1줄', '2줄', '3줄'],
       aPage: (n, tot) => `${tot}페이지 중 ${n}페이지`, aPageAdd: (n, tot) => `${n}페이지를 추가했습니다. 총 ${tot}페이지`, aPageDel: (n, tot) => `페이지를 삭제했습니다. 현재 ${n}페이지, 총 ${tot}페이지`,
       aPageMoveUp: n => `${n}페이지를 위로 옮겼습니다.`, aPageMoveDown: n => `${n}페이지를 아래로 옮겼습니다.`, aPageFirst: '이미 첫 페이지입니다.', aPageLast: '이미 마지막 페이지입니다.', pageMoveUp: '위로 이동', pageMoveDown: '아래로 이동', pageReorder: n => `${n}페이지 순서 변경`,
+      pageDuplicate: '페이지 복제', aPageDup: (n, tot) => `${n}페이지를 복제했습니다. 총 ${tot}페이지`,
       strokeDesc: ['정밀한 1줄 선', '표준 2줄 선', '굵은 3줄 선'], eraserDesc: ['작게 지우기', '표준 크기로 지우기', '넓게 지우기'],
       quick: '빠른 작업', qClear: '모두 지우기', qInvert: '반전', qFlipH: '좌우 반전', qFlipV: '상하 반전', moreOpts: '옵션 더보기',
       createMenu: '만들기', savedStatus: '저장됨', saveStatusSaving: '저장 중…', saveStatusError: '저장 실패', shapesGroup: '도형',
@@ -1809,7 +1816,7 @@ class Component extends DCLogic {
       scToggleDot: '점 켜기·끄기', scNudge: '커서 이동', scClosePoly: '다각형 닫기', scApply: '설명·나레이션 적용', scHelp: '단축키 도움말', scEscape: '닫기·취소',
       scgTools: '도구', scgCanvas: '캔버스', scgEditing: '편집', scgView: '보기', scgApply: '적용 및 출력', kbShortcutsTitle: '키보드 단축키',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', 
-      dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
+      dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateReconnecting: 'DotPad에 재연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '전체 올리기', dpLower: '전체 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
       
@@ -1893,6 +1900,7 @@ class Component extends DCLogic {
       strokeL: 'Stroke width', eraserL: 'Eraser size', rowN: ['1 row', '2 rows', '3 rows'],
       aPage: (n, tot) => `Page ${n} of ${tot}`, aPageAdd: (n, tot) => `Page ${n} added. ${tot} pages total`, aPageDel: (n, tot) => `Page deleted. Now on page ${n}, ${tot} pages total`,
       aPageMoveUp: n => `Page ${n} moved up.`, aPageMoveDown: n => `Page ${n} moved down.`, aPageFirst: 'Page is already first.', aPageLast: 'Page is already last.', pageMoveUp: 'Move up', pageMoveDown: 'Move down', pageReorder: n => `Reorder page ${n}`,
+      pageDuplicate: 'Duplicate page', aPageDup: (n, tot) => `Page ${n} duplicated. ${tot} pages total`,
       strokeDesc: ['Precise 1-row stroke', 'Standard 2-row stroke', 'Bold 3-row stroke'], eraserDesc: ['Small eraser size', 'Standard eraser size', 'Wide eraser size'],
       quick: 'Quick actions', qClear: 'Clear all', qInvert: 'Invert', qFlipH: 'Flip H', qFlipV: 'Flip V', moreOpts: 'More options',
       createMenu: 'Create', savedStatus: 'Saved', saveStatusSaving: 'Saving…', saveStatusError: 'Save failed', shapesGroup: 'Shapes',
@@ -1939,7 +1947,7 @@ class Component extends DCLogic {
       scToggleDot: 'Toggle dot', scNudge: 'Move cursor', scClosePoly: 'Close polygon', scApply: 'Apply description / narration', scHelp: 'Keyboard help', scEscape: 'Close / cancel',
       scgTools: 'Tools', scgCanvas: 'Canvas', scgEditing: 'Editing', scgView: 'View', scgApply: 'Apply & output', kbShortcutsTitle: 'Keyboard shortcuts',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', 
-      dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
+      dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateReconnecting: 'Reconnecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
       
@@ -2889,13 +2897,17 @@ class Component extends DCLogic {
     })();
     this._onLocale = (e) => this.onParentLocale(e);
     window.addEventListener('message', this._onLocale);
+    // DotPad connection health watch — no-ops instantly when no real device
+    // is present (dpReal() returns null), so this costs nothing for anyone
+    // without hardware attached.
+    this._connWatchT = setInterval(() => this._connWatch(), 3000);
     this.drawAll();
     this.heroSetup();
     this.heroReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearInterval(this._connWatchT); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); this._restorePageFocus(); }
   // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
   onParentLocale(e) {
@@ -3768,6 +3780,33 @@ class Component extends DCLogic {
     this.queueBraillePreview();
     this.say(this.T().aPageAdd(at + 1, n));
   }
+  // Duplicate page idx: same dots, narration/description, and vector-line
+  // objects (if any), inserted immediately after it. Reuses the same
+  // insert-reindex helpers as addPage() to shift every OTHER page's
+  // audio/vector metadata out of the way, then carries the SOURCE page's own
+  // metadata into the new slot. A shallow reference copy is safe here: every
+  // mutation path in this file replaces a page's record via Object.assign
+  // rather than editing it in place (see setPageNarration etc.), so the two
+  // pages briefly sharing one record object never causes cross-page bleed —
+  // the first edit to either page forks its own copy.
+  duplicatePage(idx) {
+    const n0 = this.pages.length;
+    if (idx < 0 || idx >= n0) return;
+    const at = idx + 1;
+    const copy = this.pages[idx].slice();
+    this.pages.splice(at, 0, copy);
+    this._reindexPageAudioInsert(at);
+    this._reindexPageVectorsInsert(at);
+    if (this.pageAudio[idx]) this.pageAudio[at] = this.pageAudio[idx];
+    if (this.pageVectors[idx]) this.pageVectors[at] = this.pageVectors[idx];
+    this.undoStack = []; this.redoStack = [];
+    this.cells = copy; this.polyPts = []; this.preview = null;
+    const n = this.pages.length;
+    this.setState({ pageIndex: at, pageCount: n, cx: 0, cy: 0, selRect: null });
+    this.bump();   // structural change (page duplicated) — dirty + autosave
+    this.queueBraillePreview();
+    this.say(this.T().aPageDup(at + 1, n));
+  }
   deletePageAt(idx) {
     if (this.pages.length <= 1) return;
     const wasActive = idx === this.state.pageIndex;
@@ -3930,13 +3969,15 @@ class Component extends DCLogic {
     if (!this.undoStack.length) return;
     this.redoStack.push(this._histEntry());
     this._restoreHistEntry(this.undoStack.pop());
-    this.say(this.T().aUndo); this.bump();
+    const msg = this.T().aUndo;
+    this.say(msg); this.toastMsg(msg); this.bump();
   }
   redo() {
     if (!this.redoStack.length) return;
     this.undoStack.push(this._histEntry());
     this._restoreHistEntry(this.redoStack.pop());
-    this.say(this.T().aRedo); this.bump();
+    const msg = this.T().aRedo;
+    this.say(msg); this.toastMsg(msg); this.bump();
   }
   setGrid(w, h) {
     if (w === this.state.gridW && h === this.state.gridH) return;
@@ -4270,6 +4311,37 @@ class Component extends DCLogic {
         }
       }
     }
+  }
+  // ── DotPad connection health watch (real hardware only) ──────────────────
+  // vendor/tw/dotpad.js already retries a dropped BLE link silently inside
+  // ensure()/output() and on tab-visibility return, but never surfaces that a
+  // drop happened or a retry is in flight — from the app side, the UI simply
+  // keeps showing its last-known "connected" state until the NEXT deliberate
+  // action (opening the send dialog) happens to re-check it via
+  // syncRealConnection(). This polls the real link every ~3s while
+  // state.connected is true, so a drop is caught and shown promptly, then
+  // retries via the wrapper's own ensure() — which reconnects to the
+  // ALREADY-PAIRED device object, so (unlike DP.connect(), which opens a
+  // fresh device picker) it needs no new user gesture and is safe to run
+  // unattended on a timer.
+  _connWatch() {
+    const DP = this.dpReal();
+    if (!DP || !this.state.connected || this.state.connBusy || this.state.dpReconnecting) return;
+    if (DP.gattOk()) return;   // still physically connected — nothing to do
+    const t = this.T();
+    this.setState({ connected: false, dpReconnecting: true });
+    this.say(t.aConnOff);
+    DP.ensure(true).then(ok => {
+      this.setState(s => ({
+        dpReconnecting: false, connected: ok,
+        sendPhase: s.dotpadOpen ? (ok ? 'idle' : 'error') : s.sendPhase
+      }));
+      this.say(ok ? t.aConnOn : t.aConnFailed);
+      if (ok && this.state.livePreview) this.queueLivePreview(true, true);
+    }).catch(() => {
+      this.setState(s => ({ dpReconnecting: false, connected: false, sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
+      this.say(t.aConnFailed);
+    });
   }
   syncRealConnection() {
     const DP = this.dpReal();
@@ -5139,13 +5211,14 @@ class Component extends DCLogic {
     // Unified DotPad connection flow (right pane): derive a single phase from the
     // existing connection/send state — no new state is introduced.
     const dpFlow = st.connBusy ? 'connecting'
+      : st.dpReconnecting ? 'reconnecting'
       : st.sendPhase === 'sending' ? 'sending'
       : st.connFailed ? 'error'
       : st.sendPhase === 'error' ? 'error'
       : !st.connected ? 'disconnected'
       : st.sendPhase === 'done' ? 'sent'
       : 'connected';
-    const dpTone = (dpFlow === 'connected' || dpFlow === 'sent') ? 'ok' : (dpFlow === 'connecting' || dpFlow === 'sending') ? 'busy' : dpFlow === 'error' ? 'err' : 'off';
+    const dpTone = (dpFlow === 'connected' || dpFlow === 'sent') ? 'ok' : (dpFlow === 'connecting' || dpFlow === 'reconnecting' || dpFlow === 'sending') ? 'busy' : dpFlow === 'error' ? 'err' : 'off';
     const dpToneColor = dpTone === 'ok' ? '#0B7500' : dpTone === 'busy' ? '#8A5400' : dpTone === 'err' ? 'var(--ts-danger)' : 'var(--ts-text-secondary)';
     const dpToneBg = dpTone === 'ok' ? 'rgba(11,136,0,0.10)' : dpTone === 'busy' ? 'rgba(217,135,16,0.10)' : dpTone === 'err' ? 'rgba(218,18,13,0.07)' : 'rgba(140,131,119,0.08)';
     const dpBtnPrimary = { height: 38, border: 'none', borderRadius: 8, background: 'var(--ts-primary)', color: '#fff', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', width: '100%', boxSizing: 'border-box' };
@@ -5286,13 +5359,13 @@ class Component extends DCLogic {
       narrCaretStyle: { transition: 'transform 0.15s ease', transform: st.narrOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
       // Unified DotPad connection section (right pane) — reuses connectDot/disconnectDot/send state.
       dpPhaseDisconnected: dpFlow === 'disconnected',
-      dpPhaseConnecting: dpFlow === 'connecting',
+      dpPhaseConnecting: dpFlow === 'connecting' || dpFlow === 'reconnecting',
       dpPhaseSending: dpFlow === 'sending',
       dpPhaseError: dpFlow === 'error',
       dpPhaseNotError: dpFlow !== 'error',
       dpShowReadyActions: dpFlow === 'connected' || dpFlow === 'sent',
       dpErrorWhileConnected: dpFlow === 'error' && st.connected,
-      dpConnStatusText: dpFlow === 'connecting' ? t.dpStateConnecting : dpFlow === 'sending' ? t.dpStateSending : dpFlow === 'sent' ? t.dpStateSent : dpFlow === 'error' ? t.dpStateError : dpFlow === 'disconnected' ? t.dpStateDisconnected : t.dpStateConnected,
+      dpConnStatusText: dpFlow === 'connecting' ? t.dpStateConnecting : dpFlow === 'reconnecting' ? t.dpStateReconnecting : dpFlow === 'sending' ? t.dpStateSending : dpFlow === 'sent' ? t.dpStateSent : dpFlow === 'error' ? t.dpStateError : dpFlow === 'disconnected' ? t.dpStateDisconnected : t.dpStateConnected,
       dpConnStatusStyle: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, borderRadius: 8, padding: '8px 10px', lineHeight: 1.35, background: dpToneBg, color: dpToneColor },
       dpConnStatusDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', display: 'inline-block', background: dpToneColor, animation: dpTone === 'busy' ? 'tsPulse 1.2s infinite' : 'none' },
       dpPrimaryBtnStyle: dpBtnPrimary,
@@ -5489,8 +5562,9 @@ class Component extends DCLogic {
           upDisabled: !canUp, downDisabled: !canDown,
           moveUp: () => { this.setState({ pageMenu: null }); this.movePageStep(i, -1); },
           moveDown: () => { this.setState({ pageMenu: null }); this.movePageStep(i, 1); },
+          duplicate: () => { this.setState({ pageMenu: null }); this.duplicatePage(i); },
           menuStyle: 'position:absolute;top:34px;left:6px;min-width:150px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:10px;box-shadow:0 8px 8px -4px rgba(16,24,40,0.06),0 20px 24px -4px rgba(16,24,40,0.14);padding:4px;display:flex;flex-direction:column;gap:2px;z-index:20;animation:tsFly 0.12s ease-out',
-          menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown),
+          menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown), menuDupStyle: menuItem(true),
           aria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (sel ? (st.lang === 'ko' ? ' (현재)' : ' (current)') : ''),
           label: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1),
           style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:10px;cursor:pointer;text-align:left;'
