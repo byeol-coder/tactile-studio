@@ -3477,6 +3477,11 @@ class Component extends DCLogic {
   }
   onDown(e) {
     if (e.button !== undefined && e.button !== 0) return; // middle/right click: not a drawing gesture (middle = pan, see canvasPanDown)
+    // A second pointer touching down while a drag is already in progress
+    // (classic case: a resting palm while drawing with a stylus, or an
+    // accidental second finger) must not hijack/reset it — ignore until the
+    // active pointer lifts (onUp clears this.drag).
+    if (this.drag && e.pointerId !== this.drag.pointerId) return;
     e.preventDefault();
     this.canvasRef.current.focus();
     const [x, y] = this.evCell(e), t = this.T(), tool = this.state.tool;
@@ -3488,13 +3493,13 @@ class Component extends DCLogic {
       const v = tool === 'pen' ? 1 : 0;
       const size = this.strokeSizeFor(tool);
       this.brushCb((px, py) => { if (this.inb(px, py)) this.cells[this.idx(px, py)] = v; }, size)(x, y);
-      this.drag = { mode: 'paint', v, size }; this.lastPaint = [x, y];
+      this.drag = { mode: 'paint', v, size, pointerId: e.pointerId }; this.lastPaint = [x, y];
       this.setState({ cx: x, cy: y });
       this.say(v ? t.aDotOn(x, y) : t.aDotOff(x, y));
       return;
     }
     if (tool === 'line' || tool === 'rect' || tool === 'ellipse') {
-      this.drag = { mode: 'shape', x0: x, y0: y }; this.preview = new Set([this.idx(x, y)]);
+      this.drag = { mode: 'shape', x0: x, y0: y, pointerId: e.pointerId }; this.preview = new Set([this.idx(x, y)]);
       this.setState({ cx: x, cy: y });
       return;
     }
@@ -3519,15 +3524,16 @@ class Component extends DCLogic {
     if (tool === 'select') {
       const sel = this.state.selRect;
       if (sel && x >= sel.x0 && x <= sel.x1 && y >= sel.y0 && y <= sel.y1) {
-        this.drag = { mode: 'move', sx: x, sy: y, base: this.cells.slice(), sel: { ...sel } };
+        this.drag = { mode: 'move', sx: x, sy: y, base: this.cells.slice(), sel: { ...sel }, pointerId: e.pointerId };
       } else {
-        this.drag = { mode: 'sel', x0: x, y0: y };
+        this.drag = { mode: 'sel', x0: x, y0: y, pointerId: e.pointerId };
         this.setState({ selRect: { x0: x, y0: y, x1: x, y1: y } });
       }
       this.setState({ cx: x, cy: y });
     }
   }
   onMove(e) {
+    if (this.drag && e.pointerId !== this.drag.pointerId) return;
     const [x, y] = this.evCell(e);
     if (x !== this.state.cx || y !== this.state.cy) this.setState({ cx: x, cy: y });
     const d = this.drag; if (!d) return;
@@ -3554,6 +3560,7 @@ class Component extends DCLogic {
     }
   }
   onUp(e) {
+    if (this.drag && e.pointerId !== this.drag.pointerId) return;
     const d = this.drag; this.drag = null;
     const t = this.T();
     if (!d) return;
@@ -3787,7 +3794,7 @@ class Component extends DCLogic {
     if (i === this.state.pageIndex) return;
     this.undoStack = []; this.redoStack = [];
     this.cells = this.pages[i];
-    this.polyPts = []; this.preview = null;
+    this.polyPts = []; this.preview = null; this.drag = null;
     // Transient Apply state is per-page; drop it so the incoming page derives
     // its own status (saved/unsaved) from its own model, and refresh preview.
     this.setState({ pageIndex: i, pageCount: n, cx: 0, cy: 0, selRect: null, applyBusy: null, applyErr: null, brBusy: false });
@@ -3807,7 +3814,7 @@ class Component extends DCLogic {
     this._reindexPageAudioInsert(at);
     this._reindexPageVectorsInsert(at);
     this.undoStack = []; this.redoStack = [];
-    this.cells = blank; this.polyPts = []; this.preview = null;
+    this.cells = blank; this.polyPts = []; this.preview = null; this.drag = null;
     const n = this.pages.length;
     this.setState({ pageIndex: at, pageCount: n, cx: 0, cy: 0, selRect: null });
     this.bump();   // structural change (page added) — dirty + autosave
@@ -3834,7 +3841,7 @@ class Component extends DCLogic {
     if (this.pageAudio[idx]) this.pageAudio[at] = this.pageAudio[idx];
     if (this.pageVectors[idx]) this.pageVectors[at] = this.pageVectors[idx];
     this.undoStack = []; this.redoStack = [];
-    this.cells = copy; this.polyPts = []; this.preview = null;
+    this.cells = copy; this.polyPts = []; this.preview = null; this.drag = null;
     const n = this.pages.length;
     this.setState({ pageIndex: at, pageCount: n, cx: 0, cy: 0, selRect: null });
     this.bump();   // structural change (page duplicated) — dirty + autosave
@@ -3853,7 +3860,7 @@ class Component extends DCLogic {
     if (wasActive) {
       ni = Math.max(0, Math.min(n - 1, idx));
       this.undoStack = []; this.redoStack = [];
-      this.cells = this.pages[ni]; this.polyPts = []; this.preview = null;
+      this.cells = this.pages[ni]; this.polyPts = []; this.preview = null; this.drag = null;
       patch.cx = 0; patch.cy = 0; patch.selRect = null;
     } else {
       // a non-active page was removed: the active page's own buffer/undo
