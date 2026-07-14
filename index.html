@@ -1888,6 +1888,7 @@ class Component extends DCLogic {
       aPoly: 'Enter 키로 다각형을 닫습니다', aFill: '영역을 채웠습니다',
       aShape: n => n + ' 그리기 완료', aSel: '영역 선택됨 — 드래그하여 이동', aMoved: '선택 영역을 이동했습니다',
       tExport: 'PNG로 내보냈습니다', tSavedDrive: 'Tactile Drive에 저장되었습니다', tSavedLib: 'Dot Library에 저장되었습니다',
+      tSaveErr: '저장에 실패했습니다 — 저장 공간이 부족합니다',
     };
     const en = {
       
@@ -2019,6 +2020,7 @@ class Component extends DCLogic {
       aPoly: 'Press Enter to close the polygon', aFill: 'Region filled',
       aShape: n => n + ' drawn', aSel: 'Region selected — drag to move', aMoved: 'Selection moved',
       tExport: 'Exported as PNG', tSavedDrive: 'Saved to Tactile Drive', tSavedLib: 'Saved to Dot Library',
+      tSaveErr: 'Save failed — storage is full',
     };
     return (lang || this.state.lang) === 'ko' ? ko : en;
   }
@@ -4694,27 +4696,36 @@ class Component extends DCLogic {
   }
   railDragUp() { this.toolbarDrag = null; }
   doSaveCommit() {
-    const t = this.T(), name = this.state.fileName || t.untitled;
-    const thumb = this.thumbFrom(this.cells, this.state.gridW, this.state.gridH);
+    const t = this.T(), st = this.state, name = st.fileName || t.untitled;
+    const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
     const cells = this.cells.slice();
-    let ok = true;
-    this.setState(s => {
-      const saved = [{ name, loc: s.saveLoc, thumb, cells, grid: s.gridW + '×' + s.gridH, savedAt: Date.now(), favorite: false }, ...s.saved];
-      this.saveLibrary(saved);
-      return { savePhase: 'done', saved };
-    });
+    // Persist first so success/failure is known before we announce anything.
+    // (saveLibrary is kept out of the setState updater — updaters must be pure.)
+    const saved = [{ name, loc: st.saveLoc, thumb, cells, grid: st.gridW + '×' + st.gridH, savedAt: Date.now(), favorite: false }, ...st.saved];
+    let ok = this.saveLibrary(saved);
     // Saving to the shared library also emits a schema-v1 asset file (JSON) so it
     // can drop straight into build-corpus → the app corpus grows (WS1↔WS2 link).
-    if (this.state.saveLoc === 'library') { try { this.exportLibraryAsset(name); } catch (e) { ok = false; } }
-    this.say(this.state.saveLoc === 'drive' ? t.tSavedDrive : t.tSavedLib);
-    this._flashSaveStatus(ok ? 'saved' : 'error');
-    // The document is now durably saved (Drive/Library) — this supersedes the
-    // rolling crash-recovery snapshot. Clear dirty state, cancel any pending
-    // debounced autosave, and drop the snapshot so a later refresh doesn't
-    // offer to "restore" work that's already saved.
-    this._dirty = false;
-    clearTimeout(this._sessT);
-    try { window.localStorage.removeItem('ts.session.v1'); } catch (e) {}
+    if (st.saveLoc === 'library') { try { this.exportLibraryAsset(name); } catch (e) { ok = false; } }
+    if (ok) {
+      this.setState({ savePhase: 'done', saved });
+      this.say(st.saveLoc === 'drive' ? t.tSavedDrive : t.tSavedLib);
+      this._flashSaveStatus('saved');
+      // A successful save supersedes the rolling crash-recovery snapshot: clear
+      // dirty state, cancel any pending debounced autosave, and drop the
+      // snapshot so a later refresh doesn't offer to "restore" already-saved work.
+      this._dirty = false;
+      clearTimeout(this._sessT);
+      try { window.localStorage.removeItem('ts.session.v1'); } catch (e) {}
+    } else {
+      // Persist failed — do NOT advance to the success screen (which would show
+      // a green "saved" that lies) and do NOT touch the recovery snapshot, so
+      // the work isn't lost. Keep the dialog on the form to allow a retry and
+      // surface the error via the toast, which — unlike the top-bar save-status
+      // indicator (display:none ≤1180px) — stays visible on every viewport.
+      this.say(t.tSaveErr);
+      this.toastMsg(t.tSaveErr);
+      this._flashSaveStatus('error');
+    }
   }
   // Top-bar save indicator is meaningful-state-only: a transient "saved" that
   // auto-clears, or a sticky "error" until the next save attempt.
@@ -5121,7 +5132,8 @@ class Component extends DCLogic {
         return { name: it.name, loc: it.loc, grid: it.grid, thumb: it.thumb || '', hex };
       });
       window.localStorage.setItem('ts.library.v1', JSON.stringify(arr));
-    } catch (e) { /* storage full or unavailable — session-only, non-fatal */ }
+      return true;
+    } catch (e) { /* storage full or unavailable — session-only, non-fatal */ return false; }
   }
   deleteSaved(index) {
     this.setState(s => {
@@ -6025,23 +6037,25 @@ class Component extends DCLogic {
         const name = st.fileName || t.untitled;
         const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
         const cells = this.cells.slice();
-        this.setState(s => {
-          const saved = [{ name, loc: 'drive', thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved];
-          this.saveLibrary(saved);
-          return { dotpadOpen: false, saveLoc: 'drive', saved };
-        });
-        this.toastMsg(t.tSavedDrive); this.say(t.tSavedDrive);
+        // Persist first, then announce the real outcome (not an unconditional
+        // "saved" that lies when storage is full).
+        const saved = [{ name, loc: 'drive', thumb, cells, grid: st.gridW + '×' + st.gridH }, ...this.state.saved];
+        const ok = this.saveLibrary(saved);
+        this.setState({ dotpadOpen: false, saveLoc: 'drive', saved });
+        const msg = ok ? t.tSavedDrive : t.tSaveErr;
+        this.toastMsg(msg); this.say(msg);
       },
       successAddLibrary: () => {
         const name = st.fileName || t.untitled;
         const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
         const cells = this.cells.slice();
-        this.setState(s => {
-          const saved = [{ name, loc: 'library', thumb, cells, grid: s.gridW + '×' + s.gridH }, ...s.saved];
-          this.saveLibrary(saved);
-          return { dotpadOpen: false, saveLoc: 'library', saved };
-        });
-        this.toastMsg(t.tSavedLib); this.say(t.tSavedLib);
+        // Persist first, then announce the real outcome (not an unconditional
+        // "saved" that lies when storage is full).
+        const saved = [{ name, loc: 'library', thumb, cells, grid: st.gridW + '×' + st.gridH }, ...this.state.saved];
+        const ok = this.saveLibrary(saved);
+        this.setState({ dotpadOpen: false, saveLoc: 'library', saved });
+        const msg = ok ? t.tSavedLib : t.tSaveErr;
+        this.toastMsg(msg); this.say(msg);
       },
       continueEditing: () => this.setState({ dotpadOpen: false }),
       successReturn: () => { this.setState({ dotpadOpen: false }); this.toastMsg(t.aSent); },
