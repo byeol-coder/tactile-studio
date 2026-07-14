@@ -99,13 +99,13 @@ describe('buildLibraryAsset — Library Asset v1 export (banaPrintCheck fixed)',
     const w = 60, h = 40;
     const empty = proto.banaPrintCheck.call(inst, new Uint8Array(w * h), w, h);
     expect(empty.pass).toBe(false);
-    expect(empty.issues).toContain('empty');
+    expect(empty.key).toBe('tooSparse');
     const dense = proto.banaPrintCheck.call(inst, patternCells(w, h, 'all-on'), w, h);
     expect(dense.pass).toBe(false);
-    expect(dense.issues).toContain('tooDense');
+    expect(dense.key).toBe('tooDense');
     const ok = proto.banaPrintCheck.call(inst, seededCells(w, h, 11), w, h);
     expect(ok.pass).toBe(true);
-    expect(ok.issues).toEqual([]);
+    expect(ok.key).toBe('readable');
   });
 });
 

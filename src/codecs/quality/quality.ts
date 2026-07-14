@@ -1,7 +1,11 @@
 // src/codecs/quality/quality.ts
 //
-// Verbatim port of the monolith's convQuality and banaPrintCheck (the latter
-// added in the `fix(studio): implement missing banaPrintCheck` commit).
+// Verbatim port of the monolith's convQuality and banaPrintCheck. The latter
+// was independently (re-)implemented twice: once by this migration branch
+// itself (Phase 1, before the fork) and once by vanilla `main` afterwards
+// (`addd43a`, 2026-07-13) with a different shape. This module now matches
+// the real shipped `main` implementation — see the doc comment on
+// banaPrintCheck below and docs/known-issues.md #1.
 // Pure, fully self-contained — no injected dependency needed, unlike the
 // DTMS/vector/image codecs which wrap vendor libraries.
 
@@ -40,18 +44,28 @@ export function convQuality(cells: CellGrid, w: number, h: number): ConvQuality 
 
 export interface BanaCheckResult {
   pass: boolean;
-  issues: string[];
-  dots: number;
+  key: QualityKey;
   density: number;
   isolated: number;
+  dots: number;
 }
 
-/** monolith banaPrintCheck(cells, w, h) (added in the banaPrintCheck fix commit) */
+/** monolith banaPrintCheck(cells, w, h).
+ *
+ * NOTE ON SHAPE: the migration branch's own earlier `fix(studio): implement
+ * missing banaPrintCheck` (Phase 1, before this branch forked from main)
+ * invented an `{ pass, issues: string[] }` shape. Vanilla `main` was fixed
+ * completely independently afterwards, on 2026-07-13, in `addd43a` — with
+ * NO awareness of the migration branch's fix — landing on a DIFFERENT shape:
+ * `{ pass, key, density, isolated, dots }` (reusing convQuality's `key`
+ * rather than a multi-issue array). This function now matches the real
+ * shipped shape, superseding this codec's own earlier guess. Every actual
+ * consumer in this repo only reads `.pass` (see
+ * codecs/library-asset-v1/library-asset-v1.ts's `BanaCheckFn` type, which
+ * only requires `{ pass: boolean }`), so this was a safe, non-breaking
+ * change here — but the raw shape has changed and is documented in
+ * docs/known-issues.md #1. */
 export function banaPrintCheck(cells: CellGrid, w: number, h: number): BanaCheckResult {
   const q = convQuality(cells, w, h);
-  const issues: string[] = [];
-  if (!q.dots) issues.push('empty');
-  if (q.density > 0.40) issues.push('tooDense');
-  if (q.dots > 0 && q.isolated / q.dots > 0.25) issues.push('manyIsolated');
-  return { pass: issues.length === 0, issues, dots: q.dots, density: q.density, isolated: q.isolated };
+  return { pass: q.key === 'readable', key: q.key, density: q.density, isolated: q.isolated, dots: q.dots };
 }

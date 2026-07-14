@@ -203,6 +203,22 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 }
 .ts-size-mobile{display:none}
 @media (max-width:1080px){.ts-size-mobile{display:flex}}
+/* Mobile page pager: desktop uses the pages rail; on touch (< 820px, rail hidden)
+   this floating pill is the only visible page nav + add. */
+.ts-mobile-pager{display:none}
+@media (max-width:820px){.ts-mobile-pager{display:inline-flex}}
+/* Touch targets: at the same breakpoint the pages rail hides and the mobile
+   pager appears (≤820px, phone / small tablet), bump the primary controls
+   that were sized for mouse precision (30–38px) up to the 44px minimum
+   recommended for touch (WCAG 2.5.5). Desktop density is unchanged. */
+@media (max-width:820px){
+  .ts-zoom-btn{width:44px!important;height:44px!important}
+  .ts-zoom-reset{height:44px!important}
+  .ts-fx-btn{height:44px!important}
+  .ts-txt-input{height:44px!important}
+  .ts-txt-seg{height:44px!important}
+  .ts-txt-btn{height:44px!important}
+}
 /* Pages panel: reorder grip. Hidden until the item is hovered or keyboard-focused
    (via :focus-within on the thumbnail), mirroring the delete control at top-right. */
 .ts-page-handle{position:absolute;top:6px;left:6px;width:26px;height:26px;box-sizing:border-box;display:grid;place-items:center;border:1px solid var(--ts-border-decor);border-radius:7px;background:rgba(255,255,255,0.94);color:var(--ts-text-secondary);box-shadow:0 1px 3px rgba(16,24,40,0.14);cursor:grab;opacity:0;touch-action:none;z-index:6;transition:opacity .12s ease,color .12s ease,border-color .12s ease}
@@ -321,6 +337,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </button>
             <sc-if value="{{ p.menuOpen }}" hint-placeholder-val="{{ false }}">
               <div role="menu" aria-label="{{ p.handleAria }}" style="{{ p.menuStyle }}">
+                <button role="menuitem" onClick="{{ p.duplicate }}" style="{{ p.menuDupStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><rect x="5" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect></svg>
+                  <span>{{ t.pageDuplicate }}</span>
+                </button>
                 <button role="menuitem" onClick="{{ p.moveUp }}" disabled="{{ p.upDisabled }}" style="{{ p.menuUpStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
                   <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   <span>{{ t.pageMoveUp }}</span>
@@ -389,33 +409,33 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       <div role="dialog" aria-label="{{ t.txtTitle }}" style="{{ textPopoverStyle }}">
         <div style="font-size:13.5px;font-weight:800;color:#1E1C1A;margin-bottom:3px">{{ t.txtTitle }}</div>
         <div style="font-size:12.5px;color:#8A857E;line-height:1.4;margin-bottom:11px">{{ t.txtSub }}</div>
-        <input value="{{ textValue }}" onChange="{{ onTextInput }}" onKeyDown="{{ onTextKey }}" autoFocus="{{ true }}" aria-label="{{ t.txtTitle }}" placeholder="{{ t.txtPlaceholder }}" maxLength="32" style="width:100%;height:38px;border:1px solid var(--ts-border-functional);border-radius:9px;background:#FBF8F4;padding:0 11px;font-size:14px;font-weight:600;color:#1E1C1A" style-focus="border:1px solid var(--ts-primary);outline:none;background:#fff">
+        <input class="ts-txt-input" value="{{ textValue }}" onChange="{{ onTextInput }}" onKeyDown="{{ onTextKey }}" autoFocus="{{ true }}" aria-label="{{ t.txtTitle }}" placeholder="{{ t.txtPlaceholder }}" maxLength="32" style="width:100%;height:38px;border:1px solid var(--ts-border-functional);border-radius:9px;background:#FBF8F4;padding:0 11px;font-size:14px;font-weight:600;color:#1E1C1A" style-focus="border:1px solid var(--ts-primary);outline:none;background:#fff">
         <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
           <div>
             <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtSizeL }}</div>
             <div role="group" aria-label="{{ t.txtSizeL }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
-              <sc-for list="{{ textSizeOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
+              <sc-for list="{{ textSizeOpts }}" as="o" hint-placeholder-count="3"><button class="ts-txt-seg" onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
             </div>
           </div>
           <div style="display:flex;gap:10px">
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtOrientL }}</div>
               <div role="group" aria-label="{{ t.txtOrientL }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
-                <sc-for list="{{ textOrientOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
+                <sc-for list="{{ textOrientOpts }}" as="o" hint-placeholder-count="2"><button class="ts-txt-seg" onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
               </div>
             </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:5px">{{ t.txtStyleL }}</div>
               <div role="group" aria-label="{{ t.txtStyleL }}" style="display:flex;gap:3px;background:#F2ECE4;border-radius:9px;padding:3px">
-                <sc-for list="{{ textStyleOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
+                <sc-for list="{{ textStyleOpts }}" as="o" hint-placeholder-count="2"><button class="ts-txt-seg" onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ o.label }}</button></sc-for>
               </div>
             </div>
           </div>
         </div>
         <div style="font-size:12px;color:#B7AEA4;line-height:1.45;margin-top:11px">{{ t.txtNote }}</div>
         <div style="display:flex;gap:8px;margin-top:13px">
-          <button onClick="{{ textCancel }}" style="flex:none;height:38px;padding:0 14px;border:1px solid var(--ts-border-decor);border-radius:9px;background:#fff;color:var(--ts-text-secondary);font-weight:700;font-size:12.5px" style-hover="border-color:#C9BBAF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.txtCancel }}</button>
-          <button onClick="{{ textCommit }}" aria-label="{{ t.txtAdd }}" style="flex:1;height:38px;border:none;border-radius:9px;background:var(--ts-primary);color:#fff;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px" style-hover="background:#D64A1C" style-active="background:#B93E15" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
+          <button class="ts-txt-btn" onClick="{{ textCancel }}" style="flex:none;height:38px;padding:0 14px;border:1px solid var(--ts-border-decor);border-radius:9px;background:#fff;color:var(--ts-text-secondary);font-weight:700;font-size:12.5px" style-hover="border-color:#C9BBAF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.txtCancel }}</button>
+          <button class="ts-txt-btn" onClick="{{ textCommit }}" aria-label="{{ t.txtAdd }}" style="flex:1;height:38px;border:none;border-radius:9px;background:var(--ts-primary);color:#fff;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px" style-hover="background:#D64A1C" style-active="background:#B93E15" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
             <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             {{ t.txtAdd }}
           </button>
@@ -436,6 +456,19 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </button>
         </div>
       </sc-if>
+      <sc-if value="{{ recoverOffer }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:22;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 12px 11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
+          <span style="width:26px;height:26px;border-radius:8px;background:rgba(var(--ts-primary-rgb),0.22);display:grid;place-items:center;color:var(--ts-primary);flex:none">
+            <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </span>
+          <span style="display:flex;flex-direction:column;line-height:1.35;min-width:0">
+            <span style="font-size:12.5px;font-weight:700">{{ t.recoverTitle }}</span>
+            <span style="font-size:11.5px;font-weight:500;color:rgba(255,255,255,0.72)">{{ t.recoverSub }}</span>
+          </span>
+          <button onClick="{{ doRecover }}" style="flex:none;height:32px;padding:0 14px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:800;font-size:12.5px;cursor:pointer;margin-left:4px" style-hover="background:#D64A1C" style-focus="outline:2px solid #fff;outline-offset:2px">{{ t.recoverBtn }}</button>
+          <button onClick="{{ dismissRecover }}" style="flex:none;height:32px;padding:0 12px;border:1px solid rgba(255,255,255,0.28);border-radius:8px;background:transparent;color:#fff;font-weight:700;font-size:12.5px;cursor:pointer" style-hover="background:rgba(255,255,255,0.12)" style-focus="outline:2px solid #fff;outline-offset:2px">{{ t.recoverDismissL }}</button>
+        </div>
+      </sc-if>
       <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
         <div role="status" style="pointer-events:none;position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
           <span style="width:26px;height:26px;border-radius:8px;background:rgba(var(--ts-primary-rgb),0.22);display:grid;place-items:center;color:var(--ts-primary);flex:none">
@@ -444,6 +477,17 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <span style="font-size:12.5px;font-weight:600;line-height:1.45">{{ t.retouchHintMsg }}</span>
           <button onClick="{{ dismissRetouch }}" aria-label="{{ t.close }}" style="pointer-events:auto;flex:none;width:26px;height:26px;border:none;border-radius:7px;background:rgba(255,255,255,0.12);color:#fff;display:grid;place-items:center" style-hover="background:rgba(255,255,255,0.22)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="13" height="13" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+          </button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ emptyHint }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="pointer-events:none;position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:19;max-width:520px;display:flex;align-items:center;gap:10px;background:#fff;color:#1E1C1A;border:1px solid var(--ts-border-decor);border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(16,24,40,0.05),0 12px 28px -14px rgba(16,24,40,0.14);animation:tsUp 0.25s ease-out">
+          <span style="width:24px;height:24px;border-radius:8px;background:rgba(var(--ts-primary-rgb),0.10);display:grid;place-items:center;color:var(--ts-primary);flex:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </span>
+          <span style="font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ts-text-secondary)">{{ t.emptyHintMsg }}</span>
+          <button onClick="{{ dismissEmptyHint }}" aria-label="{{ t.close }}" style="pointer-events:auto;flex:none;width:24px;height:24px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
           </button>
         </div>
       </sc-if>
@@ -461,17 +505,33 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       </div>
       </div>
 
+      <!-- Mobile page pager: the pages rail is hidden < 820px, so this floating
+           pill is the only visible page nav + add on touch. Hidden on desktop
+           (rail handles it there) via .ts-mobile-pager / media query. -->
+      <div class="ts-mobile-pager" role="group" aria-label="{{ t.pagesLabel }}" style="position:absolute;left:16px;top:12px;z-index:16;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:3px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
+        <button onClick="{{ mobilePrevPage }}" disabled="{{ pagePrevDisabled }}" aria-label="{{ t.pagePrevL }}" title="{{ t.pagePrevL }}" style="{{ mobilePrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <span style="min-width:44px;text-align:center;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:#1E1C1A">{{ pagePos }}</span>
+        <button onClick="{{ mobileNextPage }}" disabled="{{ pageNextDisabled }}" aria-label="{{ t.pageNextL }}" title="{{ t.pageNextL }}" style="{{ mobileNextStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <span aria-hidden="true" style="width:1px;height:22px;background:var(--ts-border-decor);margin:0 2px;flex:none"></span>
+        <button onClick="{{ mobileAddPage }}" aria-label="{{ t.pageAddMobileL }}" title="{{ t.pageAddMobileL }}" style="{{ mobileAddStyle }}" style-hover="background:#F7F4EF;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+        </button>
+      </div>
       <!-- Zoom pill (Figma-style): Ctrl/Cmd + wheel or trackpad pinch zooms
            continuously anywhere over the canvas viewport (see cvWheel on the
            scroll container above); +/− jump between preset steps. Placed as
            a sibling of the scrollable viewport so it stays put on scroll,
            and above the floating tool pill so the two never overlap. -->
       <div role="group" aria-label="{{ t.zoomLabel }}" style="position:absolute;right:16px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
-        <button onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" aria-keyshortcuts="{{ zoomOutKeys }}" onMouseEnter="{{ zoomOutTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomOutTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <button class="ts-zoom-btn" onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" aria-keyshortcuts="{{ zoomOutKeys }}" onMouseEnter="{{ zoomOutTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomOutTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
-        <button onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" aria-keyshortcuts="{{ zoomResetKeys }}" onMouseEnter="{{ zoomResetTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomResetTip }}" onBlur="{{ hideTip }}" style="min-width:48px;height:30px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
-        <button onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" aria-keyshortcuts="{{ zoomInKeys }}" onMouseEnter="{{ zoomInTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomInTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <button class="ts-zoom-reset" onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" aria-keyshortcuts="{{ zoomResetKeys }}" onMouseEnter="{{ zoomResetTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomResetTip }}" onBlur="{{ hideTip }}" style="min-width:48px;height:30px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
+        <button class="ts-zoom-btn" onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" aria-keyshortcuts="{{ zoomInKeys }}" onMouseEnter="{{ zoomInTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomInTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
       </div>
@@ -582,10 +642,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             <div style="font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:3px">{{ t.inspCleanup }}</div>
             <div style="font-size:13px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
             <div style="display:flex;gap:6px;margin-bottom:6px">
-              <button onClick="{{ fxThinner }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThinner }}</button>
-              <button onClick="{{ fxThicker }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThicker }}</button>
+              <button class="ts-fx-btn" onClick="{{ fxThinner }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThinner }}</button>
+              <button class="ts-fx-btn" onClick="{{ fxThicker }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThicker }}</button>
             </div>
-            <button onClick="{{ fxDenoise }}" style="width:100%;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspDenoise }}</button>
+            <button class="ts-fx-btn" onClick="{{ fxDenoise }}" style="width:100%;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspDenoise }}</button>
           </div>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
@@ -716,11 +776,13 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </button>
           </sc-if>
 
-          <!-- connecting → disabled loading (guards against duplicate connect requests) -->
+          <!-- connecting → disabled loading (guards against duplicate connect requests).
+               Also covers the automatic reconnect watch (dpReconnecting) — same
+               spinner, dpConnStatusText supplies the right label for each case. -->
           <sc-if value="{{ dpPhaseConnecting }}" hint-placeholder-val="{{ false }}">
-            <button disabled="{{ dpPhaseConnecting }}" aria-label="{{ t.dpStateConnecting }}" style="{{ dpPrimaryBtnDisabledStyle }}">
+            <button disabled="{{ dpPhaseConnecting }}" aria-label="{{ dpConnStatusText }}" style="{{ dpPrimaryBtnDisabledStyle }}">
               <span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span>
-              {{ t.dpStateConnecting }}
+              {{ dpConnStatusText }}
             </button>
           </sc-if>
 
@@ -971,60 +1033,51 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         </sc-if>
       </sc-if>
 
-      <!-- STEP 2 · CROP -->
-      <sc-if value="{{ impIsCrop }}" hint-placeholder-val="{{ false }}">
-        <p style="margin:0 0 16px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impCropQ }}</p>
-        <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
-          <button onClick="{{ pickCropCrop }}" aria-pressed="{{ cropIsCrop }}" style="{{ cropCardStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <span style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
-              <svg width="17" height="17" viewBox="0 0 24 24"><path d="M6 2v16a2 2 0 0 0 2 2h14M2 6h16a2 2 0 0 1 2 2v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              {{ t.impCrop }}
-              <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" style="margin-left:auto;color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </sc-if>
-            </span>
-            <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:500">{{ t.impCropDesc }}</span>
-          </button>
-          <button onClick="{{ pickCropFull }}" aria-pressed="{{ cropIsFull }}" style="{{ fullCardStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <span style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px">
-              <svg width="17" height="17" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 15l4-4 4 4 4-5 4 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              {{ t.impFull }}
-              <sc-if value="{{ cropIsFull }}" hint-placeholder-val="{{ true }}">
-                <svg width="15" height="15" viewBox="0 0 24 24" style="margin-left:auto;color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              </sc-if>
-            </span>
-            <span style="font-size:13px;color:var(--ts-text-secondary);font-weight:500">{{ t.impFullDesc }}</span>
-          </button>
-        </div>
-        <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:16/9;padding:14px">
-          <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
-        </div>
-        <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:10px;font-size:13px;color:var(--ts-text-secondary);display:flex;align-items:center;gap:7px">
-            <svg width="14" height="14" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none"><path d="M12 8v8M8 12h8M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
-            {{ t.impCropHint }}
-          </div>
-        </sc-if>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap">
-          <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
-          <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
-            <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
-              <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
-            </sc-for>
-          </div>
-          <span style="font-size:13px;color:var(--ts-text-secondary)">{{ outName }}</span>
-        </div>
-      </sc-if>
-
-      <!-- STEP 4 · REVIEW -->
+      <!-- STEP 3 · REVIEW -->
       <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
         <p style="margin:0 0 18px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impReviewSub }}</p>
-        <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <div>
+
+        <!-- Crop choice + output size: a single compact row (was two big
+             cards with icon+title+description, plus a separate prompt
+             paragraph, plus a separate output-size row below — simplified to
+             match the output-size selector's own compact segmented style,
+             since crop-or-not defaults to "full" for most conversions and
+             doesn't need its own visual weight). Choosing 자르기 still reveals
+             the same drag handles on the Original preview below. -->
+        <div style="display:flex;align-items:center;gap:22px;margin-bottom:18px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.impCropQ }}</span>
+            <div role="group" aria-label="{{ t.impCropQ }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
+              <button onClick="{{ pickCropFull }}" aria-pressed="{{ cropIsFull }}" title="{{ t.impFull }} — {{ t.impFullDesc }}" style="{{ cropFullSegStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.impFullShort }}</button>
+              <button onClick="{{ pickCropCrop }}" aria-pressed="{{ cropIsCrop }}" title="{{ t.impCrop }} — {{ t.impCropDesc }}" style="{{ cropCropSegStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.impCropShort }}</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
+            <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
+              <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
+                <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
+              </sc-for>
+            </div>
+            <span style="font-size:13px;color:var(--ts-text-secondary)">{{ outName }}</span>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin:-4px 0 8px">
+          <button onClick="{{ toggleOrigPreview }}" aria-pressed="{{ origPreviewOpen }}" style="height:32px;padding:0 10px;border:1px solid var(--ts-border-decor);border-radius:7px;background:#fff;color:var(--ts-text-secondary);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impShowOrig }}</button>
+        </div>
+        <div class="ts-2col" style="{{ reviewPreviewGridStyle }}">
+          <div style="display:{{ origPreviewDisplay }}">
             <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
             <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:14px">
-              <canvas ref="{{ impOrigRef }}" aria-label="{{ t.original }}"></canvas>
+              <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
             </div>
+            <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:8px;font-size:12.5px;color:var(--ts-text-secondary);display:flex;align-items:center;gap:6px">
+                <svg width="13" height="13" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none"><path d="M12 8v8M8 12h8M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+                {{ t.impCropHint }}
+              </div>
+            </sc-if>
           </div>
           <div>
             <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">
@@ -1046,29 +1099,18 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         </div>
         <div style="margin-top:4px">
           <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px">{{ presetLabel }}</div>
-          <div role="group" aria-label="{{ presetLabel }}" style="display:flex;gap:7px">
+          <div role="group" aria-label="{{ presetLabel }}" style="display:flex;gap:5px">
             <sc-for list="{{ convPresets }}" as="pp" hint-placeholder-count="4">
-              <button onClick="{{ pp.setIt }}" aria-pressed="{{ pp.sel }}" style="{{ pp.style }}" style-focus="outline:2px solid #C43D00;outline-offset:2px">
+              <button onClick="{{ pp.setIt }}" aria-pressed="{{ pp.sel }}" title="{{ pp.label }} — {{ pp.sub }}" style="{{ pp.style }}" style-focus="outline:2px solid #C43D00;outline-offset:2px">
                 <span style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ pp.label }}</span>
-                <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.3">{{ pp.sub }}</span>
               </button>
             </sc-for>
           </div>
         </div>
-        <label style="display:block;margin-top:18px;font-size:12.5px;font-weight:700;color:#1E1C1A">
-          <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
-          <input type="range" min="10" max="90" step="10" value="{{ threshold }}" onChange="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
-        </label>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
-          <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.6" fill="currentColor"></circle><circle cx="12" cy="6" r="1.6" fill="currentColor"></circle><circle cx="18" cy="6" r="1.6" fill="currentColor"></circle><circle cx="9" cy="12" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="6" cy="18" r="1.6" fill="currentColor"></circle><circle cx="18" cy="18" r="1.6" fill="currentColor"></circle></svg>
-            {{ t.dither }} · <b>{{ ditherState }}</b>
-          </button>
-          <button onClick="{{ toggleInvert }}" aria-pressed="{{ invertConv }}" style="{{ invStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
-            {{ t.invert }} · <b>{{ invState }}</b>
-          </button>
-        </div>
+        <!-- Quality feedback stays visible by default regardless of the
+             advanced disclosure below — it's the one signal that tells you
+             whether the preset alone already looks good, which is exactly
+             what most people need without ever opening "고급 설정". -->
         <sc-if value="{{ qAdv }}" hint-placeholder-val="{{ true }}">
           <div role="status" style="{{ qAdv.box }}">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 8v5M12 15.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="{{ qAdv.color }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1079,29 +1121,59 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
         </sc-if>
 
-        <!-- Vectorize lines (Beta) — optional, experimental, deliberately kept
-             secondary/below the fold of the main conversion controls above. -->
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #EFE7DE">
-          <button onClick="{{ toggleVectorize }}" aria-pressed="{{ vectorizeEnabled }}" style="{{ vecStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 8L13 14L20 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="8" r="1.6" fill="currentColor"></circle><circle cx="13" cy="14" r="1.6" fill="currentColor"></circle></svg>
-            {{ t.vecToggleL }}
+        <!-- Advanced settings (collapsed by default): threshold / dither /
+             invert are fine-tuning knobs ON TOP OF whichever preset is
+             active — a preset alone is enough for most conversions, so these
+             plus Vectorize (Beta) are tucked behind one disclosure instead of
+             always taking up space. Mirrors the existing advOpen/toggleAdv
+             disclosure pattern used in the DotPad panel for visual consistency. -->
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #EFE7DE">
+          <button onClick="{{ toggleImpAdv }}" aria-expanded="{{ impAdvOpen }}" style="display:flex;align-items:center;gap:8px;width:100%;min-height:38px;background:transparent;border:none;padding:2px 0;cursor:pointer;text-align:left" style-focus="outline:2px solid #C43D00;outline-offset:2px">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;transition:transform 0.15s ease;transform:rotate({{ impAdvCaret }})"><path d="M9 6l6 6-6 6" fill="none" stroke="var(--ts-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-size:12.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase">{{ t.impAdvL }}</span>
           </button>
-          <p style="margin:8px 0 0;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.5;max-width:520px">{{ t.vecToggleHelp }}</p>
-          <sc-if value="{{ vecAdv }}" hint-placeholder-val="{{ false }}">
-            <sc-if value="{{ vecAdv.tooFragmented }}" hint-placeholder-val="{{ false }}">
-              <div role="alert" style="display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(218,18,13,0.06);border:1px solid var(--ts-danger);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--ts-danger)">
-                <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                {{ t.vecWarnMsg }}
-              </div>
-            </sc-if>
-            <sc-if value="{{ vecAdv.hasObjects }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
-                <sc-for list="{{ vecAdv.chips }}" as="ch" hint-placeholder-count="3">
-                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#1F6FB2;background:rgba(31,111,178,0.09);border:1px solid rgba(31,111,178,0.28);border-radius:100px;padding:3px 10px">{{ ch.label }} {{ ch.count }}</span>
-                </sc-for>
-              </div>
-            </sc-if>
-            <div role="status" style="margin-top:8px;font-size:12px;color:var(--ts-text-secondary);font-weight:600">{{ vecAdv.countText }}</div>
+          <sc-if value="{{ impAdvOpen }}" hint-placeholder-val="{{ false }}">
+            <label style="display:block;margin-top:14px;font-size:12.5px;font-weight:700;color:#1E1C1A">
+              <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
+              <input type="range" min="10" max="90" step="1" value="{{ threshold }}" onInput="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
+            </label>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.6" fill="currentColor"></circle><circle cx="12" cy="6" r="1.6" fill="currentColor"></circle><circle cx="18" cy="6" r="1.6" fill="currentColor"></circle><circle cx="9" cy="12" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="6" cy="18" r="1.6" fill="currentColor"></circle><circle cx="18" cy="18" r="1.6" fill="currentColor"></circle></svg>
+                {{ t.dither }} · <b>{{ ditherState }}</b>
+              </button>
+              <button onClick="{{ toggleInvert }}" aria-pressed="{{ invertConv }}" style="{{ invStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+                {{ t.invert }} · <b>{{ invState }}</b>
+              </button>
+            </div>
+
+            <!-- Vectorize lines (Beta) — optional, experimental; now lives inside
+                 the same advanced disclosure rather than its own always-visible
+                 secondary section. -->
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid #EFE7DE">
+              <button onClick="{{ toggleVectorize }}" aria-pressed="{{ vectorizeEnabled }}" style="{{ vecStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 8L13 14L20 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="8" r="1.6" fill="currentColor"></circle><circle cx="13" cy="14" r="1.6" fill="currentColor"></circle></svg>
+                {{ t.vecToggleL }}
+              </button>
+              <p style="margin:8px 0 0;font-size:12.5px;color:var(--ts-text-secondary);line-height:1.5;max-width:520px">{{ t.vecToggleHelp }}</p>
+              <sc-if value="{{ vecAdv }}" hint-placeholder-val="{{ false }}">
+                <sc-if value="{{ vecAdv.tooFragmented }}" hint-placeholder-val="{{ false }}">
+                  <div role="alert" style="display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(218,18,13,0.06);border:1px solid var(--ts-danger);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--ts-danger)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    {{ t.vecWarnMsg }}
+                  </div>
+                </sc-if>
+                <sc-if value="{{ vecAdv.hasObjects }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px">
+                    <sc-for list="{{ vecAdv.chips }}" as="ch" hint-placeholder-count="3">
+                      <span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:#1F6FB2;background:rgba(31,111,178,0.09);border:1px solid rgba(31,111,178,0.28);border-radius:100px;padding:3px 10px">{{ ch.label }} {{ ch.count }}</span>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <div role="status" style="margin-top:8px;font-size:12px;color:var(--ts-text-secondary);font-weight:600">{{ vecAdv.countText }}</div>
+              </sc-if>
+            </div>
           </sc-if>
         </div>
       </sc-if>
@@ -1128,12 +1200,6 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             <svg width="15" height="15" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </sc-if>
-      </sc-if>
-      <sc-if value="{{ impIsCrop }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ impCropNext }}" style="height:40px;padding:0 22px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:7px" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-          {{ cropConfirmLabel }}
-          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </button>
       </sc-if>
       <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ impLoad }}" style="height:40px;padding:0 20px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
@@ -1612,7 +1678,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 class Component extends DCLogic {
   state = {
     lang: (function () { try { return new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ko'; } catch (e) { return 'ko'; } })(), tool: 'pen',
-    a11yMode: false, saveStatus: '',
+    a11yMode: false, saveStatus: '', recoverOffer: false, emptyHintDismissed: false,
     gridW: 60, gridH: 40, rev: 0,
     strokeSize: 1, eraserSize: 1, canvasHover: false, lastShape: 'line',
     pageIndex: 0, pageCount: 1, pageDrag: null, pageMenu: null,
@@ -1620,14 +1686,14 @@ class Component extends DCLogic {
     confirmKind: 'newdoc',
     cx: 8, cy: 6,
     output: '60', embossOpen: false, embossPhase: 'idle',
-    importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced',
+    importOpen: false, threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', impAdvOpen: false, impOrigOpen: false,
     impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile',
     imgReady: false, impLoading: false, impErr: '', impName: '',
     cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, cropCursor: 'move', retouchHint: false, armedPreset: null,
     cmdOpen: false, cmdPrompt: '', cmdGrid: '60', cmdPurpose: 'auto', cmdGenerating: false, cmdError: false, cmdFeatureFilter: [],
     tplOpen: false, tplGroup: 'recommended',
     confirmOpen: false,
-    connected: true, connBusy: '', connFailed: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
+    connected: true, connBusy: '', connFailed: false, dpReconnecting: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     narrOpen: false,
     brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 }, brBusy: false,
@@ -1662,6 +1728,7 @@ class Component extends DCLogic {
     this.pageAudio = {};         // pageIndex → { src, mime, bytes, durationSec, narration } (DTMA, path-reference)
     this.pageVectors = {};       // pageIndex → vectorLineObjects[] (optional, experimental — see vectorizeGrid)
     this.undoStack = []; this.redoStack = [];
+    this._dirty = false; this._sessT = null;   // session autosave / crash recovery
     this.preview = null;   // Set of idx (additive overlay)
     this.drag = null;      // {mode,x0,y0,...}
     this.zoomSteps = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 8];
@@ -1706,6 +1773,7 @@ class Component extends DCLogic {
       strokeL: '선 두께', eraserL: '지우개 크기', rowN: ['1줄', '2줄', '3줄'],
       aPage: (n, tot) => `${tot}페이지 중 ${n}페이지`, aPageAdd: (n, tot) => `${n}페이지를 추가했습니다. 총 ${tot}페이지`, aPageDel: (n, tot) => `페이지를 삭제했습니다. 현재 ${n}페이지, 총 ${tot}페이지`,
       aPageMoveUp: n => `${n}페이지를 위로 옮겼습니다.`, aPageMoveDown: n => `${n}페이지를 아래로 옮겼습니다.`, aPageFirst: '이미 첫 페이지입니다.', aPageLast: '이미 마지막 페이지입니다.', pageMoveUp: '위로 이동', pageMoveDown: '아래로 이동', pageReorder: n => `${n}페이지 순서 변경`,
+      pageDuplicate: '페이지 복제', aPageDup: (n, tot) => `${n}페이지를 복제했습니다. 총 ${tot}페이지`,
       strokeDesc: ['정밀한 1줄 선', '표준 2줄 선', '굵은 3줄 선'], eraserDesc: ['작게 지우기', '표준 크기로 지우기', '넓게 지우기'],
       quick: '빠른 작업', qClear: '모두 지우기', qInvert: '반전', qFlipH: '좌우 반전', qFlipV: '상하 반전', moreOpts: '옵션 더보기',
       createMenu: '만들기', savedStatus: '저장됨', saveStatusSaving: '저장 중…', saveStatusError: '저장 실패', shapesGroup: '도형',
@@ -1752,7 +1820,7 @@ class Component extends DCLogic {
       scToggleDot: '점 켜기·끄기', scNudge: '커서 이동', scClosePoly: '다각형 닫기', scApply: '설명·나레이션 적용', scHelp: '단축키 도움말', scEscape: '닫기·취소',
       scgTools: '도구', scgCanvas: '캔버스', scgEditing: '편집', scgView: '보기', scgApply: '적용 및 출력', kbShortcutsTitle: '키보드 단축키',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', 
-      dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
+      dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateReconnecting: 'DotPad에 재연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '전체 올리기', dpLower: '전체 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
       
@@ -1764,7 +1832,7 @@ class Component extends DCLogic {
       aTplLoaded: '템플릿을 편집기로 불러왔습니다.', aPresetArmed: '이미지 변환 프리셋이 준비되었습니다.',
       aImgNewPage: (n, tot) => `변환한 이미지를 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aCmdNewPage: (n, tot) => `명령어 초안을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`, aTplNewPage: (n, tot) => `템플릿을 ${n}페이지에 추가했습니다. 총 ${tot}페이지`,
       importTitle: '이미지 변환', original: '원본 이미지', tactilePreview: '촉각 변환 미리보기', vecViewL: '벡터화 보기 Beta', threshold: '촉각 디테일 정도', convert: '변환하여 불러오기', cancel: '취소', close: '닫기',
-      impSteps: ['가져오기', '자르기', '검토', '편집'],
+      impSteps: ['가져오기', '검토', '편집'],
       impImportTitle: '이미지로 촉각 그래픽 만들기', impImportSub: '이미지를 가져오면 주요 윤곽과 구조를 분석해 DotPad용 촉각 그래픽으로 변환합니다.',
       impDrop: '이미지를 끌어다 놓거나 파일을 선택하세요', impDropSecondary: '사진, 도표, 지도, 선화 이미지를 촉각 그래픽으로 변환할 수 있습니다.', impChooseFile: '파일 선택', impSample: '샘플 이미지로 체험하기',
       impFormats: 'PNG · JPG · SVG · 최대 10MB',
@@ -1773,7 +1841,7 @@ class Component extends DCLogic {
       impErrType: '지원하지 않는 파일 형식입니다. PNG, JPG, SVG 파일을 선택해주세요.', impErrSize: '파일이 너무 큽니다. 최대 10MB까지 지원합니다.',
       impNext: '다음', impCancel: '취소', impChooseToContinue: '이미지를 선택하면 다음 단계로 이동할 수 있습니다.',
       impCropTitle: '자르고 변환', impCropQ: '특정 영역을 먼저 자르시겠어요?',
-      impCrop: '이미지 자르기', impCropDesc: '변환할 영역을 선택합니다', impFull: '전체 이미지 사용', impFullDesc: '이미지 전체를 변환합니다',
+      impCrop: '이미지 자르기', impCropDesc: '변환할 영역을 선택합니다', impFull: '전체 이미지 사용', impFullDesc: '이미지 전체를 변환합니다', impCropShort: '자르기', impFullShort: '전체',
       impCropHint: '상자를 드래그해 이동하고, 모서리 손잡이로 크기를 조절하세요.',
       
       
@@ -1783,7 +1851,7 @@ class Component extends DCLogic {
       vecCountOf: n => '오브젝트 ' + n + '개 생성됨',
       vecTypeRect: '사각형', vecTypeEllipse: '원', vecTypePolyline: '폴리라인', vecTypeLine: '선', 
       impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impLoad: '편집기로 불러오기',
-      presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일',
+      presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일', impAdvL: '고급 설정', impShowOrig: '원본 보기',
       presetSubBalanced: '일반 사진·그림용', presetSubOutline: '아이콘·사물·도형용', presetSubDiagram: '차트·지도·선화용', presetSubDetail: '디테일 보존(점 밀도↑)',
       qSparseMsg: '점이 너무 적어 촉각으로 읽기 어려울 수 있어요. 대상에 더 가깝게 자르거나 고디테일을 사용해 보세요.',
       qDenseMsg: '점이 너무 많아 촉각으로 뭉쳐 보일 수 있어요. 깔끔한 다이어그램이나 강한 윤곽을 사용해 보세요.',
@@ -1793,7 +1861,10 @@ class Component extends DCLogic {
       impErrLoad: '이미지를 불러오지 못했어요. 10MB 이하의 PNG 또는 JPG로 다시 시도해 주세요.',
       advTests: '고급 장치 테스트', advTestsHint: '아래는 DotPad 하드웨어 점검용입니다. 일반 편집에는 필요하지 않습니다.',
       retouchHintMsg: 'AI 변환 결과입니다. 펜·지우개·채우기 등 도구로 세부를 수정하세요.',
-      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', banaPass: 'BANA 인쇄 기준을 충족합니다.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', 
+      recoverTitle: '이전 작업을 복구할까요?', recoverSub: '저장하지 않고 종료된 작업이 남아 있습니다.', recoverBtn: '복구', recoverDismissL: '새로 시작', aRecovered: '이전 작업을 복구했습니다.',
+      pagePrevL: '이전 페이지', pageNextL: '다음 페이지', pageAddMobileL: '페이지 추가',
+      emptyHintMsg: '펜으로 그리거나, 위의 만들기 메뉴에서 이미지·명령어로 시작해보세요.',
+      aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', 
       preview: 'DotPad 미리보기', sendNow: '지금 전송', sending: 'DotPad로 전송 중…', sent: '전송 완료', sentSub: 'DotPad에서 촉각 그래픽이 출력되고 있습니다.',
       errTitle: 'DotPad에 연결할 수 없습니다', errSub: '케이블 또는 블루투스 연결을 확인한 뒤 다시 시도해주세요.',
       saveTitle: '저장', saveLocL: '저장 위치', locDriveSub: '내 촉각 파일 보관함', locLibSub: '팀과 공유하는 라이브러리',
@@ -1833,6 +1904,7 @@ class Component extends DCLogic {
       strokeL: 'Stroke width', eraserL: 'Eraser size', rowN: ['1 row', '2 rows', '3 rows'],
       aPage: (n, tot) => `Page ${n} of ${tot}`, aPageAdd: (n, tot) => `Page ${n} added. ${tot} pages total`, aPageDel: (n, tot) => `Page deleted. Now on page ${n}, ${tot} pages total`,
       aPageMoveUp: n => `Page ${n} moved up.`, aPageMoveDown: n => `Page ${n} moved down.`, aPageFirst: 'Page is already first.', aPageLast: 'Page is already last.', pageMoveUp: 'Move up', pageMoveDown: 'Move down', pageReorder: n => `Reorder page ${n}`,
+      pageDuplicate: 'Duplicate page', aPageDup: (n, tot) => `Page ${n} duplicated. ${tot} pages total`,
       strokeDesc: ['Precise 1-row stroke', 'Standard 2-row stroke', 'Bold 3-row stroke'], eraserDesc: ['Small eraser size', 'Standard eraser size', 'Wide eraser size'],
       quick: 'Quick actions', qClear: 'Clear all', qInvert: 'Invert', qFlipH: 'Flip H', qFlipV: 'Flip V', moreOpts: 'More options',
       createMenu: 'Create', savedStatus: 'Saved', saveStatusSaving: 'Saving…', saveStatusError: 'Save failed', shapesGroup: 'Shapes',
@@ -1879,7 +1951,7 @@ class Component extends DCLogic {
       scToggleDot: 'Toggle dot', scNudge: 'Move cursor', scClosePoly: 'Close polygon', scApply: 'Apply description / narration', scHelp: 'Keyboard help', scEscape: 'Close / cancel',
       scgTools: 'Tools', scgCanvas: 'Canvas', scgEditing: 'Editing', scgView: 'View', scgApply: 'Apply & output', kbShortcutsTitle: 'Keyboard shortcuts',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', 
-      dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
+      dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateReconnecting: 'Reconnecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
       
@@ -1891,7 +1963,7 @@ class Component extends DCLogic {
       aTplLoaded: 'Template loaded into the editor.', aPresetArmed: 'Image-conversion preset armed.',
       aImgNewPage: (n, tot) => `Converted image added on page ${n}. ${tot} pages total`, aCmdNewPage: (n, tot) => `Command draft added on page ${n}. ${tot} pages total`, aTplNewPage: (n, tot) => `Template added on page ${n}. ${tot} pages total`,
       importTitle: 'Image conversion', original: 'Original image', tactilePreview: 'Tactile preview', vecViewL: 'Vectorized view Beta', threshold: 'Tactile detail level', convert: 'Convert & import', cancel: 'Cancel', close: 'Close',
-      impSteps: ['Import', 'Crop', 'Review', 'Edit'],
+      impSteps: ['Import', 'Review', 'Edit'],
       impImportTitle: 'Create Tactile Graphic from Image', impImportSub: 'Import an image and convert its key outlines and structure into a DotPad-ready tactile graphic.',
       impDrop: 'Drop an image here or choose a file', impDropSecondary: 'Convert photos, diagrams, maps, and line drawings into tactile graphics.', impChooseFile: 'Choose File', impSample: 'Try Sample Image',
       impFormats: 'PNG · JPG · SVG · up to 10MB',
@@ -1900,7 +1972,7 @@ class Component extends DCLogic {
       impErrType: 'Unsupported file type. Please choose a PNG, JPG, or SVG file.', impErrSize: 'File is too large. Maximum size is 10MB.',
       impNext: 'Next', impCancel: 'Cancel', impChooseToContinue: 'Choose an image to continue.',
       impCropTitle: 'Crop or convert', impCropQ: 'Do you want to crop a specific area first?',
-      impCrop: 'Crop image', impCropDesc: 'Select the area to convert', impFull: 'Use full image', impFullDesc: 'Convert the whole image',
+      impCrop: 'Crop image', impCropDesc: 'Select the area to convert', impFull: 'Use full image', impFullDesc: 'Convert the whole image', impCropShort: 'Crop', impFullShort: 'Full',
       impCropHint: 'Drag the box to move it, and use the corner handle to resize.',
       
       
@@ -1910,7 +1982,7 @@ class Component extends DCLogic {
       vecCountOf: n => n + ' object' + (n === 1 ? '' : 's') + ' generated',
       vecTypeRect: 'Rectangle', vecTypeEllipse: 'Ellipse', vecTypePolyline: 'Polyline', vecTypeLine: 'Line', 
       impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impLoad: 'Load into editor',
-      presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail',
+      presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail', impAdvL: 'Advanced settings', impShowOrig: 'Show original',
       presetSubBalanced: 'General photos & drawings', presetSubOutline: 'Icons, objects, shapes', presetSubDiagram: 'Charts, maps, line art', presetSubDetail: 'Keeps detail (denser)',
       qSparseMsg: 'This may be too sparse to read by touch. Crop closer to the subject or try High Detail.',
       qDenseMsg: 'This may be too dense for touch. Try Clean Diagram or Strong Outline.',
@@ -1920,7 +1992,10 @@ class Component extends DCLogic {
       impErrLoad: 'Couldn\u2019t load this image. Please try a PNG or JPG under 10MB.',
       advTests: 'Advanced device tests', advTestsHint: 'The controls below are for checking DotPad hardware. They are not needed for normal editing.',
       retouchHintMsg: 'This is the AI conversion result. Refine details with the Pen, Eraser, Fill and other tools.',
-      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', banaPass: 'Meets BANA print-standard minimums.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', 
+      recoverTitle: 'Restore your previous work?', recoverSub: 'Work from a session that closed without saving is still here.', recoverBtn: 'Restore', recoverDismissL: 'Start fresh', aRecovered: 'Restored your previous work.',
+      pagePrevL: 'Previous page', pageNextL: 'Next page', pageAddMobileL: 'Add page',
+      emptyHintMsg: 'Draw with the Pen, or use Create above to start from an image or a command.',
+      aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', 
       preview: 'DotPad preview', sendNow: 'Send now', sending: 'Sending to DotPad…', sent: 'Sent to DotPad', sentSub: 'Your graphic is now rendering on the DotPad.',
       errTitle: "Can't reach DotPad", errSub: 'Check the cable or Bluetooth connection and try again.',
       saveTitle: 'Save', saveLocL: 'Save to', locDriveSub: 'Your tactile file storage', locLibSub: 'Shared team library',
@@ -1973,6 +2048,108 @@ class Component extends DCLogic {
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (bits[y] && bits[y][x]) out[y * w + x] = 1;
     return out;
   }
+  // ── session autosave / crash recovery (grid-agnostic) ─────────────────────
+  // Distinct from the library (ts.library.v1, saved assets): this is a rolling
+  // snapshot of the WORKING document written to localStorage on every edit, so a
+  // refresh / tab-close / crash never silently loses unsaved work. Cells are
+  // bit-packed (1 bit/dot) → base64, which round-trips at ANY grid size (unlike
+  // the 60x40-only DTMS hex the library uses). Audio blobs are never stored (only
+  // metadata + narration/desc text); the object URL is dropped, matching the
+  // existing "audio is a deploy-path reference" model.
+  static get SESSION_KEY() { return 'ts.session.v1'; }
+  _packCells(cells) {
+    const n = cells.length, bytes = new Uint8Array((n + 7) >> 3);
+    for (let i = 0; i < n; i++) if (cells[i]) bytes[i >> 3] |= (1 << (i & 7));
+    let s = ''; for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    try { return btoa(s); } catch (e) { return ''; }
+  }
+  _unpackCells(b64, len) {
+    const out = new Uint8Array(len);
+    try { const s = atob(b64); for (let i = 0; i < len; i++) if (s.charCodeAt(i >> 3) & (1 << (i & 7))) out[i] = 1; } catch (e) {}
+    return out;
+  }
+  // Any real work worth recovering? (a dot anywhere, >1 page, or narration/desc/audio)
+  _hasContent() {
+    const pages = this.pages || [];
+    if (pages.length > 1) return true;
+    for (const p of pages) { for (let i = 0; i < p.length; i++) if (p[i]) return true; }
+    const a = this.pageAudio || {};
+    for (const k in a) { const r = a[k]; if (r && (r.narration || r.desc || r.src)) return true; }
+    return false;
+  }
+  _serializeSession() {
+    const st = this.state;
+    const audio = {};
+    const src = this.pageAudio || {};
+    for (const k in src) {
+      const r = src[k]; if (!r) continue;
+      // drop the in-memory object URL (invalid after reload); keep path + text meta
+      const { _url, ...rest } = r; audio[k] = rest;
+    }
+    return {
+      v: 1, savedAt: Date.now(),
+      gridW: st.gridW, gridH: st.gridH, output: st.output,
+      pageIndex: st.pageIndex, fileName: st.fileName || null, brailleLang: st.brailleLang,
+      pages: (this.pages || []).map((c) => this._packCells(c)),
+      audio,
+      vectors: this.pageVectors || {}
+    };
+  }
+  _saveSession() {
+    // Never clobber a snapshot the user hasn't answered the recovery prompt for.
+    if (this.state && this.state.recoverOffer) return;
+    try {
+      if (!this._hasContent()) { window.localStorage.removeItem('ts.session.v1'); return; }
+      window.localStorage.setItem('ts.session.v1', JSON.stringify(this._serializeSession()));
+    } catch (e) { /* quota / private mode - session-only, non-fatal */ }
+  }
+  _scheduleSession() { clearTimeout(this._sessT); this._sessT = setTimeout(() => this._saveSession(), 800); }
+  _loadSession() {
+    try {
+      const raw = window.localStorage.getItem('ts.session.v1');
+      if (!raw) return null;
+      const snap = JSON.parse(raw);
+      if (!snap || !Array.isArray(snap.pages) || !snap.pages.length) return null;
+      const gw = +snap.gridW || 60, gh = +snap.gridH || 40, len = gw * gh;
+      snap._pages = snap.pages.map((b64) => this._unpackCells(b64, len));
+      // recoverable = a dot anywhere, or a multi-page doc, or saved narration/desc
+      let worth = snap._pages.length > 1;
+      if (!worth) for (const p of snap._pages) { for (let i = 0; i < p.length; i++) if (p[i]) { worth = true; break; } if (worth) break; }
+      if (!worth) { const a = snap.audio || {}; for (const k in a) { const r = a[k]; if (r && (r.narration || r.desc || r.src)) { worth = true; break; } } }
+      return worth ? snap : null;
+    } catch (e) { return null; }
+  }
+  _applySession(snap) {
+    if (!snap || !snap._pages || !snap._pages.length) return;
+    const gw = +snap.gridW || 60, gh = +snap.gridH || 40;
+    this.pages = snap._pages;
+    let idx = +snap.pageIndex || 0; if (idx < 0 || idx >= this.pages.length) idx = 0;
+    this.cells = this.pages[idx];
+    this.pageAudio = (snap.audio && typeof snap.audio === 'object') ? Object.assign({}, snap.audio) : {};
+    this.pageVectors = (snap.vectors && typeof snap.vectors === 'object') ? Object.assign({}, snap.vectors) : {};
+    this.undoStack = []; this.redoStack = []; this.polyPts = []; this.preview = null;
+    this.setState({
+      gridW: gw, gridH: gh, output: snap.output || (gw === 96 ? '96' : '60'),
+      pageIndex: idx, pageCount: this.pages.length, fileName: snap.fileName || null,
+      brailleLang: snap.brailleLang || 'ko-g2', recoverOffer: false,
+      cx: 0, cy: 0, selRect: null, applyBusy: null, applyErr: null
+    });
+    this._dirty = false;              // freshly restored == matches the snapshot
+    this.queueLivePreview();
+    this.queueBraillePreview();
+    this.say(this.T().aRecovered);
+  }
+  _dismissRecover() {
+    this.setState({ recoverOffer: false });
+    try { window.localStorage.removeItem('ts.session.v1'); } catch (e) {}
+  }
+  // First-run empty-canvas hint condition, factored out for testability: true
+  // only for an untouched, single-page, unnamed document with zero dots, and
+  // only when no higher-priority banner (recovery / retouch) is showing.
+  _emptyHintOn(dots) {
+    const st = this.state;
+    return !st.recoverOffer && !st.retouchHint && !st.emptyHintDismissed && dots === 0 && st.pageCount === 1 && !st.fileName;
+  }
   // Apply a window.TW grid transform to the current page (undoable). fn(bits,w,h)→bits.
   applyGridFx(fn, sayMsg) {
     if (typeof fn !== 'function') return;
@@ -1985,7 +2162,7 @@ class Component extends DCLogic {
   }
   thickenFx(level) { const fx = window.TW && window.TW.thickenBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h, level), this.T().aThicken); }
   denoiseFx() { const fx = window.TW && window.TW.denoiseBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h), this.T().aDenoise); }
-  bump() { this.setState(s => ({ rev: s.rev + 1 })); this.queueLivePreview(); }
+  bump() { this._dirty = true; this._scheduleSession(); this.setState(s => ({ rev: s.rev + 1 })); this.queueLivePreview(); }
   say(msg) { this.setState({ announce: msg }); }
   // Safe i18n invoker: locale value may be a function, a string, or missing.
   callI18n(value, fallback, ...args) {
@@ -2421,6 +2598,7 @@ class Component extends DCLogic {
       this.setState({ output: out, cmdGenerating: false, cmdOpen: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: ctx });
     }
     this.say(this.corpusLoadMessage(result));
+    this.bump();   // new content loaded — dirty + autosave
     return true;
   }
   // Look up the full parent corpus record (all pages) by id — read-only access to
@@ -2656,10 +2834,31 @@ class Component extends DCLogic {
     if (density < 0.03) key = 'tooSparse'; else if (density > 0.40) key = 'tooDense'; else if (dots > 0 && isolated / dots > 0.25) key = 'manyIsolated';
     return { dots, density, isolated, key };
   }
+  // banaPrintCheck(cells, w, h): informational print-readiness check.
+  // FIX: this was CALLED (importAssetFile, deriveGraphicFeatures) but never
+  // defined anywhere in the file — every call threw "banaPrintCheck is not a
+  // function". In importAssetFile (inside a bare FileReader.onload, no
+  // try/catch around this point) that was an UNCAUGHT crash: loading any
+  // TGIL/asset JSON file hung forever with impLoading stuck true and no
+  // error shown. The library-save JSON auto-export and JSON export call
+  // sites happen to be wrapped in try/catch elsewhere, so those merely
+  // failed silently rather than crashing — but the pass/fail signal they
+  // depend on ("embossable") was always missing either way.
+  // IMPORTANT: this reuses convQuality()'s existing density/isolated-dot
+  // thresholds (already shipped elsewhere for conversion-quality feedback)
+  // rather than inventing new unverified numbers — it is a heuristic
+  // readability proxy, NOT a verified implementation of the full BANA 2022
+  // tactile-graphics print specification. The exact pass/fail bar should get
+  // a domain-expert review before this is treated as compliance output
+  // rather than a "does this look print-reasonable" sanity check.
+  banaPrintCheck(cells, w, h) {
+    const q = this.convQuality(cells, w, h);
+    return { pass: q.key === 'readable', key: q.key, density: q.density, isolated: q.isolated, dots: q.dots };
+  }
   presetChipStyle(sel) {
-    return { flex: '1 1 0', minWidth: 0, textAlign: 'left', padding: '9px 11px', borderRadius: 9, cursor: 'pointer',
+    return { flex: '1 1 0', minWidth: 0, textAlign: 'center', padding: '0 6px', borderRadius: 8, cursor: 'pointer',
       border: sel ? '1.5px solid #C43D00' : '1.5px solid var(--ts-border-decor)', background: sel ? 'rgba(196,61,0,0.06)' : '#fff',
-      display: 'flex', flexDirection: 'column', gap: 2, minHeight: 44 };
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minHeight: 36 };
   }
   catPattern(w, h, threshold, crop) {
     const cnv = document.createElement('canvas');
@@ -2692,7 +2891,16 @@ class Component extends DCLogic {
 
   // ---------- lifecycle ----------
   componentDidMount() {
+    // Crash recovery: if a rolling session snapshot survived a refresh/close/crash,
+    // offer to restore it. Read BEFORE the first bump() so the debounced autosave
+    // can't overwrite the snapshot with the empty default document.
+    try { this._recoverSnap = this._loadSession(); } catch (e) { this._recoverSnap = null; }
+    if (this._recoverSnap) this.setState({ recoverOffer: true });
     this.bump();
+    // Warn before leaving with unsaved work (autosave is the real safety net;
+    // this is the secondary guard). Skipped when there is nothing worth keeping.
+    this._beforeUnload = (e) => { if (this._dirty && this._hasContent()) { e.preventDefault(); e.returnValue = ''; return ''; } };
+    window.addEventListener('beforeunload', this._beforeUnload);
     this._key = (e) => this.onKey(e);
     window.addEventListener('keydown', this._key);
     // 닷패드 물리 화살표(패닝) 키 → 페이지 이동. 한 번만 등록하면 재연결과
@@ -2715,13 +2923,17 @@ class Component extends DCLogic {
     })();
     this._onLocale = (e) => this.onParentLocale(e);
     window.addEventListener('message', this._onLocale);
+    // DotPad connection health watch — no-ops instantly when no real device
+    // is present (dpReal() returns null), so this costs nothing for anyone
+    // without hardware attached.
+    this._connWatchT = setInterval(() => this._connWatch(), 3000);
     this.drawAll();
     this.heroSetup();
     this.heroReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._cmdT); clearTimeout(this._connT); clearTimeout(this._embT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearInterval(this._connWatchT); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); this._restorePageFocus(); }
   // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
   onParentLocale(e) {
@@ -2748,21 +2960,28 @@ class Component extends DCLogic {
     this.drawImp();
     this.drawEmboss();
   }
-  drawEmboss() {
-    const cv = this.embossRef.current; if (!cv || !this.state.embossOpen) return;
+  // Shared A4 paper layout renderer: draws the current page's dots onto ANY
+  // canvas at ANY width (margin/dot-size scale proportionally to PW), so the
+  // small on-screen preview (drawEmboss, PW=320) and a print-resolution export
+  // (exportEmbossPNG, PW=2480 ≈ A4 @ 300dpi) render the IDENTICAL layout —
+  // what you preview is exactly what gets exported, just at higher density.
+  _renderEmbossPage(cv, PW) {
     const { gridW: w, gridH: h } = this.state;
-    // A4 paper preview: portrait sheet, charcoal raised dots on paper white
-    const PW = 320, PH = Math.round(PW * 297 / 210);
+    const PH = Math.round(PW * 297 / 210);
     cv.width = PW; cv.height = PH;
     const g = cv.getContext('2d');
     g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, PW, PH);
-    const margin = 22;
+    const margin = PW * (22 / 320);   // same proportion the on-screen preview used
     const s = Math.min((PW - 2 * margin) / w, (PH - 2 * margin) / h);
     const offX = (PW - w * s) / 2, offY = (PH - h * s) / 2;
     g.fillStyle = '#1E1C1A';
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (this.cells[y * w + x]) {
       g.beginPath(); g.arc(offX + (x + 0.5) * s, offY + (y + 0.5) * s, Math.max(0.9, s * 0.34), 0, Math.PI * 2); g.fill();
     }
+  }
+  drawEmboss() {
+    const cv = this.embossRef.current; if (!cv || !this.state.embossOpen) return;
+    this._renderEmbossPage(cv, 320);
   }
   drawMain() {
     const cv = this.canvasRef.current; if (!cv) return;
@@ -3182,7 +3401,7 @@ class Component extends DCLogic {
     // original image with optional crop overlay
     const oc = this.impOrigRef.current;
     if (oc && st.importOpen) {
-      this.drawSourcePreview(oc, st, st.impStep === 'crop');
+      this.drawSourcePreview(oc, st, st.impStep === 'review' && st.cropChoice === 'crop');
     }
   }
 
@@ -3258,6 +3477,11 @@ class Component extends DCLogic {
   }
   onDown(e) {
     if (e.button !== undefined && e.button !== 0) return; // middle/right click: not a drawing gesture (middle = pan, see canvasPanDown)
+    // A second pointer touching down while a drag is already in progress
+    // (classic case: a resting palm while drawing with a stylus, or an
+    // accidental second finger) must not hijack/reset it — ignore until the
+    // active pointer lifts (onUp clears this.drag).
+    if (this.drag && e.pointerId !== this.drag.pointerId) return;
     e.preventDefault();
     this.canvasRef.current.focus();
     const [x, y] = this.evCell(e), t = this.T(), tool = this.state.tool;
@@ -3269,13 +3493,13 @@ class Component extends DCLogic {
       const v = tool === 'pen' ? 1 : 0;
       const size = this.strokeSizeFor(tool);
       this.brushCb((px, py) => { if (this.inb(px, py)) this.cells[this.idx(px, py)] = v; }, size)(x, y);
-      this.drag = { mode: 'paint', v, size }; this.lastPaint = [x, y];
+      this.drag = { mode: 'paint', v, size, pointerId: e.pointerId }; this.lastPaint = [x, y];
       this.setState({ cx: x, cy: y });
       this.say(v ? t.aDotOn(x, y) : t.aDotOff(x, y));
       return;
     }
     if (tool === 'line' || tool === 'rect' || tool === 'ellipse') {
-      this.drag = { mode: 'shape', x0: x, y0: y }; this.preview = new Set([this.idx(x, y)]);
+      this.drag = { mode: 'shape', x0: x, y0: y, pointerId: e.pointerId }; this.preview = new Set([this.idx(x, y)]);
       this.setState({ cx: x, cy: y });
       return;
     }
@@ -3294,20 +3518,22 @@ class Component extends DCLogic {
     if (tool === 'fill') {
       this.snapshot(); this.flood(x, y);
       this.say(t.aFill); this.setState({ cx: x, cy: y });
+      this.bump();   // flood() doesn't bump itself — content change, dirty + autosave
       return;
     }
     if (tool === 'select') {
       const sel = this.state.selRect;
       if (sel && x >= sel.x0 && x <= sel.x1 && y >= sel.y0 && y <= sel.y1) {
-        this.drag = { mode: 'move', sx: x, sy: y, base: this.cells.slice(), sel: { ...sel } };
+        this.drag = { mode: 'move', sx: x, sy: y, base: this.cells.slice(), sel: { ...sel }, pointerId: e.pointerId };
       } else {
-        this.drag = { mode: 'sel', x0: x, y0: y };
+        this.drag = { mode: 'sel', x0: x, y0: y, pointerId: e.pointerId };
         this.setState({ selRect: { x0: x, y0: y, x1: x, y1: y } });
       }
       this.setState({ cx: x, cy: y });
     }
   }
   onMove(e) {
+    if (this.drag && e.pointerId !== this.drag.pointerId) return;
     const [x, y] = this.evCell(e);
     if (x !== this.state.cx || y !== this.state.cy) this.setState({ cx: x, cy: y });
     const d = this.drag; if (!d) return;
@@ -3334,6 +3560,7 @@ class Component extends DCLogic {
     }
   }
   onUp(e) {
+    if (this.drag && e.pointerId !== this.drag.pointerId) return;
     const d = this.drag; this.drag = null;
     const t = this.T();
     if (!d) return;
@@ -3567,10 +3794,14 @@ class Component extends DCLogic {
     if (i === this.state.pageIndex) return;
     this.undoStack = []; this.redoStack = [];
     this.cells = this.pages[i];
-    this.polyPts = []; this.preview = null;
+    this.polyPts = []; this.preview = null; this.drag = null;
     // Transient Apply state is per-page; drop it so the incoming page derives
     // its own status (saved/unsaved) from its own model, and refresh preview.
     this.setState({ pageIndex: i, pageCount: n, cx: 0, cy: 0, selRect: null, applyBusy: null, applyErr: null, brBusy: false });
+    // Page navigation alone isn't new work — don't mark dirty / arm the
+    // beforeunload warning — but the snapshot's pageIndex should still track
+    // where the user is, so a recovered session resumes on the right page.
+    this._scheduleSession();
     this.queueBraillePreview();
     this.queueLivePreview();
     this.queueBraillePreview(); // 페이지마다 설명/나레이션이 다르므로 갱신
@@ -3583,12 +3814,39 @@ class Component extends DCLogic {
     this._reindexPageAudioInsert(at);
     this._reindexPageVectorsInsert(at);
     this.undoStack = []; this.redoStack = [];
-    this.cells = blank; this.polyPts = []; this.preview = null;
+    this.cells = blank; this.polyPts = []; this.preview = null; this.drag = null;
     const n = this.pages.length;
     this.setState({ pageIndex: at, pageCount: n, cx: 0, cy: 0, selRect: null });
-    this.queueLivePreview();
+    this.bump();   // structural change (page added) — dirty + autosave
     this.queueBraillePreview();
     this.say(this.T().aPageAdd(at + 1, n));
+  }
+  // Duplicate page idx: same dots, narration/description, and vector-line
+  // objects (if any), inserted immediately after it. Reuses the same
+  // insert-reindex helpers as addPage() to shift every OTHER page's
+  // audio/vector metadata out of the way, then carries the SOURCE page's own
+  // metadata into the new slot. A shallow reference copy is safe here: every
+  // mutation path in this file replaces a page's record via Object.assign
+  // rather than editing it in place (see setPageNarration etc.), so the two
+  // pages briefly sharing one record object never causes cross-page bleed —
+  // the first edit to either page forks its own copy.
+  duplicatePage(idx) {
+    const n0 = this.pages.length;
+    if (idx < 0 || idx >= n0) return;
+    const at = idx + 1;
+    const copy = this.pages[idx].slice();
+    this.pages.splice(at, 0, copy);
+    this._reindexPageAudioInsert(at);
+    this._reindexPageVectorsInsert(at);
+    if (this.pageAudio[idx]) this.pageAudio[at] = this.pageAudio[idx];
+    if (this.pageVectors[idx]) this.pageVectors[at] = this.pageVectors[idx];
+    this.undoStack = []; this.redoStack = [];
+    this.cells = copy; this.polyPts = []; this.preview = null; this.drag = null;
+    const n = this.pages.length;
+    this.setState({ pageIndex: at, pageCount: n, cx: 0, cy: 0, selRect: null });
+    this.bump();   // structural change (page duplicated) — dirty + autosave
+    this.queueBraillePreview();
+    this.say(this.T().aPageDup(at + 1, n));
   }
   deletePageAt(idx) {
     if (this.pages.length <= 1) return;
@@ -3602,7 +3860,7 @@ class Component extends DCLogic {
     if (wasActive) {
       ni = Math.max(0, Math.min(n - 1, idx));
       this.undoStack = []; this.redoStack = [];
-      this.cells = this.pages[ni]; this.polyPts = []; this.preview = null;
+      this.cells = this.pages[ni]; this.polyPts = []; this.preview = null; this.drag = null;
       patch.cx = 0; patch.cy = 0; patch.selRect = null;
     } else {
       // a non-active page was removed: the active page's own buffer/undo
@@ -3611,7 +3869,7 @@ class Component extends DCLogic {
     }
     patch.pageIndex = ni;
     this.setState(patch);
-    this.queueLivePreview();
+    this.bump();   // structural change (page removed) — dirty + autosave
     this.queueBraillePreview();
     this.say(this.T().aPageDel(ni + 1, n));
   }
@@ -3637,7 +3895,7 @@ class Component extends DCLogic {
     const ni = this.pages.indexOf(active);
     this.cells = this.pages[ni];
     this.setState({ pageIndex: ni, pageCount: n });
-    this.queueLivePreview();
+    this.bump();   // structural change (page reordered) — dirty + autosave
     this.queueBraillePreview();
     return true;
   }
@@ -3752,13 +4010,15 @@ class Component extends DCLogic {
     if (!this.undoStack.length) return;
     this.redoStack.push(this._histEntry());
     this._restoreHistEntry(this.undoStack.pop());
-    this.say(this.T().aUndo); this.bump();
+    const msg = this.T().aUndo;
+    this.say(msg); this.toastMsg(msg); this.bump();
   }
   redo() {
     if (!this.redoStack.length) return;
     this.undoStack.push(this._histEntry());
     this._restoreHistEntry(this.redoStack.pop());
-    this.say(this.T().aRedo); this.bump();
+    const msg = this.T().aRedo;
+    this.say(msg); this.toastMsg(msg); this.bump();
   }
   setGrid(w, h) {
     if (w === this.state.gridW && h === this.state.gridH) return;
@@ -3772,7 +4032,7 @@ class Component extends DCLogic {
     });
     this.cells = this.pages[this.state.pageIndex]; this.undoStack = []; this.redoStack = [];
     this.setState({ gridW: w, gridH: h, cx: 0, cy: 0, selRect: null });
-    this.queueLivePreview();
+    this.bump();   // structural change (grid resized, all pages resampled) — dirty + autosave
     this.say(this.T().aGrid(w + '×' + h));
   }
   // output targets: DotPad grids + A4 embossing paper
@@ -3866,7 +4126,7 @@ class Component extends DCLogic {
     clearTimeout(this._readT);
     this._uploadSeq = (this._uploadSeq || 0) + 1;
     this._srcData = null; this._srcCanvas = null; this._srcW = 0; this._srcH = 0; this._srcFitBox = null;
-    this.setState({ impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile', threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
+    this.setState({ impStep: 'import', cropChoice: 'full', vectorizeEnabled: false, vecViewTab: 'tactile', threshold: 50, dither: false, invertConv: false, convPreset: 'balanced', impAdvOpen: false, impOrigOpen: false, cropRect: { x: 0.14, y: 0.12, w: 0.60, h: 0.66 }, imgReady: false, impLoading: false, impErr: '', impName: '' });
   }
   // decode an ImageBitmap/Image into an offscreen canvas and capture its pixels for conversion
   _captureSource(bmp, w, h) {
@@ -3926,8 +4186,12 @@ class Component extends DCLogic {
   }
   // guard destructive new-document actions when the canvas has content
   guardNewDoc(fn) {
-    let dots = 0; for (let i = 0; i < this.cells.length; i++) dots += this.cells[i];
-    if (dots > 0) { this._pendingDoc = fn; this.setState({ confirmOpen: true, confirmKind: 'newdoc' }); }
+    // Was: only checked the CURRENT page's dots. A multi-page document whose
+    // active page happened to be blank (e.g. a freshly-added page, or after
+    // navigating away from the drawn page) would then be replaced with zero
+    // confirmation, silently discarding every OTHER page. _hasContent() checks
+    // the whole document (all pages, plus any narration/desc/audio) instead.
+    if (this._hasContent()) { this._pendingDoc = fn; this.setState({ confirmOpen: true, confirmKind: 'newdoc' }); }
     else fn();
   }
   loadDoc(cells, name) {
@@ -3935,6 +4199,7 @@ class Component extends DCLogic {
     this.undoStack = []; this.redoStack = [];
     this.setState({ importOpen: false, tplOpen: false, cmdOpen: false, confirmOpen: false, fileName: name, sendPhase: 'idle', pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, corpusCtx: null });
     this.queueLivePreview();
+    this.bump();   // new document loaded — dirty + autosave
   }
   // ── TGIL / library asset import (DTMS JSON or schema-v1 asset) ─────────────
   // Reads a downloaded tactile-graphic file and loads its 60×40 pages into the
@@ -3996,6 +4261,7 @@ class Component extends DCLogic {
       this.queueLivePreview();
       this.queueBraillePreview();
       this.say(this.callI18n(t.aAssetLoaded, '', this.pages.length) + ' ' + banaMsg);
+      this.bump();   // new document loaded — dirty + autosave
     };
     this.setState({ impLoading: true, impErr: '' });
     reader.readAsText(file);
@@ -4047,8 +4313,12 @@ class Component extends DCLogic {
     if (!prompt) { this.setState({ cmdError: true }); this.say(t.cmdEnterFirst); return; }
     this.setState({ cmdError: false, cmdGenerating: true });
     const o = this.outputDef(st.cmdGrid), gw = o.gw, gh = o.gh, mode = st.cmdApply || 'current';
-    clearTimeout(this._cmdT);
-    this._cmdT = setTimeout(() => {
+    // Runs synchronously: corpus lookup and local pattern-fill are both instant
+    // local computation, so there's no real async work to wait on. An earlier
+    // version wrapped this in an artificial 700ms delay to feel like
+    // "generation" — removed, since manufacturing a delay for work that's
+    // actually instant sits oddly next to the honest "v1 · not real AI" label.
+    {
       // Corpus first: a CONFIDENT hit (title/tag/category match) seeds the real
       // DTMS graphic. Failing that, Stage 5 lets a STRONG page-content match on the
       // top deterministic result (page-label / desc / braille, validated) load its
@@ -4076,6 +4346,7 @@ class Component extends DCLogic {
         this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, fileName: name, cx: 0, cy: 0, selRect: null, corpusCtx: null });
         this.say(intent ? t.aCmdOk : t.aCmdFallback);
       }
+      this.bump();   // new content loaded — dirty + autosave
       if (!intent) {
         // Optional recall aid: if the corpus has near candidates, suggest them
         // (visual toast only — does NOT replace the generated draft on canvas).
@@ -4087,7 +4358,38 @@ class Component extends DCLogic {
           this.toastMsg(t.aCmdNoLib);
         }
       }
-    }, 700);
+    }
+  }
+  // ── DotPad connection health watch (real hardware only) ──────────────────
+  // vendor/tw/dotpad.js already retries a dropped BLE link silently inside
+  // ensure()/output() and on tab-visibility return, but never surfaces that a
+  // drop happened or a retry is in flight — from the app side, the UI simply
+  // keeps showing its last-known "connected" state until the NEXT deliberate
+  // action (opening the send dialog) happens to re-check it via
+  // syncRealConnection(). This polls the real link every ~3s while
+  // state.connected is true, so a drop is caught and shown promptly, then
+  // retries via the wrapper's own ensure() — which reconnects to the
+  // ALREADY-PAIRED device object, so (unlike DP.connect(), which opens a
+  // fresh device picker) it needs no new user gesture and is safe to run
+  // unattended on a timer.
+  _connWatch() {
+    const DP = this.dpReal();
+    if (!DP || !this.state.connected || this.state.connBusy || this.state.dpReconnecting) return;
+    if (DP.gattOk()) return;   // still physically connected — nothing to do
+    const t = this.T();
+    this.setState({ connected: false, dpReconnecting: true });
+    this.say(t.aConnOff);
+    DP.ensure(true).then(ok => {
+      this.setState(s => ({
+        dpReconnecting: false, connected: ok,
+        sendPhase: s.dotpadOpen ? (ok ? 'idle' : 'error') : s.sendPhase
+      }));
+      this.say(ok ? t.aConnOn : t.aConnFailed);
+      if (ok && this.state.livePreview) this.queueLivePreview(true, true);
+    }).catch(() => {
+      this.setState(s => ({ dpReconnecting: false, connected: false, sendPhase: s.dotpadOpen ? 'error' : s.sendPhase }));
+      this.say(t.aConnFailed);
+    });
   }
   syncRealConnection() {
     const DP = this.dpReal();
@@ -4166,6 +4468,31 @@ class Component extends DCLogic {
       if (this.cells[y * w + x]) { g.beginPath(); g.arc(pad + x * cell + cell / 2, pad + y * cell + cell / 2, cell * 0.42, 0, Math.PI * 2); g.fill(); }
     }
     cnv.toBlob((blob) => { if (blob && TW && TW.downloadBlob) TW.downloadBlob(blob, TW.safeName(name || 'preview', 'png')); }, 'image/png');
+  }
+  // Real "export for embossing": renders the SAME A4 paper layout as the
+  // on-screen preview (_renderEmbossPage), but on an offscreen canvas at
+  // print resolution (2480×3508 ≈ A4 @ 300dpi) instead of the small preview
+  // size, then downloads it as a PNG. Returns a promise resolving to whether
+  // a file was actually produced, so the caller can show a real error state
+  // instead of a fake "done" when TW/downloadBlob isn't available.
+  exportEmbossPNG(name) {
+    const TW = window.TW;
+    if (!TW || !TW.downloadBlob || !TW.safeName) return Promise.resolve(false);
+    let cnv;
+    try {
+      cnv = document.createElement('canvas');
+      this._renderEmbossPage(cnv, 2480);
+    } catch (e) { return Promise.resolve(false); }
+    return new Promise((resolve) => {
+      try {
+        cnv.toBlob((blob) => {
+          try {
+            if (blob) { TW.downloadBlob(blob, TW.safeName(name || 'emboss', 'png')); resolve(true); }
+            else resolve(false);
+          } catch (e) { resolve(false); }
+        }, 'image/png');
+      } catch (e) { resolve(false); }
+    });
   }
   queueLivePreview(immediate, force) {
     clearTimeout(this._liveT);
@@ -4381,6 +4708,13 @@ class Component extends DCLogic {
     if (this.state.saveLoc === 'library') { try { this.exportLibraryAsset(name); } catch (e) { ok = false; } }
     this.say(this.state.saveLoc === 'drive' ? t.tSavedDrive : t.tSavedLib);
     this._flashSaveStatus(ok ? 'saved' : 'error');
+    // The document is now durably saved (Drive/Library) — this supersedes the
+    // rolling crash-recovery snapshot. Clear dirty state, cancel any pending
+    // debounced autosave, and drop the snapshot so a later refresh doesn't
+    // offer to "restore" work that's already saved.
+    this._dirty = false;
+    clearTimeout(this._sessT);
+    try { window.localStorage.removeItem('ts.session.v1'); } catch (e) {}
   }
   // Top-bar save indicator is meaningful-state-only: a transient "saved" that
   // auto-clears, or a sticky "error" until the next save attempt.
@@ -4393,20 +4727,6 @@ class Component extends DCLogic {
   // Every page's graphic is DTMS hex from the byte-identical encoder.
   // Derive TGIL-style device flags from the graphic itself (not hand-set), so
   // filters/search stay honest. Judged on the first page.
-  // BANA print-standard minimums — informational, pin-grid approximation.
-  // Reuses convQuality's metrics (single source of truth): an embossable page
-  // must not be empty, must not exceed emboss density limits, and must not be
-  // dominated by isolated single dots (below BANA's minimum distinct-element
-  // size, they don't emboss legibly). Callers consume `pass` today; the metric
-  // fields feed the emboss-export detail view (TGIL integration stage 2).
-  banaPrintCheck(cells, w, h) {
-    const q = this.convQuality(cells, w, h);
-    const issues = [];
-    if (!q.dots) issues.push('empty');
-    if (q.density > 0.40) issues.push('tooDense');
-    if (q.dots > 0 && q.isolated / q.dots > 0.25) issues.push('manyIsolated');
-    return { pass: issues.length === 0, issues, dots: q.dots, density: q.density, isolated: q.isolated };
-  }
   //  · dotpadCompatible: renders on a DotPad grid (native DTMS specs)
   //  · dotpadOptimized : reads well on-screen (convQuality 'readable')
   //  · embossable      : meets BANA print minimums (banaPrintCheck)
@@ -4819,6 +5139,7 @@ class Component extends DCLogic {
     this.setState({ output: out, gridW: gw, gridH: gh, pageIndex: 0, pageCount: 1, cx: 0, cy: 0, selRect: null, fileName: name, sendPhase: 'idle', corpusCtx: null });
     this.queueLivePreview();
     this.say(this._readyMsg());
+    this.bump();   // new document loaded — dirty + autosave
   }
   sendCard(kind, gw, gh, cells, name) {
     this.openCard(kind, gw, gh, cells, name);
@@ -4833,6 +5154,7 @@ class Component extends DCLogic {
     const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
+    const mobilePagerBtn = en => ({ width: 44, height: 44, flex: 'none', border: 'none', borderRadius: 100, background: 'transparent', color: '#1E1C1A', display: 'grid', placeItems: 'center', cursor: en ? 'pointer' : 'not-allowed', opacity: en ? 1 : 0.35 });
     const pinBtn = kind => ({ minWidth: 0, height: 58, padding: '0 4px', borderRadius: 11, cursor: st.connected ? 'pointer' : 'not-allowed', fontWeight: 600, fontSize: 12, whiteSpace: 'nowrap', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, border: '1px solid ' + (st.pinFx === kind ? 'var(--ts-primary)' : 'var(--ts-border-decor)'), background: st.pinFx === kind ? 'rgba(var(--ts-primary-rgb),0.08)' : '#FBF8F4', color: st.connected ? (st.pinFx === kind ? '#B93E15' : '#1E1C1A') : '#B7AFA4', opacity: st.connected ? 1 : 0.6 });
     const locCard = on => ({ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 4, padding: '14px 16px', borderRadius: 8, cursor: 'pointer', background: on ? 'rgba(var(--ts-primary-rgb),0.06)' : '#fff', border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', color: '#1E1C1A' });
     const pill2 = on => ({ height: 34, padding: '0 14px', borderRadius: 8, border: on ? '1px solid var(--ts-primary)' : '1px solid var(--ts-border-decor)', background: on ? 'rgba(var(--ts-primary-rgb),0.08)' : '#fff', color: on ? '#B93E15' : 'var(--ts-text-secondary)', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 });
@@ -4956,20 +5278,21 @@ class Component extends DCLogic {
       };
     });
 
-    const impIdx = ['import', 'crop', 'review', 'edit'].indexOf(st.impStep);
+    const impIdx = ['import', 'review', 'edit'].indexOf(st.impStep);
     const cellVal = this.cells[this.idx(st.cx, st.cy)];
     let dots = 0; for (let i = 0; i < this.cells.length; i++) dots += this.cells[i];
     const phase = st.sendPhase;
     // Unified DotPad connection flow (right pane): derive a single phase from the
     // existing connection/send state — no new state is introduced.
     const dpFlow = st.connBusy ? 'connecting'
+      : st.dpReconnecting ? 'reconnecting'
       : st.sendPhase === 'sending' ? 'sending'
       : st.connFailed ? 'error'
       : st.sendPhase === 'error' ? 'error'
       : !st.connected ? 'disconnected'
       : st.sendPhase === 'done' ? 'sent'
       : 'connected';
-    const dpTone = (dpFlow === 'connected' || dpFlow === 'sent') ? 'ok' : (dpFlow === 'connecting' || dpFlow === 'sending') ? 'busy' : dpFlow === 'error' ? 'err' : 'off';
+    const dpTone = (dpFlow === 'connected' || dpFlow === 'sent') ? 'ok' : (dpFlow === 'connecting' || dpFlow === 'reconnecting' || dpFlow === 'sending') ? 'busy' : dpFlow === 'error' ? 'err' : 'off';
     const dpToneColor = dpTone === 'ok' ? '#0B7500' : dpTone === 'busy' ? '#8A5400' : dpTone === 'err' ? 'var(--ts-danger)' : 'var(--ts-text-secondary)';
     const dpToneBg = dpTone === 'ok' ? 'rgba(11,136,0,0.10)' : dpTone === 'busy' ? 'rgba(217,135,16,0.10)' : dpTone === 'err' ? 'rgba(218,18,13,0.07)' : 'rgba(140,131,119,0.08)';
     const dpBtnPrimary = { height: 38, border: 'none', borderRadius: 8, background: 'var(--ts-primary)', color: '#fff', fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', width: '100%', boxSizing: 'border-box' };
@@ -5110,13 +5433,13 @@ class Component extends DCLogic {
       narrCaretStyle: { transition: 'transform 0.15s ease', transform: st.narrOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
       // Unified DotPad connection section (right pane) — reuses connectDot/disconnectDot/send state.
       dpPhaseDisconnected: dpFlow === 'disconnected',
-      dpPhaseConnecting: dpFlow === 'connecting',
+      dpPhaseConnecting: dpFlow === 'connecting' || dpFlow === 'reconnecting',
       dpPhaseSending: dpFlow === 'sending',
       dpPhaseError: dpFlow === 'error',
       dpPhaseNotError: dpFlow !== 'error',
       dpShowReadyActions: dpFlow === 'connected' || dpFlow === 'sent',
       dpErrorWhileConnected: dpFlow === 'error' && st.connected,
-      dpConnStatusText: dpFlow === 'connecting' ? t.dpStateConnecting : dpFlow === 'sending' ? t.dpStateSending : dpFlow === 'sent' ? t.dpStateSent : dpFlow === 'error' ? t.dpStateError : dpFlow === 'disconnected' ? t.dpStateDisconnected : t.dpStateConnected,
+      dpConnStatusText: dpFlow === 'connecting' ? t.dpStateConnecting : dpFlow === 'reconnecting' ? t.dpStateReconnecting : dpFlow === 'sending' ? t.dpStateSending : dpFlow === 'sent' ? t.dpStateSent : dpFlow === 'error' ? t.dpStateError : dpFlow === 'disconnected' ? t.dpStateDisconnected : t.dpStateConnected,
       dpConnStatusStyle: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, borderRadius: 8, padding: '8px 10px', lineHeight: 1.35, background: dpToneBg, color: dpToneColor },
       dpConnStatusDotStyle: { width: 8, height: 8, borderRadius: 100, flex: 'none', display: 'inline-block', background: dpToneColor, animation: dpTone === 'busy' ? 'tsPulse 1.2s infinite' : 'none' },
       dpPrimaryBtnStyle: dpBtnPrimary,
@@ -5153,9 +5476,13 @@ class Component extends DCLogic {
       embossIdle: st.embossPhase === 'idle', embossExporting: st.embossPhase === 'exporting', embossDone: st.embossPhase === 'done',
       embossRef: this.embossRef,
       doEmboss: () => {
+        const name = st.fileName || t.untitled;
         this.setState({ embossPhase: 'exporting' });
-        clearTimeout(this._embT);
-        this._embT = setTimeout(() => { this.setState({ embossPhase: 'done' }); this.say(t.embossReadyMsg); }, 1400);
+        this.exportEmbossPNG(name).then(ok => {
+          this.setState({ embossPhase: ok ? 'done' : 'idle' });
+          if (ok) this.say(t.embossReadyMsg);
+          else this.toastMsg(t.aExportUnavail || 'Export unavailable');
+        });
       },
       exportGroups: [
         { title: t.exportOriginal, sub: t.exportOriginalSub, items: [
@@ -5313,8 +5640,9 @@ class Component extends DCLogic {
           upDisabled: !canUp, downDisabled: !canDown,
           moveUp: () => { this.setState({ pageMenu: null }); this.movePageStep(i, -1); },
           moveDown: () => { this.setState({ pageMenu: null }); this.movePageStep(i, 1); },
+          duplicate: () => { this.setState({ pageMenu: null }); this.duplicatePage(i); },
           menuStyle: 'position:absolute;top:34px;left:6px;min-width:150px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:10px;box-shadow:0 8px 8px -4px rgba(16,24,40,0.06),0 20px 24px -4px rgba(16,24,40,0.14);padding:4px;display:flex;flex-direction:column;gap:2px;z-index:20;animation:tsFly 0.12s ease-out',
-          menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown),
+          menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown), menuDupStyle: menuItem(true),
           aria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (sel ? (st.lang === 'ko' ? ' (현재)' : ' (current)') : ''),
           label: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1),
           style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:10px;cursor:pointer;text-align:left;'
@@ -5382,8 +5710,8 @@ class Component extends DCLogic {
           },
           labelStyle: { fontSize: 12.5, fontWeight: state === 'current' ? 800 : 600, color: state === 'todo' ? 'var(--ts-text-secondary)' : '#1E1C1A', whiteSpace: 'nowrap' } };
       }),
-      impIsImport: st.impStep === 'import', impIsCrop: st.impStep === 'crop', impIsReview: st.impStep === 'review',
-      impHeaderTitle: st.impStep === 'import' ? t.impImportTitle : st.impStep === 'crop' ? t.impCropTitle : t.impReviewTitle,
+      impIsImport: st.impStep === 'import', impIsReview: st.impStep === 'review',
+      impHeaderTitle: st.impStep === 'import' ? t.impImportTitle : t.impReviewTitle,
       impProgressLabel: (typeof t.impStepOf === 'function' ? t.impStepOf(impIdx + 1) : ('Step ' + (impIdx + 1) + ' / 5')) + ' · ' + ((t.impSteps || [])[impIdx] || ''),
       impBackLabel: st.impStep === 'import' ? t.impCancel : t.impBack,
       // step 1 upload
@@ -5395,6 +5723,13 @@ class Component extends DCLogic {
       impErr: !!st.impErr, impErrMsg: st.impErr === 'type' ? t.impErrType : st.impErr === 'size' ? t.impErrSize : st.impErr === 'load' ? t.impErrLoad : st.impErr === 'assetFormat' ? t.aAssetBadFmt : '',
       convPreset: st.convPreset,
       presetLabel: t.presetL,
+      impAdvOpen: st.impAdvOpen,
+      toggleImpAdv: () => this.setState(x => ({ impAdvOpen: !x.impAdvOpen })),
+      impAdvCaret: st.impAdvOpen ? '90deg' : '0deg',
+      origPreviewOpen: st.impOrigOpen || st.cropChoice === 'crop',
+      origPreviewDisplay: (st.impOrigOpen || st.cropChoice === 'crop') ? 'block' : 'none',
+      reviewPreviewGridStyle: (st.impOrigOpen || st.cropChoice === 'crop') ? 'display:grid;grid-template-columns:1fr 1fr;gap:16px' : 'display:grid;grid-template-columns:minmax(0,1fr);gap:0',
+      toggleOrigPreview: () => this.setState(x => ({ impOrigOpen: !x.impOrigOpen })),
       convPresets: [
         { k: 'balanced', label: t.presetBalanced, sub: t.presetSubBalanced },
         { k: 'outline', label: t.presetOutline, sub: t.presetSubOutline },
@@ -5457,21 +5792,19 @@ class Component extends DCLogic {
       onDropZoneKey: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (this.fileRef.current) this.fileRef.current.click(); } },
       onDropOver: e => { e.preventDefault(); },
       onDropZone: e => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; this.handleFile(f); },
-      impStep1Next: () => { if (st.imgReady) this.setState({ impStep: 'crop' }); },
+      impStep1Next: () => { if (st.imgReady) this.setState({ impStep: 'review' }); },
       // crop choice
       cropIsCrop: st.cropChoice === 'crop', cropIsFull: st.cropChoice === 'full',
-      pickCropCrop: () => this.setState({ cropChoice: 'crop' }),
+      pickCropCrop: () => this.setState({ cropChoice: 'crop', impOrigOpen: true }),
       pickCropFull: () => this.setState({ cropChoice: 'full' }),
-      cropCardStyle: locCard(st.cropChoice === 'crop'), fullCardStyle: locCard(st.cropChoice === 'full'),
+      cropFullSegStyle: seg(st.cropChoice === 'full'), cropCropSegStyle: seg(st.cropChoice === 'crop'),
       cropRef: this.cropRef,
       cropDown: e => this.cropDown(e), cropMove: e => this.cropMove(e), cropUp: () => this.cropUp(),
       cropCursor: st.cropChoice === 'crop' ? (st.cropCursor || 'move') : 'default',
       // conversion state
       // step navigation
-      impPickSample: () => this.setState({ impStep: 'crop', fileName: st.fileName ?? (st.lang === 'ko' ? '고양이' : 'Cat') }),
-      impCropNext: () => this.setState({ impStep: 'review' }),
       impBack: () => {
-        const order = ['import', 'crop', 'review'];
+        const order = ['import', 'review'];
         const i = order.indexOf(st.impStep);
         if (i <= 0) return this.setState({ importOpen: false });
         this.setState({ impStep: order[i - 1] });
@@ -5493,6 +5826,31 @@ class Component extends DCLogic {
       impApplyBtnLabel: st.impApply === 'new' ? t.applyNewPage : st.impApply === 'replace' ? t.applyReplace : t.applyMerge,
       retouchHint: st.retouchHint,
       dismissRetouch: () => this.setState({ retouchHint: false }),
+      // session crash-recovery offer
+      recoverOffer: st.recoverOffer,
+      doRecover: () => this._applySession(this._recoverSnap),
+      dismissRecover: () => this._dismissRecover(),
+      // first-run empty-canvas hint: a fresh, untouched, single-page document
+      // (no dots, no fileName, no corpus context). Naturally clears itself the
+      // moment the user places a dot, adds a page, or loads anything — no
+      // localStorage needed. The explicit dismiss is just an escape hatch for
+      // someone exploring the UI before drawing. Never co-shown with the
+      // recovery / retouch banners (same screen slot, higher-priority states).
+      emptyHint: this._emptyHintOn(dots),
+      dismissEmptyHint: () => this.setState({ emptyHintDismissed: true }),
+      // mobile page pager (the pages rail is hidden < 820px; this is the only
+      // visible page nav / add on touch). Reuses goPage/addPage.
+      pagePos: (st.pageIndex + 1) + ' / ' + st.pageCount,
+      pagePrevDisabled: st.pageIndex <= 0,
+      pageNextDisabled: st.pageIndex >= st.pageCount - 1,
+      pagePrevEnabled: st.pageIndex > 0,
+      pageNextEnabled: st.pageIndex < st.pageCount - 1,
+      mobilePrevPage: () => this.goPage(st.pageIndex - 1),
+      mobileNextPage: () => this.goPage(st.pageIndex + 1),
+      mobileAddPage: () => this.addPage(),
+      mobilePrevStyle: mobilePagerBtn(st.pageIndex > 0),
+      mobileNextStyle: mobilePagerBtn(st.pageIndex < st.pageCount - 1),
+      mobileAddStyle: mobilePagerBtn(true),
       // conversion refinement
       dither: st.dither, invertConv: st.invertConv,
       toggleDither: () => this.setState(s => ({ dither: !s.dither })),
@@ -5569,6 +5927,7 @@ class Component extends DCLogic {
             this.setState({ tplOpen: false, fileName: st.lang === 'ko' ? it.ko : it.en, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null });
             this.queueLivePreview();
             this.say(this.callI18n(t.aTplNewPage, '', at + 1, this.pages.length));
+            this.bump();   // new content loaded — dirty + autosave
           } else {
             this.guardNewDoc(() => {
               const out = (this.OUTPUTS.find(oo => oo.gw === it.gw && oo.gh === it.gh) || this.OUTPUTS[0]).key;
@@ -5587,7 +5946,6 @@ class Component extends DCLogic {
       confirmCancelV: t.keepWork,
       confirmReplace: () => { const fn = this._pendingDoc; this._pendingDoc = null; this.setState({ confirmOpen: false }); if (fn) fn(); },
       confirmCancel: () => { this._pendingDoc = null; this.setState({ confirmOpen: false }); },
-      cropConfirmLabel: st.cropChoice === 'crop' ? t.impCropConfirm : t.impNext,
       // dotpad — the preview/send modal is opened from the right-pane connection section (dpSendAction → openSendFlow)
       dotpadOpen: st.dotpadOpen,
       phaseIncompat: phase === 'incompat',
