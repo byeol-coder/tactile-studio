@@ -42,6 +42,13 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
   const [crop, setCrop] = useState<CropRect>({ x: 0.1, y: 0.1, w: 0.8, h: 0.8 });
   const [preset, setPreset] = useState<keyof typeof CONV_PRESETS>('balanced');
   const [invert, setInvert] = useState(false);
+  // Tactile detail level (monolith's "촉각 디테일 정도" slider, 10-90/step 1,
+  // default 50 — matches the shipped range exactly). React's onChange on a
+  // range input already fires continuously while dragging (it normalizes to
+  // the native 'input' event, not 'change'), so this doesn't need the
+  // separate onInput fix the monolith needed (ba211bb) -- correct by
+  // construction here, not a bug to port.
+  const [threshold, setThreshold] = useState(50);
   const dragRef = useRef<{ x0: number; y0: number } | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useFocusTrap<HTMLDivElement>(open);
@@ -79,6 +86,7 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
       const previewUrl = URL.createObjectURL(file);
       setImage({ decoded, previewUrl, fileName: file.name });
       setCrop({ x: 0.1, y: 0.1, w: 0.8, h: 0.8 });
+      setThreshold(50);
     } catch (e: any) {
       setError(e?.message || 'Failed to decode image file.');
     }
@@ -111,8 +119,8 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
     const w = 60, h = 40;
     const c = crop.w > 0.02 && crop.h > 0.02 ? crop : null;
     const result = imageProcessing
-      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, invert }, c)
-      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, invert } as ConvOptions, c);
+      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold, invert }, c)
+      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold, invert } as ConvOptions, c);
     store.loadPages([result.cells], image.fileName.replace(/\.[^.]+$/, ''));
     close();
   };
@@ -181,6 +189,23 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
                 {' '}{(labels?.impConvInvert as string) || 'Invert'}
               </label>
             </div>
+
+            <label style={{ display: 'block', fontSize: 12 }}>
+              <span style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>{(labels?.threshold as string) || 'Tactile detail level'}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#B93E15' }}>{threshold}</span>
+              </span>
+              <input
+                type="range"
+                min={10}
+                max={90}
+                step={1}
+                value={threshold}
+                onChange={(e) => setThreshold(+e.target.value)}
+                aria-label={(labels?.threshold as string) || 'Tactile detail level'}
+                style={{ display: 'block', width: '100%', marginTop: 6 }}
+              />
+            </label>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
               <button type="button" onClick={() => setImage(null)}>{(labels?.back as string) || 'Back'}</button>

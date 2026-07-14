@@ -733,6 +733,59 @@ describe('ImportDialog — image import + crop UI (injected decoder for tests)',
     });
     expect(screen.getByRole('alert').textContent).toBe('bad image');
   });
+  it('exposes a tactile detail level (threshold) slider, defaulting to 50, that is passed through to the conversion', async () => {
+    const decoded = { data: new Uint8ClampedArray(4 * 4 * 4), width: 4, height: 4 };
+    const fakeDecoder = vi.fn().mockResolvedValue(decoded);
+    const convert = vi.fn().mockReturnValue({ cells: new Uint8Array(2400), removedDots: 0 });
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <ImportDialog open labels={{ threshold: 'Tactile detail level' }} onClose={() => {}} decodeImageFile={fakeDecoder} imageProcessing={{ convert }} />
+      </TactileStudioProvider>,
+    );
+    const fileInput = screen.getByLabelText('Choose image file') as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
+      await Promise.resolve();
+    });
+
+    const slider = screen.getByLabelText('Tactile detail level') as HTMLInputElement;
+    expect(slider.value).toBe('50'); // shipped default
+    expect(slider.min).toBe('10');
+    expect(slider.max).toBe('90');
+
+    fireEvent.change(slider, { target: { value: '72' } });
+    expect(screen.getByText('72')).toBeTruthy(); // live value readout, no separate "apply" step
+
+    fireEvent.click(screen.getByRole('button', { name: 'Convert' }));
+    expect(convert).toHaveBeenCalledTimes(1);
+    const opts = convert.mock.calls[0][5];
+    expect(opts.threshold).toBe(72);
+  });
+
+  it('resets the threshold slider to 50 when a new image is loaded', async () => {
+    const decoded = { data: new Uint8ClampedArray(4 * 4 * 4), width: 4, height: 4 };
+    const fakeDecoder = vi.fn().mockResolvedValue(decoded);
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <ImportDialog open labels={{ threshold: 'Tactile detail level' }} onClose={() => {}} decodeImageFile={fakeDecoder} />
+      </TactileStudioProvider>,
+    );
+    const fileInput = screen.getByLabelText('Choose image file') as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
+      await Promise.resolve();
+    });
+    fireEvent.change(screen.getByLabelText('Tactile detail level'), { target: { value: '80' } });
+    expect((screen.getByLabelText('Tactile detail level') as HTMLInputElement).value).toBe('80');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    const fileInput2 = screen.getByLabelText('Choose image file') as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(fileInput2, { target: { files: [new File(['y'], 'b.png', { type: 'image/png' })] } });
+      await Promise.resolve();
+    });
+    expect((screen.getByLabelText('Tactile detail level') as HTMLInputElement).value).toBe('50');
+  });
 });
 
 describe('Dialog focus trap (ConfirmDialog / ImportDialog)', () => {
