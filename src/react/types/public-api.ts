@@ -18,6 +18,7 @@
 
 import type { StudioDocument } from '../../core/types.js';
 import type { StudioStorageAdapter } from '../../storage/adapters/types.js';
+import type { SessionRecoveryStorageAdapter } from '../../storage/adapters/session-recovery-storage-adapter.js';
 import type { TactileDisplayAdapter } from '../../device/dotpad/types.js';
 import type { CorpusRecord } from '../../codecs/corpus/types.js';
 
@@ -66,6 +67,15 @@ export interface StudioServices {
    *  window.DTMS_CORPUS) — enables the corpus/command-panel search UI. No
    *  corpus data is bundled with or duplicated inside this package. */
   corpus?: CorpusRecord[];
+  /** Crash-recovery autosave backend (browser localStorage-backed by
+   *  default, key 'ts.session.v1' — see
+   *  storage/adapters/session-recovery-storage-adapter.ts). Studio owns
+   *  this local, ephemeral, non-cloud storage directly (same as the local
+   *  library "saved shelf"), so unlike `storage` above there is no host
+   *  requirement to provide one — TactileStudioEditor supplies the real
+   *  adapter automatically unless this is set (e.g. for tests, or a host
+   *  that wants to disable/relocate it). */
+  sessionRecovery?: SessionRecoveryStorageAdapter;
 }
 
 /** Every user-facing string the editor needs. The host owns language

@@ -62,6 +62,12 @@ function makeWindowContext(extra = {}) {
     Error,
     setTimeout,
     clearTimeout,
+    // Added for _packCells/_unpackCells (session-snapshot codec, first
+    // methods in this harness to need base64 — btoa/atob are real Node
+    // globals as of Node 16+, just not part of a vm.createContext sandbox
+    // unless explicitly passed through like every other global here).
+    btoa: globalThis.btoa,
+    atob: globalThis.atob,
     ...extra,
   };
   ctx.globalThis = ctx;

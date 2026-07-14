@@ -28,6 +28,7 @@ import { HistoryStack, makeEntry, entryCells } from '../history/history.js';
 import { flipHoriz, flipVert, invertAll, clearAll } from '../grid/grid.js';
 import { reindexMapInsert } from '../page/page-maps.js';
 import { decodeDtms60x40Hex } from '../../codecs/dtms/dtms.js';
+import type { ParsedSessionSnapshot } from '../../codecs/document/session-snapshot.js';
 import type { ToolId, EditorSnapshot, SelectionRect, BraillePreview, CorpusNavContext } from './types.js';
 
 export interface PageAudioEntry {
@@ -44,6 +45,13 @@ export interface EditorStoreOptions {
   initialZoom?: number;
   onChange?(document: StudioDocument): void;
   onDirtyChange?(dirty: boolean): void;
+  /** Optional crash-recovery autosave backend (localStorage-backed in
+   *  production, see storage/adapters/session-recovery-storage-adapter.ts).
+   *  If omitted, the feature simply no-ops -- same "optional, host-provided"
+   *  pattern as DotPadPanel's adapter. Typed structurally (see
+   *  SessionRecoveryAdapterLike below) rather than importing from storage/,
+   *  same reason as BrailleServiceLike: core/ must not depend on storage/. */
+  sessionRecovery?: SessionRecoveryAdapterLike;
 }
 
 export class EditorStore {
@@ -66,12 +74,17 @@ export class EditorStore {
   private brailleApplyToken = 0; // guards against a stale async response landing after a page switch
   private announceText = '';
   private corpusCtx: CorpusNavContext | null = null;
+  private sessionRecovery?: SessionRecoveryAdapterLike;
+  private recoverOffer = false;
+  private pendingRecoverSnap: ParsedSessionSnapshot | null = null;
+  private sessionAutosaveTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(initialDocument: StudioDocument, opts: EditorStoreOptions = {}) {
     this.doc = initialDocument;
     this.tool = opts.initialTool ?? 'pen';
     this.zoom = opts.initialZoom ?? 1;
     this.opts = opts;
+    this.sessionRecovery = opts.sessionRecovery;
     this.snapshotCache = this.computeSnapshot();
   }
 
@@ -105,6 +118,7 @@ export class EditorStore {
       braillePreview: this.braillePreview,
       announce: this.announceText,
       corpusCtx: this.corpusCtx,
+      recoverOffer: this.recoverOffer,
     };
   }
 
@@ -115,6 +129,11 @@ export class EditorStore {
   }
 
   private setDirty(next: boolean) {
+    // Reschedule the crash-recovery debounce on every dirty-marking call,
+    // not just the false→true transition -- mirrors the monolith's bump(),
+    // which calls _scheduleSession() unconditionally on every edit so the
+    // 800ms window keeps resetting while the user keeps typing/drawing.
+    if (next) this.scheduleSessionAutosave();
     if (this.dirty === next) return;
     this.dirty = next;
     this.opts.onDirtyChange?.(next);
@@ -398,6 +417,97 @@ export class EditorStore {
     this.notify();
   }
 
+  // ── crash-recovery autosave (verbatim port of the monolith's
+  //    _saveSession/_scheduleSession/_loadSession/_applySession/
+  //    _dismissRecover, added to vanilla main in ecb67e3 -- AFTER this
+  //    branch's fork point, so this is a first-time port here, not a
+  //    resync; see docs/known-issues.md #7/#8) ──────────────────────────────
+
+  private scheduleSessionAutosave() {
+    if (!this.sessionRecovery) return;
+    // Never clobber a snapshot the user hasn't answered the recovery prompt
+    // for yet -- exact mirror of the monolith's _saveSession early return.
+    if (this.recoverOffer) return;
+    if (this.sessionAutosaveTimer) clearTimeout(this.sessionAutosaveTimer);
+    this.sessionAutosaveTimer = setTimeout(() => { void this.saveSessionNow(); }, 800);
+  }
+
+  private async saveSessionNow(): Promise<void> {
+    if (!this.sessionRecovery || this.recoverOffer) return;
+    await this.sessionRecovery.save(this.doc, { brailleLang: this.brailleLang });
+  }
+
+  /** Host-facing: check for and load any existing crash-recovery snapshot.
+   *  Mirrors the monolith's componentDidMount read -- callers MUST invoke
+   *  this before the document is first mutated (the monolith reads BEFORE
+   *  its own first bump() so the debounced autosave can't clobber the
+   *  snapshot with the fresh empty document). Resolves true and sets
+   *  `recoverOffer` on the snapshot if a recoverable one was found; false
+   *  otherwise (including when no adapter was provided). */
+  async checkForRecoverableSession(): Promise<boolean> {
+    if (!this.sessionRecovery) return false;
+    const snap = await this.sessionRecovery.load();
+    if (!snap) return false;
+    this.pendingRecoverSnap = snap;
+    this.recoverOffer = true;
+    this.notify();
+    return true;
+  }
+
+  /** Host-facing: accept the pending recovery snapshot, replacing the
+   *  current document with it wholesale. Mirrors the monolith's
+   *  _applySession -- clears history/selection/braille-preview, marks the
+   *  store as freshly-restored (not dirty; it now matches the snapshot
+   *  exactly), and optionally announces recovery via an already-localized
+   *  message (core never owns i18n, same convention as announce()). No-op
+   *  if there is no pending snapshot (e.g. already dismissed, or called
+   *  without checkForRecoverableSession() finding one first). */
+  restoreSession(announceMsg?: string) {
+    const snap = this.pendingRecoverSnap;
+    if (!snap || !snap.liveCells.length) return;
+    let pageIndex = snap.pageIndex;
+    if (!Number.isInteger(pageIndex) || pageIndex < 0 || pageIndex >= snap.liveCells.length) pageIndex = 0;
+    this.doc = {
+      title: snap.fileName || '',
+      grid: { w: snap.gridW, h: snap.gridH },
+      pages: snap.liveCells,
+      pageIndex,
+      pageAudio: (snap.audio || {}) as PageMap<unknown>,
+      pageVectors: (snap.vectors || {}) as PageMap<unknown[]>,
+    };
+    this.brailleLang = snap.brailleLang || 'ko-g2';
+    this.history.clear();
+    this.selRect = null;
+    this.corpusCtx = null;
+    this.brailleBusy = false;
+    this.braillePreview = null;
+    this.recoverOffer = false;
+    this.pendingRecoverSnap = null;
+    this.dirty = false; // freshly restored == matches the snapshot, same as the monolith
+    if (announceMsg) this.announceText = announceMsg;
+    this.rev++;
+    this.notify();
+  }
+
+  /** Host-facing: dismiss the pending recovery snapshot without applying
+   *  it, and remove it from storage so it isn't offered again. Mirrors the
+   *  monolith's _dismissRecover. Safe to call with no adapter/no pending
+   *  snapshot (no-ops). */
+  async dismissRecovery(): Promise<void> {
+    this.recoverOffer = false;
+    this.pendingRecoverSnap = null;
+    this.notify();
+    await this.sessionRecovery?.clear();
+  }
+
+  /** Cancels any pending debounced autosave. Call on unmount -- mirrors the
+   *  monolith's componentWillUnmount's clearTimeout(this._sessT). The store
+   *  has no other timers/subscriptions of its own to clean up. */
+  dispose() {
+    if (this.sessionAutosaveTimer) clearTimeout(this.sessionAutosaveTimer);
+    this.sessionAutosaveTimer = null;
+  }
+
   // ── braille "Apply" (verbatim port of the monolith's applyField) ─────────
 
   setBrailleLang(lang: string) {
@@ -467,4 +577,17 @@ export class EditorStore {
  *  call site (react/hooks or wherever a real BrailleService is passed in). */
 export interface BrailleServiceLike {
   translate(text: string, langKey: string): Promise<{ ok: boolean; unicode: string; cells: number; reason?: string }>;
+}
+
+/** Minimal structural shape EditorStore needs from a session-recovery
+ *  storage backend — core/ must not import storage/adapters/session-
+ *  recovery-storage-adapter.ts (core never depends on the storage layer),
+ *  so this is defined independently. The real
+ *  SessionRecoveryStorageAdapter (storage/) is structurally compatible by
+ *  design; TypeScript checks that at the call site (react/ wherever a real
+ *  adapter is constructed and passed in as an EditorStoreOptions field). */
+export interface SessionRecoveryAdapterLike {
+  load(): Promise<ParsedSessionSnapshot | null>;
+  save(doc: StudioDocument, extra: { brailleLang: string }): Promise<boolean>;
+  clear(): Promise<void>;
 }

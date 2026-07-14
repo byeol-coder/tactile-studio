@@ -6,7 +6,7 @@
 // store through the hooks in ./hooks, never by reaching into core/ directly.
 
 import React, { createContext, useContext, useRef, useEffect } from 'react';
-import { EditorStore } from '../core/state/editor-store.js';
+import { EditorStore, type SessionRecoveryAdapterLike } from '../core/state/editor-store.js';
 import type { StudioDocument } from '../core/types.js';
 
 const EditorStoreContext = createContext<EditorStore | null>(null);
@@ -15,10 +15,15 @@ export interface TactileStudioProviderProps {
   initialDocument: StudioDocument;
   onChange?(document: StudioDocument): void;
   onDirtyChange?(dirty: boolean): void;
+  /** Optional crash-recovery autosave backend. If omitted, the store simply
+   *  never autosaves/offers recovery — same "optional, host-provided"
+   *  pattern as the DotPad adapter. See TactileStudioEditor's default
+   *  wiring (createSessionRecoveryStorageAdapter()) for the real one. */
+  sessionRecovery?: SessionRecoveryAdapterLike;
   children: React.ReactNode;
 }
 
-export function TactileStudioProvider({ initialDocument, onChange, onDirtyChange, children }: TactileStudioProviderProps) {
+export function TactileStudioProvider({ initialDocument, onChange, onDirtyChange, sessionRecovery, children }: TactileStudioProviderProps) {
   // Created once, lazily, per mount. A later prop change to `initialDocument`
   // does NOT reset the store — that would silently discard in-progress edits;
   // callers who want to load a different document should remount the
@@ -26,7 +31,7 @@ export function TactileStudioProvider({ initialDocument, onChange, onDirtyChange
   // of any component wrapping local state around a prop.
   const storeRef = useRef<EditorStore | null>(null);
   if (!storeRef.current) {
-    storeRef.current = new EditorStore(initialDocument, { onChange, onDirtyChange });
+    storeRef.current = new EditorStore(initialDocument, { onChange, onDirtyChange, sessionRecovery });
   }
 
   // Keep the latest callbacks without recreating the store (a fresh store
@@ -37,6 +42,19 @@ export function TactileStudioProvider({ initialDocument, onChange, onDirtyChange
     (storeRef.current as any).opts.onChange = onChange;
     (storeRef.current as any).opts.onDirtyChange = onDirtyChange;
   }, [onChange, onDirtyChange]);
+
+  // Check for a crash-recovery snapshot exactly once, on mount — mirrors the
+  // monolith's componentDidMount read, which happens BEFORE its own first
+  // bump() so the debounced autosave can't clobber the snapshot with the
+  // fresh initial document. Nothing else in this provider mutates the
+  // document on mount, so this ordering holds here too. Cleanup cancels any
+  // pending debounced autosave (mirrors componentWillUnmount's
+  // clearTimeout(this._sessT)).
+  useEffect(() => {
+    void storeRef.current?.checkForRecoverableSession();
+    return () => { storeRef.current?.dispose(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <EditorStoreContext.Provider value={storeRef.current}>

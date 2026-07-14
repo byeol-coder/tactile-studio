@@ -28,6 +28,8 @@ import { ImportDialog } from '../ui/dialogs/ImportDialog.js';
 import { ExportMenu } from '../ui/dialogs/ExportMenu.js';
 import { CorpusSearchPanel } from '../ui/corpus/CorpusSearchPanel.js';
 import { LiveRegion } from '../ui/live-region/LiveRegion.js';
+import { RecoveryBanner } from '../ui/recovery/RecoveryBanner.js';
+import { createSessionRecoveryStorageAdapter } from '../storage/adapters/session-recovery-storage-adapter.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { useHardwareKeyPanning } from './hooks/useHardwareKeyPanning.js';
 import type { TactileStudioEditorProps, StudioErrorLike } from './types/public-api.js';
@@ -140,6 +142,7 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
       </div>
 
       <LiveRegion />
+      <RecoveryBanner labels={labels} />
 
       <ImportDialog open={importOpen} labels={labels} onClose={() => setImportOpen(false)} imageProcessing={services.imageProcessing} />
     </div>
@@ -149,9 +152,15 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
 export function TactileStudioEditor({
   initialDocument, services, labels, theme, onChange, onSave, onDirtyChange, onError, onExport, className,
 }: TactileStudioEditorProps) {
+  // Studio owns local crash-recovery storage directly (same rationale as the
+  // local-library "saved shelf") -- the real localStorage-backed adapter is
+  // supplied automatically unless the host overrides it (e.g. tests, or a
+  // host that wants to disable/relocate it), same "optional override of the
+  // default local codec" pattern as imageProcessing.
+  const [sessionRecovery] = useState(() => services.sessionRecovery ?? createSessionRecoveryStorageAdapter());
   return (
     <div className={className} style={{ ...themeStyle(theme), display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <TactileStudioProvider initialDocument={initialDocument} onChange={onChange} onDirtyChange={onDirtyChange}>
+      <TactileStudioProvider initialDocument={initialDocument} onChange={onChange} onDirtyChange={onDirtyChange} sessionRecovery={sessionRecovery}>
         <EditorBody services={services} labels={labels} onSave={onSave} onError={onError} onExport={onExport} />
       </TactileStudioProvider>
     </div>
