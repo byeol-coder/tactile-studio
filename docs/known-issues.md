@@ -122,13 +122,15 @@ Added `vite.config.ts` (rooted at `dev/`, deliberately isolated from the repo-ro
 - **주의**: 이 어댑터는 **아직 React 레이어 어디에서도 소비되지 않음**(`src/react`, `src/ui`에 참조 0건 — grep으로 확인). 즉 UI 단에서 실제로 실패를 표면화하는 배선은 아직 없고, 이번 수정은 향후 소비될 때를 위한 원시(primitive) 계약만 바로잡은 것.
 - **회귀 픽스처**: `tests/parity/storage-adapters.test.ts`의 두 케이스를 `.resolves.toBe(false)`로 의식적으로 재작성. 라운드트립 성공 케이스에 `.resolves.toBe(true)` 단언 추가. 전체 스위트 185/185 통과, `tsc --noEmit` 클린.
 
-### 참고: vanilla의 "세션 자동복구(크래시 리커버리)" 자체는 이 모노레포에 아직 이식되지 않음
+### 참고: vanilla의 "세션 자동복구(크래시 리커버리)"는 이제 이 모노레포에도 있음
 
-vanilla `_saveSession()`(`ts.session.v1`에 800ms 디바운스로 스냅샷 저장 → 새로고침 시 "이전 작업을 복구할까요?" 배너)에 해당하는 기능이 `src/` 어디에도 없다(session/autosave/recover 관련 grep 결과, `editor-store.ts`의 `dirty` 플래그 추적 외엔 없음). `EditorStore`는 `dirty` 상태와 `onDirtyChange` 콜백만 가지고 있고, 로컬 스토리지 기반 크래시 복구 스냅샷 자체가 아직 없다.
+**[갱신: 해결됨]** 아래 단락은 작성 당시(이 항목이 처음 쓰였을 때) 사실이었으나, 이후 `feat(studio): port crash-recovery session autosave from vanilla ecb67e3` 커밋에서 이식 완료됨. `codecs/document/session-snapshot.ts` + `storage/adapters/session-recovery-storage-adapter.ts` + `EditorStore`의 `checkForRecoverableSession`/`restoreSession`/`dismissRecovery` + `ui/recovery/RecoveryBanner.tsx`. 25개 테스트(코덱 패리티 6, 어댑터 7, EditorStore 8, React 통합 4) 추가, 전체 스위트 210/210.
+
+당시 기록(이력 보존): vanilla `_saveSession()`(`ts.session.v1`에 800ms 디바운스로 스냅샷 저장 → 새로고침 시 "이전 작업을 복구할까요?" 배너)에 해당하는 기능이 `src/` 어디에도 없다(session/autosave/recover 관련 grep 결과, `editor-store.ts`의 `dirty` 플래그 추적 외엔 없음). `EditorStore`는 `dirty` 상태와 `onDirtyChange` 콜백만 가지고 있고, 로컬 스토리지 기반 크래시 복구 스냅샷 자체가 아직 없다.
 
 즉 vanilla에서 고친 두 가지 버그 중:
-- **`saveLibrary()` 무음 실패** → 이번에 이식·수정 완료 (위 항목)
-- **`_saveSession()` 무음 실패** → 대응하는 기능 자체가 이 브랜치에 없어 "수정을 이식"할 대상이 없음. 세션 자동복구 기능을 이 모노레포에 새로 구현하는 건 별도 Phase 작업으로 필요.
+- **`saveLibrary()` 무음 실패** → 이식·수정 완료 (위 항목)
+- **`_saveSession()` 무음 실패** → **[해결됨]** 대응 기능 자체를 새로 이식하면서, 처음부터 성공/실패를 boolean으로 반환하는 올바른 계약으로 구현(로컬 라이브러리 어댑터처럼 버그를 verbatim 재현하지 않음 — 이 브랜치엔 참조할 이전 버전이 없었으므로).
 
 ## 8. 감사 — DotPad 빠른저장 무음실패 라운드(vanilla 3차 수정)는 이 브랜치에 이식할 코드가 없음
 
@@ -139,4 +141,4 @@ vanilla `main`에서 진행된 세 번째 수정 라운드(`successSaveDrive`/`s
 - **`say()`/toast 무조건 성공 announce**: N/A — 위 항목과 동일 이유로 애초에 해당 코드 경로가 없다.
 - **반응형 숨김 갭(`ts-save-status{display:none}` at ≤1180px)**: 이 브랜치의 UI는 전부 인라인 스타일이고 `@media` 쿼리가 `src/ui`, `src/react` 어디에도 없다(grep 확인) — 저장 상태를 반응형으로 숨기는 CSS 자체가 존재하지 않으므로 해당 버그가 성립하지 않는다.
 
-**남은 실제 격차는 여전히 #7에 적힌 것 하나뿐**: DotPad 전송-후-저장 단축 흐름과 세션 자동복구 자체가 아직 이 브랜치에 없다는 것. 이번 라운드도 버그 수정이 아니라 신규 기능 이식이 필요한 항목임을 재확인.
+**남은 실제 격차는 DotPad 전송-후-저장 단축 흐름(`successSaveDrive`/`successAddLibrary`) 하나뿐** — 세션 자동복구 자체는 #7 갱신에서 이식 완료됨. 이번 라운드도 버그 수정이 아니라 신규 기능 이식이 필요한 항목임을 재확인.
