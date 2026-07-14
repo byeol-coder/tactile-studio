@@ -78,7 +78,7 @@ describe('LocalLibraryStorageAdapter (fake window.localStorage)', () => {
       { name: 'A', loc: 'drive', grid: '60×40', thumb: 'tA', cells: seededCells(60, 40, 5) },
       { name: 'B', loc: 'device', grid: '96×64', thumb: 'tB', cells: seededCells(96, 64, 9) },
     ];
-    await adapter.save(items);
+    await expect(adapter.save(items)).resolves.toBe(true);
     const raw = window.localStorage.getItem(LOCAL_LIBRARY_KEY);
     expect(raw).toBeTruthy();
     const loaded = await adapter.list();
@@ -112,20 +112,20 @@ describe('LocalLibraryStorageAdapter (fake window.localStorage)', () => {
     expect(JSON.parse(extractedRaw!)).toEqual(JSON.parse(shippedRaw!));
   });
 
-  it('tolerates a storage that throws (private-browsing / quota) exactly like production: non-fatal', async () => {
+  it('tolerates a storage that throws (private-browsing / quota) exactly like production: non-fatal, but now reports the failure', async () => {
     (globalThis as any).window.localStorage = {
       getItem() { throw new Error('quota'); },
       setItem() { throw new Error('quota'); },
     };
     const adapter = createLocalLibraryStorageAdapter(TW.encodeBits);
     await expect(adapter.list()).resolves.toEqual([]);
-    await expect(adapter.save([{ name: 'x', loc: 'drive', grid: '60×40', thumb: '', cells: seededCells(60, 40, 1) }])).resolves.toBeUndefined();
+    await expect(adapter.save([{ name: 'x', loc: 'drive', grid: '60×40', thumb: '', cells: seededCells(60, 40, 1) }])).resolves.toBe(false);
   });
 
   it('is a no-op (never throws) when window/localStorage is unavailable (SSR / dev shell without DOM)', async () => {
     (globalThis as any).window = undefined;
     const adapter = createLocalLibraryStorageAdapter(TW.encodeBits);
     await expect(adapter.list()).resolves.toEqual([]);
-    await expect(adapter.save([])).resolves.toBeUndefined();
+    await expect(adapter.save([])).resolves.toBe(false);
   });
 });

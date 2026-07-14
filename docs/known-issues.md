@@ -112,3 +112,20 @@ Added `vite.config.ts` (rooted at `dev/`, deliberately isolated from the repo-ro
 ### Testing note (jsdom limitation, documented not silently worked around)
 
 `jsdom` implements neither `CanvasRenderingContext2D` nor `PointerEvent`. Tests handle this honestly: `StudioCanvas`'s `draw()` no-ops on a null context (tests verify wiring, not pixels); pointer tests construct `MouseEvent`s with pointer-event type strings (React dispatches by type, not `instanceof`); the text tool's tests inject a synthetic `GlyphRasterizer` rather than exercising the real canvas-based one.
+
+## 7. [해결됨] `LocalLibraryStorageAdapter.save()` — 저장 실패가 완전히 무음 (vanilla와 동일 결함, verbatim 이식됨)
+
+**상태: 해결** — vanilla `main`의 실배포본을 감사하던 중 발견·수정된 `saveLibrary()`/`_saveSession()` 무음 실패 버그와 동일 계열. 이 어댑터는 Phase 4에서 `saveLibrary`를 그대로(버그 포함) verbatim 이식했고(`tests/parity/storage-adapters.test.ts`의 `.resolves.toBeUndefined()` 단언이 그 증거), 이번에 독립 커밋으로 수정한다.
+
+- **문제**: `save()`가 `Promise<void>`를 반환해, quota 초과·private-mode·SSR(윈도우 없음) 등으로 실제 쓰기가 실패해도 호출자가 이를 감지할 방법이 전혀 없었음.
+- **수정**: `save(): Promise<boolean>` — 성공 시 `true`, 실패(quota/private-mode/윈도우 없음) 시 `false`.
+- **주의**: 이 어댑터는 **아직 React 레이어 어디에서도 소비되지 않음**(`src/react`, `src/ui`에 참조 0건 — grep으로 확인). 즉 UI 단에서 실제로 실패를 표면화하는 배선은 아직 없고, 이번 수정은 향후 소비될 때를 위한 원시(primitive) 계약만 바로잡은 것.
+- **회귀 픽스처**: `tests/parity/storage-adapters.test.ts`의 두 케이스를 `.resolves.toBe(false)`로 의식적으로 재작성. 라운드트립 성공 케이스에 `.resolves.toBe(true)` 단언 추가. 전체 스위트 185/185 통과, `tsc --noEmit` 클린.
+
+### 참고: vanilla의 "세션 자동복구(크래시 리커버리)" 자체는 이 모노레포에 아직 이식되지 않음
+
+vanilla `_saveSession()`(`ts.session.v1`에 800ms 디바운스로 스냅샷 저장 → 새로고침 시 "이전 작업을 복구할까요?" 배너)에 해당하는 기능이 `src/` 어디에도 없다(session/autosave/recover 관련 grep 결과, `editor-store.ts`의 `dirty` 플래그 추적 외엔 없음). `EditorStore`는 `dirty` 상태와 `onDirtyChange` 콜백만 가지고 있고, 로컬 스토리지 기반 크래시 복구 스냅샷 자체가 아직 없다.
+
+즉 vanilla에서 고친 두 가지 버그 중:
+- **`saveLibrary()` 무음 실패** → 이번에 이식·수정 완료 (위 항목)
+- **`_saveSession()` 무음 실패** → 대응하는 기능 자체가 이 브랜치에 없어 "수정을 이식"할 대상이 없음. 세션 자동복구 기능을 이 모노레포에 새로 구현하는 건 별도 Phase 작업으로 필요.
