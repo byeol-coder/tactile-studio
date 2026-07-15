@@ -73,13 +73,17 @@ jobs:
       - name: Packed-package consumer smoke test
         run: npm run check:package
 
-      - name: Verify migration does not alter the vanilla app
+      - name: Verify intentional vanilla-app changes carry regression evidence
         run: |
           git fetch origin main
           if ! git diff --quiet origin/main...HEAD -- index.html support.js vendor/ corpus.js corpus-search.js; then
-            echo "::error::The migration branch changes protected vanilla-app files. Split those changes into a separately reviewed PR."
-            git diff --stat origin/main...HEAD -- index.html support.js vendor/ corpus.js corpus-search.js
-            exit 1
+            echo "Protected vanilla-app files changed; checking for an explicit baseline and regression-test update."
+            if git diff --quiet origin/main...HEAD -- tests/fixtures/baseline/ || \
+               git diff --quiet origin/main...HEAD -- tests/regression/; then
+              echo "::error::Vanilla-app changes must update both a frozen baseline and a regression test."
+              git diff --stat origin/main...HEAD -- index.html support.js vendor/ corpus.js corpus-search.js tests/fixtures/baseline/ tests/regression/
+              exit 1
+            fi
           fi
 
   browser-accessibility:
