@@ -21,6 +21,7 @@ import { ConfirmDialog } from '../../src/ui/dialogs/ConfirmDialog.js';
 import { Tooltip } from '../../src/ui/tooltip/Tooltip.js';
 import { IconButton } from '../../src/ui/toolbar/IconButton.js';
 import { LiveRegion } from '../../src/ui/live-region/LiveRegion.js';
+import { DotPadPanel } from '../../src/ui/dotpad/DotPadPanel.js';
 import { createDocument } from '../../src/core/document/document.js';
 import { createMemoryStorageAdapter } from '../../src/storage/adapters/memory-storage-adapter.js';
 import { createMockDotPadAdapter } from '../../src/device/dotpad/mock-adapter.js';
@@ -1097,5 +1098,63 @@ describe('TactileStudioEditor — onExport callback', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Export' }));
     fireEvent.click(screen.getByRole('menuitem', { name: /DTMS/ }));
     expect(onExport).toHaveBeenCalledWith(expect.objectContaining({ format: 'dtms' }));
+  });
+});
+
+describe('DotPadPanel — background reconnect status (onConnectionStateChange wiring)', () => {
+  function makeFakeAdapter() {
+    let state: 'disconnected' | 'connecting' | 'reconnecting' | 'connected' | 'error' = 'disconnected';
+    const stateListeners = new Set<(s: any) => void>();
+    return {
+      async connect() { state = 'connected'; stateListeners.forEach((l) => l(state)); },
+      async disconnect() { state = 'disconnected'; stateListeners.forEach((l) => l(state)); },
+      async display() {},
+      async clear() {},
+      subscribeKeys() { return () => {}; },
+      getConnectionState() { return state; },
+      onConnectionStateChange(listener: (s: any) => void) {
+        stateListeners.add(listener);
+        return () => stateListeners.delete(listener);
+      },
+      getDeviceInfo() { return state === 'connected' ? { name: 'Real DotPad', cellType: 'D3', brailleCellCount: 20 } : null; },
+      dispose() {},
+      _simulateReconnecting() { state = 'reconnecting'; stateListeners.forEach((l) => l(state)); },
+      _simulateRecovered() { state = 'connected'; stateListeners.forEach((l) => l(state)); },
+    };
+  }
+
+  it('shows "Reconnecting…" and disables the Connect button when the adapter pushes a reconnecting state, without any user action', async () => {
+    const adapter = makeFakeAdapter();
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <DotPadPanel adapter={adapter as any} labels={{ dpStateReconnecting: 'Reconnecting…' }} />
+      </TactileStudioProvider>,
+    );
+    await act(async () => { await adapter.connect(); });
+    expect(screen.getByText(/real dotpad — connected/i)).toBeTruthy();
+
+    act(() => { adapter._simulateReconnecting(); });
+    expect(screen.getByText('Reconnecting…')).toBeTruthy();
+    // While reconnecting, the ready-state actions (Disconnect/Send) are
+    // hidden (same grouping as 'connecting' in the monolith's dpPhaseConnecting)
+    expect(screen.queryByRole('button', { name: 'Disconnect' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Connect' })).toHaveProperty('disabled', true);
+
+    act(() => { adapter._simulateRecovered(); });
+    expect(screen.getByText(/real dotpad — connected/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Disconnect' })).toBeTruthy();
+  });
+
+  it('falls back gracefully (still functional via refresh-after-action) when the adapter has no onConnectionStateChange', async () => {
+    const adapter = createMockDotPadAdapter(); // no onConnectionStateChange, per its own test coverage
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <DotPadPanel adapter={adapter} />
+      </TactileStudioProvider>,
+    );
+    expect(screen.getByText(/not connected/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Connect' }));
+    await act(async () => { await Promise.resolve(); });
+    expect(screen.getByRole('button', { name: 'Disconnect' })).toBeTruthy();
   });
 });

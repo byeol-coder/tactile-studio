@@ -4,7 +4,7 @@
 // since real hardware/Web Bluetooth cannot exist in this test environment).
 // This is not a claim about SDK behavior; it verifies OUR adapter's wiring,
 // error translation, and listener lifecycle.
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createMockDotPadAdapter } from '../../src/device/dotpad/mock-adapter.js';
 import { createBrowserDotPadAdapter } from '../../src/device/dotpad/browser-adapter.js';
 import type { TwDotPadSingleton } from '../../src/device/dotpad/sdk-types.js';
@@ -24,13 +24,21 @@ function makeFakeDP(overrides: Partial<TwDotPadSingleton> = {}): TwDotPadSinglet
     busy: false,
     onKey(fn) { handler = fn; },
     hasReal() { return true; },
-    isConnected() { return connected; },
+    // Mirrors the real singleton's derivation (isConnected = live && gattOk())
+    // via `this`, so a test overriding only `gattOk` (to simulate a dropped
+    // GATT link) still changes isConnected()'s result correctly, exactly
+    // like production. `connected` is only used by the default
+    // gattOk()/connect()/disconnect() below when a test doesn't override
+    // those either.
+    isConnected() { return this.live && this.gattOk(); },
+    gattOk() { return connected; },
+    async ensure(force?: boolean) { if (force || !this.gattOk()) connected = true; this.live = true; return this.gattOk(); },
     deviceName() { return 'Fake DotPad'; },
-    async connect() { connected = true; return true; },
+    async connect() { connected = true; this.live = true; return true; },
     async output() { return true; },
     async outputText() { return true; },
     brailleCellCount() { return 20; },
-    async disconnect() { connected = false; },
+    async disconnect() { connected = false; this.live = false; },
     ...overrides,
   };
   (base as any)._fireKey = (code: string, extra: string) => handler && handler(code, extra);
@@ -115,6 +123,20 @@ describe('browser DotPad adapter (wired against a fake window.TW.DP)', () => {
     await expect(a.connect()).rejects.toMatchObject({ code: 'not-supported' });
   });
 
+  it('getConnectionState() reports \'error\' (not \'disconnected\') after a failed connect() while a real DP exists', async () => {
+    // A real DP is present but its own connect() fails (device not found /
+    // scan cancelled) -- distinct from the "no SDK at all" case above.
+    // getConnectionState() must surface this as 'error', not silently
+    // collapse it to 'disconnected' (which would read as "nothing was ever
+    // tried"), since the health watch and UI both depend on 'error' being
+    // distinguishable from a plain, never-attempted disconnection.
+    const fakeDP = makeFakeDP({ connect: async () => false });
+    (globalThis as any).window.TW = { DP: fakeDP };
+    const a = createBrowserDotPadAdapter();
+    await expect(a.connect()).rejects.toMatchObject({ code: 'connect-failed' });
+    expect(a.getConnectionState()).toBe('error');
+  });
+
   it('calls the real (confirmed-existing) displayAllUp/displayAllDown via DP.sdk, not an invented method', async () => {
     const fakeDP = makeFakeDP();
     (globalThis as any).window.TW = { DP: fakeDP };
@@ -179,5 +201,94 @@ describe('browser DotPad adapter (wired against a fake window.TW.DP)', () => {
 
     (fakeDP as any)._fireKey('KeyElse', '');
     expect(calls).toEqual(['KeyElse']);
+  });
+});
+
+describe('browser DotPad adapter — background connection health watch (reconnecting)', () => {
+  beforeEach(() => {
+    (globalThis as any).window = (globalThis as any).window || {};
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('does nothing while the GATT link stays up (no spurious reconnecting flicker)', async () => {
+    const fakeDP = makeFakeDP({ live: true });
+    (globalThis as any).window.TW = { DP: fakeDP };
+    const a = createBrowserDotPadAdapter();
+    await a.connect();
+    const states: string[] = [];
+    a.onConnectionStateChange!((s) => states.push(s));
+
+    await vi.advanceTimersByTimeAsync(10_000); // several health-watch ticks
+    expect(states).toEqual([]); // gattOk() stayed true the whole time -> no notifications
+    expect(a.getConnectionState()).toBe('connected');
+    a.dispose();
+  });
+
+  it('detects a dropped GATT link, flips to reconnecting, and recovers to connected via ensure(true)', async () => {
+    let gatt = true;
+    const ensure = vi.fn(async (force?: boolean) => { if (force) gatt = true; return gatt; });
+    const fakeDP = makeFakeDP({ live: true, gattOk: () => gatt, ensure });
+    (globalThis as any).window.TW = { DP: fakeDP };
+    const a = createBrowserDotPadAdapter();
+    await a.connect();
+    const states: string[] = [];
+    a.onConnectionStateChange!((s) => states.push(s));
+
+    gatt = false; // simulate a silent BLE drop between ticks
+    await vi.advanceTimersByTimeAsync(3000);
+
+    expect(states).toEqual(['reconnecting', 'connected']);
+    expect(ensure).toHaveBeenCalledWith(true);
+    expect(a.getConnectionState()).toBe('connected');
+    a.dispose();
+  });
+
+  it('flips to error when the silent reconnect attempt fails', async () => {
+    let gatt = true;
+    const ensure = vi.fn(async () => false); // reconnect attempt fails
+    const fakeDP = makeFakeDP({ live: true, gattOk: () => gatt, ensure });
+    (globalThis as any).window.TW = { DP: fakeDP };
+    const a = createBrowserDotPadAdapter();
+    await a.connect();
+    const states: string[] = [];
+    a.onConnectionStateChange!((s) => states.push(s));
+
+    gatt = false;
+    await vi.advanceTimersByTimeAsync(3000);
+
+    expect(states).toEqual(['reconnecting', 'error']);
+    expect(a.getConnectionState()).toBe('error');
+    a.dispose();
+  });
+
+  it('never runs when there is no real device (simulation / no hardware)', async () => {
+    const ensure = vi.fn(async () => true);
+    const fakeDP = makeFakeDP({ hasReal: () => false, live: false, ensure });
+    (globalThis as any).window.TW = { DP: fakeDP };
+    const a = createBrowserDotPadAdapter();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(ensure).not.toHaveBeenCalled();
+    a.dispose();
+  });
+
+  it('stops ticking after dispose() (no leaked interval)', async () => {
+    let gatt = true;
+    const ensure = vi.fn(async () => true);
+    const fakeDP = makeFakeDP({ live: true, gattOk: () => gatt, ensure });
+    (globalThis as any).window.TW = { DP: fakeDP };
+    const a = createBrowserDotPadAdapter();
+    await a.connect();
+    a.dispose();
+    gatt = false;
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(ensure).not.toHaveBeenCalled();
+  });
+
+  it('the mock adapter has no onConnectionStateChange (feature-detected, not assumed)', () => {
+    const mock = createMockDotPadAdapter();
+    expect(mock.onConnectionStateChange).toBeUndefined();
   });
 });

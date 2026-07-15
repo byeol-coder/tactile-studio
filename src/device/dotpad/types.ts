@@ -20,7 +20,13 @@ export type DeviceKeyCode =
 export type DeviceKeyListener = (code: DeviceKeyCode, extra: string) => void;
 export type Unsubscribe = () => void;
 
-export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error';
+/** 'reconnecting' mirrors the monolith's dpReconnecting: the adapter
+ *  detected a dropped physical link on its own (background health watch,
+ *  real hardware only) and is silently retrying via the SDK wrapper's own
+ *  ensure()/reconnect-to-already-paired-device path — distinct from
+ *  'connecting', which is a fresh user-initiated connect() with a new
+ *  device picker. */
+export type ConnectionState = 'disconnected' | 'connecting' | 'reconnecting' | 'connected' | 'error';
 
 export interface DeviceInfo {
   name: string;
@@ -57,6 +63,15 @@ export interface TactileDisplayAdapter {
    *  singleton directly (which would violate the "never call the SDK
    *  directly" rule). */
   getConnectionState(): ConnectionState;
+  /** Optional: subscribe to connection-state changes that happen WITHOUT a
+   *  user-initiated action (e.g. a background health-watch detecting and
+   *  silently retrying a dropped physical link — see browser-adapter.ts).
+   *  Previously (docs/known-issues.md #5) there was no such event, so
+   *  DotPadPanel only refreshed after user-initiated actions; this closes
+   *  that gap for adapters that support it. Adapters without a background
+   *  watch (e.g. the mock adapter) can simply not implement this — callers
+   *  must feature-detect, same as raiseAll/lowerAll/invert. */
+  onConnectionStateChange?(listener: (state: ConnectionState) => void): Unsubscribe;
   getDeviceInfo(): DeviceInfo | null;
   /** Deterministic teardown: removes every listener/subscription this
    *  adapter instance registered. Must be idempotent and safe to call even

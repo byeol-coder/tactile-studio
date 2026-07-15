@@ -15,6 +15,14 @@
 // currently expose them, so our adapter calls `DP.sdk` directly for these
 // two methods only — every other interaction goes through `DP`.
 
+// CONFIRMED BY DIRECT SOURCE INSPECTION (vendor/tw/dotpad.js): `gattOk()`
+// (`!!(this.btDevice && this.btDevice.gatt && this.btDevice.gatt.connected)`,
+// swallowed to false on any error) and `ensure(force)` (reconnects to the
+// ALREADY-PAIRED btDevice via `sdk.connectBleDevice(this.btDevice)` when the
+// GATT link is down, or immediately returns true if force is falsy and the
+// link is already up) both exist at runtime on the DP singleton. Used by the
+// background health-watch in browser-adapter.ts — see its doc comment.
+
 export type DotPadDeviceHandle = unknown; // opaque `DotDevice` instance
 
 export interface DotPadSDKInstance {
@@ -34,6 +42,16 @@ export interface TwDotPadSingleton {
   onKey(fn: ((code: string, extra: string) => void) | null): void;
   hasReal(): boolean;
   isConnected(): boolean;
+  /** True iff the underlying Web Bluetooth GATT link is currently physically
+   *  connected — narrower than isConnected() (which also requires `live`).
+   *  Never throws (swallows to false internally). */
+  gattOk(): boolean;
+  /** Reconnects to the already-paired btDevice if the GATT link is down (or
+   *  immediately returns true without reconnecting if `force` is falsy and
+   *  the link is already up). Unlike connect(), does NOT open a new device
+   *  picker — safe to call unattended (e.g. from a timer), no user gesture
+   *  required. Resolves false if reconnection fails. */
+  ensure(force?: boolean): Promise<boolean>;
   deviceName(): string;
   connect(): Promise<boolean>;
   output(hex: string): Promise<boolean>;
