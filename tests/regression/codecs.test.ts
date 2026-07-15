@@ -74,6 +74,26 @@ describe('grid post-processing fx (thickenBits / denoiseBits)', () => {
   });
 });
 
+describe('image import conversion controls', () => {
+  it('applies inversion exactly once before shared post-processing', () => {
+    const src = new Uint8ClampedArray([
+      0, 0, 0, 255,       255, 255, 255, 255,
+      255, 255, 255, 255, 0, 0, 0, 255,
+    ]);
+    const run = (invert: boolean) => {
+      const inst = makeInstance(Component, {
+        state: { dither: false, invertConv: invert },
+        _srcData: src, _srcW: 2, _srcH: 2,
+      });
+      const converted = proto.imgToCells.call(inst, 2, 2, { preset: 'detail', threshold: 50, invert }, null).cells;
+      return proto.applyConv.call(inst, converted, 2, 2);
+    };
+    const normal = run(false);
+    const inverted = run(true);
+    expect(Array.from(inverted as Uint8Array)).toEqual(Array.from(normal as Uint8Array, (cell) => cell ^ 1));
+  });
+});
+
 describe('buildLibraryAsset — Library Asset v1 export (banaPrintCheck fixed)', () => {
   // banaPrintCheck was missing on earlier mains (buildLibraryAsset threw); it
   // is now implemented, and this fixture was consciously regenerated with
