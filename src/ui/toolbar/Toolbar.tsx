@@ -78,8 +78,12 @@ export function Toolbar({ labels }: ToolbarProps) {
   const setActiveSize = isEraser ? setEraserSize : setStrokeSize;
   const thicknessLabel = isEraser ? ((labels?.eraserL as string) || 'Eraser size') : ((labels?.strokeL as string) || 'Line thickness');
 
-  const doUndo = () => { undo(); store.announce((labels?.aUndo as string) || 'Undone'); };
-  const doRedo = () => { redo(); store.announce((labels?.aRedo as string) || 'Redone'); };
+  // Both announce() (screen-reader live region) and toastMsg() (visible
+  // pill, see ui/toast/Toast.tsx) fire together for the same event -- the
+  // monolith's undo()/redo() call this.say(msg) + this.toastMsg(msg) as one
+  // pair, never one without the other.
+  const doUndo = () => { undo(); const msg = (labels?.aUndo as string) || 'Undone'; store.announce(msg); store.toastMsg(msg); };
+  const doRedo = () => { redo(); const msg = (labels?.aRedo as string) || 'Redone'; store.announce(msg); store.toastMsg(msg); };
   const doFlipH = () => { store.flipHoriz(); store.announce((labels?.aFlipH as string) || 'Flipped horizontally'); };
   const doFlipV = () => { store.flipVert(); store.announce((labels?.aFlipV as string) || 'Flipped vertically'); };
   const doInvert = () => { store.invertAll(); store.announce((labels?.aInvert as string) || 'Inverted'); };

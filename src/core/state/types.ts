@@ -99,4 +99,11 @@ export interface EditorSnapshot {
    *  that doc comment). Never shown while recoverOffer is true (same
    *  screen slot, higher-priority banner). */
   emptyHintOn: boolean;
+  /** Visible toast text (monolith's state.toast, set via toastMsg()), or
+   *  null when none is showing. Distinct from `announce`: this is the
+   *  sighted-user visual pill (see ui/toast/Toast.tsx); announce is the
+   *  screen-reader-only live region. The monolith shows both for the same
+   *  event (see its toastMsg()/say() call sites) -- never one without the
+   *  other -- so every call site that sets one sets the other too. */
+  toast: string | null;
 }

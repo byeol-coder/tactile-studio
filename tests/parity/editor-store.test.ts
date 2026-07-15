@@ -409,3 +409,59 @@ describe('EditorStore — corpusGoPage (multi-page corpus navigation)', () => {
     expect(store.getSnapshot().corpusCtx).toBeNull();
   });
 });
+
+describe('EditorStore — toastMsg (monolith toastMsg() port, backs ui/toast/Toast.tsx)', () => {
+  it('sets the toast text on the snapshot and auto-clears it after 2600ms', () => {
+    vi.useFakeTimers();
+    try {
+      const store = new EditorStore(createDocument('doc', 10, 10));
+      store.toastMsg('Undone');
+      expect(store.getSnapshot().toast).toBe('Undone');
+      vi.advanceTimersByTime(2599);
+      expect(store.getSnapshot().toast).toBe('Undone');
+      vi.advanceTimersByTime(1);
+      expect(store.getSnapshot().toast).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a second call before the first clears resets the timer rather than stacking (verbatim clearTimeout behavior)', () => {
+    vi.useFakeTimers();
+    try {
+      const store = new EditorStore(createDocument('doc', 10, 10));
+      store.toastMsg('Undone');
+      vi.advanceTimersByTime(2000);
+      store.toastMsg('Redone');
+      vi.advanceTimersByTime(2000); // 4000ms since the first call, 2000ms since the second
+      expect(store.getSnapshot().toast).toBe('Redone'); // still showing -- reset, not stacked/raced
+      vi.advanceTimersByTime(600); // 2600ms since the second call
+      expect(store.getSnapshot().toast).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('is null by default, and undo()/redo() themselves do not set it (UI layer owns the localized message, same convention as announce())', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    expect(store.getSnapshot().toast).toBeNull();
+    store.mutateActiveCells((cells) => { cells[0] = 1; });
+    store.undo();
+    expect(store.getSnapshot().toast).toBeNull();
+  });
+
+  it('dispose() cancels a pending toast timer (no update-after-dispose, mirrors the sessionAutosaveTimer cleanup)', () => {
+    vi.useFakeTimers();
+    try {
+      const store = new EditorStore(createDocument('doc', 10, 10));
+      store.toastMsg('Undone');
+      store.dispose();
+      expect(() => vi.advanceTimersByTime(3000)).not.toThrow();
+      // snapshot cache is whatever it was at dispose time -- the point is
+      // the timer callback never fires and never touches a torn-down store.
+      expect(store.getSnapshot().toast).toBe('Undone');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

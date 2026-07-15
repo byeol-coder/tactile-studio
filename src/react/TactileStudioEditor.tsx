@@ -28,6 +28,7 @@ import { ImportDialog } from '../ui/dialogs/ImportDialog.js';
 import { ExportMenu } from '../ui/dialogs/ExportMenu.js';
 import { CorpusSearchPanel } from '../ui/corpus/CorpusSearchPanel.js';
 import { LiveRegion } from '../ui/live-region/LiveRegion.js';
+import { Toast } from '../ui/toast/Toast.js';
 import { RecoveryBanner } from '../ui/recovery/RecoveryBanner.js';
 import { EmptyStateHint } from '../ui/hints/EmptyStateHint.js';
 import { createSessionRecoveryStorageAdapter } from '../storage/adapters/session-recovery-storage-adapter.js';
@@ -66,7 +67,7 @@ interface EditorBodyProps extends Pick<TactileStudioEditorProps, 'services' | 'l
 
 /** Internal — must render inside TactileStudioProvider to reach the store. */
 function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyProps) {
-  useKeyboardShortcuts();
+  useKeyboardShortcuts(labels);
   useHardwareKeyPanning(services.tactileDisplay);
   const { store } = useEditorStore();
   const [importOpen, setImportOpen] = useState(false);
@@ -143,6 +144,7 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
       </div>
 
       <LiveRegion />
+      <Toast />
       <RecoveryBanner labels={labels} />
       <EmptyStateHint labels={labels} />
 

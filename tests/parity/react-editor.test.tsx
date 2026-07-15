@@ -23,6 +23,8 @@ import { IconButton } from '../../src/ui/toolbar/IconButton.js';
 import { LiveRegion } from '../../src/ui/live-region/LiveRegion.js';
 import { DotPadPanel } from '../../src/ui/dotpad/DotPadPanel.js';
 import { RecoveryBanner } from '../../src/ui/recovery/RecoveryBanner.js';
+import { Toast } from '../../src/ui/toast/Toast.js';
+import { useKeyboardShortcuts } from '../../src/react/hooks/useKeyboardShortcuts.js';
 import { EmptyStateHint } from '../../src/ui/hints/EmptyStateHint.js';
 import { createDocument } from '../../src/core/document/document.js';
 import { createMemoryStorageAdapter } from '../../src/storage/adapters/memory-storage-adapter.js';
@@ -678,6 +680,102 @@ describe('Toolbar — shape flyout, thickness flyout, and live-region announceme
     expect(screen.getByRole('status').textContent).toBe('Inverted');
     fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
     expect(screen.getByRole('status').textContent).toBe('Canvas cleared');
+  });
+});
+
+describe('Toast — undo/redo visual feedback (ported from vanilla toastMsg(), see docs/known-issues.md #8)', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  // Uses TactileStudioProvider + Toolbar directly (not the full
+  // TactileStudioEditor) so EmptyStateHint's own role="status" banner
+  // (visible on a fresh untouched document) doesn't add a third status
+  // element and make these assertions ambiguous -- these tests care about
+  // LiveRegion/Toast specifically, not the empty-canvas hint.
+  function KeyboardHarness({ labels }: { labels?: Record<string, unknown> }) {
+    useKeyboardShortcuts(labels);
+    return null;
+  }
+
+  it('clicking Undo shows the toast alongside the live-region announcement (both fire together, same event), auto-clearing after 2600ms', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+        <LiveRegion />
+        <Toast />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Invert' })); // creates an undo entry
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    const shown = screen.getAllByRole('status');
+    expect(shown).toHaveLength(2); // LiveRegion + Toast
+    expect(shown.every((el) => el.textContent === 'Undone')).toBe(true);
+    act(() => { vi.advanceTimersByTime(2600); });
+    // Toast unmounts; LiveRegion stays (announce() never auto-clears, only
+    // toastMsg() does -- that's the whole distinction between the two).
+    const remaining = screen.getAllByRole('status');
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].textContent).toBe('Undone');
+  });
+
+  it('clicking Redo shows the toast', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+        <Toast />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Invert' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }));
+    expect(screen.getByRole('status').textContent).toBe('Redone');
+  });
+
+  it('a second Undo click while the toast is showing resets the auto-clear timer instead of racing/stacking (matches the monolith clearTimeout(this._toastT))', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+        <Toast />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Invert' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Invert' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    act(() => { vi.advanceTimersByTime(1000); });
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    act(() => { vi.advanceTimersByTime(2000); }); // 3000ms since the 1st click, 2000ms since the 2nd
+    expect(screen.getByRole('status').textContent).toBe('Undone'); // still showing
+    act(() => { vi.advanceTimersByTime(600); }); // 2600ms since the 2nd click
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
+  it('Ctrl+Z also shows the toast and announces -- closes a pre-existing gap where the keyboard shortcut path never called announce()/toastMsg() at all', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+        <LiveRegion />
+        <Toast />
+        <KeyboardHarness labels={{ aUndo: '실행 취소됨' }} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Invert' }));
+    fireEvent.keyDown(document, { key: 'z', ctrlKey: true });
+    const shown = screen.getAllByRole('status');
+    expect(shown).toHaveLength(2);
+    expect(shown.every((el) => el.textContent === '실행 취소됨')).toBe(true);
+  });
+
+  it('Ctrl+Z with an empty undo stack stays silent -- no toast, no announce (mirrors the monolith\'s own early-return on an empty stack)', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+        <LiveRegion />
+        <Toast />
+        <KeyboardHarness />
+      </TactileStudioProvider>,
+    );
+    fireEvent.keyDown(document, { key: 'z', ctrlKey: true });
+    expect(screen.getByRole('status').textContent).toBe(''); // only LiveRegion present; Toast renders nothing
   });
 });
 

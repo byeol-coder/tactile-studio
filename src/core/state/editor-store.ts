@@ -79,6 +79,8 @@ export class EditorStore {
   private pendingRecoverSnap: ParsedSessionSnapshot | null = null;
   private sessionAutosaveTimer: ReturnType<typeof setTimeout> | null = null;
   private emptyHintDismissed = false;
+  private toastText: string | null = null;
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(initialDocument: StudioDocument, opts: EditorStoreOptions = {}) {
     this.doc = initialDocument;
@@ -121,6 +123,7 @@ export class EditorStore {
       corpusCtx: this.corpusCtx,
       recoverOffer: this.recoverOffer,
       emptyHintOn: this.computeEmptyHintOn(),
+      toast: this.toastText,
     };
   }
 
@@ -446,6 +449,30 @@ export class EditorStore {
     this.notify();
   }
 
+  /** monolith toastMsg(msg): shows a transient visual toast (see
+   *  ui/toast/Toast.tsx), auto-clearing after 2600ms -- same timing as the
+   *  monolith's `setTimeout(() => this.setState({ toast: null }), 2600)`.
+   *  A second call before the first clears resets the timer (verbatim: the
+   *  monolith does `clearTimeout(this._toastT)` at the top of toastMsg,
+   *  so a rapid run of actions keeps extending/replacing the same toast
+   *  rather than stacking or racing). Core never owns i18n -- same
+   *  convention as announce(), callers pass an already-localized string.
+   *  Distinct from announce(): this is the sighted-user pill, announce is
+   *  the screen-reader live region; the monolith's call sites always fire
+   *  both together for the same event, and this port's call sites (see
+   *  Toolbar.tsx, useKeyboardShortcuts.ts) do the same rather than
+   *  reintroducing announce() as some general-purpose toast trigger. */
+  toastMsg(msg: string) {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastText = msg;
+    this.notify();
+    this.toastTimer = setTimeout(() => {
+      this.toastText = null;
+      this.toastTimer = null;
+      this.notify();
+    }, 2600);
+  }
+
   /** Host-facing: clears the dirty flag after a successful save(), without
    *  touching document content or history. */
   markSaved() {
@@ -547,12 +574,14 @@ export class EditorStore {
     this.notify();
   }
 
-  /** Cancels any pending debounced autosave. Call on unmount -- mirrors the
-   *  monolith's componentWillUnmount's clearTimeout(this._sessT). The store
-   *  has no other timers/subscriptions of its own to clean up. */
+  /** Cancels any pending debounced autosave and any pending toast
+   *  auto-clear timer. Call on unmount -- mirrors the monolith's
+   *  componentWillUnmount's clearTimeout(this._sessT)/clearTimeout(this._toastT). */
   dispose() {
     if (this.sessionAutosaveTimer) clearTimeout(this.sessionAutosaveTimer);
     this.sessionAutosaveTimer = null;
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = null;
   }
 
   // ── braille "Apply" (verbatim port of the monolith's applyField) ─────────
