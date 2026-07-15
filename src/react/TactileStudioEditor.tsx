@@ -29,6 +29,7 @@ import { ExportMenu } from '../ui/dialogs/ExportMenu.js';
 import { CorpusSearchPanel } from '../ui/corpus/CorpusSearchPanel.js';
 import { LiveRegion } from '../ui/live-region/LiveRegion.js';
 import { RecoveryBanner } from '../ui/recovery/RecoveryBanner.js';
+import { EmptyStateHint } from '../ui/hints/EmptyStateHint.js';
 import { createSessionRecoveryStorageAdapter } from '../storage/adapters/session-recovery-storage-adapter.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { useHardwareKeyPanning } from './hooks/useHardwareKeyPanning.js';
@@ -143,6 +144,7 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
 
       <LiveRegion />
       <RecoveryBanner labels={labels} />
+      <EmptyStateHint labels={labels} />
 
       <ImportDialog open={importOpen} labels={labels} onClose={() => setImportOpen(false)} imageProcessing={services.imageProcessing} />
     </div>

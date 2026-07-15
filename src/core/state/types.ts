@@ -92,4 +92,11 @@ export interface EditorSnapshot {
    *  autosave never overwrites the pending snapshot -- same guard as the
    *  monolith's _saveSession early-return. */
   recoverOffer: boolean;
+  /** monolith's _emptyHintOn(dots): first-run guidance for an untouched,
+   *  single-page, blank document -- see EditorStore's computeSnapshot for
+   *  the exact condition and how it differs from the monolith's (which
+   *  additionally checked !fileName; this port uses !dirty instead, see
+   *  that doc comment). Never shown while recoverOffer is true (same
+   *  screen slot, higher-priority banner). */
+  emptyHintOn: boolean;
 }

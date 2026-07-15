@@ -22,6 +22,8 @@ import { Tooltip } from '../../src/ui/tooltip/Tooltip.js';
 import { IconButton } from '../../src/ui/toolbar/IconButton.js';
 import { LiveRegion } from '../../src/ui/live-region/LiveRegion.js';
 import { DotPadPanel } from '../../src/ui/dotpad/DotPadPanel.js';
+import { RecoveryBanner } from '../../src/ui/recovery/RecoveryBanner.js';
+import { EmptyStateHint } from '../../src/ui/hints/EmptyStateHint.js';
 import { createDocument } from '../../src/core/document/document.js';
 import { createMemoryStorageAdapter } from '../../src/storage/adapters/memory-storage-adapter.js';
 import { createMockDotPadAdapter } from '../../src/device/dotpad/mock-adapter.js';
@@ -1170,6 +1172,77 @@ describe('TactileStudioEditor — onExport callback', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Export' }));
     fireEvent.click(screen.getByRole('menuitem', { name: /DTMS/ }));
     expect(onExport).toHaveBeenCalledWith(expect.objectContaining({ format: 'dtms' }));
+  });
+});
+
+describe('EmptyStateHint — first-run empty-canvas guidance (ported from vanilla 8e393f3)', () => {
+  it('shows on a fresh, untouched, single-page document', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <EmptyStateHint labels={{ emptyHintMsg: 'Draw something!' }} />
+      </TactileStudioProvider>,
+    );
+    expect(screen.getByText('Draw something!')).toBeTruthy();
+  });
+
+  it('disappears the moment the user draws a dot', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <EmptyStateHint labels={{ emptyHintMsg: 'Draw something!' }} />
+      </TactileStudioProvider>,
+    );
+    expect(screen.queryByText('Draw something!')).toBeTruthy();
+    act(() => { capturedStore!.mutateActiveCells((cells) => { cells[0] = 1; }); });
+    expect(screen.queryByText('Draw something!')).toBeNull();
+  });
+
+  it('disappears after adding a page (no longer single-page), and after loading content', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <EmptyStateHint labels={{ emptyHintMsg: 'Draw something!' }} />
+      </TactileStudioProvider>,
+    );
+    act(() => { capturedStore!.addPage(); });
+    expect(screen.queryByText('Draw something!')).toBeNull();
+  });
+
+  it('Close dismisses the hint for the rest of the session, even back on a blank single page', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <EmptyStateHint labels={{ emptyHintMsg: 'Draw something!', close: 'Close' }} />
+      </TactileStudioProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByText('Draw something!')).toBeNull();
+    // still dismissed even though the document is still blank/single-page
+    expect(capturedStore!.getSnapshot().emptyHintOn).toBe(false);
+  });
+
+  it('never co-shows with the recovery banner (recovery takes the same screen slot)', async () => {
+    const snapshot = {
+      v: 1 as const, savedAt: 1, gridW: 10, gridH: 10, output: '60' as const, pageIndex: 0,
+      fileName: 'recovered', brailleLang: 'ko-g1', pages: ['x'], audio: {}, vectors: {},
+      liveCells: [new Uint8Array(100)],
+    };
+    const sessionRecovery = { load: async () => snapshot, save: async () => true, clear: async () => {} };
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)} sessionRecovery={sessionRecovery}>
+        <RecoveryBanner labels={{ recoverTitle: 'Restore?' }} />
+        <EmptyStateHint labels={{ emptyHintMsg: 'Draw something!' }} />
+      </TactileStudioProvider>,
+    );
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    expect(screen.getByText('Restore?')).toBeTruthy();
+    expect(screen.queryByText('Draw something!')).toBeNull();
   });
 });
 

@@ -78,6 +78,7 @@ export class EditorStore {
   private recoverOffer = false;
   private pendingRecoverSnap: ParsedSessionSnapshot | null = null;
   private sessionAutosaveTimer: ReturnType<typeof setTimeout> | null = null;
+  private emptyHintDismissed = false;
 
   constructor(initialDocument: StudioDocument, opts: EditorStoreOptions = {}) {
     this.doc = initialDocument;
@@ -119,7 +120,26 @@ export class EditorStore {
       announce: this.announceText,
       corpusCtx: this.corpusCtx,
       recoverOffer: this.recoverOffer,
+      emptyHintOn: this.computeEmptyHintOn(),
     };
+  }
+
+  /** monolith _emptyHintOn(dots): true only for an untouched, single-page,
+   *  blank document, and only when no higher-priority banner (recovery) is
+   *  showing. ADAPTATION: the monolith additionally required `!fileName`
+   *  (never named/saved) -- this port has no nullable "unnamed" concept on
+   *  StudioDocument.title (always a required string), so `!dirty` is used
+   *  instead. In practice this is at least as strict: loadPages() (asset
+   *  import, corpus load, etc.) always marks the store dirty even when the
+   *  loaded content happens to be blank, so a loaded-but-empty document
+   *  correctly still suppresses the hint, same as the monolith's fileName
+   *  check intended. */
+  private computeEmptyHintOn(): boolean {
+    if (this.recoverOffer || this.emptyHintDismissed || this.dirty) return false;
+    if (this.doc.pages.length !== 1) return false;
+    const cells = activeCells(this.doc);
+    for (let i = 0; i < cells.length; i++) if (cells[i]) return false;
+    return true;
   }
 
   private notify() {
@@ -514,6 +534,17 @@ export class EditorStore {
     this.pendingRecoverSnap = null;
     this.notify();
     await this.sessionRecovery?.clear();
+  }
+
+  /** Host-facing: dismiss the first-run empty-canvas hint without drawing
+   *  anything (an escape hatch for someone exploring the UI before
+   *  drawing). Mirrors the monolith's dismissEmptyHint -- in-memory only,
+   *  not persisted, matching the monolith (it resets on next mount, same
+   *  as here). */
+  dismissEmptyHint() {
+    if (this.emptyHintDismissed) return;
+    this.emptyHintDismissed = true;
+    this.notify();
   }
 
   /** Cancels any pending debounced autosave. Call on unmount -- mirrors the
