@@ -7,6 +7,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "capture:baseline": "node tools/capture-baseline.mjs",
     "check:xdc-syntax": "node tools/check-xdc-syntax.mjs",
@@ -19,10 +21,14 @@
     "build:dev-shell": "vite build",
     "build:lib": "vite build --config vite.lib.config.ts",
     "build:types": "tsc -p tsconfig.build.json",
-    "build:package": "npm run build:lib && npm run build:types"
+    "build:package": "npm run build:lib && npm run build:types",
+    "check:package": "node tools/check-package-consumer.mjs"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.54.1",
+    "@vitest/coverage-v8": "^2.1.9",
     "@types/node": "^22.20.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",

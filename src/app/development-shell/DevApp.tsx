@@ -19,7 +19,7 @@ export function DevApp() {
   const tactileDisplay = React.useMemo(() => createMockDotPadAdapter(), []);
 
   return (
-    <div style={{ padding: 16, fontFamily: 'sans-serif' }}>
+    <main style={{ padding: 16, fontFamily: 'sans-serif', maxWidth: '100%', overflow: 'hidden' }}>
       <h1 style={{ fontSize: 16 }}>Tactile Studio — development shell</h1>
       <TactileStudioEditor
         initialDocument={sampleDocument}
@@ -28,6 +28,6 @@ export function DevApp() {
         onDirtyChange={(dirty) => console.log('[dev-shell] dirty:', dirty)}
         onError={(err) => console.error('[dev-shell] error:', err)}
       />
-    </div>
+    </main>
   );
 }

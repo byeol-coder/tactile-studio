@@ -1,2 +1,33 @@
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Local secret/config overrides
+*.local
+*.secret
+*.secrets
+secrets/
+
+# Common credentials
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+credentials*.json
+
+# Dependencies and build output
 node_modules/
 dist/
+build/
+coverage/
+_site/
+*.tgz
+
+# Logs and OS/editor files
+*.log
+.DS_Store
+.vscode/
+.idea/

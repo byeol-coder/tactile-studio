@@ -1258,6 +1258,7 @@ describe('TactileStudioEditor — hardware key panning (PanningLeft/Right -> pag
 describe('TactileStudioEditor — onExport callback', () => {
   it('calls onExport after a DTMS export completes', async () => {
     const onExport = vi.fn();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:fake');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     render(

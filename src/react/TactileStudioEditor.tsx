@@ -129,7 +129,7 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap', maxWidth: '100%' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <PagePanel labels={labels} />
           {services.corpus && <CorpusSearchPanel corpus={services.corpus} labels={labels} />}

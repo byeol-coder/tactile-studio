@@ -8,5 +8,17 @@ export default defineConfig({
     environment: 'jsdom',
     // Regression fixtures are exact-value comparisons; no snapshot auto-update.
     update: false,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/app/**', 'src/**/*.d.ts'],
+      thresholds: {
+        lines: 65,
+        functions: 65,
+        statements: 65,
+        branches: 55,
+      },
+    },
   },
 });
