@@ -35,9 +35,9 @@ function cellPx(gridW: number): number {
 }
 
 type DragState =
-  | { mode: 'paint'; value: 0 | 1; size: number; lastX: number; lastY: number }
-  | { mode: 'shape'; x0: number; y0: number; preview: Set<number> }
-  | { mode: 'sel'; x0: number; y0: number }
+  | { mode: 'paint'; value: 0 | 1; size: number; lastX: number; lastY: number; pointerId: number }
+  | { mode: 'shape'; x0: number; y0: number; preview: Set<number>; pointerId: number }
+  | { mode: 'sel'; x0: number; y0: number; pointerId: number }
   | null;
 
 export interface StudioCanvasProps {
@@ -122,6 +122,17 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
   // bypassing this effect entirely.
   useEffect(() => { draw(); }, [draw, snapshot.rev, snapshot.pageIndex]);
 
+  // Page-switch drag/poly guard: a drag or in-progress polygon belongs to
+  // the PAGE it started on, keyed by canvas-local refs (not store state) —
+  // switching pages must not let it bleed into the new page's canvas.
+  // Vanilla added this alongside the pointerId guards above (29ef81f);
+  // ported together since both close the same class of gap (stale gesture
+  // state surviving a transition it shouldn't survive).
+  useEffect(() => {
+    dragRef.current = null;
+    polyRef.current = { points: [], preview: new Set() };
+  }, [snapshot.pageIndex]);
+
   useEffect(() => () => { if (rafRef.current != null) cancelAnimationFrame(rafRef.current); }, []);
 
   const scheduleDragRedraw = useCallback(() => {
@@ -193,6 +204,11 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (e.button !== 0) return;
+    // A second pointer touching down while a drag is already in progress
+    // (classic case: a resting palm while drawing with a stylus, or an
+    // accidental second finger) must not hijack/reset it — ignore until the
+    // active pointer lifts (onPointerUp clears dragRef).
+    if (dragRef.current && e.pointerId !== dragRef.current.pointerId) return;
     canvasRef.current?.focus();
     const [x, y] = evCell(e);
     const tool = snapshot.tool;
@@ -206,14 +222,14 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
       store.beginStroke();
       const plot = makeBrush((px, py) => { if (inBounds(gridW, gridH, px, py)) store.getActiveCells()[cellIndex(gridW, px, py)] = value; }, size);
       store.paintDuring(() => plot(x, y));
-      dragRef.current = { mode: 'paint', value, size, lastX: x, lastY: y };
+      dragRef.current = { mode: 'paint', value, size, lastX: x, lastY: y, pointerId: e.pointerId };
       store.setCursor(x, y);
       scheduleDragRedraw();
       return;
     }
 
     if (tool === 'line' || tool === 'rect' || tool === 'ellipse') {
-      dragRef.current = { mode: 'shape', x0: x, y0: y, preview: new Set([cellIndex(gridW, x, y)]) };
+      dragRef.current = { mode: 'shape', x0: x, y0: y, preview: new Set([cellIndex(gridW, x, y)]), pointerId: e.pointerId };
       store.setCursor(x, y);
       scheduleDragRedraw();
       return;
@@ -226,7 +242,7 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
     }
 
     if (tool === 'select') {
-      dragRef.current = { mode: 'sel', x0: x, y0: y };
+      dragRef.current = { mode: 'sel', x0: x, y0: y, pointerId: e.pointerId };
       store.setSelRect({ x0: x, y0: y, x1: x, y1: y });
       store.setCursor(x, y);
       return;
@@ -248,6 +264,7 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (dragRef.current && e.pointerId !== dragRef.current.pointerId) return;
     const [x, y] = evCell(e);
     const drag = dragRef.current;
     if (!drag) {
@@ -272,7 +289,8 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
     }
   };
 
-  const onPointerUp = () => {
+  const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (dragRef.current && e.pointerId !== dragRef.current.pointerId) return;
     const drag = dragRef.current;
     dragRef.current = null;
     if (!drag) return;

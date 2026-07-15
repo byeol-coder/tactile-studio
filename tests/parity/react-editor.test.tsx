@@ -202,6 +202,78 @@ describe('StudioCanvas — pointer-to-store wiring (pen tool)', () => {
     expect(Array.from(cells).every((v) => v === 1)).toBe(true); // whole empty grid floods to 1
     expect((capturedStore as any).history.undoStack.length).toBe(1);
   });
+
+  it('a second pointer touching down mid-drag does not hijack it (ported from vanilla 29ef81f)', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Capture />
+        <StudioCanvas />
+      </TactileStudioProvider>,
+    );
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
+
+    firePointerEvent(canvas, 'pointerdown', { clientX: 20, clientY: 20, pointerId: 1 }); // start drawing at (1,1)
+    // A second pointer (e.g. a resting palm) touches down elsewhere -- must be ignored
+    firePointerEvent(canvas, 'pointerdown', { clientX: 180, clientY: 180, pointerId: 2 });
+    firePointerEvent(canvas, 'pointermove', { clientX: 40, clientY: 20, pointerId: 1 }); // continue pointer 1's stroke to (2,1)
+    firePointerEvent(canvas, 'pointerup', { clientX: 40, clientY: 20, pointerId: 1 });
+
+    const cells = capturedStore!.getActiveCells();
+    expect(cells[1 * 10 + 1]).toBe(1); // (1,1) from pointer 1's down
+    expect(cells[1 * 10 + 2]).toBe(1); // (2,1) from pointer 1's continued move
+    expect(cells[9 * 10 + 9]).toBe(0); // (9,9) from the hijacking pointer 2 -- must NOT have painted
+    expect((capturedStore as any).history.undoStack.length).toBe(1); // one stroke, not two
+
+    // Pointer 2's own up (it was never a drag owner) must also be a no-op, not a crash
+    expect(() => firePointerEvent(canvas, 'pointerup', { clientX: 180, clientY: 180, pointerId: 2 })).not.toThrow();
+  });
+
+  it('a stray pointermove/up for the wrong pointerId while no drag is active is a harmless no-op', () => {
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <StudioCanvas />
+      </TactileStudioProvider>,
+    );
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
+    expect(() => {
+      firePointerEvent(canvas, 'pointermove', { clientX: 10, clientY: 10, pointerId: 7 });
+      firePointerEvent(canvas, 'pointerup', { clientX: 10, clientY: 10, pointerId: 7 });
+    }).not.toThrow();
+  });
+
+  it('switching pages mid-drag clears the stale drag so it cannot bleed onto the new page (ported from vanilla 29ef81f)', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Capture />
+        <StudioCanvas />
+      </TactileStudioProvider>,
+    );
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 200, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 200, configurable: true });
+
+    firePointerEvent(canvas, 'pointerdown', { clientX: 20, clientY: 20, pointerId: 1 }); // start a stroke on page 1
+    act(() => { capturedStore!.addPage(); }); // switch to a fresh page mid-drag (e.g. a keyboard shortcut)
+    // The old drag must not still be "live": lifting the (stale) pointer must not
+    // paint onto the new page or throw.
+    expect(() => firePointerEvent(canvas, 'pointerup', { clientX: 60, clientY: 60, pointerId: 1 })).not.toThrow();
+    const newPageCells = capturedStore!.getActiveCells();
+    expect(Array.from(newPageCells).every((v) => v === 0)).toBe(true); // untouched blank page
+
+    // A fresh drag on the new page with the SAME pointerId must work normally
+    // (proves the guard was reset, not permanently stuck).
+    firePointerEvent(canvas, 'pointerdown', { clientX: 20, clientY: 20, pointerId: 1 });
+    firePointerEvent(canvas, 'pointerup', { clientX: 20, clientY: 20, pointerId: 1 });
+    expect(capturedStore!.getActiveCells()[1 * 10 + 1]).toBe(1);
+  });
 });
 
 describe('StudioCanvas — poly tool wiring', () => {
