@@ -43,7 +43,7 @@
 - **미사용 state 필드 3개 제거**: `converting`, `convertDone`, `connType`(쓰기만 있고 읽기 0건).
 - 제거 후 `<script data-dc-script>` 블록 **구문 검사 통과**, 브라우저 콘솔 에러/경고 0건, 이미지 변환 다이얼로그·속성 pane 정상 렌더 확인.
 
-> 검증: 로컬 프리뷰(`node .claude/serve.mjs`, :8777) 리로드 → 콘솔 에러 없음 / 커서 도구 부재 / 접근성 모드 토글 시 커서 복귀 / 저장 표시 기본 숨김 확인.
+> 검증: 로컬 프리뷰(`python3 -m http.server 8000`, <http://localhost:8000/>) 리로드 → 콘솔 에러 없음 / 커서 도구 부재 / 접근성 모드 토글 시 커서 복귀 / 저장 표시 기본 숨김 확인. `index.html`을 `file://`로 직접 열지 말 것: liblouis 점자 테이블은 `fetch()`로 로드되므로 브라우저 보안 정책에 막힐 수 있습니다.
 
 ---
 

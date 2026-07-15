@@ -1,0 +1,34 @@
+{
+  "w": 60,
+  "h": 40,
+  "scenarios": [
+    {
+      "seed": 42,
+      "density": 0.2,
+      "x": 30,
+      "y": 20,
+      "resultHex": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcffffffffff37ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "seed": 42,
+      "density": 0.2,
+      "x": 0,
+      "y": 0,
+      "resultHex": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcffffffffff37ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "seed": 11,
+      "density": 0.35,
+      "x": 59,
+      "y": 39,
+      "resultHex": "084a40874aaac8feffffffffffffffffffffffffffffdf89e8cf7818cc26edefca9eeaffffffffdfffffffffffffffffffffffffffffffffbfb60226fffffffffffffffffffffffffffffbffffffffffffffffffffffffff6d807fffffffffffffffffffffffffffffffffffffffffffffffffffffffef04a1ffffffffffffffffffffffdffdffffffcf98f3ffffffffffdfffffcffff3fffffffffffffffffffffffffffffffffdffffffffffffffffffffff7ffffffffffffeffffffffff9fffffffffffffffffffffffffffffffffff8ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffff37f5ffffff7f77f777ffffffffffffffffff999b7b77f7ffff"
+    },
+    {
+      "seed": 7,
+      "density": 0.05,
+      "x": 30,
+      "y": 20,
+      "resultHex": "010000000000000060400000000000002200300010000000000000000010200200100000080c00040000000000000000100000800000008008400800000000800000000000000080019000000000000020880000000000000008000000000000020010000010000000000080000000000000010020400000080000000000000000080000020100000082000000400004800000002000000080000000400004018000000808012200000104000800400002000200010048004080402004000400000080000000040040800000802000000000000800000201102002000000000000000120040000002010000000002000000000000000000200800000001000000000000200000060020010800000000c0000a000001000001008000000000000008044088010001013040080"
+    }
+  ]
+}

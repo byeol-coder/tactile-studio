@@ -1,0 +1,85 @@
+{
+  "name": "tactile-studio",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Tactile Studio — migrating from a buildless x-dc CDN runtime to a React + Vite TypeScript monorepo. This package field describes the NEW library surface (src/core, src/codecs, src/device, src/storage, src/react); the deployed vanilla app (index.html/support.js/vendor) is a separate, unrelated static site in the same repo. private:true is intentional — not yet published to a registry.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:watch": "vitest",
+    "capture:baseline": "node tools/capture-baseline.mjs",
+    "check:xdc-syntax": "node tools/check-xdc-syntax.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "capture:core-baseline": "node tools/capture-core-baseline.mjs",
+    "capture:codecs-baseline": "node tools/capture-codecs-baseline.mjs",
+    "capture:codecs-b-baseline": "node --experimental-strip-types tools/capture-codecs-b-baseline.mjs",
+    "dev": "vite",
+    "build": "npm run build:dev-shell && npm run build:package",
+    "build:dev-shell": "vite build",
+    "build:lib": "vite build --config vite.lib.config.ts",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build:package": "npm run build:lib && npm run build:types",
+    "check:package": "node tools/check-package-consumer.mjs"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.54.1",
+    "@vitest/coverage-v8": "^2.1.9",
+    "@types/node": "^22.20.1",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "~5.6",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
+  },
+  "exports": {
+    "./core": {
+      "types": "./dist/types/core/index.d.ts",
+      "import": "./dist/lib/core/index.js"
+    },
+    "./codecs": {
+      "types": "./dist/types/codecs/index.d.ts",
+      "import": "./dist/lib/codecs/index.js"
+    },
+    "./device": {
+      "types": "./dist/types/device/index.d.ts",
+      "import": "./dist/lib/device/index.js"
+    },
+    "./storage": {
+      "types": "./dist/types/storage/index.d.ts",
+      "import": "./dist/lib/storage/index.js"
+    },
+    "./react": {
+      "types": "./dist/types/react/index.d.ts",
+      "import": "./dist/lib/react/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/lib",
+    "dist/types"
+  ],
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

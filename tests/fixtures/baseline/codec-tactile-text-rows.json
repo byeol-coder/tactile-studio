@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "text": "ABC",
+      "opts": {},
+      "expectedRows": 11
+    },
+    {
+      "text": "안녕",
+      "opts": {},
+      "expectedRows": 15
+    },
+    {
+      "text": "Hi there",
+      "opts": {
+        "size": "small"
+      },
+      "expectedRows": 7
+    },
+    {
+      "text": "세로",
+      "opts": {
+        "orient": "vertical"
+      },
+      "expectedRows": 15
+    },
+    {
+      "text": "Big",
+      "opts": {
+        "size": "large"
+      },
+      "expectedRows": 16
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Studio CI (React/TS library)"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -16,16 +18,21 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: WCAG contrast gate
         run: node scripts/check-contrast.mjs
       - name: Token integrity gate
         run: node scripts/migrate-tokens.mjs --dry
+      - name: Prepare minimal static site artifact
+        run: node tools/prepare-pages.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
@@ -33,7 +40,7 @@ jobs:
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         name: Deploy
         uses: actions/deploy-pages@v4

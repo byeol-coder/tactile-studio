@@ -1,0 +1,98 @@
+{
+  "gradient-100x80": {
+    "graySha256": "0f3225ecfcf2bfcd557838eebf998f2b47b5c29b39a72a8ce7353141b9130e7f",
+    "grayLength": 8000,
+    "otsu": 125,
+    "downGridSha256": "4ca1bc545e424fefef1f70b5fb43479826cb68049a403537ac6efbbaa9d2bd8d",
+    "downBox": {
+      "ox": 5,
+      "oy": 0,
+      "dw": 50,
+      "dh": 40
+    },
+    "downCropGridSha256": "fda4235513966f5d507b60431f5de1fbeb4a6f161abe6d7327ed9de0e2505f99",
+    "downCropBox": {
+      "ox": 5,
+      "oy": 0,
+      "dw": 50,
+      "dh": 40
+    },
+    "sobelSha256": "f9583c9031e9776bff3e331a778128149efc87f1293d55aac4c7af0f1e7a03be",
+    "thresholdedSha256": "44ad18c17b0715ae5377951c1bf865fbd50b371241e003f33c7424260a1ed798",
+    "dilatedSha256": "8d9c7d5b52a7e6dbc4c986461e5a902dd321cac554608b984d3c99f453b2b864",
+    "removedCells": "44ad18c17b0715ae5377951c1bf865fbd50b371241e003f33c7424260a1ed798",
+    "removedCount": 0
+  },
+  "checker-100x80": {
+    "graySha256": "0ad1a5a51de3c1f8725ae67ad77c96ad8616708907e0b35f336f366831ccb4bf",
+    "grayLength": 8000,
+    "otsu": 127,
+    "downGridSha256": "5c5bc525e384a65c14bea17a0fd152d9d9fc4c9a46f2eb61746d65c89a92b366",
+    "downBox": {
+      "ox": 5,
+      "oy": 0,
+      "dw": 50,
+      "dh": 40
+    },
+    "downCropGridSha256": "b3a7795c140c98c0a5ccfd87d696e51fc824ac987384f15072501ee2bab11160",
+    "downCropBox": {
+      "ox": 5,
+      "oy": 0,
+      "dw": 50,
+      "dh": 40
+    },
+    "sobelSha256": "a50e4ded7ebb448a82fdaa323f77c7d35bc698be93e7a4acb5faac0f002ecf82",
+    "thresholdedSha256": "4fbb2efeb7ee703c956ce124d2aaf6791bd29d3770ec57b06a99b813321c7b17",
+    "dilatedSha256": "cb0e01a850fd066ecc35a23891d3c7789bf03348d4eb525b23800a047722172a",
+    "removedCells": "4fbb2efeb7ee703c956ce124d2aaf6791bd29d3770ec57b06a99b813321c7b17",
+    "removedCount": 0
+  },
+  "circle-100x80": {
+    "graySha256": "0e61f1432538e077044b6ae939fed791e1bd99b98c9f451a163fe55d1dfb9838",
+    "grayLength": 8000,
+    "otsu": 130,
+    "downGridSha256": "da0d12dbdbbbade50ca02a737bdacb8a74f83478692c212d29c42ebc24e921b7",
+    "downBox": {
+      "ox": 5,
+      "oy": 0,
+      "dw": 50,
+      "dh": 40
+    },
+    "downCropGridSha256": "86adb7d77231e28415a424f02b0d07a8ea5633c8efb2bfd7e711495ffeb70fec",
+    "downCropBox": {
+      "ox": 5,
+      "oy": 0,
+      "dw": 50,
+      "dh": 40
+    },
+    "sobelSha256": "4af5f94777abc11f510ad82bcafb4b10d4f2ff5fc77d516439b3cc18185fa0b1",
+    "thresholdedSha256": "9511463c66df45ca4f0ae1a7fb947fe9b44672eb6e256a5b3b88c35c68f7dfeb",
+    "dilatedSha256": "063a142564c48718ebac402da5c3b6a1c70878cd8c2f442a4639dbae6b76296f",
+    "removedCells": "9511463c66df45ca4f0ae1a7fb947fe9b44672eb6e256a5b3b88c35c68f7dfeb",
+    "removedCount": 0
+  },
+  "transparent-diag-60x60": {
+    "graySha256": "ba33b3fe33a979beb9056684209c708ebaa6b3e7a0e29b30c3f8526df0ee4f87",
+    "grayLength": 3600,
+    "otsu": 127,
+    "downGridSha256": "8ffd52e3a04ea2c17348375336fb2ffd087da3ef0c722cd5580aa68c28170f74",
+    "downBox": {
+      "ox": 10,
+      "oy": 0,
+      "dw": 40,
+      "dh": 40
+    },
+    "downCropGridSha256": "5d06b8bd4acfcd8d14b948e9c0d1b25fbec8665d77529353f5b0872e32a5fbad",
+    "downCropBox": {
+      "ox": 10,
+      "oy": 0,
+      "dw": 40,
+      "dh": 40
+    },
+    "sobelSha256": "eb72da3b7d42213a7c1092c6a1d0fc698d2dea3e129869203443768001facf8c",
+    "thresholdedSha256": "46f9c7fa0f22250426ebddd86e3a24c33c222e1900b1d739a943edcda147f894",
+    "dilatedSha256": "7bbe7429d91bfc44ab17cbd0f2510573f20f25a536944c6305dd883587f9cdd5",
+    "removedCells": "a19a490fca033404dad8cdef886a3015ae3a531a0fba9b13f6efadccb549ab43",
+    "removedCount": 40
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "cases": [
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 16,
+      "y0": 8,
+      "x1": 42,
+      "y1": 26,
+      "line": "6d6203557786c425fa84015e80d2fb0e31b2545128cf361962c01ad9aeba2ba5",
+      "rect": "224339a58cf01d696b395a0d96929ee32f7bd27319328db155d890376f350a9f",
+      "ellipse": "c70bad55ba45b636b8e2a0ed946cfb3efb18d18808feca937a4b685cdbddf2d0"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 3,
+      "y0": 23,
+      "x1": 9,
+      "y1": 8,
+      "line": "4bb4cb85ce128d02567b2919b33ff134a4490750d393fd31109d6c1a2621614e",
+      "rect": "d7c6fca874d9cfd6384546a620e889673c2c102cd6a31c2ddd37154296ea48d5",
+      "ellipse": "e72844d4e306330ab62bea56a4f5e20e6a27b724a84f6137d06b0bcaf5bc103d"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 29,
+      "y0": 30,
+      "x1": 39,
+      "y1": 21,
+      "line": "c3e652ca1c062ec673c309b8be279a0ae8672ff7c94cdc85d57f85685a97fd13",
+      "rect": "415152866976c2bc1eb8a30ce234656954bddce92d6b607317423de94e9d673d",
+      "ellipse": "07439b366978463c5853ffd5042796a28ab9df5ca42639a244a48173add38292"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 24,
+      "y0": 9,
+      "x1": 49,
+      "y1": 26,
+      "line": "6f27cdf3e9817583da331805528864702f1fcff906fcb2488c3590d227bb48e1",
+      "rect": "ccae47ef35795b3985d820f1632fd663d8d1a6b27194f6e4ba4d6ff5ab39937d",
+      "ellipse": "cc6a98b93ed5e53dffe99df1a77d027b2db69d866cb6394a26e91793ef693604"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 32,
+      "y0": 25,
+      "x1": 41,
+      "y1": 36,
+      "line": "9b5ae1131decbab5b3c5e015fc01e8852ef124c64d407eec83e6198759a40577",
+      "rect": "913535a0dfac9ad82deacfc87dcbdf6fe0064a3d0c17e6de0341df97cff62d27",
+      "ellipse": "9a452d631cb50b7316aaa047af403906ac6a2b91be76fcc77ef5ae40f0bd8eea"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 53,
+      "y0": 25,
+      "x1": 25,
+      "y1": 15,
+      "line": "bf315a03096743b32149567b3b94f234bb2f96ee4768555846ab3b4e6a972b9c",
+      "rect": "d9a1ed4a5de8af30606996f804acb2bf7d80934c6b2e1090311d725dc473e0dd",
+      "ellipse": "39b6138fca200d7b688b0679d7206c41b979f6266f9a1442dc90de9db1aa3132"
+    },
+    {
+      "w": 96,
+      "h": 64,
+      "x0": 58,
+      "y0": 35,
+      "x1": 31,
+      "y1": 2,
+      "line": "03443f3ea4d4f0dffbef0803211adf8c038f44e711870fe81be79ac98269021e",
+      "rect": "150bd59d23ca2ef8ed1f920df7c593122377e51caf3c3bdce5561bba3ee9015f",
+      "ellipse": "95e589edaa607203811f759d45eb90468867a3e732afd8227aae46b6d9bd07d0"
+    },
+    {
+      "w": 96,
+      "h": 64,
+      "x0": 86,
+      "y0": 25,
+      "x1": 75,
+      "y1": 17,
+      "line": "f77a8a709f9dc8f94af8310da2dc6edad5fff582dbcf6da39cadc8cf5ff8f3a1",
+      "rect": "0f6dbe2d949c36d08bcec7d9a0fc1cd7c95e6e13a02de1ee2f25687c28e5c444",
+      "ellipse": "2e89d01857c00618f6590a74dc9ffa458c7807ef452d0a48fe6039efa41c957d"
+    },
+    {
+      "w": 96,
+      "h": 64,
+      "x0": 91,
+      "y0": 21,
+      "x1": 71,
+      "y1": 4,
+      "line": "bc629f6ed7618c793de406ebf6d58aa604052f9de1a609e5ac56865d6e180511",
+      "rect": "c486a9e019526fc480a54af3bdde05b9dcff1651f5cb7c1df4dc54dedafdffbf",
+      "ellipse": "7e9ecd5eec645c0c38d5b03a525f5614db1c88ed3adb9b414ac80e96e8024315"
+    },
+    {
+      "w": 96,
+      "h": 64,
+      "x0": 3,
+      "y0": 55,
+      "x1": 73,
+      "y1": 47,
+      "line": "885f91b8ae6a9bcf936fc7bdb96a031f8166699e35916b14184a34d147939bd7",
+      "rect": "5b3fe469b873c2959d0a91f712024b3ffd4a2b00228012b6a3533de6b11efda6",
+      "ellipse": "1ebea8a40e696dac517de10c842cce318529418aa556bdde9ecd225ad3d815df"
+    },
+    {
+      "w": 96,
+      "h": 64,
+      "x0": 23,
+      "y0": 58,
+      "x1": 56,
+      "y1": 56,
+      "line": "cf1bbb15781ddad9437d0e7cc9a11cbc6de07bd9c7aa99b57f3d87f1ae2b26ea",
+      "rect": "9c559899d40398f1c6202b64ee12c5aef97a0db4c33705ae79d1ce318c7b03bc",
+      "ellipse": "5aee04951c7c2869926b97a39752081df76b9f4a004d0f064a6935e4e803738e"
+    },
+    {
+      "w": 96,
+      "h": 64,
+      "x0": 61,
+      "y0": 13,
+      "x1": 84,
+      "y1": 12,
+      "line": "5953e8db4a02f372b0f9e969c869dff5640d72914116c2d79cdc45481457aeb9",
+      "rect": "2f8535f3c6b23b40affb946c4f2fdc6000371659627a0be4cee4e966a16f035a",
+      "ellipse": "939f3fb6d86701af7e778b5278c131fbefcd13d8f55f6908a3cca3c57daf0ed8"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 5,
+      "y0": 5,
+      "x1": 5,
+      "y1": 5,
+      "line": "79aae85457506561b94e8c7d53c63a2533fcd85c34ecf69ddc59ceaa9d2264ff",
+      "rect": "7ed1a6c59efe68e5d83b1b2ce3420b2fcd744ad3202aefaa30e9ee276f6cc2cc",
+      "ellipse": "27c302552ed250ff23a7766c66178f2c19b793415ca2f2e6842779717810b093"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 0,
+      "y0": 0,
+      "x1": 59,
+      "y1": 39,
+      "line": "59a1106c293e65206c3b87ade5d85a5ac0c9827c05263bdd2ca1d03ddeed6b1c",
+      "rect": "36ef1097f20ee086053e69d6579b519ab6b01f45d68b19b882763fbc680b190f",
+      "ellipse": "0ee1f7ff7ca5fc7ac0e420a292b3d102aa342889736572acc96811187b5de465"
+    },
+    {
+      "w": 60,
+      "h": 40,
+      "x0": 59,
+      "y0": 0,
+      "x1": 0,
+      "y1": 39,
+      "line": "2920b45a2a3beac85330cc32a030a22f0fbf3893698a6f709e19f7d7fd49225f",
+      "rect": "36ef1097f20ee086053e69d6579b519ab6b01f45d68b19b882763fbc680b190f",
+      "ellipse": "0ee1f7ff7ca5fc7ac0e420a292b3d102aa342889736572acc96811187b5de465"
+    }
+  ],
+  "brush": [
+    {
+      "size": 0,
+      "hits": [
+        [
+          10,
+          10
+        ]
+      ]
+    },
+    {
+      "size": 1,
+      "hits": [
+        [
+          10,
+          10
+        ]
+      ]
+    },
+    {
+      "size": 2,
+      "hits": [
+        [
+          10,
+          10
+        ],
+        [
+          11,
+          10
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          11,
+          11
+        ]
+      ]
+    },
+    {
+      "size": 3,
+      "hits": [
+        [
+          9,
+          9
+        ],
+        [
+          10,
+          9
+        ],
+        [
+          11,
+          9
+        ],
+        [
+          9,
+          10
+        ],
+        [
+          10,
+          10
+        ],
+        [
+          11,
+          10
+        ],
+        [
+          9,
+          11
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          11,
+          11
+        ]
+      ]
+    }
+  ]
+}

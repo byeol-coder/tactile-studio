@@ -1,0 +1,94 @@
+{
+  "CELL": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ]
+  ],
+  "probes": [
+    {
+      "lx": 0,
+      "ly": 0,
+      "expectedBit": 0,
+      "firstByteHex": "01",
+      "hexLength": 600
+    },
+    {
+      "lx": 1,
+      "ly": 0,
+      "expectedBit": 4,
+      "firstByteHex": "10",
+      "hexLength": 600
+    },
+    {
+      "lx": 0,
+      "ly": 1,
+      "expectedBit": 1,
+      "firstByteHex": "02",
+      "hexLength": 600
+    },
+    {
+      "lx": 1,
+      "ly": 1,
+      "expectedBit": 5,
+      "firstByteHex": "20",
+      "hexLength": 600
+    },
+    {
+      "lx": 0,
+      "ly": 2,
+      "expectedBit": 2,
+      "firstByteHex": "04",
+      "hexLength": 600
+    },
+    {
+      "lx": 1,
+      "ly": 2,
+      "expectedBit": 6,
+      "firstByteHex": "40",
+      "hexLength": 600
+    },
+    {
+      "lx": 0,
+      "ly": 3,
+      "expectedBit": 3,
+      "firstByteHex": "08",
+      "hexLength": 600
+    },
+    {
+      "lx": 1,
+      "ly": 3,
+      "expectedBit": 7,
+      "firstByteHex": "80",
+      "hexLength": 600
+    }
+  ]
+}

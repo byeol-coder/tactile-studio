@@ -1,0 +1,1677 @@
+{
+  "scenarios": [
+    {
+      "name": "seed-11-sparse",
+      "w": 60,
+      "h": 40,
+      "result": {
+        "objects": [
+          {
+            "type": "polyline",
+            "points": [
+              [
+                19,
+                4
+              ],
+              [
+                21,
+                4
+              ],
+              [
+                21,
+                6
+              ],
+              [
+                19,
+                4
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 19,
+              "y": 4,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                5,
+                6
+              ],
+              [
+                6,
+                8
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                6
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 4,
+              "y": 6,
+              "w": 2,
+              "h": 4
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                9,
+                6
+              ],
+              [
+                12,
+                7
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 9,
+              "y": 6,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                52,
+                6
+              ],
+              [
+                54,
+                9
+              ],
+              [
+                52,
+                9
+              ],
+              [
+                52,
+                6
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 52,
+              "y": 6,
+              "w": 2,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                29,
+                7
+              ],
+              [
+                32,
+                8
+              ],
+              [
+                30,
+                8
+              ],
+              [
+                29,
+                10
+              ],
+              [
+                29,
+                7
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 29,
+              "y": 7,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                55,
+                7
+              ],
+              [
+                57,
+                9
+              ],
+              [
+                55,
+                9
+              ],
+              [
+                55,
+                7
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 55,
+              "y": 7,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                6,
+                12
+              ],
+              [
+                8,
+                12
+              ],
+              [
+                8,
+                14
+              ],
+              [
+                6,
+                12
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 6,
+              "y": 12,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                11,
+                16
+              ],
+              [
+                13,
+                16
+              ],
+              [
+                13,
+                18
+              ],
+              [
+                11,
+                16
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 11,
+              "y": 16,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                2,
+                18
+              ],
+              [
+                4,
+                18
+              ],
+              [
+                4,
+                20
+              ],
+              [
+                2,
+                18
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 2,
+              "y": 18,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                45,
+                20
+              ],
+              [
+                47,
+                21
+              ],
+              [
+                45,
+                22
+              ],
+              [
+                45,
+                20
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 45,
+              "y": 20,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                57,
+                20
+              ],
+              [
+                60,
+                20
+              ],
+              [
+                60,
+                23
+              ],
+              [
+                57,
+                20
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 57,
+              "y": 20,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                10,
+                23
+              ],
+              [
+                13,
+                24
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 10,
+              "y": 23,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                37,
+                28
+              ],
+              [
+                39,
+                29
+              ],
+              [
+                37,
+                30
+              ],
+              [
+                37,
+                28
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 37,
+              "y": 28,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                10,
+                30
+              ],
+              [
+                12,
+                31
+              ],
+              [
+                10,
+                32
+              ],
+              [
+                10,
+                30
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 10,
+              "y": 30,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                40,
+                31
+              ],
+              [
+                41,
+                34
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 40,
+              "y": 31,
+              "w": 1,
+              "h": 3
+            }
+          }
+        ],
+        "stats": {
+          "componentCount": 219,
+          "objectCount": 15,
+          "ignoredSmall": 204,
+          "ignoredDegenerate": 0,
+          "totalRawPoints": 149,
+          "totalSimplifiedPoints": 55,
+          "tooFragmented": false,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "name": "seed-42-mid",
+      "w": 60,
+      "h": 40,
+      "result": {
+        "objects": [
+          {
+            "type": "polyline",
+            "points": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                0,
+                3
+              ],
+              [
+                0,
+                1
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 0,
+              "y": 1,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                15,
+                2
+              ],
+              [
+                16,
+                4
+              ],
+              [
+                14,
+                5
+              ],
+              [
+                13,
+                3
+              ],
+              [
+                15,
+                2
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 13,
+              "y": 2,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                47,
+                2
+              ],
+              [
+                48,
+                4
+              ],
+              [
+                46,
+                4
+              ],
+              [
+                47,
+                2
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 46,
+              "y": 2,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                34,
+                3
+              ],
+              [
+                38,
+                4
+              ],
+              [
+                33,
+                5
+              ],
+              [
+                34,
+                3
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 33,
+              "y": 3,
+              "w": 5,
+              "h": 2
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                10,
+                4
+              ],
+              [
+                13,
+                5
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 10,
+              "y": 4,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                37,
+                5
+              ],
+              [
+                38,
+                7
+              ],
+              [
+                36,
+                7
+              ],
+              [
+                37,
+                5
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 36,
+              "y": 5,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                46,
+                5
+              ],
+              [
+                50,
+                6
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 46,
+              "y": 5,
+              "w": 4,
+              "h": 1
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                18,
+                6
+              ],
+              [
+                21,
+                7
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 18,
+              "y": 6,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                36,
+                8
+              ],
+              [
+                40,
+                8
+              ],
+              [
+                40,
+                10
+              ],
+              [
+                37,
+                10
+              ],
+              [
+                36,
+                8
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 36,
+              "y": 8,
+              "w": 4,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                53,
+                8
+              ],
+              [
+                55,
+                8
+              ],
+              [
+                55,
+                10
+              ],
+              [
+                53,
+                8
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 53,
+              "y": 8,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                3,
+                9
+              ],
+              [
+                5,
+                11
+              ],
+              [
+                3,
+                11
+              ],
+              [
+                3,
+                9
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 3,
+              "y": 9,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                40,
+                11
+              ],
+              [
+                42,
+                11
+              ],
+              [
+                42,
+                13
+              ],
+              [
+                40,
+                11
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 40,
+              "y": 11,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                16,
+                12
+              ],
+              [
+                20,
+                13
+              ],
+              [
+                17,
+                14
+              ],
+              [
+                16,
+                12
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 16,
+              "y": 12,
+              "w": 4,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                11,
+                18
+              ],
+              [
+                14,
+                18
+              ],
+              [
+                14,
+                21
+              ],
+              [
+                12,
+                21
+              ],
+              [
+                13,
+                19
+              ],
+              [
+                11,
+                18
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 11,
+              "y": 18,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                56,
+                18
+              ],
+              [
+                59,
+                18
+              ],
+              [
+                58,
+                21
+              ],
+              [
+                56,
+                18
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 56,
+              "y": 18,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                32,
+                19
+              ],
+              [
+                34,
+                19
+              ],
+              [
+                34,
+                21
+              ],
+              [
+                31,
+                21
+              ],
+              [
+                32,
+                19
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 31,
+              "y": 19,
+              "w": 3,
+              "h": 2
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                18,
+                21
+              ],
+              [
+                21,
+                22
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 18,
+              "y": 21,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                22,
+                21
+              ],
+              [
+                25,
+                22
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 22,
+              "y": 21,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                28,
+                21
+              ],
+              [
+                30,
+                22
+              ],
+              [
+                29,
+                24
+              ],
+              [
+                27,
+                23
+              ],
+              [
+                28,
+                21
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 27,
+              "y": 21,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                37,
+                21
+              ],
+              [
+                42,
+                21
+              ],
+              [
+                41,
+                26
+              ],
+              [
+                38,
+                26
+              ],
+              [
+                40,
+                25
+              ],
+              [
+                40,
+                22
+              ],
+              [
+                37,
+                21
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 37,
+              "y": 21,
+              "w": 5,
+              "h": 5
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                48,
+                21
+              ],
+              [
+                50,
+                21
+              ],
+              [
+                50,
+                24
+              ],
+              [
+                48,
+                21
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 48,
+              "y": 21,
+              "w": 2,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                58,
+                22
+              ],
+              [
+                60,
+                22
+              ],
+              [
+                59,
+                25
+              ],
+              [
+                57,
+                24
+              ],
+              [
+                58,
+                22
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 57,
+              "y": 22,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                15,
+                23
+              ],
+              [
+                18,
+                24
+              ],
+              [
+                17,
+                27
+              ],
+              [
+                15,
+                23
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 15,
+              "y": 23,
+              "w": 3,
+              "h": 4
+            }
+          },
+          {
+            "type": "rect",
+            "points": [
+              [
+                47,
+                24
+              ],
+              [
+                49,
+                24
+              ],
+              [
+                49,
+                26
+              ],
+              [
+                47,
+                26
+              ],
+              [
+                47,
+                24
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 47,
+              "y": 24,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                26,
+                25
+              ],
+              [
+                27,
+                28
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 26,
+              "y": 25,
+              "w": 1,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                42,
+                25
+              ],
+              [
+                43,
+                27
+              ],
+              [
+                41,
+                27
+              ],
+              [
+                42,
+                25
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 41,
+              "y": 25,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                52,
+                26
+              ],
+              [
+                55,
+                27
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 52,
+              "y": 26,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                10,
+                27
+              ],
+              [
+                11,
+                31
+              ],
+              [
+                9,
+                31
+              ],
+              [
+                10,
+                27
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 9,
+              "y": 27,
+              "w": 2,
+              "h": 4
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                31,
+                28
+              ],
+              [
+                34,
+                29
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 31,
+              "y": 28,
+              "w": 3,
+              "h": 1
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                38,
+                28
+              ],
+              [
+                40,
+                29
+              ],
+              [
+                38,
+                30
+              ],
+              [
+                38,
+                28
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 38,
+              "y": 28,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                57,
+                28
+              ],
+              [
+                59,
+                29
+              ],
+              [
+                59,
+                32
+              ],
+              [
+                57,
+                28
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 57,
+              "y": 28,
+              "w": 2,
+              "h": 4
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                34,
+                29
+              ],
+              [
+                37,
+                30
+              ],
+              [
+                35,
+                30
+              ],
+              [
+                34,
+                32
+              ],
+              [
+                34,
+                29
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 34,
+              "y": 29,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                22,
+                30
+              ],
+              [
+                23,
+                32
+              ],
+              [
+                21,
+                32
+              ],
+              [
+                22,
+                30
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 21,
+              "y": 30,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                49,
+                30
+              ],
+              [
+                52,
+                31
+              ],
+              [
+                52,
+                34
+              ],
+              [
+                51,
+                32
+              ],
+              [
+                49,
+                34
+              ],
+              [
+                49,
+                30
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 49,
+              "y": 30,
+              "w": 3,
+              "h": 4
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                36,
+                32
+              ],
+              [
+                37,
+                35
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 36,
+              "y": 32,
+              "w": 1,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                47,
+                32
+              ],
+              [
+                48,
+                34
+              ],
+              [
+                45,
+                35
+              ],
+              [
+                44,
+                33
+              ],
+              [
+                47,
+                32
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 44,
+              "y": 32,
+              "w": 4,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                55,
+                33
+              ],
+              [
+                57,
+                33
+              ],
+              [
+                56,
+                38
+              ],
+              [
+                55,
+                33
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 55,
+              "y": 33,
+              "w": 2,
+              "h": 5
+            }
+          },
+          {
+            "type": "line",
+            "points": [
+              [
+                10,
+                35
+              ],
+              [
+                11,
+                38
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 10,
+              "y": 35,
+              "w": 1,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                37,
+                35
+              ],
+              [
+                39,
+                38
+              ],
+              [
+                36,
+                37
+              ],
+              [
+                37,
+                35
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 36,
+              "y": 35,
+              "w": 3,
+              "h": 3
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                28,
+                36
+              ],
+              [
+                30,
+                37
+              ],
+              [
+                28,
+                38
+              ],
+              [
+                28,
+                36
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 28,
+              "y": 36,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                22,
+                37
+              ],
+              [
+                24,
+                38
+              ],
+              [
+                22,
+                39
+              ],
+              [
+                22,
+                37
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 22,
+              "y": 37,
+              "w": 2,
+              "h": 2
+            }
+          },
+          {
+            "type": "polyline",
+            "points": [
+              [
+                39,
+                38
+              ],
+              [
+                41,
+                38
+              ],
+              [
+                42,
+                40
+              ],
+              [
+                40,
+                40
+              ],
+              [
+                39,
+                38
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 39,
+              "y": 38,
+              "w": 3,
+              "h": 2
+            }
+          }
+        ],
+        "stats": {
+          "componentCount": 301,
+          "objectCount": 42,
+          "ignoredSmall": 259,
+          "ignoredDegenerate": 0,
+          "totalRawPoints": 490,
+          "totalSimplifiedPoints": 164,
+          "tooFragmented": false,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "name": "checker",
+      "w": 60,
+      "h": 40,
+      "result": {
+        "objects": [],
+        "stats": {
+          "componentCount": 1200,
+          "objectCount": 0,
+          "ignoredSmall": 1200,
+          "ignoredDegenerate": 0,
+          "totalRawPoints": 0,
+          "totalSimplifiedPoints": 0,
+          "tooFragmented": false,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "name": "diagonal",
+      "w": 60,
+      "h": 40,
+      "result": {
+        "objects": [],
+        "stats": {
+          "componentCount": 40,
+          "objectCount": 0,
+          "ignoredSmall": 40,
+          "ignoredDegenerate": 0,
+          "totalRawPoints": 0,
+          "totalSimplifiedPoints": 0,
+          "tooFragmented": false,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "name": "first-row",
+      "w": 60,
+      "h": 40,
+      "result": {
+        "objects": [
+          {
+            "type": "line",
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                60,
+                1
+              ]
+            ],
+            "closed": false,
+            "bbox": {
+              "x": 0,
+              "y": 0,
+              "w": 60,
+              "h": 1
+            }
+          }
+        ],
+        "stats": {
+          "componentCount": 1,
+          "objectCount": 1,
+          "ignoredSmall": 0,
+          "ignoredDegenerate": 0,
+          "totalRawPoints": 123,
+          "totalSimplifiedPoints": 2,
+          "tooFragmented": false,
+          "truncated": false
+        }
+      }
+    }
+  ]
+}

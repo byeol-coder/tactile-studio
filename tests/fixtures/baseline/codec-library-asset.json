@@ -1,0 +1,108 @@
+{
+  "fixedNow": 1767225600000,
+  "noCtx": {
+    "id": "lib-회귀-픽스처-mjuohs00",
+    "title": "회귀 픽스처",
+    "spec": "60x40",
+    "lang": "ko",
+    "category": "basic",
+    "tags": [],
+    "graphicFeatures": {
+      "dotpadCompatible": true,
+      "dotpadOptimized": true,
+      "embossable": true
+    },
+    "brailleLang": "ko-g1",
+    "pages": [
+      {
+        "page": 1,
+        "label": "회귀 픽스처 · 1",
+        "desc": {
+          "grade": 2,
+          "text": "설명"
+        },
+        "braille": "⠁⠃⠉",
+        "graphic": "084a40874aaac8121140108c4e0a03334cb190445000d28968437818cc262563ca9e6ac51004595ecf9128a8ae880b39220d1426acc018c1bcb602268928172b2013c428818a481021547b0b56042854b71a4f51a00937b16d806f2a19f9b022204762310332904844a164b00af853a410230ac29030a904a1c5485192980ffa204608025625005404c398c3c82001b81d5b12924733e35c4079618c0ce838c01a2e1990e70475254049c28235050a69ab8090790182606c70de0d239009019f8690ecc84904410723204420230d290a45877c1e022120fc49719367904660201e64432532810a424002b3005824004265440012c36891a31c9d139090db002032017288d3c948504c27030b096a00d22012c234e51013026a748454583220211025a601e2999b4b45968070",
+        "narration": "나레이션"
+      },
+      {
+        "page": 2,
+        "label": "회귀 픽스처 · 2",
+        "desc": "",
+        "braille": "",
+        "graphic": "2608c1036421d4cf040156521301d0412a29dd466135ccde5b23001a241010d91c8446198187284d45651ae04800d2917580808155222f5400620a4b816885ca8108a48168a841c5886020484040b176a88603241023901b0000a7054c21002082053b930106000603a99748ab2d3004a165ca45414ec11000262c9c0654c522c428f78c22199045d8d92304024d2820c6100c58d5d4e1119422cacb95906822022223c84e10950aa023be00a841f299b8c690dca951b2441a6e019817400211215fe011408291a64ba6e070430f6e07d4098cc8c426636f5ac80081831c1a0a5052552f5213ae602022c98d14527a2e05f004154408288785152021244804ad3364d710a81a62723f3000f00280241c7c8180430e903581d0ae5b0f53082300bb438c21400eb2a64ab4a19e",
+        "vectorLineObjects": [
+          {
+            "type": "rect",
+            "points": [
+              [
+                0,
+                0
+              ]
+            ],
+            "closed": true,
+            "bbox": {
+              "x": 0,
+              "y": 0,
+              "w": 1,
+              "h": 1
+            }
+          }
+        ]
+      }
+    ],
+    "provenance": {
+      "createdBy": "tactile-studio",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "derivedFrom": null,
+      "sourceType": "blank"
+    },
+    "qa": {
+      "status": "draft"
+    },
+    "sharing": "campus"
+  },
+  "withCtx": {
+    "id": "lib-ctx-variant-mjuohs00",
+    "title": "ctx variant",
+    "spec": "60x40",
+    "lang": "en",
+    "category": "science",
+    "tags": [
+      "t1",
+      "t2"
+    ],
+    "graphicFeatures": {
+      "dotpadCompatible": true,
+      "dotpadOptimized": true,
+      "embossable": true
+    },
+    "brailleLang": "ueb-g1",
+    "pages": [
+      {
+        "page": 1,
+        "label": "ctx-p1",
+        "desc": "ctx-desc",
+        "braille": "ctx-brl",
+        "graphic": "084a40874aaac8121140108c4e0a03334cb190445000d28968437818cc262563ca9e6ac51004595ecf9128a8ae880b39220d1426acc018c1bcb602268928172b2013c428818a481021547b0b56042854b71a4f51a00937b16d806f2a19f9b022204762310332904844a164b00af853a410230ac29030a904a1c5485192980ffa204608025625005404c398c3c82001b81d5b12924733e35c4079618c0ce838c01a2e1990e70475254049c28235050a69ab8090790182606c70de0d239009019f8690ecc84904410723204420230d290a45877c1e022120fc49719367904660201e64432532810a424002b3005824004265440012c36891a31c9d139090db002032017288d3c948504c27030b096a00d22012c234e51013026a748454583220211025a601e2999b4b45968070"
+      },
+      {
+        "page": 2,
+        "label": "ctx variant · 2",
+        "desc": "",
+        "braille": "",
+        "graphic": "2608c1036421d4cf040156521301d0412a29dd466135ccde5b23001a241010d91c8446198187284d45651ae04800d2917580808155222f5400620a4b816885ca8108a48168a841c5886020484040b176a88603241023901b0000a7054c21002082053b930106000603a99748ab2d3004a165ca45414ec11000262c9c0654c522c428f78c22199045d8d92304024d2820c6100c58d5d4e1119422cacb95906822022223c84e10950aa023be00a841f299b8c690dca951b2441a6e019817400211215fe011408291a64ba6e070430f6e07d4098cc8c426636f5ac80081831c1a0a5052552f5213ae602022c98d14527a2e05f004154408288785152021244804ad3364d710a81a62723f3000f00280241c7c8180430e903581d0ae5b0f53082300bb438c21400eb2a64ab4a19e"
+      }
+    ],
+    "provenance": {
+      "createdBy": "tactile-studio",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "derivedFrom": "dtms-샘플",
+      "sourceType": "command"
+    },
+    "qa": {
+      "status": "draft"
+    },
+    "sharing": "campus"
+  }
+}
