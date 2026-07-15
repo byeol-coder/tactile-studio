@@ -1121,8 +1121,8 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
         </sc-if>
 
-        <!-- Advanced settings (collapsed by default): threshold / dither /
-             invert are fine-tuning knobs ON TOP OF whichever preset is
+        <!-- Advanced settings (collapsed by default): threshold / dither are
+             conversion-only fine-tuning knobs ON TOP OF whichever preset is
              active — a preset alone is enough for most conversions, so these
              plus Vectorize (Beta) are tucked behind one disclosure instead of
              always taking up space. Mirrors the existing advOpen/toggleAdv
@@ -1141,10 +1141,6 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
               <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
                 <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.6" fill="currentColor"></circle><circle cx="12" cy="6" r="1.6" fill="currentColor"></circle><circle cx="18" cy="6" r="1.6" fill="currentColor"></circle><circle cx="9" cy="12" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="6" cy="18" r="1.6" fill="currentColor"></circle><circle cx="18" cy="18" r="1.6" fill="currentColor"></circle></svg>
                 {{ t.dither }} · <b>{{ ditherState }}</b>
-              </button>
-              <button onClick="{{ toggleInvert }}" aria-pressed="{{ invertConv }}" style="{{ invStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
-                {{ t.invert }} · <b>{{ invState }}</b>
               </button>
             </div>
 
@@ -3286,7 +3282,9 @@ class Component extends DCLogic {
 
   applyConv(pat, w, h) {
     const st = this.state;
-    if (st.invertConv) for (let i = 0; i < pat.length; i++) pat[i] ^= 1;
+    // Inversion is owned by imgToCells. Applying it here as well used to
+    // cancel the first inversion, so the Import preview and committed cells
+    // looked unchanged when the legacy/internal silhouette preset enabled it.
     if (st.dither) for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (pat[y * w + x] && (x + y) % 2) pat[y * w + x] = 0; }
     return pat;
   }
@@ -5866,9 +5864,8 @@ class Component extends DCLogic {
       // conversion refinement
       dither: st.dither, invertConv: st.invertConv,
       toggleDither: () => this.setState(s => ({ dither: !s.dither })),
-      toggleInvert: () => this.setState(s => ({ invertConv: !s.invertConv })),
-      ditherStyle: pill2(st.dither), invStyle: pill2(st.invertConv),
-      ditherState: st.dither ? t.use : t.off, invState: st.invertConv ? t.use : t.off,
+      ditherStyle: pill2(st.dither),
+      ditherState: st.dither ? t.use : t.off,
       armedPreset: st.armedPreset, armedPresetName: st.armedPreset ? (t.presetNames ? t.presetNames[st.armedPreset] : st.armedPreset) : '',
       // command generation
       cmdOpen: st.cmdOpen,

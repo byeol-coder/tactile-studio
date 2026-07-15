@@ -41,7 +41,6 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
   const [image, setImage] = useState<{ decoded: DecodedImage; previewUrl: string; fileName: string } | null>(null);
   const [crop, setCrop] = useState<CropRect>({ x: 0.1, y: 0.1, w: 0.8, h: 0.8 });
   const [preset, setPreset] = useState<keyof typeof CONV_PRESETS>('balanced');
-  const [invert, setInvert] = useState(false);
   // Tactile detail level (monolith's "촉각 디테일 정도" slider, 10-90/step 1,
   // default 50 — matches the shipped range exactly). React's onChange on a
   // range input already fires continuously while dragging (it normalizes to
@@ -119,8 +118,8 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
     const w = 60, h = 40;
     const c = crop.w > 0.02 && crop.h > 0.02 ? crop : null;
     const result = imageProcessing
-      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold, invert }, c)
-      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold, invert } as ConvOptions, c);
+      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold }, c)
+      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold } as ConvOptions, c);
     store.loadPages([result.cells], image.fileName.replace(/\.[^.]+$/, ''));
     close();
   };
@@ -183,10 +182,6 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
                 <select value={preset} onChange={(e) => setPreset(e.target.value as keyof typeof CONV_PRESETS)} aria-label={(labels?.impConvPreset as string) || 'Preset'}>
                   {Object.keys(CONV_PRESETS).map((k) => <option key={k} value={k}>{k}</option>)}
                 </select>
-              </label>
-              <label style={{ fontSize: 12 }}>
-                <input type="checkbox" checked={invert} onChange={(e) => setInvert(e.target.checked)} />
-                {' '}{(labels?.impConvInvert as string) || 'Invert'}
               </label>
             </div>
 

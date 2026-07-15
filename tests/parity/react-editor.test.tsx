@@ -7,7 +7,7 @@
 // handled in Phase 3 (documented limitation, not a silent gap).
 import React from 'react';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, act, waitFor } from '@testing-library/react';
 import { TactileStudioEditor } from '../../src/react/TactileStudioEditor.js';
 import { TactileStudioProvider, useEditorStoreContext } from '../../src/react/TactileStudioProvider.js';
 import { StudioCanvas } from '../../src/ui/canvas/StudioCanvas.js';
@@ -978,6 +978,19 @@ describe('ImportDialog — image import + crop UI (injected decoder for tests)',
       await Promise.resolve();
     });
     expect((screen.getByLabelText('Tactile detail level') as HTMLInputElement).value).toBe('50');
+  });
+
+  it('omits the redundant image-import invert control because the editor toolbar owns inversion', async () => {
+    const fakeDecoder = vi.fn().mockResolvedValue({ data: new Uint8ClampedArray(4 * 4 * 4), width: 4, height: 4 });
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 60, 40)}>
+        <ImportDialog open labels={{ impConvInvert: 'Invert imported image' }} onClose={() => {}} decodeImageFile={fakeDecoder} />
+      </TactileStudioProvider>,
+    );
+    const input = screen.getByLabelText('Image file') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [new File(['x'], 'sample.png', { type: 'image/png' })] } });
+    await waitFor(() => expect(fakeDecoder).toHaveBeenCalled());
+    expect(screen.queryByText('Invert imported image')).toBeNull();
   });
 });
 
