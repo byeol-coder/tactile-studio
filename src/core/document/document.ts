@@ -48,6 +48,32 @@ export function addPage(doc: StudioDocument): PageOpResult {
   return { changed: true, historyCleared: true };
 }
 
+/** monolith duplicatePage(idx): insert a copy of page `idx` (same dots,
+ *  narration/description, and vector-line objects if any) immediately after
+ *  it, and activate the copy. Reuses the same insert-reindex helpers as
+ *  addPage() to shift every OTHER page's audio/vector metadata out of the
+ *  way, then carries the SOURCE page's own metadata into the new slot. A
+ *  shallow reference copy of the metadata record is safe here — every
+ *  mutation path replaces a page's record via a new object (see
+ *  EditorStore.setPageDesc/setPageNarration) rather than editing one in
+ *  place, so the two pages briefly sharing one record object never causes
+ *  cross-page bleed: the first edit to either page forks its own copy.
+ *  Always clears history, same as addPage(). No-ops (changed: false) for an
+ *  out-of-range index. */
+export function duplicatePage(doc: StudioDocument, idx: number): PageOpResult {
+  const n0 = doc.pages.length;
+  if (idx < 0 || idx >= n0) return { changed: false, historyCleared: false };
+  const at = idx + 1;
+  const copy = doc.pages[idx].slice();
+  doc.pages.splice(at, 0, copy);
+  doc.pageAudio = reindexMapInsert(doc.pageAudio, at);
+  doc.pageVectors = reindexMapInsert(doc.pageVectors, at) as PageMap<unknown[]>;
+  if (doc.pageAudio[idx] != null) (doc.pageAudio as PageMap<unknown>)[at] = doc.pageAudio[idx];
+  if (doc.pageVectors[idx] != null) (doc.pageVectors as PageMap<unknown[]>)[at] = doc.pageVectors[idx];
+  doc.pageIndex = at;
+  return { changed: true, historyCleared: true };
+}
+
 /** monolith deletePageAt(idx): refuses to delete the last page; active-page
  *  deletion clears history and clamps the index, non-active deletion only
  *  shifts the index when the removed page sat before it. */

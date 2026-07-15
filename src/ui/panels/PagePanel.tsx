@@ -24,7 +24,7 @@ export interface PagePanelProps {
 }
 
 export function PagePanel({ labels }: PagePanelProps) {
-  const { pageIndex, pageCount, addPage, deletePageAt, movePage } = usePages();
+  const { pageIndex, pageCount, addPage, duplicatePage, deletePageAt, movePage } = usePages();
   const { snapshot, store } = useEditorStore();
   const pagesLabel = (labels?.pagesLabel as string) || 'Pages';
   const addLabel = (labels?.addPage as string) || 'Add page';
@@ -137,6 +137,16 @@ export function PagePanel({ labels }: PagePanelProps) {
               <PageThumbnail cells={doc.pages[i]} gridW={snapshot.gridW} gridH={snapshot.gridH} />
               <span>{i + 1}</span>
             </button>
+            <button
+              type="button"
+              aria-label={(labels?.pageDuplicate as string) || 'Duplicate page'}
+              title={(labels?.pageDuplicate as string) || 'Duplicate page'}
+              onClick={() => {
+                duplicatePage(i);
+                const tpl = (labels?.aPageDup as string) || 'Page {i} duplicated. {n} pages total';
+                store.announce(tpl.replace('{i}', String(i + 2)).replace('{n}', String(pageCount + 1)));
+              }}
+            >⧉</button>
             <button type="button" aria-label="Move up" title="Move up" disabled={i === 0} onClick={() => { movePage(i, i - 1); store.announce(((labels?.aPageMoved as string) || 'Page moved to position {n}').replace('{n}', String(i))); }} style={{ opacity: i === 0 ? 0.3 : 1 }}>↑</button>
             <button type="button" aria-label="Move down" title="Move down" disabled={i === pageCount - 1} onClick={() => { movePage(i, i + 1); store.announce(((labels?.aPageMoved as string) || 'Page moved to position {n}').replace('{n}', String(i + 2))); }} style={{ opacity: i === pageCount - 1 ? 0.3 : 1 }}>↓</button>
             <button type="button" aria-label="Delete page" title="Delete page" disabled={pageCount <= 1} onClick={() => setConfirmDeleteIndex(i)} style={{ opacity: pageCount <= 1 ? 0.3 : 1 }}>✕</button>

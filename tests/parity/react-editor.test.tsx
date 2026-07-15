@@ -657,6 +657,26 @@ describe('PagePanel — confirm-before-delete and announcements', () => {
     fireEvent.click(screen.getByRole('button', { name: '1' }));
     expect(screen.getByRole('status').textContent).toBe('Page 1 of 2');
   });
+
+  it('the duplicate-page button adds a copy right after the source page and announces it', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    render(
+      <TactileStudioProvider initialDocument={createDocument('doc', 10, 10)}>
+        <Capture />
+        <PagePanel labels={{ pageDuplicate: 'Duplicate page', aPageDup: 'Page {i} duplicated. {n} pages total' }} />
+        <LiveRegion />
+      </TactileStudioProvider>,
+    );
+    act(() => { capturedStore!.mutateActiveCells((cells) => { cells[0] = 1; }); });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Duplicate page' }));
+
+    expect(capturedStore!.getSnapshot().pageCount).toBe(2);
+    expect(capturedStore!.getSnapshot().pageIndex).toBe(1);
+    expect(Array.from(capturedStore!.getActiveCells())).toEqual(Array.from(capturedStore!.getDocument().pages[0]));
+    expect(screen.getByRole('status').textContent).toBe('Page 2 duplicated. 2 pages total');
+  });
 });
 
 describe('ImportDialog — image import + crop UI (injected decoder for tests)', () => {

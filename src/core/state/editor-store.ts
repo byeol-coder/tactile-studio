@@ -23,7 +23,7 @@
 // only the number/timing of React notifications differs.
 
 import type { StudioDocument, CellGrid, HistoryEntry, PageMap } from '../types.js';
-import { activeCells, addPage as coreAddPage, deletePageAt as coreDeletePageAt, movePage as coreMovePage, setGrid as coreSetGrid, goToPage as coreGoToPage } from '../document/document.js';
+import { activeCells, addPage as coreAddPage, duplicatePage as coreDuplicatePage, deletePageAt as coreDeletePageAt, movePage as coreMovePage, setGrid as coreSetGrid, goToPage as coreGoToPage } from '../document/document.js';
 import { HistoryStack, makeEntry, entryCells } from '../history/history.js';
 import { flipHoriz, flipVert, invertAll, clearAll } from '../grid/grid.js';
 import { reindexMapInsert } from '../page/page-maps.js';
@@ -220,6 +220,22 @@ export class EditorStore {
     this.rev++;
     this.setDirty(true);
     this.notify();
+  }
+
+  /** monolith duplicatePage(idx): see core/document/document.ts's
+   *  duplicatePage() doc comment for the copy semantics. Also resets the
+   *  keyboard cursor and selection, matching the monolith's
+   *  `setState({ cx:0, cy:0, selRect:null })` alongside the page switch. */
+  duplicatePage(idx: number) {
+    const r = coreDuplicatePage(this.doc, idx);
+    if (!r.changed) return false;
+    if (r.historyCleared) this.history.clear();
+    this.selRect = null;
+    this.cursor = { cx: 0, cy: 0 };
+    this.rev++;
+    this.setDirty(true);
+    this.notify();
+    return true;
   }
 
   deletePageAt(idx: number) {
