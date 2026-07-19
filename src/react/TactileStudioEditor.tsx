@@ -31,6 +31,7 @@ import { LiveRegion } from '../ui/live-region/LiveRegion.js';
 import { Toast } from '../ui/toast/Toast.js';
 import { RecoveryBanner } from '../ui/recovery/RecoveryBanner.js';
 import { EmptyStateHint } from '../ui/hints/EmptyStateHint.js';
+import { QualityPanel } from '../ui/quality/QualityPanel.js';
 import { createSessionRecoveryStorageAdapter } from '../storage/adapters/session-recovery-storage-adapter.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { useHardwareKeyPanning } from './hooks/useHardwareKeyPanning.js';
@@ -137,6 +138,7 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
         <StudioCanvas ariaLabel={(labels?.canvasAria as string) || 'Tactile drawing canvas'} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Inspector labels={labels} gridFx={services.gridFx} braille={services.braille} />
+          <QualityPanel />
           {services.tactileDisplay && (
             <DotPadPanel adapter={services.tactileDisplay} encodeBits={services.encodeBits} labels={labels} onError={reportError} />
           )}

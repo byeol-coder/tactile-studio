@@ -50,6 +50,63 @@ export interface BanaCheckResult {
   dots: number;
 }
 
+export type QualityIssue = { key: string; level: 'info' | 'warn'; message: string };
+export interface TactileQualityReport extends ConvQuality {
+  pass: boolean;
+  thin: number;
+  thinRatio: number;
+  tightGaps: number;
+  components: number;
+  issues: QualityIssue[];
+}
+
+/** Extended, presentation-ready tactile checks. convQuality remains unchanged
+ * for codec compatibility; this adds only advisory warnings for the editor. */
+export function analyzeTactileQuality(cells: CellGrid, w: number, h: number): TactileQualityReport {
+  const base = convQuality(cells, w, h);
+  let thin = 0;
+  const labels = new Int32Array(w * h);
+  let components = 0;
+  const on = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && !!cells[y * w + x];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!on(x, y)) continue;
+    const horizontal = !on(x - 1, y) && !on(x + 1, y);
+    const vertical = !on(x, y - 1) && !on(x, y + 1);
+    if (horizontal || vertical) thin++;
+    const start = y * w + x;
+    if (labels[start]) continue;
+    labels[start] = ++components;
+    const stack = [start];
+    while (stack.length) {
+      const i = stack.pop()!, px = i % w, py = (i / w) | 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = px + dx, ny = py + dy, ni = ny * w + nx;
+        if ((dx || dy) && on(nx, ny) && !labels[ni]) { labels[ni] = components; stack.push(ni); }
+      }
+    }
+  }
+  let tightGaps = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (!on(x, y)) {
+    const seen = new Set<number>();
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && ny >= 0 && nx < w && ny < h && labels[ny * w + nx]) seen.add(labels[ny * w + nx]);
+    }
+    if (seen.size > 1) tightGaps++;
+  }
+  const thinRatio = base.dots ? thin / base.dots : 0;
+  const issues: QualityIssue[] = [];
+  if (!base.dots) issues.push({ key: 'empty', level: 'info', message: 'No raised pins yet.' });
+  else {
+    if (base.key === 'tooDense') issues.push({ key: 'tooDense', level: 'warn', message: `Pins are dense (${Math.round(base.density * 100)}%).` });
+    if (base.key === 'tooSparse') issues.push({ key: 'tooSparse', level: 'info', message: `Few pins are raised (${Math.round(base.density * 100)}%).` });
+    if (base.isolated / base.dots > .25) issues.push({ key: 'manyIsolated', level: 'warn', message: `${base.isolated} isolated pins detected.` });
+    if (thinRatio > .5) issues.push({ key: 'thin', level: 'warn', message: `Thin strokes (${Math.round(thinRatio * 100)}%).` });
+    if (tightGaps) issues.push({ key: 'tightGap', level: 'warn', message: `${tightGaps} tight gaps between elements.` });
+  }
+  return { ...base, pass: !issues.some((i) => i.level === 'warn'), thin, thinRatio, tightGaps, components, issues };
+}
+
 /** monolith banaPrintCheck(cells, w, h).
  *
  * NOTE ON SHAPE: the migration branch's own earlier `fix(studio): implement
