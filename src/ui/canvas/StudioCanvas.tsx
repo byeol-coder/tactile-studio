@@ -36,9 +36,14 @@ function cellPx(gridW: number): number {
 
 type DragState =
   | { mode: 'paint'; value: 0 | 1; size: number; lastX: number; lastY: number; pointerId: number }
-  | { mode: 'shape'; x0: number; y0: number; preview: Set<number>; pointerId: number }
-  | { mode: 'sel'; x0: number; y0: number; pointerId: number }
+  | { mode: 'shape'; x0: number; y0: number; x1: number; y1: number; snap: 0 | 5 | 10; preview: Set<number>; pointerId: number }
+  | { mode: 'sel'; x0: number; y0: number; snap: 0 | 5 | 10; pointerId: number }
   | null;
+
+function snapToGuide(value: number, step: 0 | 5 | 10, max: number): number {
+  if (!step) return value;
+  return Math.max(0, Math.min(max, Math.round(value / step) * step));
+}
 
 export interface StudioCanvasProps {
   /** ARIA label for the canvas (host-supplied, since Studio owns no i18n). */
@@ -87,6 +92,16 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
         const x = i % gridW, y = (i / gridW) | 0;
         g.beginPath(); g.arc(x * c + c / 2, y * c + c / 2, c * 0.36, 0, Math.PI * 2); g.fill();
       });
+      // A restrained endpoint marker confirms that Shift/Alt snapping is active
+      // without covering the tactile dots themselves. It is an editing aid only.
+      if (drag.snap) {
+        const px = drag.x1 * c + c / 2, py = drag.y1 * c + c / 2;
+        g.save();
+        g.strokeStyle = 'rgba(196,61,0,0.72)'; g.lineWidth = 1;
+        g.setLineDash([2, 2]);
+        g.beginPath(); g.moveTo(px - c * 0.65, py); g.lineTo(px + c * 0.65, py); g.moveTo(px, py - c * 0.65); g.lineTo(px, py + c * 0.65); g.stroke();
+        g.restore();
+      }
     }
 
     if (polyRef.current.preview.size) {
@@ -147,6 +162,12 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
     const y = Math.floor(((e.clientY - r.top) * (cv.height / r.height)) / c);
     return [Math.max(0, Math.min(gridW - 1, x)), Math.max(0, Math.min(gridH - 1, y))];
   }, [c, gridW, gridH]);
+
+  const snapForEvent = (e: Pick<React.PointerEvent<HTMLCanvasElement>, 'shiftKey' | 'altKey'>): 0 | 5 | 10 => e.altKey ? 10 : e.shiftKey ? 5 : 0;
+  const snappedCell = (e: React.PointerEvent<HTMLCanvasElement>): [number, number, 0 | 5 | 10] => {
+    const [rawX, rawY] = evCell(e), snap = snapForEvent(e);
+    return [snapToGuide(rawX, snap, gridW - 1), snapToGuide(rawY, snap, gridH - 1), snap];
+  };
 
   const strokeSizeFor = (tool: string) => (tool === 'eraser' ? snapshot.eraserSize : snapshot.strokeSize);
 
@@ -210,45 +231,48 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
     // active pointer lifts (onPointerUp clears dragRef).
     if (dragRef.current && e.pointerId !== dragRef.current.pointerId) return;
     canvasRef.current?.focus();
-    const [x, y] = evCell(e);
+    const [rawX, rawY] = evCell(e);
     const tool = snapshot.tool;
     try { (e.target as Element).setPointerCapture?.(e.pointerId); } catch { /* capture is an optimization, never fatal */ }
 
-    if (tool === 'cursor') { store.setCursor(x, y); return; }
+    if (tool === 'cursor') { store.setCursor(rawX, rawY); return; }
 
     if (tool === 'pen' || tool === 'eraser') {
       const value: 0 | 1 = tool === 'pen' ? 1 : 0;
       const size = strokeSizeFor(tool);
       store.beginStroke();
       const plot = makeBrush((px, py) => { if (inBounds(gridW, gridH, px, py)) store.getActiveCells()[cellIndex(gridW, px, py)] = value; }, size);
-      store.paintDuring(() => plot(x, y));
-      dragRef.current = { mode: 'paint', value, size, lastX: x, lastY: y, pointerId: e.pointerId };
-      store.setCursor(x, y);
+      store.paintDuring(() => plot(rawX, rawY));
+      dragRef.current = { mode: 'paint', value, size, lastX: rawX, lastY: rawY, pointerId: e.pointerId };
+      store.setCursor(rawX, rawY);
       scheduleDragRedraw();
       return;
     }
 
     if (tool === 'line' || tool === 'rect' || tool === 'ellipse') {
-      dragRef.current = { mode: 'shape', x0: x, y0: y, preview: new Set([cellIndex(gridW, x, y)]), pointerId: e.pointerId };
+      const [x, y, snap] = snappedCell(e);
+      dragRef.current = { mode: 'shape', x0: x, y0: y, x1: x, y1: y, snap, preview: new Set([cellIndex(gridW, x, y)]), pointerId: e.pointerId };
       store.setCursor(x, y);
       scheduleDragRedraw();
       return;
     }
 
     if (tool === 'fill') {
-      store.mutateActiveCells((cells) => floodFill(cells, gridW, gridH, x, y));
-      store.setCursor(x, y);
+      store.mutateActiveCells((cells) => floodFill(cells, gridW, gridH, rawX, rawY));
+      store.setCursor(rawX, rawY);
       return;
     }
 
     if (tool === 'select') {
-      dragRef.current = { mode: 'sel', x0: x, y0: y, pointerId: e.pointerId };
+      const [x, y, snap] = snappedCell(e);
+      dragRef.current = { mode: 'sel', x0: x, y0: y, snap, pointerId: e.pointerId };
       store.setSelRect({ x0: x, y0: y, x1: x, y1: y });
       store.setCursor(x, y);
       return;
     }
 
     if (tool === 'poly') {
+      const [x, y] = snappedCell(e);
       polyRef.current.points.push([x, y]);
       updatePolyPreview();
       store.setCursor(x, y);
@@ -257,8 +281,8 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
 
     if (tool === 'text') {
       const rect = canvasRef.current!.getBoundingClientRect();
-      setTextPopover({ gx: x, gy: y, left: Math.min(e.clientX, rect.right - 40), top: Math.min(e.clientY + 12, (typeof window !== 'undefined' ? window.innerHeight : 600) - 60), value: '' });
-      store.setCursor(x, y);
+      setTextPopover({ gx: rawX, gy: rawY, left: Math.min(e.clientX, rect.right - 40), top: Math.min(e.clientY + 12, (typeof window !== 'undefined' ? window.innerHeight : 600) - 60), value: '' });
+      store.setCursor(rawX, rawY);
       return;
     }
   };
@@ -277,15 +301,20 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
       drag.lastX = x; drag.lastY = y;
       scheduleDragRedraw();
     } else if (drag.mode === 'shape') {
+      const snap = snapForEvent(e);
+      const sx = snapToGuide(x, snap, gridW - 1), sy = snapToGuide(y, snap, gridH - 1);
       const s = new Set<number>();
       const add = makeBrush((px, py) => { if (inBounds(gridW, gridH, px, py)) s.add(cellIndex(gridW, px, py)); }, strokeSizeFor(snapshot.tool));
-      if (snapshot.tool === 'line') line(drag.x0, drag.y0, x, y, add);
-      else if (snapshot.tool === 'rect') rectOutline(drag.x0, drag.y0, x, y, add);
-      else ellipseOutline(drag.x0, drag.y0, x, y, add);
-      drag.preview = s;
+      if (snapshot.tool === 'line') line(drag.x0, drag.y0, sx, sy, add);
+      else if (snapshot.tool === 'rect') rectOutline(drag.x0, drag.y0, sx, sy, add);
+      else ellipseOutline(drag.x0, drag.y0, sx, sy, add);
+      drag.preview = s; drag.x1 = sx; drag.y1 = sy; drag.snap = snap;
       scheduleDragRedraw();
     } else if (drag.mode === 'sel') {
-      store.setSelRect({ x0: Math.min(drag.x0, x), y0: Math.min(drag.y0, y), x1: Math.max(drag.x0, x), y1: Math.max(drag.y0, y) });
+      const snap = snapForEvent(e);
+      const sx = snapToGuide(x, snap, gridW - 1), sy = snapToGuide(y, snap, gridH - 1);
+      drag.snap = snap;
+      store.setSelRect({ x0: Math.min(drag.x0, sx), y0: Math.min(drag.y0, sy), x1: Math.max(drag.x0, sx), y1: Math.max(drag.y0, sy) });
     }
   };
 
@@ -307,11 +336,17 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     const { cx, cy } = snapshot.cursor;
-    const move = (x: number, y: number) => { e.preventDefault(); store.setCursor(Math.max(0, Math.min(gridW - 1, x)), Math.max(0, Math.min(gridH - 1, y))); };
-    if (e.key === 'ArrowLeft') return move(cx - 1, cy);
-    if (e.key === 'ArrowRight') return move(cx + 1, cy);
-    if (e.key === 'ArrowUp') return move(cx, cy - 1);
-    if (e.key === 'ArrowDown') return move(cx, cy + 1);
+    const step = e.altKey ? 10 : e.shiftKey ? 5 : 1;
+    const move = (x: number, y: number) => {
+      e.preventDefault();
+      const nx = Math.max(0, Math.min(gridW - 1, x)), ny = Math.max(0, Math.min(gridH - 1, y));
+      store.setCursor(nx, ny);
+      store.announce(`Row ${ny + 1}, column ${nx + 1}.`);
+    };
+    if (e.key === 'ArrowLeft') return move(cx - step, cy);
+    if (e.key === 'ArrowRight') return move(cx + step, cy);
+    if (e.key === 'ArrowUp') return move(cx, cy - step);
+    if (e.key === 'ArrowDown') return move(cx, cy + step);
     if (e.key.toLowerCase() === 'u') { e.preventDefault(); store.undo(); return; }
     if (e.key.toLowerCase() === 'r') { e.preventDefault(); store.redo(); return; }
     if (e.key !== ' ' && e.key !== 'Enter') return;
@@ -331,7 +366,7 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
         ref={canvasRef}
         tabIndex={0}
         role="img"
-        aria-label={`${ariaLabel || 'Tactile drawing canvas'}. Arrow keys move, Space or Enter edits, U undoes, R redoes.`}
+        aria-label={`${ariaLabel || 'Tactile drawing canvas'}. Arrow keys move; Shift moves 5 cells and Alt moves 10. Hold Shift while shaping to snap to 5 cells, or Alt to snap to 10. Space or Enter edits, U undoes, R redoes.`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
