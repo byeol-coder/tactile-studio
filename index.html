@@ -630,13 +630,48 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             <span class="ts-action-label">{{ t.export }}</span>
           </button>
         </div>
-        <div style="display:flex;align-items:center;gap:4px;padding:0 8px 0 4px;border-bottom:1px solid #F2ECE4">
+        <div role="tablist" aria-label="편집 패널" style="display:flex;align-items:center;gap:0;padding:0 6px;border-bottom:1px solid #F2ECE4">
+          <button onClick="{{ setInspLayers }}" role="tab" aria-selected="{{ inspTabLayers }}" style="{{ inspTabLayersStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ layerTabLabel }}</button>
           <button onClick="{{ setInspProps }}" role="tab" aria-selected="{{ inspTabProps }}" style="{{ inspTabPropsStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspProps }}</button>
           <button onClick="{{ setInspDevice }}" role="tab" aria-selected="{{ inspTabDevice }}" style="{{ inspTabDeviceStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspDevice }}</button>
-          <button onClick="{{ toggleInspector }}" aria-label="{{ t.dpCollapse }}" title="{{ t.dpCollapse }}" aria-expanded="{{ inspectorOpen }}" aria-controls="ts-dotpad-panel" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center;flex:none" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <button onClick="{{ toggleInspector }}" aria-label="{{ t.dpCollapse }}" title="{{ t.dpCollapse }}" aria-expanded="{{ inspectorOpen }}" aria-controls="ts-dotpad-panel" style="width:24px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center;flex:none;margin-left:2px" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </div>
+
+        <sc-if value="{{ inspTabLayers }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Inspector · Layers" style="padding:14px 14px 16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px;padding-bottom:11px;border-bottom:1px solid #F2ECE4">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:800;color:#1E1C1A">{{ layerTabLabel }}</div>
+              <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-top:2px">{{ layerCountLabel }}</div>
+            </div>
+            <button onClick="{{ addLayer }}" aria-label="레이어 추가" style="height:32px;padding:0 10px;border:1px solid rgba(var(--ts-primary-rgb),0.28);border-radius:8px;background:#FFF7F2;color:var(--ts-primary);font-size:12.5px;font-weight:800;white-space:nowrap" style-hover="border-color:var(--ts-primary);background:#FFF1E9" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">+ 추가</button>
+          </div>
+
+          <div role="list" aria-label="레이어 목록" style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{ layerRows }}" as="layer" hint-placeholder-count="2">
+              <div role="listitem" style="display:flex;align-items:center;gap:5px;min-height:42px;padding:4px 5px 4px 4px;border:1px solid {{ layer.border }};border-left:3px solid {{ layer.accent }};border-radius:9px;background:{{ layer.bg }};box-sizing:border-box">
+                <button onClick="{{ layer.toggle }}" aria-pressed="{{ layer.visible }}" aria-label="{{ layer.visibilityLabel }}" title="{{ layer.visibilityLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:{{ layer.iconColor }};display:grid;place-items:center;flex:none" style-hover="background:rgba(140,131,119,0.09)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+                <button onClick="{{ layer.pick }}" aria-pressed="{{ layer.active }}" style="flex:1;min-width:0;height:28px;border:none;background:transparent;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:{{ layer.weight }};color:#1E1C1A">{{ layer.name }}</button>
+                <button onClick="{{ layer.more }}" aria-label="{{ layer.moreLabel }}" title="{{ layer.moreLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--ts-text-secondary);font-size:17px;line-height:1;flex:none" style-hover="background:rgba(140,131,119,0.09)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">⋯</button>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding-top:2px">
+            <button onClick="{{ layerUp }}" disabled="{{ layerUpDisabled }}" aria-label="레이어 위로" title="레이어 위로" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">↑</button>
+            <button onClick="{{ layerDown }}" disabled="{{ layerDownDisabled }}" aria-label="레이어 아래로" title="레이어 아래로" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">↓</button>
+            <button onClick="{{ layerDuplicate }}" disabled="{{ layerActionsDisabled }}" aria-label="레이어 복제" title="레이어 복제" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">⧉</button>
+            <button onClick="{{ layerMerge }}" disabled="{{ layerMergeDisabled }}" aria-label="아래 레이어와 병합" title="아래 레이어와 병합" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">⇩</button>
+            <button onClick="{{ layerDelete }}" disabled="{{ layerDeleteDisabled }}" aria-label="레이어 삭제" title="레이어 삭제" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-danger);font-size:15px" style-hover="border-color:var(--ts-danger);background:#FFF7F5">⌫</button>
+          </div>
+
+          <div style="padding:9px 10px;border:1px solid #EEE7DE;border-radius:8px;background:#FBF9F6;font-size:11.5px;color:var(--ts-text-secondary);line-height:1.5">보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.</div>
+        </div>
+        </sc-if>
 
         <!-- Properties tab: contextual tool options (wired to window.TW post-processing later) -->
         <sc-if value="{{ inspTabProps }}" hint-placeholder-val="{{ true }}">
@@ -644,32 +679,6 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <div>
             <div style="font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em;margin-bottom:8px">{{ t.inspToolOpts }}</div>
             <div style="font-size:14px;font-weight:800;color:#1E1C1A">{{ propToolName }}</div>
-          </div>
-
-          <div style="border-top:1px solid #F2ECE4;padding-top:14px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
-              <div style="flex:1;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em">레이어</div>
-              <button onClick="{{ addLayer }}" aria-label="레이어 추가" title="레이어 추가" style="width:30px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-primary);display:grid;place-items:center;font-size:19px;font-weight:700" style-hover="border-color:var(--ts-primary);background:#FFF7F2" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">+</button>
-            </div>
-            <div role="list" aria-label="레이어 목록" style="display:flex;flex-direction:column;gap:5px">
-              <sc-for list="{{ layerRows }}" as="layer" hint-placeholder-count="2">
-                <div role="listitem" style="display:flex;align-items:center;gap:5px;padding:5px;border:1px solid {{ layer.border }};border-radius:8px;background:{{ layer.bg }}">
-                  <button onClick="{{ layer.toggle }}" aria-pressed="{{ layer.visible }}" aria-label="{{ layer.visibilityLabel }}" title="{{ layer.visibilityLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:{{ layer.iconColor }};display:grid;place-items:center" style-hover="background:#F7F4EF">
-                    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                  </button>
-                  <button onClick="{{ layer.pick }}" aria-pressed="{{ layer.active }}" style="flex:1;min-width:0;height:28px;border:none;background:transparent;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:{{ layer.weight }};color:#1E1C1A">{{ layer.name }}</button>
-                  <button onClick="{{ layer.more }}" aria-label="{{ layer.moreLabel }}" title="{{ layer.moreLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--ts-text-secondary);font-size:17px;line-height:1" style-hover="background:#F7F4EF">⋯</button>
-                </div>
-              </sc-for>
-            </div>
-            <div style="display:flex;gap:5px;margin-top:8px">
-              <button onClick="{{ layerUp }}" disabled="{{ layerUpDisabled }}" style="width:30px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" title="레이어 위로">↑</button>
-              <button onClick="{{ layerDown }}" disabled="{{ layerDownDisabled }}" style="width:30px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" title="레이어 아래로">↓</button>
-              <button onClick="{{ layerDuplicate }}" disabled="{{ layerActionsDisabled }}" style="flex:1;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:11.5px;font-weight:700;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">복제</button>
-              <button onClick="{{ layerMerge }}" disabled="{{ layerMergeDisabled }}" style="flex:1;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:11.5px;font-weight:700;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">아래와 병합</button>
-              <button onClick="{{ layerDelete }}" disabled="{{ layerDeleteDisabled }}" style="width:34px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-danger);font-size:15px" title="레이어 삭제">⌫</button>
-            </div>
-            <div style="margin-top:8px;font-size:11.5px;color:var(--ts-text-secondary);line-height:1.45">보이는 레이어만 DotPad·내보내기에서 하나의 촉각 그래픽으로 합성됩니다.</div>
           </div>
 
           <label style="display:flex;flex-direction:column;align-items:stretch;gap:6px;border-top:1px solid #F2ECE4;padding-top:14px">
@@ -5708,19 +5717,24 @@ class Component extends DCLogic {
       focusLabel: st.lang === 'en' ? (st.focusMode ? 'Exit focus mode' : 'Enter focus mode') : (st.focusMode ? '집중 모드 종료' : '집중 모드'),
       toggleFocusMode: () => this.toggleFocusMode(),
       inspectorTab: st.inspectorTab,
+      inspTabLayers: st.inspectorTab === 'layers',
       inspTabProps: st.inspectorTab === 'props',
       inspTabDevice: st.inspectorTab === 'device',
+      setInspLayers: () => this.setState({ inspectorTab: 'layers' }),
       setInspProps: () => this.setState({ inspectorTab: 'props' }),
       setInspDevice: () => this.setState({ inspectorTab: 'device' }),
+      inspTabLayersStyle: this.tabStyle(st.inspectorTab === 'layers'),
       inspTabPropsStyle: this.tabStyle(st.inspectorTab === 'props'),
       inspTabDeviceStyle: this.tabStyle(st.inspectorTab === 'device'),
+      layerTabLabel: st.lang === 'en' ? 'Layers' : '레이어',
+      layerCountLabel: st.lang === 'en' ? `${this._layersAt().length} layers · edit separately` : `${this._layersAt().length}개 레이어 · 개별로 편집`,
       // Page-local raster layers: the active layer receives edits; all visible
       // layers are composited only for output/preview.
       layerRows: (() => {
         const active = this._activeLayer(), layers = this._layersAt();
         return layers.slice().reverse().map(layer => ({
           id: layer.id, name: layer.name, visible: layer.visible !== false, active: layer.id === active.id,
-          border: layer.id === active.id ? 'var(--ts-primary)' : '#EDE4DA', bg: layer.id === active.id ? '#FFF7F2' : '#fff',
+          border: layer.id === active.id ? 'rgba(var(--ts-primary-rgb),0.32)' : '#EDE4DA', accent: layer.id === active.id ? 'var(--ts-primary)' : 'transparent', bg: layer.id === active.id ? '#FFF9F5' : '#fff',
           weight: layer.id === active.id ? 800 : 650, iconColor: layer.visible !== false ? '#1E1C1A' : '#B7AEA4',
           visibilityLabel: (layer.visible !== false ? '레이어 숨기기: ' : '레이어 표시: ') + layer.name,
           moreLabel: '레이어 이름 변경: ' + layer.name,
