@@ -3073,35 +3073,38 @@ class Component extends DCLogic {
     if (this.state.showGrid) {
       const strength = this.state.gridStrength || 1; // 1=soft, 2=guide, 3=detail
       const wpx = gridW * c, hpx = gridH * c;
-      const alpha = strength === 1 ? 0.038 : strength === 2 ? 0.065 : 0.095;
-      // Alternating 10×10 zones provide orientation without turning the canvas
-      // into graph paper. This is intentionally almost imperceptible behind dots.
-      g.fillStyle = 'rgba(105,94,83,' + alpha.toFixed(3) + ')';
-      for (let y = 0; y < gridH; y += 10) for (let x = 0; x < gridW; x += 10) {
-        if (((x / 10) + (y / 10)) % 2) g.fillRect(x * c, y * c, Math.min(10, gridW - x) * c, Math.min(10, gridH - y) * c);
+      // "Soft" keeps the canvas visually white; "Guide" uses only major lines.
+      // The subtle 10×10 shading is intentionally reserved for "Detail" mode.
+      if (strength === 3) {
+        g.fillStyle = 'rgba(105,94,83,0.035)';
+        for (let y = 0; y < gridH; y += 10) for (let x = 0; x < gridW; x += 10) {
+          if (((x / 10) + (y / 10)) % 2) g.fillRect(x * c, y * c, Math.min(10, gridW - x) * c, Math.min(10, gridH - y) * c);
+        }
       }
       // Detail mode adds cell boundaries only when enough physical pixels exist;
-      // dense 96×64 canvases keep their clean 5/10 guides instead of visual noise.
+      // dense 96×64 canvases keep their clean guides instead of visual noise.
       if (strength === 3 && c >= 11) {
         g.lineWidth = 1;
-        g.strokeStyle = 'rgba(139,129,119,0.14)';
+        g.strokeStyle = 'rgba(139,129,119,0.12)';
         g.beginPath();
         for (let x = 1; x < gridW; x++) { const px = x * c + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); }
         for (let y = 1; y < gridH; y++) { const py = y * c + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); }
         g.stroke();
       }
-      // 5-cell guides make short shapes easy to count; 10-cell guides form the
-      // stable alignment rhythm. They are crisp half-pixel strokes at every zoom.
-      const guideAlpha = strength === 1 ? 0.18 : strength === 2 ? 0.26 : 0.34;
-      g.lineWidth = 1;
-      g.strokeStyle = 'rgba(113,103,92,' + guideAlpha.toFixed(3) + ')';
-      g.setLineDash([2, 3]); g.beginPath();
-      for (let x = 5; x < gridW; x += 5) { if (x % 10) { const px = x * c + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); } }
-      for (let y = 5; y < gridH; y += 5) { if (y % 10) { const py = y * c + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); } }
-      g.stroke(); g.setLineDash([]);
+      // 5-cell guides are useful for quick counting, but stay out of Guide mode
+      // so its major 10-cell rhythm remains immediately legible.
+      if (strength === 1 || strength === 3) {
+        const guideAlpha = strength === 1 ? 0.12 : 0.22;
+        g.lineWidth = 1;
+        g.strokeStyle = 'rgba(113,103,92,' + guideAlpha.toFixed(3) + ')';
+        g.setLineDash([2, 3]); g.beginPath();
+        for (let x = 5; x < gridW; x += 5) { if (x % 10) { const px = x * c + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); } }
+        for (let y = 5; y < gridH; y += 5) { if (y % 10) { const py = y * c + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); } }
+        g.stroke(); g.setLineDash([]);
+      }
       // Primary orange stays reserved for active drawing, selection, and focus.
       // Major grid lines use a calm neutral so they guide without competing.
-      const majorAlpha = strength === 1 ? 0.30 : strength === 2 ? 0.42 : 0.56;
+      const majorAlpha = strength === 1 ? 0.18 : strength === 2 ? 0.40 : 0.48;
       g.lineWidth = 1.15;
       g.strokeStyle = 'rgba(82,73,65,' + majorAlpha.toFixed(3) + ')';
       g.beginPath();
