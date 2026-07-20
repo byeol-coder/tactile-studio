@@ -511,7 +511,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
     </sc-if>
 
     <div class="ts-canvas-zone" style="flex:1;position:relative;display:flex;flex-direction:column;overflow:hidden;padding:0">
-      <div ref="{{ viewportRef }}" onWheel="{{ cvWheel }}" onPointerDown="{{ canvasPanDown }}" onPointerMove="{{ canvasPanMove }}" onPointerUp="{{ canvasPanUp }}" onPointerCancel="{{ canvasPanUp }}" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px">
+      <div ref="{{ viewportRef }}" onWheel="{{ cvWheel }}" onScroll="{{ vpScroll }}" onPointerDown="{{ canvasPanDown }}" onPointerMove="{{ canvasPanMove }}" onPointerUp="{{ canvasPanUp }}" onPointerCancel="{{ canvasPanUp }}" style="{{ viewportStyle }}">
       <sc-if value="{{ corpusNavOn }}" hint-placeholder-val="{{ false }}">
         <div role="group" aria-label="{{ corpusNavGroupLabel }}" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E3D9CE;border-radius:100px;padding:4px 6px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 1px 3px rgba(16,24,40,0.1)">
           <button onClick="{{ corpusPrev }}" data-corpus-nav="prev" aria-label="{{ corpusPrevLabel }}" title="{{ corpusPrevLabel }}" disabled="{{ corpusPrevDisabled }}" style="{{ corpusPrevStyle }}" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -657,6 +657,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 
         <button class="ts-rail-tool" data-sel="{{ selectTool.sel }}" onClick="{{ selectTool.pick }}" onMouseEnter="{{ selectTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ selectTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ selectTool.selected }}" aria-label="{{ selectTool.aria }}" aria-keyshortcuts="{{ selectTool.aks }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ selectTool.iconEl }}
+        </button>
+
+        <button class="ts-rail-tool" data-sel="{{ panTool.sel }}" onClick="{{ panTool.pick }}" onMouseEnter="{{ panTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ panTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ panTool.selected }}" aria-label="{{ panTool.aria }}" aria-keyshortcuts="{{ panTool.aks }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          {{ panTool.iconEl }}
         </button>
 
         <button class="ts-rail-tool" data-sel="{{ textTool.sel }}" onClick="{{ textTool.pick }}" onMouseEnter="{{ textTool.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ textTool.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ textTool.selected }}" aria-label="{{ textTool.aria }}" aria-keyshortcuts="{{ textTool.aks }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -1818,7 +1822,7 @@ class Component extends DCLogic {
     toolbarPos: null,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
-    zoom: 1, focusMode: false,
+    zoom: 1, focusMode: false, panSnapPulse: false,
     // A quiet guide is useful from the first stroke. It remains screen-only —
     // never saved/exported/sent to DotPad — and can be hidden at any time.
     showGrid: true, gridStrength: 1,
@@ -1892,7 +1896,7 @@ class Component extends DCLogic {
       
       retry: '다시 연결',
       untitled: '제목 없는 그래픽', fileNameL: '파일 이름',
-      toolNames: { cursor: '커서', pen: '펜', eraser: '지우개', line: '직선', rect: '사각형', ellipse: '원', poly: '다각형', fill: '채우기', select: '선택', text: '묵자' },
+      toolNames: { cursor: '커서', pen: '펜', eraser: '지우개', line: '직선', rect: '사각형', ellipse: '원', poly: '다각형', fill: '채우기', select: '선택', pan: '손도구', text: '묵자' },
       txtTitle: '묵자 입력', txtSub: '짧은 글자를 촉각 점으로 변환합니다.', txtPlaceholder: '예: x축, 제목, A, 1', txtAdd: '촉각 글자 추가', txtCancel: '취소',
       txtSizeL: '크기', txtSizeS: '작게', txtSizeM: '보통', txtSizeL2: '크게', txtOrientL: '방향', txtOrientH: '가로', txtOrientV: '세로', txtStyleL: '스타일', txtStyleFill: '채움', txtStyleOutline: '윤곽선', txtNote: '점자가 아닌 인쇄용 묵자 글자입니다. 추가 후 점으로 편집·삭제할 수 있습니다.',
       strokeL: '선 두께', eraserL: '지우개 크기', rowN: ['1줄', '2줄', '3줄'],
@@ -1941,7 +1945,7 @@ class Component extends DCLogic {
       applyBraille: '점자 적용', applyNarr: '나레이션 적용', applyHint: (m) => m + ' + Enter로 적용',
       applyDescOk: '점자 설명이 현재 페이지에 적용되었습니다.', applyNarrOk: '나레이션 텍스트가 현재 페이지에 적용되었습니다.', applyFail: '적용하지 못했습니다. 다시 시도하세요.',
       aDescField: '점자 설명', aNarrField: '나레이션 텍스트',
-      toolDesc: { pen: '촉각 점을 그립니다', eraser: '촉각 점을 지웁니다', line: '직선을 그립니다', rect: '사각형을 그립니다', ellipse: '원을 그립니다', poly: '다각형을 그립니다', fill: '영역을 채웁니다', select: '영역을 선택합니다', text: '묵자·촉각 글자를 넣습니다', cursor: '키보드 커서로 점을 편집합니다' },
+      toolDesc: { pen: '촉각 점을 그립니다', eraser: '촉각 점을 지웁니다', line: '직선을 그립니다', rect: '사각형을 그립니다', ellipse: '원을 그립니다', poly: '다각형을 그립니다', fill: '영역을 채웁니다', select: '영역을 선택합니다', pan: '드래그로 캔버스를 이동합니다', text: '묵자·촉각 글자를 넣습니다', cursor: '키보드 커서로 점을 편집합니다' },
       shapesDesc: '도형 도구를 선택합니다',
       scToggleDot: '점 켜기·끄기', scNudge: '커서 이동', scClosePoly: '다각형 닫기', scApply: '설명·나레이션 적용', scHelp: '단축키 도움말', scEscape: '닫기·취소',
       scgTools: '도구', scgCanvas: '캔버스', scgEditing: '편집', scgView: '보기', scgApply: '적용 및 출력', kbShortcutsTitle: '키보드 단축키',
@@ -2013,6 +2017,7 @@ class Component extends DCLogic {
       aLangSet: '언어를 한국어로 변경했습니다',
       aPoly: 'Enter 키로 다각형을 닫습니다', aFill: '영역을 채웠습니다',
       aShape: n => n + ' 그리기 완료', aSel: '영역 선택됨 — 드래그하여 이동', aMoved: '선택 영역을 이동했습니다',
+      aPanMajor: '격자 10칸 지점을 지났습니다', aPanEdge: '캔버스 가장자리에 도달했습니다',
       tExport: 'PNG로 내보냈습니다', tExportFormat: f => f + '로 내보냈습니다', tSavedDrive: 'Tactile Drive에 저장되었습니다', tSavedLib: 'Dot Library에 저장되었습니다',
       tSaveErr: '저장에 실패했습니다 — 저장 공간이 부족합니다',
     };
@@ -2025,7 +2030,7 @@ class Component extends DCLogic {
       
       retry: 'Reconnect',
       untitled: 'Untitled graphic', fileNameL: 'File name',
-      toolNames: { cursor: 'Cursor', pen: 'Pen', eraser: 'Eraser', line: 'Line', rect: 'Rectangle', ellipse: 'Ellipse', poly: 'Polygon', fill: 'Fill', select: 'Select', text: 'Tactile Text' },
+      toolNames: { cursor: 'Cursor', pen: 'Pen', eraser: 'Eraser', line: 'Line', rect: 'Rectangle', ellipse: 'Ellipse', poly: 'Polygon', fill: 'Fill', select: 'Select', pan: 'Pan', text: 'Tactile Text' },
       txtTitle: 'Tactile Text', txtSub: 'Convert short text into tactile-dot lettering.', txtPlaceholder: 'e.g. x-axis, Title, A, 1', txtAdd: 'Add tactile label', txtCancel: 'Cancel',
       txtSizeL: 'Size', txtSizeS: 'Small', txtSizeM: 'Medium', txtSizeL2: 'Large', txtOrientL: 'Direction', txtOrientH: 'Horizontal', txtOrientV: 'Vertical', txtStyleL: 'Style', txtStyleFill: 'Filled', txtStyleOutline: 'Outline', txtNote: 'Printed (묵자) lettering, not braille. Editable as dots after adding.',
       strokeL: 'Stroke width', eraserL: 'Eraser size', rowN: ['1 row', '2 rows', '3 rows'],
@@ -2074,7 +2079,7 @@ class Component extends DCLogic {
       applyBraille: 'Apply braille', applyNarr: 'Apply narration', applyHint: (m) => 'Press ' + m + ' + Enter to apply',
       applyDescOk: 'Braille description applied to the current page.', applyNarrOk: 'Narration text applied to the current page.', applyFail: "Couldn't apply. Please try again.",
       aDescField: 'Braille description', aNarrField: 'Narration text',
-      toolDesc: { pen: 'Draw tactile dots', eraser: 'Remove tactile dots', line: 'Draw a straight line', rect: 'Draw a rectangle', ellipse: 'Draw an ellipse', poly: 'Draw a polygon', fill: 'Fill an area', select: 'Select an area', text: 'Place tactile text', cursor: 'Edit dots with the keyboard' },
+      toolDesc: { pen: 'Draw tactile dots', eraser: 'Remove tactile dots', line: 'Draw a straight line', rect: 'Draw a rectangle', ellipse: 'Draw an ellipse', poly: 'Draw a polygon', fill: 'Fill an area', select: 'Select an area', pan: 'Drag to move the canvas', text: 'Place tactile text', cursor: 'Edit dots with the keyboard' },
       shapesDesc: 'Choose a shape tool',
       scToggleDot: 'Toggle dot', scNudge: 'Move cursor', scClosePoly: 'Close polygon', scApply: 'Apply description / narration', scHelp: 'Keyboard help', scEscape: 'Close / cancel',
       scgTools: 'Tools', scgCanvas: 'Canvas', scgEditing: 'Editing', scgView: 'View', scgApply: 'Apply & output', kbShortcutsTitle: 'Keyboard shortcuts',
@@ -2146,6 +2151,7 @@ class Component extends DCLogic {
       aLangSet: 'Language changed to English',
       aPoly: 'Press Enter to close the polygon', aFill: 'Region filled',
       aShape: n => n + ' drawn', aSel: 'Region selected — drag to move', aMoved: 'Selection moved',
+      aPanMajor: 'Passed a 10-cell grid line', aPanEdge: 'Reached the canvas edge',
       tExport: 'Exported as PNG', tExportFormat: f => 'Exported as ' + f, tSavedDrive: 'Saved to Tactile Drive', tSavedLib: 'Saved to Dot Library',
       tSaveErr: 'Save failed — storage is full',
     };
@@ -2419,7 +2425,7 @@ class Component extends DCLogic {
   // Canonical tool→key map. Both the keyboard handler (onKey) and the toolbar /
   // tooltip builders derive from this, so a shortcut is defined exactly once.
   toolKeys() {
-    return { pen: 'P', eraser: 'E', line: 'L', rect: 'R', ellipse: 'O', poly: 'G', fill: 'F', select: 'S', text: 'T', cursor: 'V' };
+    return { pen: 'P', eraser: 'E', line: 'L', rect: 'R', ellipse: 'O', poly: 'G', fill: 'F', select: 'S', pan: 'H', text: 'T', cursor: 'V' };
   }
   // The full, localized shortcut registry. Drives the tooltips' key caps, the
   // aria-keyshortcuts values, and the Keyboard-shortcuts help dialog — one
@@ -2431,7 +2437,7 @@ class Component extends DCLogic {
     const TK = this.toolKeys();
     const tn = id => (t.toolNames && t.toolNames[id]) || id;
     const rows = [];
-    ['pen', 'eraser', 'line', 'rect', 'ellipse', 'poly', 'fill', 'select', 'text'].forEach(id =>
+    ['pen', 'eraser', 'line', 'rect', 'ellipse', 'poly', 'fill', 'select', 'pan', 'text'].forEach(id =>
       rows.push({ id, ctx: 'tools', cap: TK[id], aks: TK[id], name: tn(id) }));
     if (this.state.a11yMode) rows.push({ id: 'cursor', ctx: 'tools', cap: TK.cursor, aks: TK.cursor, name: tn('cursor') });
     rows.push({ id: 'toggleDot', ctx: 'canvas', cap: 'Space', aks: 'Space', name: t.scToggleDot });
@@ -3843,6 +3849,11 @@ class Component extends DCLogic {
     e.preventDefault();
     this.canvasRef.current.focus();
     const [x, y] = this.evCell(e), t = this.T(), tool = this.state.tool;
+    // Pan tool: no drawing dispatch here — the pointerdown bubbles up to the
+    // viewport's canvasPanDown (see canvasPanDown's tool==='pan' branch),
+    // which does the actual scroll-drag. Keeping one pan implementation
+    // avoids duplicating the scrollLeft/scrollTop math in two places.
+    if (tool === 'pan') return;
     // Capture is an optimization (drag beyond bounds); it must never break drawing.
     try { e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
     if (tool === 'cursor') { this.setState({ cx: x, cy: y }); return; }
@@ -4048,7 +4059,8 @@ class Component extends DCLogic {
   // deliberately not spacebar-based, since Space already toggles the dot at
   // the keyboard cursor for screen-reader/keyboard-only editing.
   canvasPanDown(e) {
-    if (e.button !== 1) return;
+    const panToolActive = this.state.tool === 'pan';
+    if (e.button !== 1 && !(panToolActive && e.button === 0)) return;
     e.preventDefault();
     const el = e.currentTarget;
     try { el.setPointerCapture && el.setPointerCapture(e.pointerId); } catch (err) { /* noop */ }
@@ -4062,6 +4074,39 @@ class Component extends DCLogic {
     e.currentTarget.scrollTop = d.stp - (e.clientY - d.y);
   }
   canvasPanUp() { this.panDrag = null; }
+  // Pan-position guidance: fires on ANY viewport scroll — drag-pan (either
+  // pointer method), trackpad two-finger scroll, or keyboard scroll — so it
+  // covers every panning path with one implementation instead of hooking each
+  // input method separately. Cheap arithmetic on every scroll event; only the
+  // rare boundary-crossing tick does a setState + announce, throttled to at
+  // most once per ~400ms so a fast drag never floods the screen reader.
+  vpScroll(e) {
+    const el = e.currentTarget;
+    const c = this.cellPx() * this.state.zoom;
+    if (!c) return;
+    const majorX = Math.floor(Math.round(el.scrollLeft / c) / 10);
+    const majorY = Math.floor(Math.round(el.scrollTop / c) / 10);
+    const atEdge = el.scrollLeft <= 1 || el.scrollTop <= 1 ||
+      el.scrollLeft >= el.scrollWidth - el.clientWidth - 1 ||
+      el.scrollTop >= el.scrollHeight - el.clientHeight - 1;
+    const prev = this._panSnap || (this._panSnap = { mx: null, my: null, edge: false, at: 0 });
+    const hadBaseline = prev.mx !== null;
+    const crossedMajor = hadBaseline && (prev.mx !== majorX || prev.my !== majorY);
+    const crossedEdge = hadBaseline && atEdge && !prev.edge;
+    prev.mx = majorX; prev.my = majorY; prev.edge = atEdge;
+    if (!crossedMajor && !crossedEdge) return;
+    const now = Date.now();
+    if (now - prev.at < 400) return;
+    prev.at = now;
+    this.pulseSnap();
+    const t = this.T();
+    this.say(crossedEdge ? t.aPanEdge : t.aPanMajor);
+  }
+  pulseSnap() {
+    clearTimeout(this._snapT);
+    this.setState({ panSnapPulse: true });
+    this._snapT = setTimeout(() => this.setState({ panSnapPulse: false }), 200);
+  }
   // Keeps the keyboard-navigated cell (cx,cy) visible after arrow-key moves —
   // matters once zoomed in, where the full grid no longer fits on screen.
   scrollCellIntoView(x, y) {
@@ -4492,6 +4537,7 @@ class Component extends DCLogic {
     fill: [{ d: 'M 6 11.5 L 12 5.5 L 18 11.5 L 12 17.5 C 11.85 17.65 11.67 17.78 11.47 17.86 C 11.28 17.94 11.06 17.99 10.85 17.99 C 10.64 17.99 10.42 17.94 10.23 17.86 C 10.03 17.78 9.85 17.65 9.7 17.5 L 6 13.8 C 5.85 13.65 5.72 13.47 5.64 13.27 C 5.56 13.08 5.51 12.86 5.51 12.65 C 5.51 12.44 5.56 12.22 5.64 12.03 C 5.72 11.83 5.85 11.65 6 11.5 Z' }, { d: 'M 12 5.5 L 10 3.5' }, { d: 'M 19.5 15.5 C 19.5 15.5 21 17.4 21 18.5 C 21 18.9 20.84 19.28 20.56 19.56 C 20.28 19.84 19.9 20 19.5 20 C 19.1 20 18.72 19.84 18.44 19.56 C 18.16 19.28 18 18.9 18 18.5 C 18 17.4 19.5 15.5 19.5 15.5 Z', fill: true }],
     select: [{ d: 'M 4 8.5 L 4 5.5 C 4 5.1 4.16 4.72 4.44 4.44 C 4.72 4.16 5.1 4 5.5 4 L 8.5 4' }, { d: 'M 15.5 4 L 18.5 4 C 18.9 4 19.28 4.16 19.56 4.44 C 19.84 4.72 20 5.1 20 5.5 L 20 8.5' }, { d: 'M 20 15.5 L 20 18.5 C 20 18.9 19.84 19.28 19.56 19.56 C 19.28 19.84 18.9 20 18.5 20 L 15.5 20' }, { d: 'M 8.5 20 L 5.5 20 C 5.1 20 4.72 19.84 4.44 19.56 C 4.16 19.28 4 18.9 4 18.5 L 4 15.5' }],
     text: [{ d: 'M5 5h14M12 5v14M9 19h6' }],
+    pan: [{ d: 'M12 2v20' }, { d: 'M2 12h20' }, { d: 'M9 5l3-3 3 3' }, { d: 'M9 19l3 3 3-3' }, { d: 'M5 9l-3 3 3 3' }, { d: 'M19 9l3 3-3 3' }],
     shapes: [{ d: 'M4 5h8v8H4z' }, { d: 'M20 15.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z' }],
     clearAll: [{ d: 'M4 7h16' }, { d: 'M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2' }, { d: 'M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12' }],
     invert: [{ d: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z' }, { d: 'M12 4a8 8 0 0 1 0 16Z', fill: true }],
@@ -5666,6 +5712,7 @@ class Component extends DCLogic {
     // editing works regardless of the active tool. See a11yMode.
     const primaryTools = (st.a11yMode ? ['cursor', 'pen', 'eraser'] : ['pen', 'eraser']).map(mkTool);
     const selectTool = mkTool('select');
+    const panTool = mkTool('pan');
     const textTool = mkTool('text');
     const segBtn = on => ({ flex: 1, height: 30, borderRadius: 7, border: 'none', background: on ? '#1E1C1A' : 'transparent', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 12.5, cursor: 'pointer', transition: 'background 0.12s ease' });
     const textSizeOpts = [['small', t.txtSizeS], ['medium', t.txtSizeM], ['large', t.txtSizeL2]].map(a => ({ key: a[0], label: a[1], active: st.textSize === a[0], pick: () => this.setState({ textSize: a[0] }), style: segBtn(st.textSize === a[0]) }));
@@ -6008,7 +6055,8 @@ class Component extends DCLogic {
       heroRef: this.heroRef,
       cvDown: e => this.onDown(e), cvMove: e => this.onMove(e), cvUp: e => this.onUp(e), cvDbl: () => this.onDbl(),
       cvEnter: () => this.setState({ canvasHover: true }), cvLeave: () => this.setState({ canvasHover: false }),
-      cvWheel: e => this.cvWheel(e),
+      cvWheel: e => this.cvWheel(e), vpScroll: e => this.vpScroll(e),
+      viewportStyle: { flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '20px', boxShadow: st.panSnapPulse ? 'inset 0 0 0 3px var(--ts-primary)' : 'inset 0 0 0 0px transparent', transition: 'box-shadow var(--ts-duration-normal) var(--ts-easing-standard)' },
       viewportRef: this.viewportRef,
       pagesRailRef: this.pagesRailRef,
       canvasPanDown: e => this.canvasPanDown(e), canvasPanMove: e => this.canvasPanMove(e), canvasPanUp: () => this.canvasPanUp(),
@@ -6028,8 +6076,8 @@ class Component extends DCLogic {
       // Away from 100% we switch to an explicit pixel size so the scrollable viewport
       // can correctly grow/scroll — image-rendering keeps dots crisp instead of blurry.
       canvasStyle: st.zoom === 1
-        ? { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', maxWidth: '100%' }
-        : { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', width: (st.gridW * this.cellPx() * st.zoom) + 'px', height: (st.gridH * this.cellPx() * st.zoom) + 'px', imageRendering: 'pixelated' },
+        ? { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'pan' ? 'grab' : st.tool === 'eraser' ? 'none' : 'crosshair', maxWidth: '100%' }
+        : { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'pan' ? 'grab' : st.tool === 'eraser' ? 'none' : 'crosshair', width: (st.gridW * this.cellPx() * st.zoom) + 'px', height: (st.gridH * this.cellPx() * st.zoom) + 'px', imageRendering: 'pixelated' },
       // Eraser cursor guide: a grid-aligned box over the exact cells the next
       // erase stroke will hit (mirrors the offsets brushCb() actually stamps),
       // so it stays correct at any zoom and never outruns the real erase area.
@@ -6051,7 +6099,7 @@ class Component extends DCLogic {
         };
       })(),
       // tools (grouped compact rail)
-      primaryTools, selectTool, textTool, shapeTools, shapeGroup, strokeGroup, quickGroup, quickItems,
+      primaryTools, selectTool, panTool, textTool, shapeTools, shapeGroup, strokeGroup, quickGroup, quickItems,
       textSizeOpts, textOrientOpts, textStyleOpts,
       textPopoverOpen: !!st.textPopover,
       textPopoverStyle: st.textPopover ? { position: 'fixed', left: st.textPopover.left, top: st.textPopover.top, zIndex: 82, width: 258, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 16, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' } : null,
