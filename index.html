@@ -524,22 +524,15 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
         </button>
       </div>
-      <!-- Canvas view controls live together at the lower right: grid is a view
-           option, while zoom changes magnification. Keeping them side by side
-           makes their relationship clear without competing with the tool rail. -->
-      <div role="group" aria-label="{{ t.gridLabelUi }}" style="position:absolute;right:150px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
+      <!-- One compact canvas-view control keeps display aids and magnification
+           together without creating a second floating hierarchy. Grid is its
+           own left-hand segment; the divider makes it distinct from zoom. -->
+      <div role="group" aria-label="{{ t.canvasViewLabel }}" style="position:absolute;right:16px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
         <button class="ts-zoom-btn" onClick="{{ toggleGrid }}" aria-pressed="{{ gridActive }}" aria-label="{{ gridToggleLabel }}" title="{{ gridToggleLabel }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridToggleColor }};display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         </button>
-        <span aria-hidden="true" style="width:1px;height:18px;background:var(--ts-border-decor);margin:0 1px;flex:none"></span>
         <button class="ts-zoom-btn" onClick="{{ cycleGridStrength }}" disabled="{{ gridStrengthDisabled }}" aria-label="{{ gridStrengthLabel }}" title="{{ gridStrengthLabel }}" style="min-width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridStrengthColor }};display:grid;place-items:center;font-size:14px;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ gridStrengthText }}</button>
-      </div>
-      <!-- Zoom pill (Figma-style): Ctrl/Cmd + wheel or trackpad pinch zooms
-           continuously anywhere over the canvas viewport (see cvWheel on the
-           scroll container above); +/− jump between preset steps. Placed as
-           a sibling of the scrollable viewport so it stays put on scroll,
-           and above the floating tool pill so the two never overlap. -->
-      <div role="group" aria-label="{{ t.zoomLabel }}" style="position:absolute;right:16px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
+        <span aria-hidden="true" style="width:1px;height:22px;background:var(--ts-border-decor);margin:0 3px;flex:none"></span>
         <button class="ts-zoom-btn" onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" aria-keyshortcuts="{{ zoomOutKeys }}" onMouseEnter="{{ zoomOutTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomOutTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
@@ -1812,7 +1805,7 @@ class Component extends DCLogic {
       pos: '위치', dotOn: '점 있음', dotOff: '점 없음', toolLabel: '도구', undo: '실행 취소', redo: '다시 실행', dots: '점', helpHint: '단축키 안내',
       canvasAria: '촉각 그리드 편집기.',
       canvasAriaA11y: '촉각 그리드 편집기. 화살표 키로 이동하고 스페이스로 점을 토글합니다.',
-      zoomLabel: '캔버스 확대/축소', zoomOutL: '축소', zoomInL: '확대', zoomResetL: '100%로 초기화',
+      canvasViewLabel: '캔버스 보기 설정', zoomLabel: '캔버스 확대/축소', zoomOutL: '축소', zoomInL: '확대', zoomResetL: '100%로 초기화',
       gridLabelUi: '작업 그리드', gridToggleOnL: '그리드 표시', gridToggleOffL: '그리드 숨기기', gridStrengthL: '그리드 진하기', gridStrengthNames: ['옅게', '보통', '진하게'], gridOnMsg: '그리드 표시', gridOffMsg: '그리드 숨김', gridStrengthMsg: '그리드 진하기: ',
       
       
@@ -1945,7 +1938,7 @@ class Component extends DCLogic {
       pos: 'Position', dotOn: 'Dot present', dotOff: 'No dot', toolLabel: 'Tool', undo: 'Undo', redo: 'Redo', dots: 'dots', helpHint: 'Shortcuts',
       canvasAria: 'Tactile grid editor.',
       canvasAriaA11y: 'Tactile grid editor. Move with arrow keys, toggle dots with Space.',
-      zoomLabel: 'Zoom canvas', zoomOutL: 'Zoom out', zoomInL: 'Zoom in', zoomResetL: 'Reset to 100%',
+      canvasViewLabel: 'Canvas view controls', zoomLabel: 'Zoom canvas', zoomOutL: 'Zoom out', zoomInL: 'Zoom in', zoomResetL: 'Reset to 100%',
       gridLabelUi: 'Working grid', gridToggleOnL: 'Show grid', gridToggleOffL: 'Hide grid', gridStrengthL: 'Grid strength', gridStrengthNames: ['Light', 'Medium', 'Strong'], gridOnMsg: 'Grid shown', gridOffMsg: 'Grid hidden', gridStrengthMsg: 'Grid strength: ',
       
       
