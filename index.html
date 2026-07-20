@@ -232,6 +232,13 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 .ts-page-handle[data-dragging="true"]{cursor:grabbing}
 [data-ts-focus="true"] .ts-pages-rail,[data-ts-focus="true"] .ts-side-panel{display:none!important}
 [data-ts-focus="true"] .ts-canvas-zone{background:#1E1C1A}
+/* Focus mode is deliberately an editor-only surface: keep the product mark and
+   the exit control, while removing document chrome that competes with drawing. */
+[data-ts-focus="true"] .ts-topbar{height:56px;grid-template-columns:minmax(0,1fr) auto;padding:0 14px}
+[data-ts-focus="true"] .ts-topbar-left .ts-divider,[data-ts-focus="true"] .ts-project-name,[data-ts-focus="true"] .ts-save-status{display:none!important}
+[data-ts-focus="true"] .ts-topbar-right > :not(:last-child){display:none!important}
+[data-ts-focus="true"] .ts-brand-logo{display:block!important}
+[data-ts-focus="true"] .ts-tool-rail{z-index:72!important}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
@@ -540,6 +547,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <button class="ts-zoom-btn" onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" aria-keyshortcuts="{{ zoomInKeys }}" onMouseEnter="{{ zoomInTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomInTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
         </button>
+        <span aria-hidden="true" style="width:1px;height:22px;background:var(--ts-border-decor);margin:0 3px;flex:none"></span>
+        <button class="ts-zoom-btn" onClick="{{ toggleA11y }}" aria-pressed="{{ a11yMode }}" aria-label="{{ keyboardAssistLabel }}" title="{{ keyboardAssistLabel }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:{{ keyboardAssistBg }};color:{{ keyboardAssistColor }};display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><path d="M6.5 10h.01M9.5 10h.01M12.5 10h.01M15.5 10h.01M18 10h.01M8 14h8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+        </button>
       </div>
 
       <!-- Floating tool pill (Figma: 중앙 플로팅 툴바) — centered over the bottom edge
@@ -547,7 +558,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
            anchor off each button's own getBoundingClientRect(), so no extra wiring
            was needed for the new position. -->
       <div class="ts-tool-rail" role="toolbar" aria-label="Tools" aria-orientation="horizontal" style="{{ toolbarStyle }}">
-        <div onPointerDown="{{ railDragDown }}" onPointerMove="{{ railDragMove }}" onPointerUp="{{ railDragUp }}" onPointerCancel="{{ railDragUp }}" role="button" tabindex="0" aria-label="{{ t.dragToolbar }}" title="{{ t.dragToolbar }}" style="width:16px;height:32px;flex:none;border-radius:6px;cursor:grab;display:grid;place-items:center;touch-action:none;margin-right:2px" style-hover="background:rgba(255,255,255,0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+        <div onPointerDown="{{ railDragDown }}" onPointerMove="{{ railDragMove }}" onPointerUp="{{ railDragUp }}" onPointerCancel="{{ railDragUp }}" onDoubleClick="{{ railDragReset }}" role="button" tabindex="0" aria-label="{{ t.dragToolbar }}" title="{{ t.dragToolbar }}" style="width:16px;height:32px;flex:none;border-radius:6px;cursor:grab;display:grid;place-items:center;touch-action:none;margin-right:2px" style-hover="background:rgba(255,255,255,0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="6" height="16" viewBox="0 0 6 16" aria-hidden="true"><circle cx="1.2" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="14.6" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="14.6" r="1.2" fill="#B7AEA4"></circle></svg>
         </div>
         <sc-for list="{{ primaryTools }}" as="tl" hint-placeholder-count="3">
@@ -4831,6 +4842,11 @@ class Component extends DCLogic {
     this.setState({ toolbarPos: { x, y } });
   }
   railDragUp() { this.toolbarDrag = null; }
+  railDragReset() {
+    this.toolbarDrag = null;
+    this.setState({ toolbarPos: null });
+    this.say(this.state.lang === 'en' ? 'Toolbar returned to its default position.' : '도구모음을 기본 위치로 되돌렸습니다.');
+  }
   doSaveCommit() {
     const t = this.T(), st = this.state, name = st.fileName || t.untitled;
     const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
@@ -5615,6 +5631,9 @@ class Component extends DCLogic {
       // Accessibility Mode toggle (Properties pane)
       a11yMode: st.a11yMode,
       toggleA11y: () => this.setState(s => { const on = !s.a11yMode; const patch = { a11yMode: on }; if (!on && s.tool === 'cursor') patch.tool = 'pen'; return patch; }),
+      keyboardAssistLabel: st.lang === 'en' ? (st.a11yMode ? 'Hide keyboard editing guide' : 'Show keyboard editing guide') : (st.a11yMode ? '키보드 편집 안내 숨기기' : '키보드 편집 안내 보기'),
+      keyboardAssistBg: st.a11yMode ? 'rgba(var(--ts-primary-rgb),0.10)' : 'transparent',
+      keyboardAssistColor: st.a11yMode ? 'var(--ts-primary)' : '#1E1C1A',
       a11yTrackStyle: { position: 'relative', width: 40, height: 22, borderRadius: 100, flex: 'none', transition: 'background 0.16s ease', background: st.a11yMode ? 'var(--ts-primary)' : 'var(--ts-border-decor)', cursor: 'pointer', border: 'none', padding: 0 },
       a11yKnobStyle: { position: 'absolute', top: 2, left: st.a11yMode ? 20 : 2, width: 18, height: 18, borderRadius: 100, background: '#fff', transition: 'left 0.16s ease', boxShadow: '0 1px 2px rgba(16,24,40,0.2)' },
       pinsDisabled: !st.connected,
@@ -5723,6 +5742,7 @@ class Component extends DCLogic {
       railDragDown: e => this.railDragDown(e),
       railDragMove: e => this.railDragMove(e),
       railDragUp: () => this.railDragUp(),
+      railDragReset: () => this.railDragReset(),
       // contextual stroke / eraser thickness (tactile grid rows: 1/2/3)
       // Pen/eraser no longer need the separate dedicated button — pressing
       // either one now opens its own contextual size menu directly (see
