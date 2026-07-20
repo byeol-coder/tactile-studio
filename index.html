@@ -1903,7 +1903,7 @@ class Component extends DCLogic {
       aLangSet: '언어를 한국어로 변경했습니다',
       aPoly: 'Enter 키로 다각형을 닫습니다', aFill: '영역을 채웠습니다',
       aShape: n => n + ' 그리기 완료', aSel: '영역 선택됨 — 드래그하여 이동', aMoved: '선택 영역을 이동했습니다',
-      tExport: 'PNG로 내보냈습니다', tSavedDrive: 'Tactile Drive에 저장되었습니다', tSavedLib: 'Dot Library에 저장되었습니다',
+      tExport: 'PNG로 내보냈습니다', tExportFormat: f => f + '로 내보냈습니다', tSavedDrive: 'Tactile Drive에 저장되었습니다', tSavedLib: 'Dot Library에 저장되었습니다',
       tSaveErr: '저장에 실패했습니다 — 저장 공간이 부족합니다',
     };
     const en = {
@@ -2036,7 +2036,7 @@ class Component extends DCLogic {
       aLangSet: 'Language changed to English',
       aPoly: 'Press Enter to close the polygon', aFill: 'Region filled',
       aShape: n => n + ' drawn', aSel: 'Region selected — drag to move', aMoved: 'Selection moved',
-      tExport: 'Exported as PNG', tSavedDrive: 'Saved to Tactile Drive', tSavedLib: 'Saved to Dot Library',
+      tExport: 'Exported as PNG', tExportFormat: f => 'Exported as ' + f, tSavedDrive: 'Saved to Tactile Drive', tSavedLib: 'Saved to Dot Library',
       tSaveErr: 'Save failed — storage is full',
     };
     return (lang || this.state.lang) === 'ko' ? ko : en;
@@ -4605,8 +4605,9 @@ class Component extends DCLogic {
         TW.downloadBlob(new Blob([JSON.stringify(asset, null, 2)], { type: 'application/json' }), TW.safeName(asset.id, 'json'));
       }
       this.setState({ menu: null });
-      this.toastMsg(t.tExport + ' · ' + fmt);
-      this.say((t.aExported || t.tExport) + ' ' + fmt);
+      const msg = t.tExportFormat ? t.tExportFormat(fmt) : (t.tExport + ' · ' + fmt);
+      this.toastMsg(msg);
+      this.say(msg);
     } catch (e) {
       this.toastMsg(t.aExportUnavail || 'Export failed');
     }
