@@ -988,6 +988,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </span>
         </div>
 
+        <!-- The tall picker is only an empty-state control. Once an image is
+             decoded, remove it so the before/after comparison stays above the
+             fold instead of looking clipped below the first scroll. -->
+        <sc-if value="{{ imgNotReady }}" hint-placeholder-val="{{ true }}">
         <!-- drop zone -->
         <div role="button" tabIndex="0" aria-label="{{ t.impDrop }}" onClick="{{ impChooseFile }}" onKeyDown="{{ onDropZoneKey }}" onDragOver="{{ onDropOver }}" onDrop="{{ onDropZone }}" style="border:2px dashed #C9BBAF;border-radius:14px;background:#F7F4EF;padding:34px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;cursor:pointer" style-hover="border-color:var(--ts-primary);background:#FBF6F1" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           <div style="width:58px;height:58px;border-radius:15px;background:rgba(var(--ts-primary-rgb),0.10);display:grid;place-items:center;color:var(--ts-primary)">
@@ -1022,6 +1026,8 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <button onClick="{{ chooseAssetFile }}" style="flex:none;height:30px;padding:0 4px;border:none;background:transparent;color:var(--ts-primary);font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:underline;text-decoration-color:transparent" style-hover="text-decoration-color:currentColor" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impAssetChoose }}</button>
         </div>
 
+        </sc-if>
+
         <!-- states -->
         <sc-if value="{{ impErr }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:8px;margin-top:12px;background:rgba(218,18,13,0.06);border:1px solid var(--ts-danger);border-radius:9px;padding:10px 13px;font-size:12.5px;font-weight:600;color:var(--ts-danger)">
@@ -1036,9 +1042,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
         </sc-if>
         <sc-if value="{{ imgReady }}" hint-placeholder-val="{{ false }}">
-          <div role="status" style="display:flex;align-items:center;gap:9px;margin-top:12px;background:rgba(11,136,0,0.08);border:1px solid var(--ts-success);border-radius:9px;padding:10px 13px;font-size:12.5px;font-weight:700;color:#0B7500">
+          <div role="status" style="display:flex;align-items:center;gap:9px;margin-top:12px;background:rgba(11,136,0,0.08);border:1px solid var(--ts-success);border-radius:9px;padding:8px 10px 8px 13px;font-size:12.5px;font-weight:700;color:#0B7500">
             <svg width="15" height="15" viewBox="0 0 24 24" style="flex:none"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            {{ t.impLoaded }} · <span style="font-weight:600;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ impName }}</span>
+            <span style="min-width:0;flex:1">{{ t.impLoaded }} · <span style="font-weight:600;color:#1E1C1A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ impName }}</span></span>
+            <button onClick="{{ impChooseFileBtn }}" style="flex:none;height:28px;padding:0 8px;border:1px solid rgba(11,136,0,0.28);border-radius:6px;background:#fff;color:#0B7500;font-size:12px;font-weight:800;cursor:pointer" style-hover="border-color:#0B7500" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impChooseFile }}</button>
           </div>
           <!-- Original + live tactile conversion, side by side, the moment the
                image loads — so the result is visible immediately instead of only
@@ -5859,6 +5866,7 @@ class Component extends DCLogic {
           labelStyle: { fontSize: 12.5, fontWeight: state === 'current' ? 800 : 600, color: state === 'todo' ? 'var(--ts-text-secondary)' : '#1E1C1A', whiteSpace: 'nowrap' } };
       }),
       impIsImport: st.impStep === 'import', impIsReview: st.impStep === 'review',
+      imgNotReady: !st.imgReady,
       impHeaderTitle: st.impStep === 'import' ? t.impImportTitle : t.impReviewTitle,
       impProgressLabel: (typeof t.impStepOf === 'function' ? t.impStepOf(impIdx + 1) : ('Step ' + (impIdx + 1) + ' / 5')) + ' · ' + ((t.impSteps || [])[impIdx] || ''),
       impBackLabel: st.impStep === 'import' ? t.impCancel : t.impBack,
