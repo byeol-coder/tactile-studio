@@ -14,7 +14,7 @@
       "dotCount": 471
     },
     "outline": {
-      "cellsSha256": "0f2034f82a6a67b2ae2449a683106ca7a14c26c6705ee28f2e7b11973cc43b2d",
+      "cellsSha256": "38012d5d0f86570d2bba3d877450c62930173dca57cbef3a563533efb50eb15a",
       "box": {
         "ox": 5,
         "oy": 0,
@@ -22,10 +22,10 @@
         "dh": 40
       },
       "removedDots": 0,
-      "dotCount": 344
+      "dotCount": 355
     },
     "diagram": {
-      "cellsSha256": "13cec1706bbb22522338628a70edbe29b5df10bc576db98a0544869ede613a68",
+      "cellsSha256": "c837e3133f505e78473229aaec5c3de41757758a00d75532cabe51152f807f46",
       "box": {
         "ox": 5,
         "oy": 0,
@@ -33,7 +33,7 @@
         "dh": 40
       },
       "removedDots": 0,
-      "dotCount": 134
+      "dotCount": 158
     },
     "detail": {
       "cellsSha256": "9511463c66df45ca4f0ae1a7fb947fe9b44672eb6e256a5b3b88c35c68f7dfeb",
