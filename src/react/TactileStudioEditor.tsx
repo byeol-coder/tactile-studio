@@ -65,11 +65,12 @@ interface EditorBodyProps extends Pick<TactileStudioEditorProps, 'services' | 'l
   onSaveConflict?: TactileStudioEditorProps['onSaveConflict'];
   onError?: TactileStudioEditorProps['onError'];
   onExport?: TactileStudioEditorProps['onExport'];
+  onExit?: TactileStudioEditorProps['onExit'];
   initialVersion?: string;
 }
 
 /** Internal — must render inside TactileStudioProvider to reach the store. */
-function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExport, initialVersion }: EditorBodyProps) {
+function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExport, onExit, initialVersion }: EditorBodyProps) {
   useKeyboardShortcuts(labels);
   useHardwareKeyPanning(services.tactileDisplay);
   const { store } = useEditorStore();
@@ -145,6 +146,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <Toolbar labels={labels} />
         <span style={{ flex: 1 }} />
+        {onExit && <button type="button" onClick={onExit}>{(labels?.exit as string) || 'Exit'}</button>}
         <button type="button" onClick={toggleFocusMode} aria-pressed={focusMode} aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode'}>{focusMode ? 'Exit focus' : 'Focus mode'}</button>
         <button type="button" disabled={saving} onClick={handleSave}>{saving ? ((labels?.saving as string) || 'Saving…') : ((labels?.save as string) || 'Save')}</button>
         <button type="button" onClick={() => setImportOpen(true)}>{(labels?.impAssetTitle as string) || 'Import'}</button>
@@ -188,7 +190,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
 }
 
 export function TactileStudioEditor({
-  initialDocument, initialVersion, services, labels, theme, onChange, onSave, onSaveConflict, onDirtyChange, onError, onExport, className,
+  initialDocument, initialVersion, services, labels, theme, onChange, onSave, onSaveConflict, onDirtyChange, onError, onExport, onExit, className,
 }: TactileStudioEditorProps) {
   // Studio owns local crash-recovery storage directly (same rationale as the
   // local-library "saved shelf") -- the real localStorage-backed adapter is
@@ -199,7 +201,7 @@ export function TactileStudioEditor({
   return (
     <div className={className} style={{ ...themeStyle(theme), display: 'flex', flexDirection: 'column', gap: 8 }}>
       <TactileStudioProvider initialDocument={initialDocument} onChange={onChange} onDirtyChange={onDirtyChange} sessionRecovery={sessionRecovery}>
-        <EditorBody services={services} labels={labels} initialVersion={initialVersion} onSave={onSave} onSaveConflict={onSaveConflict} onError={onError} onExport={onExport} />
+        <EditorBody services={services} labels={labels} initialVersion={initialVersion} onSave={onSave} onSaveConflict={onSaveConflict} onError={onError} onExport={onExport} onExit={onExit} />
       </TactileStudioProvider>
     </div>
   );

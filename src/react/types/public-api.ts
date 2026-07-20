@@ -122,6 +122,9 @@ export interface TactileStudioEditorProps {
    *  deliberately does not auto-reload (that could discard local edits); the
    *  host chooses the next action such as compare, reload, or save-as-copy. */
   onSaveConflict?(document: StudioDocument, result: SaveResult): void;
+  /** Called only when the user explicitly chooses Exit. Routing, unsaved-work
+   *  prompts, and host navigation remain owned by the embedding product. */
+  onExit?(): void;
   onDirtyChange?(dirty: boolean): void;
   onError?(error: StudioErrorLike): void;
   /** Called after an export completes and the browser download has been
