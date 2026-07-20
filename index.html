@@ -2874,7 +2874,9 @@ class Component extends DCLogic {
       if (useEdge) {
         const edges = this._cvSobel(grid, w, h); let max = 1; for (let i = 0; i < edges.length; i++) if (edges[i] > max) max = edges[i];
         const norm = new Float32Array(w * h); for (let i = 0; i < edges.length; i++) norm[i] = 255 - (edges[i] / max) * 255;
-        const base = this._cvOtsu(norm); const thr = base - preset.edgeBias * 255 - ((opts.threshold != null ? (opts.threshold - 50) : 0) * 1.2);
+        // Keep the threshold direction consistent with fill conversion: a higher
+        // value should retain more tactile dots, regardless of the preset.
+        const base = this._cvOtsu(norm); const thr = base - preset.edgeBias * 255 + ((opts.threshold != null ? (opts.threshold - 50) : 0) * 1.2);
         // Hysteresis instead of a single global cut: seed at `thr` (identical to
         // the old threshold, so strong edges are unchanged), then reconnect the
         // faint continuation pixels within a weak-edge band so outlines stop
@@ -3474,7 +3476,7 @@ class Component extends DCLogic {
     const cv = this.impRef.current;
     if (cv && st.importOpen) {
       const a4 = this.isA4();
-      const w = st.gridW, h = st.gridH, s = 6, pat = this.applyConv(this.imgToCells(w, h, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, w, h);
+      const w = st.gridW, h = st.gridH, s = 6, pat = this.applyConv(this.imgToCells(w, h, { preset: st.convPreset, threshold: st.threshold }, crop).cells, w, h);
       cv.width = w * s; cv.height = h * s;
       const g = cv.getContext('2d');
       g.fillStyle = a4 ? '#FFFFFF' : '#141210'; g.fillRect(0, 0, cv.width, cv.height);
@@ -4405,7 +4407,7 @@ class Component extends DCLogic {
   applyImport(mode) {
     const st = this.state, t = this.T();
     const crop = st.cropChoice === 'crop' ? st.cropRect : null;
-    const r = this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop);
+    const r = this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold }, crop);
     const conv = this.applyConv(r.cells, st.gridW, st.gridH);
     const q = this.convQuality(conv, st.gridW, st.gridH);
     if (window.__TS_DEBUG) console.log('[TactileConvert]', { src: this._srcW + 'x' + this._srcH, crop, target: st.gridW + 'x' + st.gridH, preset: st.convPreset, dots: q.dots, density: +(q.density * 100).toFixed(1), isolated: q.isolated, removed: r.removedDots });
@@ -5878,7 +5880,7 @@ class Component extends DCLogic {
       qAdv: (() => {
         if (!(st.importOpen && st.impStep === 'review')) return null;
         const crop = st.cropChoice === 'crop' ? st.cropRect : null;
-        const cells = this.applyConv(this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, st.gridW, st.gridH);
+        const cells = this.applyConv(this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold }, crop).cells, st.gridW, st.gridH);
         const q = this.convQuality(cells, st.gridW, st.gridH);
         const msg = q.key === 'tooSparse' ? t.qSparseMsg : q.key === 'tooDense' ? t.qDenseMsg : q.key === 'manyIsolated' ? t.qIsoMsg : t.qOkMsg;
         const good = q.key === 'readable';
@@ -5906,7 +5908,7 @@ class Component extends DCLogic {
       vecAdv: (() => {
         if (!(st.importOpen && st.impStep === 'review' && st.vectorizeEnabled)) return null;
         const crop = st.cropChoice === 'crop' ? st.cropRect : null;
-        const pat = this.applyConv(this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold, invert: st.invertConv }, crop).cells, st.gridW, st.gridH);
+        const pat = this.applyConv(this.imgToCells(st.gridW, st.gridH, { preset: st.convPreset, threshold: st.threshold }, crop).cells, st.gridW, st.gridH);
         const res = this.vectorizeGrid(pat, st.gridW, st.gridH);
         const typeLabel = { rect: t.vecTypeRect, ellipse: t.vecTypeEllipse, polyline: t.vecTypePolyline, line: t.vecTypeLine };
         const counts = {};
