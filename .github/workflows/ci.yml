@@ -73,11 +73,17 @@ jobs:
       - name: Packed-package consumer smoke test
         run: npm run check:package
 
-      - name: Verify migration does not alter protected runtime files
+      - name: Verify frozen vanilla runtime files are untouched
+        # Post-merge (PR #18) the vanilla index.html IS the actively developed
+        # deploy target, so it is no longer guarded here — deliberate edits to
+        # it are instead gated by the x-dc fingerprint test, which forces an
+        # explicit fixture refresh in the same PR. The runtime/vendor layer
+        # below still changes rarely and an accidental edit is dangerous
+        # (pin encoding, SDK, corpus), so it stays hard-guarded.
         run: |
           git fetch origin main
           if ! git diff --quiet origin/main...HEAD -- support.js vendor/ corpus.js corpus-search.js; then
-            echo "::error::This branch changes protected runtime files (support.js/vendor/corpus*.js). Split those changes into a separately reviewed PR."
+            echo "::error::This branch changes frozen vanilla runtime files (support.js / vendor/ / corpus*.js). Split those changes into a separately reviewed PR."
             git diff --stat origin/main...HEAD -- support.js vendor/ corpus.js corpus-search.js
             exit 1
           fi
