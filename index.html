@@ -2422,9 +2422,28 @@ class Component extends DCLogic {
     const st = this.state;
     if (st.railMenu && st.railMenu.kind === kind) { this.setState({ railMenu: null }); return; }
     const r = anchor.getBoundingClientRect();
-    // Toolbar is a floating pill anchored to the bottom of the canvas, so the
-    // flyout always opens ABOVE the button, clamped to the viewport.
-    this.setState({ railMenu: { kind, up: true, bottom: Math.max(8, window.innerHeight - r.top + 10), left: Math.max(8, Math.min(r.left, window.innerWidth - 198)) } });
+    // The toolbar can be dragged anywhere. Its menu must therefore choose the
+    // side with room instead of assuming the rail is always near the bottom.
+    // Keep the menu inside the canvas viewport as well, so it never masks the
+    // layers/properties panel when the rail is moved toward the right edge.
+    const vp = this.viewportRef.current;
+    const vr = vp && vp.getBoundingClientRect ? vp.getBoundingClientRect() : null;
+    const gap = 10, width = 190, margin = 8;
+    const bounds = vr ? {
+      left: Math.max(margin, vr.left + margin), right: Math.min(window.innerWidth - margin, vr.right - margin),
+      top: Math.max(margin, vr.top + margin), bottom: Math.min(window.innerHeight - margin, vr.bottom - margin)
+    } : { left: margin, right: window.innerWidth - margin, top: margin, bottom: window.innerHeight - margin };
+    const estimate = kind === 'shape' ? 236 : kind === 'quick' ? 192 : 148;
+    const above = Math.max(0, r.top - bounds.top - gap), below = Math.max(0, bounds.bottom - r.bottom - gap);
+    const up = above >= estimate || above >= below;
+    const room = up ? above : below;
+    const maxLeft = Math.max(bounds.left, bounds.right - width);
+    const left = Math.max(bounds.left, Math.min(r.left, maxLeft));
+    this.setState({ railMenu: {
+      kind, up, left, maxHeight: Math.max(48, Math.floor(room)),
+      bottom: up ? window.innerHeight - r.top + gap : undefined,
+      top: up ? undefined : r.bottom + gap
+    } });
   }
   closeRail() { this.setState({ railMenu: null }); }
   // Long-press on a grouped tool opens its flyout (touch discoverability). The
@@ -5706,7 +5725,7 @@ class Component extends DCLogic {
       hideTip: () => this.hideTip(),
       tip: st.tip,
       tipStyle: st.tip ? { position: 'fixed', top: st.tip.top, left: st.tip.left, transform: st.tip.place === 'bottom' ? 'translate(-50%, 0)' : 'translate(-50%, -100%)', zIndex: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', maxWidth: 220, background: '#1E1C1A', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 8, padding: '6px 10px', boxShadow: '0 4px 6px -2px rgba(10,13,18,0.12),0 12px 16px -4px rgba(10,13,18,0.18)', pointerEvents: 'none', whiteSpace: 'nowrap', animation: this.heroReduced ? 'none' : 'tsTip 0.12s ease-out' } : null,
-      railFlyoutStyle: st.railMenu ? Object.assign({ position: 'fixed', left: st.railMenu.left, zIndex: 80, width: 190, background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' }, st.railMenu.up ? { bottom: st.railMenu.bottom, transformOrigin: 'left bottom' } : { top: st.railMenu.top, transformOrigin: 'left top' }) : null,
+      railFlyoutStyle: st.railMenu ? Object.assign({ position: 'fixed', left: st.railMenu.left, zIndex: 80, width: 190, maxHeight: st.railMenu.maxHeight, overflowY: 'auto', overscrollBehavior: 'contain', background: '#fff', border: '1px solid #EDE4DA', borderRadius: 14, padding: 6, boxShadow: '0 8px 8px -4px rgba(16,24,40,0.04),0 20px 24px -4px rgba(16,24,40,0.1)', animation: 'tsFly 0.15s ease-out' }, st.railMenu.up ? { bottom: st.railMenu.bottom, transformOrigin: 'left bottom' } : { top: st.railMenu.top, transformOrigin: 'left top' }) : null,
       // Floating toolbar (Photoshop-style movable pill): defaults to centered
       // over the bottom of the canvas; once dragged, toolbarPos pins it to
       // fixed viewport coordinates captured at drag-start (see railDragDown).
