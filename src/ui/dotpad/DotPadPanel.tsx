@@ -27,6 +27,7 @@ export function DotPadPanel({ adapter, encodeBits, labels, onError }: DotPadPane
   const { snapshot, store } = useEditorStore();
   const [state, setState] = useState<ConnectionState>(adapter.getConnectionState());
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   // Refresh after every user-initiated action (works with any adapter, even
   // ones without background events). Additionally subscribe to
@@ -65,6 +66,21 @@ export function DotPadPanel({ adapter, encodeBits, labels, onError }: DotPadPane
       onError?.({ code: e?.code || 'send-failed', message: e?.message || 'Send failed', cause: e });
     }
   };
+  const deviceTest = async (kind: 'raise' | 'lower' | 'invert') => {
+    if (busy) return;
+    setBusy(true); setError(null);
+    try {
+      if (kind === 'raise') await adapter.raiseAll?.();
+      else if (kind === 'lower') await adapter.lowerAll?.();
+      else if (encodeBits) {
+        const hex = encodeDtmsHex(encodeBits, store.getActiveCells(), snapshot.gridW, snapshot.gridH);
+        await adapter.display(hex.replace(/../g, (pair) => (255 ^ parseInt(pair, 16)).toString(16).padStart(2, '0')));
+      } else if (adapter.invert) await adapter.invert();
+      else throw new Error('This device does not support that test.');
+      store.announce(`Device test completed: ${kind}.`);
+    } catch (e: any) { setError(e?.message || 'Device test failed'); }
+    finally { setBusy(false); refresh(); }
+  };
 
   const connected = state === 'connected';
   const info = connected ? adapter.getDeviceInfo() : null;
@@ -86,6 +102,14 @@ export function DotPadPanel({ adapter, encodeBits, labels, onError }: DotPadPane
         <>
           <button type="button" onClick={disconnect}>Disconnect</button>
           <button type="button" onClick={send} disabled={!encodeBits}>Send current page</button>
+          {(adapter.raiseAll || adapter.lowerAll || adapter.invert || encodeBits) && <div style={{ borderTop: '1px solid var(--ts-line, #ECE6DC)', paddingTop: 8 }}>
+            <div style={{ fontSize: 12, marginBottom: 4 }}>Device tests</div>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {adapter.raiseAll && <button type="button" disabled={busy} onClick={() => deviceTest('raise')}>Raise all</button>}
+              {adapter.lowerAll && <button type="button" disabled={busy} onClick={() => deviceTest('lower')}>Lower all</button>}
+              {(adapter.invert || encodeBits) && <button type="button" disabled={busy} onClick={() => deviceTest('invert')}>Invert</button>}
+            </div>
+          </div>}
         </>
       )}
       {error && <div role="alert" style={{ color: 'var(--ts-danger, #DA120D)', fontSize: 12 }}>{error}</div>}

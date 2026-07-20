@@ -305,18 +305,39 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
 
   const onDoubleClick = () => { if (snapshot.tool === 'poly') closePoly(); };
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
+    const { cx, cy } = snapshot.cursor;
+    const move = (x: number, y: number) => { e.preventDefault(); store.setCursor(Math.max(0, Math.min(gridW - 1, x)), Math.max(0, Math.min(gridH - 1, y))); };
+    if (e.key === 'ArrowLeft') return move(cx - 1, cy);
+    if (e.key === 'ArrowRight') return move(cx + 1, cy);
+    if (e.key === 'ArrowUp') return move(cx, cy - 1);
+    if (e.key === 'ArrowDown') return move(cx, cy + 1);
+    if (e.key.toLowerCase() === 'u') { e.preventDefault(); store.undo(); return; }
+    if (e.key.toLowerCase() === 'r') { e.preventDefault(); store.redo(); return; }
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    e.preventDefault();
+    if (snapshot.tool === 'fill') store.mutateActiveCells((cells) => floodFill(cells, gridW, gridH, cx, cy));
+    else {
+      const value: 0 | 1 = snapshot.tool === 'eraser' ? 0 : snapshot.tool === 'pen' ? 1 : (store.getActiveCells()[cellIndex(gridW, cx, cy)] ? 0 : 1);
+      store.mutateActiveCells((cells) => { makeBrush((x, y) => { if (inBounds(gridW, gridH, x, y)) cells[cellIndex(gridW, x, y)] = value; }, strokeSizeFor(snapshot.tool))(cx, cy); });
+    }
+    const raised = !!store.getActiveCells()[cellIndex(gridW, cx, cy)];
+    store.announce(`Row ${cy + 1}, column ${cx + 1}: ${raised ? 'raised' : 'lowered'}.`);
+  };
+
   return (
     <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
       <canvas
         ref={canvasRef}
         tabIndex={0}
         role="img"
-        aria-label={ariaLabel}
+        aria-label={`${ariaLabel || 'Tactile drawing canvas'}. Arrow keys move, Space or Enter edits, U undoes, R redoes.`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onDoubleClick={onDoubleClick}
+        onKeyDown={onKeyDown}
         style={{ display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated', maxWidth: '100%', height: 'auto' }}
       />
       {textPopover && (
