@@ -1008,15 +1008,15 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <!-- TGIL / DTMS / library asset import (already-tactile files → DotPad) —
              kept deliberately quiet: this is the alternate path, the dropzone
              above is the primary action. -->
-        <div style="display:flex;align-items:center;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid #F2ECE4">
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid #F2ECE4;flex-wrap:wrap">
           <span style="flex:none;color:var(--ts-text-secondary);display:grid;place-items:center">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><circle cx="9" cy="13" r="1" fill="currentColor"></circle><circle cx="13" cy="13" r="1" fill="currentColor"></circle><circle cx="17" cy="13" r="1" fill="currentColor"></circle></svg>
           </span>
-          <div style="flex:1;min-width:0">
-            <span style="font-size:12.5px;font-weight:700;color:#1E1C1A">{{ t.impAssetTitle }}</span>
-            <span style="font-size:12.5px;color:var(--ts-text-secondary)"> · {{ t.impAssetSub }}</span>
+          <div style="flex:1;min-width:220px;display:grid;gap:2px">
+            <span style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ t.impAssetTitle }}</span>
+            <span style="font-size:12px;color:var(--ts-text-secondary);line-height:1.35">{{ t.impAssetSub }}</span>
           </div>
-          <button onClick="{{ chooseAssetFile }}" style="flex:none;height:30px;padding:0 4px;border:none;background:transparent;color:var(--ts-primary);font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:underline;text-decoration-color:transparent" style-hover="text-decoration-color:currentColor" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impAssetChoose }}</button>
+          <button onClick="{{ chooseAssetFile }}" style="flex:none;height:34px;padding:0 12px;border:1px solid rgba(var(--ts-primary-rgb),0.30);border-radius:8px;background:#fff;color:var(--ts-primary);font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap" style-hover="border-color:var(--ts-primary);background:rgba(var(--ts-primary-rgb),0.05)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impAssetChoose }}</button>
         </div>
 
         </sc-if>
@@ -1113,14 +1113,32 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
-          <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary)">{{ presetLabel }}</div>
-          <div role="group" aria-label="{{ presetLabel }}" style="display:flex;gap:5px;flex-wrap:wrap">
+        <div style="display:grid;gap:7px;margin-top:12px">
+          <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary)">{{ presetLabel }}</div>
+          <div role="group" aria-label="{{ presetLabel }}" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:100%">
             <sc-for list="{{ convPresets }}" as="pp" hint-placeholder-count="4">
               <button onClick="{{ pp.setIt }}" aria-pressed="{{ pp.sel }}" title="{{ pp.label }} — {{ pp.sub }}" style="{{ pp.style }}" style-focus="outline:2px solid #C43D00;outline-offset:2px">
                 <span style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ pp.label }}</span>
               </button>
             </sc-for>
+          </div>
+        </div>
+        <!-- These are the primary conversion controls, not advanced options:
+             show their effect before the quality verdict so adjustment is direct. -->
+        <div style="display:grid;gap:10px;margin-top:12px;padding:11px 12px;border:1px solid #E8DFD6;border-radius:10px;background:#FCFAF7">
+          <label style="display:block;font-size:12px;font-weight:800;color:#1E1C1A">
+            <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
+            <input type="range" min="10" max="90" step="1" value="{{ threshold }}" onInput="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:7px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
+          </label>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.6" fill="currentColor"></circle><circle cx="12" cy="6" r="1.6" fill="currentColor"></circle><circle cx="18" cy="6" r="1.6" fill="currentColor"></circle><circle cx="9" cy="12" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="6" cy="18" r="1.6" fill="currentColor"></circle><circle cx="18" cy="18" r="1.6" fill="currentColor"></circle></svg>
+              {{ t.dither }} · <b>{{ ditherState }}</b>
+            </button>
+            <button onClick="{{ toggleInvert }}" aria-pressed="{{ invertConv }}" style="{{ invStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
+              {{ t.invert }} · <b>{{ invState }}</b>
+            </button>
           </div>
         </div>
         <!-- Quality feedback stays visible by default regardless of the
@@ -1134,37 +1152,18 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </div>
         </sc-if>
 
-        <!-- Advanced settings (collapsed by default): threshold / dither /
-             invert are fine-tuning knobs ON TOP OF whichever preset is
-             active — a preset alone is enough for most conversions, so these
-             plus Vectorize (Beta) are tucked behind one disclosure instead of
-             always taking up space. Mirrors the existing advOpen/toggleAdv
-             disclosure pattern used in the DotPad panel for visual consistency. -->
-        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #EFE7DE">
+        <!-- Vectorization remains optional because it changes the editing model;
+             basic image conversion controls above are always available. -->
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid #EFE7DE">
           <button onClick="{{ toggleImpAdv }}" aria-expanded="{{ impAdvOpen }}" style="display:flex;align-items:center;gap:8px;width:100%;min-height:38px;background:transparent;border:none;padding:2px 0;cursor:pointer;text-align:left" style-focus="outline:2px solid #C43D00;outline-offset:2px">
             <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;transition:transform 0.15s ease;transform:rotate({{ impAdvCaret }})"><path d="M9 6l6 6-6 6" fill="none" stroke="var(--ts-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <span style="font-size:12.5px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase">{{ t.impAdvL }}</span>
+            <span style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase">{{ t.impAdvL }}</span>
           </button>
           <sc-if value="{{ impAdvOpen }}" hint-placeholder-val="{{ false }}">
-            <label style="display:block;margin-top:14px;font-size:12.5px;font-weight:700;color:#1E1C1A">
-              <span style="display:flex;justify-content:space-between"><span>{{ t.threshold }}</span><span style="font-variant-numeric:tabular-nums;color:#B93E15">{{ threshold }}</span></span>
-              <input type="range" min="10" max="90" step="1" value="{{ threshold }}" onInput="{{ thresholdChange }}" aria-label="{{ t.threshold }}" style="display:block;width:100%;margin-top:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:4px">
-            </label>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
-              <button onClick="{{ toggleDither }}" aria-pressed="{{ dither }}" style="{{ ditherStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="6" cy="6" r="1.6" fill="currentColor"></circle><circle cx="12" cy="6" r="1.6" fill="currentColor"></circle><circle cx="18" cy="6" r="1.6" fill="currentColor"></circle><circle cx="9" cy="12" r="1.6" fill="currentColor"></circle><circle cx="15" cy="12" r="1.6" fill="currentColor"></circle><circle cx="6" cy="18" r="1.6" fill="currentColor"></circle><circle cx="18" cy="18" r="1.6" fill="currentColor"></circle></svg>
-                {{ t.dither }} · <b>{{ ditherState }}</b>
-              </button>
-              <button onClick="{{ toggleInvert }}" aria-pressed="{{ invertConv }}" style="{{ invStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-                <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"></circle></svg>
-                {{ t.invert }} · <b>{{ invState }}</b>
-              </button>
-            </div>
-
             <!-- Vectorize lines (Beta) — optional, experimental; now lives inside
                  the same advanced disclosure rather than its own always-visible
                  secondary section. -->
-            <div style="margin-top:20px;padding-top:16px;border-top:1px solid #EFE7DE">
+            <div style="margin-top:10px">
               <button onClick="{{ toggleVectorize }}" aria-pressed="{{ vectorizeEnabled }}" style="{{ vecStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
                 <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 8L13 14L20 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="8" r="1.6" fill="currentColor"></circle><circle cx="13" cy="14" r="1.6" fill="currentColor"></circle></svg>
                 {{ t.vecToggleL }}
@@ -1868,7 +1867,7 @@ class Component extends DCLogic {
       vecCountOf: n => '오브젝트 ' + n + '개 생성됨',
       vecTypeRect: '사각형', vecTypeEllipse: '원', vecTypePolyline: '폴리라인', vecTypeLine: '선', 
       impBack: '뒤로', impNext: '다음', impCropConfirm: '이 영역으로 변환', impLoad: '편집기로 불러오기',
-      presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일', impAdvL: '고급 설정', impShowOrig: '원본 보기',
+      presetL: '촉각 변환 스타일', presetBalanced: '균형', presetOutline: '강한 윤곽', presetDiagram: '깔끔한 다이어그램', presetDetail: '고디테일', impAdvL: '추가 도구', impShowOrig: '원본 보기',
       presetSubBalanced: '일반 사진·그림용', presetSubOutline: '아이콘·사물·도형용', presetSubDiagram: '차트·지도·선화용', presetSubDetail: '디테일 보존(점 밀도↑)',
       qSparseMsg: '점이 너무 적어 촉각으로 읽기 어려울 수 있어요. 대상에 더 가깝게 자르거나 고디테일을 사용해 보세요.',
       qDenseMsg: '점이 너무 많아 촉각으로 뭉쳐 보일 수 있어요. 깔끔한 다이어그램이나 강한 윤곽을 사용해 보세요.',
@@ -2001,7 +2000,7 @@ class Component extends DCLogic {
       vecCountOf: n => n + ' object' + (n === 1 ? '' : 's') + ' generated',
       vecTypeRect: 'Rectangle', vecTypeEllipse: 'Ellipse', vecTypePolyline: 'Polyline', vecTypeLine: 'Line', 
       impBack: 'Back', impNext: 'Next', impCropConfirm: 'Convert this area', impLoad: 'Load into editor',
-      presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail', impAdvL: 'Advanced settings', impShowOrig: 'Show original',
+      presetL: 'Tactile style', presetBalanced: 'Balanced', presetOutline: 'Strong Outline', presetDiagram: 'Clean Diagram', presetDetail: 'High Detail', impAdvL: 'More tools', impShowOrig: 'Show original',
       presetSubBalanced: 'General photos & drawings', presetSubOutline: 'Icons, objects, shapes', presetSubDiagram: 'Charts, maps, line art', presetSubDetail: 'Keeps detail (denser)',
       qSparseMsg: 'This may be too sparse to read by touch. Crop closer to the subject or try High Detail.',
       qDenseMsg: 'This may be too dense for touch. Try Clean Diagram or Strong Outline.',
