@@ -327,16 +327,16 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
     <!-- RIGHT ZONE: create, device status, and utilities -->
     <div class="ts-topbar-right">
       <button class="ts-topbar-action" onClick="{{ toggleCreate }}" aria-haspopup="menu" aria-expanded="{{ createOpen }}" aria-label="{{ t.createMenu }}" title="{{ t.createMenu }}" style="border:1px solid var(--ts-border-decor);background:#fff;color:#1E1C1A;font-weight:700;font-size:13px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         <span class="ts-action-label ts-create-label">{{ t.createMenu }}</span>
         <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
       <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" aria-keyshortcuts="Shift+/" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4 1c0 1.9-2.6 2-2.6 3.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 17.2h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"></circle><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4 1c0 1.9-2.6 2-2.6 3.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 17.2h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
       </button>
       <button class="ts-help-button ts-topbar-button" onClick="{{ toggleFocusMode }}" aria-pressed="{{ focusMode }}" aria-label="{{ focusLabel }}" title="{{ focusLabel }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M4 16v3a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M4 16v3a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
     </div>
   </div>
@@ -539,11 +539,11 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       <sc-if value="{{ retouchHint }}" hint-placeholder-val="{{ false }}">
         <div role="status" style="pointer-events:none;position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:560px;display:flex;align-items:center;gap:11px;background:#1E1C1A;color:#fff;border-radius:10px;padding:11px 14px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
           <span style="width:26px;height:26px;border-radius:8px;background:rgba(var(--ts-primary-rgb),0.22);display:grid;place-items:center;color:var(--ts-primary);flex:none">
-            <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </span>
           <span style="font-size:12.5px;font-weight:600;line-height:1.45">{{ t.retouchHintMsg }}</span>
           <button onClick="{{ dismissRetouch }}" aria-label="{{ t.close }}" style="pointer-events:auto;flex:none;width:26px;height:26px;border:none;border-radius:7px;background:rgba(255,255,255,0.12);color:#fff;display:grid;place-items:center" style-hover="background:rgba(255,255,255,0.22)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="13" height="13" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
           </button>
         </div>
       </sc-if>
@@ -554,7 +554,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </span>
           <span style="font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ts-text-secondary)">{{ t.emptyHintMsg }}</span>
           <button onClick="{{ dismissEmptyHint }}" aria-label="{{ t.close }}" style="pointer-events:auto;flex:none;width:24px;height:24px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
           </button>
         </div>
       </sc-if>
@@ -585,7 +585,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         </button>
         <span aria-hidden="true" style="width:1px;height:22px;background:var(--ts-border-decor);margin:0 2px;flex:none"></span>
         <button onClick="{{ mobileAddPage }}" aria-label="{{ t.pageAddMobileL }}" title="{{ t.pageAddMobileL }}" style="{{ mobileAddStyle }}" style-hover="background:#F7F4EF;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         </button>
       </div>
       <!-- One compact canvas-view control keeps display aids and magnification
@@ -722,10 +722,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 
           <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding-top:2px">
             <button class="ts-layer-act" onClick="{{ layerUp }}" disabled="{{ layerUpDisabled }}" aria-label="{{ t.layerUpL }}" title="{{ t.layerUpL }}">
-              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
             <button class="ts-layer-act" onClick="{{ layerDown }}" disabled="{{ layerDownDisabled }}" aria-label="{{ t.layerDownL }}" title="{{ t.layerDownL }}">
-              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
             <button class="ts-layer-act" onClick="{{ layerDuplicate }}" disabled="{{ layerActionsDisabled }}" aria-label="{{ t.layerDuplicateL }}" title="{{ t.layerDuplicateL }}">
               <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><rect x="5" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect></svg>
@@ -734,7 +734,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
               <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10M8 9l4 4 4-4M5 17h14M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
             <button class="ts-layer-act ts-layer-act--danger" onClick="{{ layerDelete }}" disabled="{{ layerDeleteDisabled }}" aria-label="{{ t.layerDeleteL }}" title="{{ t.layerDeleteL }}">
-              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
           </div>
 
@@ -840,7 +840,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </sc-if>
             <sc-if value="{{ pgAudio.none }}" hint-placeholder-val="{{ true }}">
               <label style="display:flex;align-items:center;justify-content:center;gap:7px;height:36px;border:1.5px dashed var(--ts-border-functional);border-radius:9px;font-size:12.5px;font-weight:700;color:var(--ts-primary);cursor:pointer;background:#fff" style-hover="border-color:var(--ts-primary);background:rgba(var(--ts-primary-rgb),0.04)">
-                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
                 {{ t.inspAudioAdd }}
                 <input type="file" accept="audio/*" onChange="{{ onAudioFile }}" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
               </label>
@@ -1310,7 +1310,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       </sc-if>
       <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ impLoad }}" style="height:40px;padding:0 20px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           {{ t.impLoad }}
         </button>
       </sc-if>
@@ -1513,7 +1513,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
           <button onClick="{{ closeDotpad }}" style="height:40px;padding:0 18px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:13.5px">{{ t.cancel }}</button>
           <button onClick="{{ doSend }}" style="height:40px;padding:0 20px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px" style-hover="background:#D64A1C">
-            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             {{ t.sendNow }}
           </button>
         </div>
@@ -1555,7 +1555,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
               Dot Library
             </button>
             <button onClick="{{ continueEditing }}" style="display:flex;align-items:center;gap:9px;height:46px;padding:0 13px;border:1px solid var(--ts-border-decor);border-radius:8px;background:#fff;color:#1E1C1A;font-weight:700;font-size:12.5px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)">
-              <svg width="16" height="16" viewBox="0 0 24 24" style="flex:none"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" style="flex:none"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               {{ t.keepEditing }}
             </button>
             <button onClick="{{ successReturn }}" style="display:flex;align-items:center;gap:9px;height:46px;padding:0 13px;border:none;border-radius:8px;background:var(--ts-primary);color:#fff;font-weight:700;font-size:12.5px" style-hover="background:#D64A1C">
@@ -1711,10 +1711,10 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
               <div style="display:flex;gap:6px;margin-top:2px">
                 <button onClick="{{ c.open }}" aria-label="{{ c.aOpen }}" style="flex:1;height:32px;border:none;border-radius:7px;background:var(--ts-primary);color:#fff;font-size:13px;font-weight:700;cursor:pointer" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:1px">{{ t.libOpenCard }}</button>
                 <button onClick="{{ c.send }}" aria-label="{{ c.aSend }}" title="{{ t.libSendCard }}" style="flex:none;width:32px;height:32px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 </button>
                 <button onClick="{{ c.remove }}" aria-label="{{ c.aDelete }}" title="{{ t.libDeleteCard }}" style="flex:none;width:32px;height:32px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-text-secondary);display:grid;place-items:center;cursor:pointer" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 </button>
               </div>
             </div>
@@ -1724,7 +1724,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
     </sc-if>
     <sc-if value="{{ libEmptyState }}" hint-placeholder-val="{{ true }}">
       <div style="text-align:center;padding:48px 20px;color:var(--ts-text-secondary)">
-        <svg width="44" height="44" viewBox="0 0 24 24" style="margin-bottom:14px;opacity:0.4"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path></svg>
+        <svg width="44" height="44" viewBox="0 0 24 24" style="margin-bottom:14px;opacity:0.4"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path></svg>
         <p style="margin:0;font-size:13.5px;line-height:1.6;max-width:340px;margin:0 auto">{{ t.libEmpty }}</p>
       </div>
     </sc-if>
