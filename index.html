@@ -100,6 +100,10 @@ if ('caches' in window) {
   --ts-danger:#DA120D;
   --ts-success:#0B8800;
   --ts-bg-warm:#F7F4EF;
+  --ts-workspace:#F8F7F5;
+  --ts-panel:#FFFFFF;
+  --ts-panel-muted:#F5F3F0;
+  --ts-shadow-panel:0 12px 30px -22px rgba(41,35,29,0.30);
 }
 html,body{margin:0;padding:0;background:#F7F4EF}
 *{box-sizing:border-box}
@@ -149,6 +153,38 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 .ts-output-zone select{min-width:0;max-width:150px}
 .ts-action-label,.ts-save-text{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1}
 .ts-save-status{max-width:94px;overflow:hidden}
+/* ── Workspace visual system ────────────────────────────────────────────
+   A restrained panel / canvas / floating-tool hierarchy keeps the editor
+   closer to a Figma-style workspace without changing any tactile workflow. */
+.ts-editor-accent{height:4px!important}
+.ts-topbar{height:60px!important;padding:0 16px!important;gap:12px!important;box-shadow:0 1px 0 rgba(31,27,23,0.02)}
+.ts-topbar-action,.ts-topbar-button{border-radius:10px!important}
+.ts-topbar-action{min-height:40px!important;height:40px!important}
+.ts-topbar-button{min-height:40px!important;height:40px!important}
+.ts-topbar-right{gap:6px!important}
+.ts-project-name{font-size:15px!important;font-weight:750!important}
+.ts-workspace{background:var(--ts-workspace)}
+.ts-pages-rail{width:200px!important;background:var(--ts-panel)!important}
+.ts-pages-rail > div:first-child{min-height:48px;padding:10px 12px 8px!important;color:#6E6962!important;letter-spacing:.01em}
+.ts-pages-rail > div:first-child button{width:30px!important;height:30px!important;border:1px solid transparent!important;border-radius:8px!important}
+.ts-pages-rail > div:nth-child(2){padding:4px 10px 14px!important;gap:8px!important}
+.ts-page-item > button[data-page-pick]{box-shadow:0 1px 1px rgba(31,27,23,0.02);transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+.ts-page-item > button[data-page-pick][aria-selected="true"]{box-shadow:inset 3px 0 0 var(--ts-primary),0 2px 8px rgba(196,61,0,0.08)!important}
+.ts-page-item > button[data-page-pick] img{border-radius:7px!important}
+.ts-page-item > button[aria-selected="true"] + .ts-page-handle,.ts-page-item > button[aria-selected="true"] ~ button{opacity:1}
+.ts-page-item > button[aria-selected="false"] ~ button{transition:opacity .14s ease,transform .14s ease}
+.ts-page-item:not(:hover):not(:focus-within) > button[aria-selected="false"] ~ button{opacity:0;transform:translateY(-2px)}
+.ts-side-panel{width:280px!important;background:var(--ts-panel)!important;box-shadow:var(--ts-shadow-panel)}
+.ts-side-panel > div:first-child{padding:12px!important;border-bottom:none!important}
+.ts-side-panel > div:first-child .ts-topbar-action{height:38px!important;min-height:38px!important;border-radius:9px!important;background:#1E1C1A!important;color:#fff!important;border-color:#1E1C1A!important}
+.ts-side-panel [role="tablist"]{margin:0 12px 4px!important;padding:4px!important;border:1px solid #EAE5DE!important;border-radius:10px!important;background:var(--ts-panel-muted)!important}
+.ts-side-panel [role="tablist"] + *{border-top:none!important}
+.ts-statusbar{height:36px!important;padding:0 16px!important;gap:12px!important;background:rgba(255,255,255,0.94)!important;font-size:12.5px!important}
+.ts-tool-rail{border:1px solid rgba(255,255,255,0.08)!important;border-radius:14px!important;padding:5px!important;box-shadow:0 14px 34px -14px rgba(16,24,40,0.42)!important}
+@media (max-width:1080px){
+  .ts-side-panel{width:248px!important}
+  .ts-pages-rail{width:164px!important}
+}
 .image-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .image-preview-frame canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .tactile-preview-frame{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -245,7 +281,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 
 
 <div data-screen-label="Tactile Studio" data-ts-focus="{{ focusMode }}" style="height:100vh;display:flex;flex-direction:column;background:#F7F4EF;font-family:'Pretendard Variable',Pretendard,sans-serif;color:#1E1C1A;overflow:hidden">
-  <div style="height:10px;background:var(--ts-primary);flex:none"></div>
+  <div class="ts-editor-accent" style="height:10px;background:var(--ts-primary);flex:none"></div>
 
   <div class="ts-topbar">
     <!-- LEFT ZONE: identity + document title (no back button — the app IS the editor) -->
@@ -317,7 +353,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
          a full-width thumbnail (correct grid aspect ratio) and a caption row below.
          thumb is a data: URL from thumbFrom, guarded by hasThumb so placeholder
          renders never leak a literal {{ }} into <img src> (no phantom 404). -->
-    <div class="ts-pages-rail" role="tablist" aria-label="{{ t.pagesLabel }}" style="width:188px;flex:none;background:#fff;border-right:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow:hidden">
+    <div class="ts-pages-rail" role="tablist" aria-label="{{ t.pagesLabel }}" style="width:200px;flex:none;background:#fff;border-right:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow:hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px;font-size:13px;font-weight:700;color:var(--ts-text-secondary)">
         <span>{{ t.pagesLabel }}</span>
         <button onClick="{{ addPageFn }}" aria-label="{{ t.addPage }}" title="{{ t.addPage }}" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
@@ -623,7 +659,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
     </div>
 
     <sc-if value="{{ inspectorShown }}" hint-placeholder-val="{{ true }}">
-      <aside id="ts-dotpad-panel" class="ts-side-panel" aria-label="{{ t.dpPanelTitle }}" data-screen-label="DotPad Output panel" style="width:256px;flex:none;background:#fff;border-left:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow-y:auto">
+      <aside id="ts-dotpad-panel" class="ts-side-panel" aria-label="{{ t.dpPanelTitle }}" data-screen-label="DotPad Output panel" style="width:280px;flex:none;background:#fff;border-left:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow-y:auto">
         <div style="display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #F2ECE4">
           <button class="ts-topbar-action" onClick="{{ toggleExport }}" aria-haspopup="menu" aria-expanded="{{ exportOpen }}" aria-label="{{ t.export }}" title="{{ t.export }}" style="flex:1;min-width:0;font-size:13px;border:1px solid var(--ts-border-decor);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -1796,12 +1832,14 @@ class Component extends DCLogic {
   //   (e.g. react-i18next / LinguiJS): each string becomes an i18n KEY
   //   (t('hub.greeting'), t('recent.title'), …) — NEVER a hard-coded literal in JSX.
   //   Product names (Tactile Studio, Tactile Drive, Dot Library, DotPad) stay verbatim in both locales.
-  // Inspector tab button style — active tab shows brand underline, inactive is muted.
+  // Inspector tabs use a compact segmented control so Layers / Properties /
+  // DotPad read as sibling workspaces rather than a stack of unrelated links.
   tabStyle(active) {
-    return 'flex:1;height:38px;font-size:13.5px;font-weight:700;background:transparent;border:none;'
-      + 'border-bottom:2px solid ' + (active ? 'var(--ts-primary)' : 'transparent') + ';'
-      + 'color:' + (active ? '#1E1C1A' : 'var(--ts-text-secondary)') + ';cursor:pointer;'
-      + 'transition:color 0.15s ease,border-color 0.15s ease';
+    return 'flex:1;min-width:0;height:32px;padding:0 5px;font-size:12.5px;font-weight:' + (active ? '800' : '700') + ';'
+      + 'background:' + (active ? '#fff' : 'transparent') + ';border:' + (active ? '1px solid #E5DED5' : '1px solid transparent') + ';'
+      + 'border-radius:7px;color:' + (active ? '#1E1C1A' : 'var(--ts-text-secondary)') + ';cursor:pointer;'
+      + 'box-shadow:' + (active ? '0 1px 2px rgba(31,27,23,0.06)' : 'none') + ';'
+      + 'transition:color 0.15s ease,background 0.15s ease,border-color 0.15s ease';
   }
   T(lang) {
     const ko = {
@@ -6059,9 +6097,9 @@ class Component extends DCLogic {
           menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown), menuDupStyle: menuItem(true),
           aria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (sel ? (st.lang === 'ko' ? ' (현재)' : ' (current)') : ''),
           label: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1),
-          style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:10px;cursor:pointer;text-align:left;'
-            + 'border:1.5px solid ' + (sel ? 'var(--ts-primary)' : 'var(--ts-border-decor)') + ';'
-            + 'background:' + (sel ? 'rgba(var(--ts-primary-rgb),0.06)' : '#fff'),
+          style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:9px;cursor:pointer;text-align:left;'
+            + 'border:1px solid ' + (sel ? 'rgba(var(--ts-primary-rgb),0.42)' : 'var(--ts-border-decor)') + ';'
+            + 'background:' + (sel ? '#FFF9F5' : '#fff'),
           thumbStyle: 'width:100%;aspect-ratio:' + st.gridW + '/' + st.gridH + ';border-radius:5px;border:1px solid var(--ts-border-decor);background:#fff;display:block;'
             + (th ? 'object-fit:contain' : ''),
           capStyle: 'display:flex;align-items:center;justify-content:space-between;gap:6px',
