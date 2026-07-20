@@ -1071,8 +1071,8 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 
       <!-- STEP 3 · REVIEW -->
       <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
-        <!-- Review controls are intentionally one quiet row: the preview is the
-             decision surface, while crop/output/original remain one-click tools. -->
+        <!-- Original and tactile output remain visible together throughout review.
+             Only crop and output are controls; comparison is not optional. -->
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:6px">
             <div role="group" aria-label="{{ t.impCropQ }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
@@ -1088,10 +1088,9 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
               </sc-for>
             </div>
           </div>
-          <button onClick="{{ toggleOrigPreview }}" aria-pressed="{{ origPreviewOpen }}" style="height:30px;padding:0 9px;border:1px solid var(--ts-border-decor);border-radius:7px;background:#fff;color:var(--ts-text-secondary);font-size:12px;font-weight:700;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impShowOrig }}</button>
         </div>
-        <div class="ts-2col" style="{{ reviewPreviewGridStyle }}">
-          <div style="display:{{ origPreviewDisplay }}">
+        <div class="ts-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
             <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
             <div class="image-preview-frame" style="width:min(100%,330px);margin:0 auto;background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px">
               <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
@@ -1115,7 +1114,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
                 <span>{{ t.tactilePreview }}</span>
               </sc-if>
             </div>
-            <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
+            <div class="tactile-preview-frame" style="position:relative;width:min(100%,330px);margin:0 auto;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:10px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
               <canvas ref="{{ impRef }}" style="display:{{ impRefDisplay }}"></canvas>
               <canvas ref="{{ impVecRef }}" style="display:{{ impVecDisplay }}"></canvas>
             </div>
@@ -5890,10 +5889,6 @@ class Component extends DCLogic {
       impAdvOpen: st.impAdvOpen,
       toggleImpAdv: () => this.setState(x => ({ impAdvOpen: !x.impAdvOpen })),
       impAdvCaret: st.impAdvOpen ? '90deg' : '0deg',
-      origPreviewOpen: st.impOrigOpen || st.cropChoice === 'crop',
-      origPreviewDisplay: (st.impOrigOpen || st.cropChoice === 'crop') ? 'block' : 'none',
-      reviewPreviewGridStyle: (st.impOrigOpen || st.cropChoice === 'crop') ? 'display:grid;grid-template-columns:1fr 1fr;gap:16px' : 'display:grid;grid-template-columns:minmax(0,1fr);gap:0',
-      toggleOrigPreview: () => this.setState(x => ({ impOrigOpen: !x.impOrigOpen })),
       convPresets: [
         { k: 'balanced', label: t.presetBalanced, sub: t.presetSubBalanced },
         { k: 'outline', label: t.presetOutline, sub: t.presetSubOutline },
@@ -5959,7 +5954,7 @@ class Component extends DCLogic {
       impStep1Next: () => { if (st.imgReady) this.setState({ impStep: 'review' }); },
       // crop choice
       cropIsCrop: st.cropChoice === 'crop', cropIsFull: st.cropChoice === 'full',
-      pickCropCrop: () => this.setState({ cropChoice: 'crop', impOrigOpen: true }),
+      pickCropCrop: () => this.setState({ cropChoice: 'crop' }),
       pickCropFull: () => this.setState({ cropChoice: 'full' }),
       cropFullSegStyle: seg(st.cropChoice === 'full'), cropCropSegStyle: seg(st.cropChoice === 'crop'),
       cropRef: this.cropRef,
