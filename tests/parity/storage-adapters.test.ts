@@ -50,6 +50,23 @@ describe('MemoryStorageAdapter', () => {
     expect(loadedAgain.pages[0][0]).toBe(0);
   });
 
+  it('rejects a stale optimistic save without overwriting the newer document', async () => {
+    const adapter = createMemoryStorageAdapter();
+    const first = createDocument('doc', 60, 40);
+    const saved = await adapter.save(first);
+    expect(saved.version).toBe('1');
+
+    const newer = createDocument('doc', 60, 40);
+    newer.pages[0][7] = 1;
+    await adapter.save(newer, { expectedVersion: '1' });
+
+    const stale = createDocument('doc', 60, 40);
+    stale.pages[0][8] = 1;
+    const rejected = await adapter.save(stale, { expectedVersion: '1' });
+    expect(rejected).toMatchObject({ ok: false, conflict: true, remoteVersion: '2' });
+    expect((await adapter.load('doc')).pages[0][7]).toBe(1);
+  });
+
   it('seed()/has()/clear() work as a test/dev-shell hook', () => {
     const adapter = createMemoryStorageAdapter();
     expect(adapter.has('x')).toBe(false);

@@ -17,7 +17,7 @@
 // No React import needed here — these are plain type contracts.
 
 import type { StudioDocument } from '../../core/types.js';
-import type { StudioStorageAdapter } from '../../storage/adapters/types.js';
+import type { StudioStorageAdapter, SaveResult } from '../../storage/adapters/types.js';
 import type { SessionRecoveryStorageAdapter } from '../../storage/adapters/session-recovery-storage-adapter.js';
 import type { TactileDisplayAdapter } from '../../device/dotpad/types.js';
 import type { CorpusRecord } from '../../codecs/corpus/types.js';
@@ -109,11 +109,19 @@ export interface StudioErrorLike {
 
 export interface TactileStudioEditorProps {
   initialDocument: StudioDocument;
+  /** Opaque version that came with initialDocument from the host. When the
+   *  storage adapter supports it, Studio returns it on save to avoid silently
+   *  overwriting someone else's newer work. */
+  initialVersion?: string;
   services: StudioServices;
   labels?: StudioLabels;
   theme?: StudioTheme;
   onChange?(document: StudioDocument): void;
   onSave?(document: StudioDocument): Promise<void> | void;
+  /** A save was rejected because the host has a newer version. The editor
+   *  deliberately does not auto-reload (that could discard local edits); the
+   *  host chooses the next action such as compare, reload, or save-as-copy. */
+  onSaveConflict?(document: StudioDocument, result: SaveResult): void;
   onDirtyChange?(dirty: boolean): void;
   onError?(error: StudioErrorLike): void;
   /** Called after an export completes and the browser download has been
