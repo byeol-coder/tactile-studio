@@ -49,8 +49,8 @@ beforeEach(() => {
 // with the pointer event's type string — React's event system dispatches
 // onPointerDown/Move/Up by matching the native event TYPE, not by checking
 // `instanceof PointerEvent`, so this reaches our handlers with real coordinates.
-function firePointerEvent(el: Element, type: 'pointerdown' | 'pointermove' | 'pointerup', init: { clientX: number; clientY: number; button?: number; pointerId?: number }) {
-  const evt = new MouseEvent(type, { clientX: init.clientX, clientY: init.clientY, button: init.button ?? 0, bubbles: true, cancelable: true });
+function firePointerEvent(el: Element, type: 'pointerdown' | 'pointermove' | 'pointerup', init: { clientX: number; clientY: number; button?: number; pointerId?: number; shiftKey?: boolean; altKey?: boolean }) {
+  const evt = new MouseEvent(type, { clientX: init.clientX, clientY: init.clientY, button: init.button ?? 0, shiftKey: init.shiftKey, altKey: init.altKey, bubbles: true, cancelable: true });
   Object.defineProperty(evt, 'pointerId', { value: init.pointerId ?? 1, configurable: true });
   fireEvent(el, evt);
 }
@@ -277,6 +277,45 @@ describe('StudioCanvas — pointer-to-store wiring (pen tool)', () => {
     firePointerEvent(canvas, 'pointerdown', { clientX: 20, clientY: 20, pointerId: 1 });
     firePointerEvent(canvas, 'pointerup', { clientX: 20, clientY: 20, pointerId: 1 });
     expect(capturedStore!.getActiveCells()[1 * 10 + 1]).toBe(1);
+  });
+
+  it('snaps shape endpoints to 5-cell guides only while Shift is held', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 20, 20)}>
+        <Capture />
+        <Toolbar />
+        <StudioCanvas />
+      </TactileStudioProvider>,
+    );
+    selectShapeTool('Line');
+    const canvas = container.querySelector('canvas')!;
+    Object.defineProperty(canvas, 'width', { value: 400, configurable: true });
+    Object.defineProperty(canvas, 'height', { value: 400, configurable: true });
+
+    firePointerEvent(canvas, 'pointerdown', { clientX: 22, clientY: 22, pointerId: 1, shiftKey: true }); // raw (1,1) → (0,0)
+    firePointerEvent(canvas, 'pointermove', { clientX: 122, clientY: 122, pointerId: 1, shiftKey: true }); // raw (6,6) → (5,5)
+    firePointerEvent(canvas, 'pointerup', { clientX: 122, clientY: 122, pointerId: 1, shiftKey: true });
+
+    const cells = capturedStore!.getActiveCells();
+    expect(cells[0]).toBe(1);
+    expect(cells[5 * 20 + 5]).toBe(1);
+    expect(cells[6 * 20 + 6]).toBe(0);
+  });
+
+  it('moves the keyboard cursor by 5 with Shift and by 10 with Alt', () => {
+    let capturedStore: ReturnType<typeof useEditorStoreContext> | null = null;
+    function Capture() { capturedStore = useEditorStoreContext(); return null; }
+    const { container } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 20, 20)}>
+        <Capture /><StudioCanvas />
+      </TactileStudioProvider>,
+    );
+    const canvas = container.querySelector('canvas')!;
+    fireEvent.keyDown(canvas, { key: 'ArrowRight', shiftKey: true });
+    fireEvent.keyDown(canvas, { key: 'ArrowDown', altKey: true });
+    expect(capturedStore!.getSnapshot().cursor).toEqual({ cx: 5, cy: 10 });
   });
 });
 
