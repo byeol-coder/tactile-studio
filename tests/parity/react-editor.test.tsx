@@ -9,6 +9,7 @@ import React from 'react';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
 import { TactileStudioEditor } from '../../src/react/TactileStudioEditor.js';
+import { TactileStudio } from '../../src/react/TactileStudio.js';
 import { TactileStudioProvider, useEditorStoreContext } from '../../src/react/TactileStudioProvider.js';
 import { StudioCanvas } from '../../src/ui/canvas/StudioCanvas.js';
 import { Toolbar } from '../../src/ui/toolbar/Toolbar.js';
@@ -82,6 +83,21 @@ describe('TactileStudioEditor — mount/unmount safety', () => {
     );
     expect(screen.getByRole('img', { name: /tactile drawing canvas/i })).toBeTruthy();
     expect(() => unmount()).not.toThrow();
+  });
+
+  it('exposes the host-friendly TactileStudio adapter contract and explicit exit callback', () => {
+    const onExit = vi.fn();
+    render(
+      <TactileStudio
+        locale="ko"
+        initialDocument={createDocument('doc', 10, 10)}
+        storageAdapter={createMemoryStorageAdapter()}
+        onExit={onExit}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Exit' }));
+    expect(onExit).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('[data-tactile-studio-locale="ko"]')).toBeTruthy();
   });
 
   it('registers keydown listeners (undo/redo shortcut + save shortcut) per mount and removes them on unmount (no leak/duplication across remounts)', () => {
