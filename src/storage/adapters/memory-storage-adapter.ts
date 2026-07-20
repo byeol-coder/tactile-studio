@@ -6,7 +6,7 @@
 // paths and round-tripping.
 
 import type { StudioDocument } from '../../core/types.js';
-import type { StudioStorageAdapter, SaveResult } from './types.js';
+import type { StudioStorageAdapter, SaveResult, SaveOptions } from './types.js';
 
 export interface MemoryStorageAdapter extends StudioStorageAdapter {
   /** test/dev-shell hook: seed a document without going through save(). */
@@ -17,6 +17,7 @@ export interface MemoryStorageAdapter extends StudioStorageAdapter {
 
 export function createMemoryStorageAdapter(): MemoryStorageAdapter {
   const store = new Map<string, StudioDocument>();
+  const versions = new Map<string, number>();
 
   return {
     async load(id: string): Promise<StudioDocument> {
@@ -32,14 +33,27 @@ export function createMemoryStorageAdapter(): MemoryStorageAdapter {
       };
     },
 
-    async save(document: StudioDocument): Promise<SaveResult> {
+    async save(document: StudioDocument, options?: SaveOptions): Promise<SaveResult> {
       const id = document.title || `doc-${store.size + 1}`;
-      store.set(id, document);
-      return { ok: true, id };
+      const current = versions.get(id);
+      if (options?.expectedVersion != null && String(current ?? 0) !== options.expectedVersion) {
+        return { ok: false, id, conflict: true, remoteVersion: String(current ?? 0), error: 'This document was changed elsewhere.' };
+      }
+      store.set(id, {
+        ...document,
+        grid: { ...document.grid },
+        pages: document.pages.map((p) => p.slice()),
+        pageAudio: { ...document.pageAudio },
+        pageVectors: { ...document.pageVectors },
+      });
+      const next = (current ?? 0) + 1;
+      versions.set(id, next);
+      return { ok: true, id, version: String(next) };
     },
 
     seed(id: string, document: StudioDocument) {
       store.set(id, document);
+      versions.set(id, (versions.get(id) ?? 0) + 1);
     },
 
     has(id: string) {
@@ -48,6 +62,7 @@ export function createMemoryStorageAdapter(): MemoryStorageAdapter {
 
     clear() {
       store.clear();
+      versions.clear();
     },
   };
 }

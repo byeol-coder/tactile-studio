@@ -62,18 +62,21 @@ function triggerDownload(result: import('../ui/dialogs/ExportMenu.js').ExportRes
 
 interface EditorBodyProps extends Pick<TactileStudioEditorProps, 'services' | 'labels'> {
   onSave?: TactileStudioEditorProps['onSave'];
+  onSaveConflict?: TactileStudioEditorProps['onSaveConflict'];
   onError?: TactileStudioEditorProps['onError'];
   onExport?: TactileStudioEditorProps['onExport'];
+  initialVersion?: string;
 }
 
 /** Internal — must render inside TactileStudioProvider to reach the store. */
-function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyProps) {
+function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExport, initialVersion }: EditorBodyProps) {
   useKeyboardShortcuts(labels);
   useHardwareKeyPanning(services.tactileDisplay);
   const { store } = useEditorStore();
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [version, setVersion] = useState<string | undefined>(initialVersion);
   const [focusMode, setFocusMode] = useState(false);
   const [showPanels, setShowPanels] = useState(false);
   const focusRoot = useRef<HTMLDivElement>(null);
@@ -102,8 +105,17 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
     setSaving(true);
     try {
       const doc = store.getDocument();
-      const result = await services.storage.save(doc);
+      const result = await services.storage.save(doc, { expectedVersion: version });
+      if (result.conflict) {
+        const message = (labels?.saveConflict as string) || 'A newer version exists. Your local work is still safe.';
+        onSaveConflict?.(doc, result);
+        reportError({ code: 'save-conflict', message, cause: result });
+        store.announce(message);
+        store.toastMsg(message);
+        return;
+      }
       if (!result.ok) throw new Error(result.error || 'Save failed');
+      if (result.version != null) setVersion(result.version);
       store.markSaved();
       store.announce((labels?.saved as string) || 'Saved');
       await onSave?.(doc);
@@ -176,7 +188,7 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
 }
 
 export function TactileStudioEditor({
-  initialDocument, services, labels, theme, onChange, onSave, onDirtyChange, onError, onExport, className,
+  initialDocument, initialVersion, services, labels, theme, onChange, onSave, onSaveConflict, onDirtyChange, onError, onExport, className,
 }: TactileStudioEditorProps) {
   // Studio owns local crash-recovery storage directly (same rationale as the
   // local-library "saved shelf") -- the real localStorage-backed adapter is
@@ -187,7 +199,7 @@ export function TactileStudioEditor({
   return (
     <div className={className} style={{ ...themeStyle(theme), display: 'flex', flexDirection: 'column', gap: 8 }}>
       <TactileStudioProvider initialDocument={initialDocument} onChange={onChange} onDirtyChange={onDirtyChange} sessionRecovery={sessionRecovery}>
-        <EditorBody services={services} labels={labels} onSave={onSave} onError={onError} onExport={onExport} />
+        <EditorBody services={services} labels={labels} initialVersion={initialVersion} onSave={onSave} onSaveConflict={onSaveConflict} onError={onError} onExport={onExport} />
       </TactileStudioProvider>
     </div>
   );
