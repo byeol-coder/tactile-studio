@@ -524,15 +524,15 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
         </button>
       </div>
-      <!-- Working-grid pill — toggle a 5/10-cell alignment grid plus a strength
-           cycle. Sibling of the zoom pill (same right edge, stacked above) so it
-           also stays put on scroll. The grid it controls is drawn in drawMain()
-           only and is never saved/exported/sent to DotPad. -->
-      <div role="group" aria-label="{{ t.gridLabelUi }}" style="position:absolute;right:16px;bottom:118px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
+      <!-- Working-grid pill — a quiet 5/10-cell drawing guide. It stays beside
+           zoom controls, but uses clear text levels instead of cryptic glyphs.
+           The guide itself is screen-only: never saved/exported/sent to DotPad. -->
+      <div role="group" aria-label="{{ t.gridLabelUi }}" style="position:absolute;right:16px;bottom:118px;z-index:16;display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.96);border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 6px 16px -8px rgba(16,24,40,0.24);backdrop-filter:blur(8px)">
         <button class="ts-zoom-btn" onClick="{{ toggleGrid }}" aria-pressed="{{ gridActive }}" aria-label="{{ gridToggleLabel }}" title="{{ gridToggleLabel }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridToggleColor }};display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM9.33 4v16M14.67 4v16M4 9.33h16M4 14.67h16" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"></path></svg>
         </button>
-        <button class="ts-zoom-btn" onClick="{{ cycleGridStrength }}" disabled="{{ gridStrengthDisabled }}" aria-label="{{ gridStrengthLabel }}" title="{{ gridStrengthLabel }}" style="min-width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;font-size:14px;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ gridStrengthText }}</button>
+        <span aria-hidden="true" style="width:1px;height:18px;background:var(--ts-border-decor);margin:0 1px"></span>
+        <button class="ts-zoom-btn" onClick="{{ cycleGridStrength }}" disabled="{{ gridStrengthDisabled }}" aria-label="{{ gridStrengthLabel }}" title="{{ gridStrengthLabel }}" style="min-width:42px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridStrengthColor }};display:grid;place-items:center;padding:0 7px;font-size:11px;font-weight:750;letter-spacing:-0.2px;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ gridStrengthText }}</button>
       </div>
       <!-- Zoom pill (Figma-style): Ctrl/Cmd + wheel or trackpad pinch zooms
            continuously anywhere over the canvas viewport (see cvWheel on the
@@ -1733,7 +1733,9 @@ class Component extends DCLogic {
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
     zoom: 1, focusMode: false,
-    showGrid: false, gridStrength: 1, // editing aid only — never saved/exported/sent to DotPad
+    // A quiet guide is useful from the first stroke. It remains screen-only —
+    // never saved/exported/sent to DotPad — and can be hidden at any time.
+    showGrid: true, gridStrength: 2,
     corpusCtx: null,
     saved: []
   };
@@ -1813,7 +1815,7 @@ class Component extends DCLogic {
       canvasAria: '촉각 그리드 편집기.',
       canvasAriaA11y: '촉각 그리드 편집기. 화살표 키로 이동하고 스페이스로 점을 토글합니다.',
       zoomLabel: '캔버스 확대/축소', zoomOutL: '축소', zoomInL: '확대', zoomResetL: '100%로 초기화',
-      gridLabelUi: '작업 그리드', gridToggleOnL: '그리드 표시', gridToggleOffL: '그리드 숨기기', gridStrengthL: '그리드 진하기', gridStrengthNames: ['옅게', '보통', '진하게'], gridOnMsg: '그리드 표시', gridOffMsg: '그리드 숨김', gridStrengthMsg: '그리드 진하기: ',
+      gridLabelUi: '작업 그리드', gridToggleOnL: '그리드 표시', gridToggleOffL: '그리드 숨기기', gridStrengthL: '그리드 표시 수준', gridStrengthNames: ['약하게', '가이드', '정밀'], gridOnMsg: '그리드 표시', gridOffMsg: '그리드 숨김', gridStrengthMsg: '그리드 표시 수준: ',
       
       
       entCmd: '명령어로 만들기', entCmdSub: '설명만 입력하면 촉각 그래픽 초안을 자동으로 만들어줍니다.', entTpl: '템플릿에서 시작', entTplSub: '읽기 쉬운 촉각 스타터로 시작합니다.',
@@ -1946,7 +1948,7 @@ class Component extends DCLogic {
       canvasAria: 'Tactile grid editor.',
       canvasAriaA11y: 'Tactile grid editor. Move with arrow keys, toggle dots with Space.',
       zoomLabel: 'Zoom canvas', zoomOutL: 'Zoom out', zoomInL: 'Zoom in', zoomResetL: 'Reset to 100%',
-      gridLabelUi: 'Working grid', gridToggleOnL: 'Show grid', gridToggleOffL: 'Hide grid', gridStrengthL: 'Grid strength', gridStrengthNames: ['Light', 'Medium', 'Strong'], gridOnMsg: 'Grid shown', gridOffMsg: 'Grid hidden', gridStrengthMsg: 'Grid strength: ',
+      gridLabelUi: 'Working grid', gridToggleOnL: 'Show grid', gridToggleOffL: 'Hide grid', gridStrengthL: 'Grid detail', gridStrengthNames: ['Soft', 'Guide', 'Detail'], gridOnMsg: 'Grid shown', gridOffMsg: 'Grid hidden', gridStrengthMsg: 'Grid detail: ',
       
       
       entCmd: 'Generate from command', entCmdSub: 'Create a tactile graphic draft from a description.', entTpl: 'Start from template', entTplSub: 'Use a readable tactile starter.',
@@ -3059,22 +3061,40 @@ class Component extends DCLogic {
     // visual guide: it is not saved, not embossed, and never sent to DotPad.
     // Sits under the dots so tactile content stays the most prominent layer.
     if (this.state.showGrid) {
-      const strength = this.state.gridStrength || 1; // 1..3
-      const op = strength >= 3 ? 1 : strength === 2 ? 0.68 : 0.4;
+      const strength = this.state.gridStrength || 2; // 1=soft, 2=guide, 3=detail
       const wpx = gridW * c, hpx = gridH * c;
-      // minor guides every 5 cells (skip where a 10-cell major will draw)
+      const alpha = strength === 1 ? 0.055 : strength === 2 ? 0.085 : 0.115;
+      // Alternating 10×10 zones provide orientation without turning the canvas
+      // into graph paper. This is intentionally almost imperceptible behind dots.
+      g.fillStyle = 'rgba(196,61,0,' + alpha.toFixed(3) + ')';
+      for (let y = 0; y < gridH; y += 10) for (let x = 0; x < gridW; x += 10) {
+        if (((x / 10) + (y / 10)) % 2) g.fillRect(x * c, y * c, Math.min(10, gridW - x) * c, Math.min(10, gridH - y) * c);
+      }
+      // Detail mode adds cell boundaries only when enough physical pixels exist;
+      // dense 96×64 canvases keep their clean 5/10 guides instead of visual noise.
+      if (strength === 3 && c >= 11) {
+        g.lineWidth = 1;
+        g.strokeStyle = 'rgba(139,129,119,0.14)';
+        g.beginPath();
+        for (let x = 1; x < gridW; x++) { const px = x * c + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); }
+        for (let y = 1; y < gridH; y++) { const py = y * c + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); }
+        g.stroke();
+      }
+      // 5-cell guides make short shapes easy to count; 10-cell guides form the
+      // stable alignment rhythm. They are crisp half-pixel strokes at every zoom.
+      const guideAlpha = strength === 1 ? 0.22 : strength === 2 ? 0.30 : 0.38;
       g.lineWidth = 1;
-      g.strokeStyle = 'rgba(139,129,119,' + (0.5 * op).toFixed(3) + ')';
+      g.strokeStyle = 'rgba(113,103,92,' + guideAlpha.toFixed(3) + ')';
+      g.setLineDash([2, 3]); g.beginPath();
+      for (let x = 5; x < gridW; x += 5) { if (x % 10) { const px = x * c + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); } }
+      for (let y = 5; y < gridH; y += 5) { if (y % 10) { const py = y * c + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); } }
+      g.stroke(); g.setLineDash([]);
+      const majorAlpha = strength === 1 ? 0.34 : strength === 2 ? 0.46 : 0.60;
+      g.lineWidth = 1.25;
+      g.strokeStyle = 'rgba(196,61,0,' + majorAlpha.toFixed(3) + ')';
       g.beginPath();
-      for (let x = 5; x < gridW; x += 5) { if (x % 10 === 0) continue; const px = Math.round(x * c) + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); }
-      for (let y = 5; y < gridH; y += 5) { if (y % 10 === 0) continue; const py = Math.round(y * c) + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); }
-      g.stroke();
-      // major guides every 10 cells — stronger, for fast counting/alignment
-      g.lineWidth = 1.5;
-      g.strokeStyle = 'rgba(107,99,89,' + op.toFixed(3) + ')';
-      g.beginPath();
-      for (let x = 10; x < gridW; x += 10) { const px = Math.round(x * c) + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); }
-      for (let y = 10; y < gridH; y += 10) { const py = Math.round(y * c) + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); }
+      for (let x = 0; x <= gridW; x += 10) { const px = Math.min(wpx - 0.625, x * c + 0.625); g.moveTo(px, 0); g.lineTo(px, hpx); }
+      for (let y = 0; y <= gridH; y += 10) { const py = Math.min(hpx - 0.625, y * c + 0.625); g.moveTo(0, py); g.lineTo(wpx, py); }
       g.stroke();
     }
     for (let y = 0; y < gridH; y++) for (let x = 0; x < gridW; x++) {
@@ -5625,7 +5645,8 @@ class Component extends DCLogic {
       gridToggleColor: st.showGrid ? 'var(--ts-primary)' : '#1E1C1A',
       gridStrengthLabel: t.gridStrengthL + ' — ' + t.gridStrengthNames[(st.gridStrength || 1) - 1],
       gridStrengthDisabled: !st.showGrid,
-      gridStrengthText: ['◔', '◑', '●'][(st.gridStrength || 1) - 1],
+      gridStrengthText: t.gridStrengthNames[(st.gridStrength || 2) - 1],
+      gridStrengthColor: st.showGrid ? 'var(--ts-primary)' : '#8A8177',
       zoomOutDisabled: st.zoom <= this.zoomSteps[0] + 0.001,
       zoomInDisabled: st.zoom >= this.zoomSteps[this.zoomSteps.length - 1] - 0.001,
       // At 100% this matches the original responsive (max-width:100%) behavior exactly.
