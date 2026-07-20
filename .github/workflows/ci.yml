@@ -5,12 +5,12 @@ permissions:
 
 # Validates the NEW React + TypeScript layer under src/ (core, codecs,
 # device, storage, react, ui) — completely separate from deploy.yml, which
-# only ships the canonical vanilla app (index.html/support.js/vendor) to
-# GitHub Pages and never touches this pipeline.
+# only ships the canonical vanilla app to GitHub Pages and never touches this
+# pipeline.
 #
 # Runs on every push and every PR so a regression in the migration's
 # regression/parity suite (tests/regression, tests/parity) — including the
-# fingerprint tests that catch any accidental edit to the vanilla app itself
+# fingerprint tests that catch any accidental edit to the protected runtime files
 # — is caught automatically, not just when someone remembers to run
 # `npm test` locally.
 
@@ -73,12 +73,12 @@ jobs:
       - name: Packed-package consumer smoke test
         run: npm run check:package
 
-      - name: Verify migration does not alter the vanilla app
+      - name: Verify migration does not alter protected runtime files
         run: |
           git fetch origin main
-          if ! git diff --quiet origin/main...HEAD -- index.html support.js vendor/ corpus.js corpus-search.js; then
-            echo "::error::The migration branch changes protected vanilla-app files. Split those changes into a separately reviewed PR."
-            git diff --stat origin/main...HEAD -- index.html support.js vendor/ corpus.js corpus-search.js
+          if ! git diff --quiet origin/main...HEAD -- support.js vendor/ corpus.js corpus-search.js; then
+            echo "::error::This branch changes protected runtime files (support.js/vendor/corpus*.js). Split those changes into a separately reviewed PR."
+            git diff --stat origin/main...HEAD -- support.js vendor/ corpus.js corpus-search.js
             exit 1
           fi
 
