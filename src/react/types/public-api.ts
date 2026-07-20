@@ -48,6 +48,30 @@ export interface GridFxService {
   denoise(cells: Uint8Array, w: number, h: number): Uint8Array;
 }
 
+/** Platform-owned review lifecycle. Studio only renders the current status
+ *  and submits an explicit request; authentication, reviewer assignment,
+ *  My Profile history, notifications, and RLS remain Tactile Worlds' work. */
+export type ReviewStatus = 'draft' | 'requested' | 'in_review' | 'changes_requested' | 'approved';
+
+export interface StudioReviewRecord {
+  id: string;
+  status: ReviewStatus;
+  submittedAt?: string;
+  updatedAt?: string;
+  feedback?: string;
+}
+
+export interface ReviewRequestResult {
+  ok: boolean;
+  review?: StudioReviewRecord;
+  error?: string;
+}
+
+export interface StudioReviewService {
+  getCurrent(document: StudioDocument): Promise<StudioReviewRecord | null>;
+  request(document: StudioDocument): Promise<ReviewRequestResult>;
+}
+
 /** Host-provided DTMS pin encoding (the real vendor TW.encodeBits — Studio
  *  never imports or reimplements it, see codecs/dtms). Required for DotPad
  *  "send" and DTMS/Library-Asset-v1 export to function; the editor renders
@@ -61,6 +85,7 @@ export interface StudioServices {
   braille?: BrailleService;
   imageProcessing?: ImageProcessingService;
   gridFx?: GridFxService;
+  review?: StudioReviewService;
   encodeBits?: EncodeBitsFn;
   bitsToSvg?: (bits: boolean[][], cols: number, rows: number, opts?: { cell?: number; dotR?: number; title?: string }) => string;
   /** Static corpus data (typically the host's own real corpus.js, read from

@@ -100,6 +100,20 @@ describe('TactileStudioEditor — mount/unmount safety', () => {
     expect(document.querySelector('[data-tactile-studio-locale="ko"]')).toBeTruthy();
   });
 
+  it('requests review through the host-owned review adapter and shows the returned status', async () => {
+    const request = vi.fn().mockResolvedValue({ ok: true, review: { id: 'r-1', status: 'requested', updatedAt: '2026-07-20T00:00:00.000Z' } });
+    render(
+      <TactileStudioEditor
+        initialDocument={createDocument('doc', 10, 10)}
+        services={{ storage: createMemoryStorageAdapter(), review: { getCurrent: vi.fn().mockResolvedValue(null), request } }}
+      />,
+    );
+    const button = await screen.findByRole('button', { name: 'Request review' });
+    fireEvent.click(button);
+    expect(await screen.findByText('Requested')).toBeTruthy();
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
   it('registers keydown listeners (undo/redo shortcut + save shortcut) per mount and removes them on unmount (no leak/duplication across remounts)', () => {
     const addSpy = vi.spyOn(document, 'addEventListener');
     const removeSpy = vi.spyOn(document, 'removeEventListener');

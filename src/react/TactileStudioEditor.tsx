@@ -32,6 +32,7 @@ import { Toast } from '../ui/toast/Toast.js';
 import { RecoveryBanner } from '../ui/recovery/RecoveryBanner.js';
 import { EmptyStateHint } from '../ui/hints/EmptyStateHint.js';
 import { QualityPanel } from '../ui/quality/QualityPanel.js';
+import { ReviewStatusPanel } from '../ui/review/ReviewStatusPanel.js';
 import { createSessionRecoveryStorageAdapter } from '../storage/adapters/session-recovery-storage-adapter.js';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { useHardwareKeyPanning } from './hooks/useHardwareKeyPanning.js';
@@ -175,6 +176,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
         {(!focusMode || showPanels) && <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Inspector labels={labels} gridFx={services.gridFx} braille={services.braille} />
           <QualityPanel />
+          {services.review && <ReviewStatusPanel review={services.review} labels={labels} />}
           {services.tactileDisplay && <DotPadPanel adapter={services.tactileDisplay} encodeBits={services.encodeBits} labels={labels} onError={reportError} />}
         </div>}
       </div>
