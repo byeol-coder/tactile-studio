@@ -332,8 +332,12 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <svg class="ts-menu-caret" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="opacity:0.45"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </button>
 
-      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" aria-keyshortcuts="Shift+/" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
-      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleFocusMode }}" aria-pressed="{{ focusMode }}" aria-label="{{ focusLabel }}" title="{{ focusLabel }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">⛶</button>
+      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" aria-keyshortcuts="Shift+/" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M9.2 9.5a2.8 2.8 0 0 1 5.4 1c0 1.9-2.6 2-2.6 3.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 17.2h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+      </button>
+      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleFocusMode }}" aria-pressed="{{ focusMode }}" aria-label="{{ focusLabel }}" title="{{ focusLabel }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+        <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H5a1 1 0 0 0-1 1v3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M4 16v3a1 1 0 0 0 1 1h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
     </div>
   </div>
 
@@ -374,7 +378,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px;font-size:13px;font-weight:700;color:var(--ts-text-secondary)">
         <span>{{ t.pagesLabel }}</span>
         <button onClick="{{ addPageFn }}" aria-label="{{ t.addPage }}" title="{{ t.addPage }}" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF;color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         </button>
       </div>
       <div ref="{{ pagesRailRef }}" style="flex:1;overflow-y:auto;padding:2px 12px 12px;display:flex;flex-direction:column;gap:10px">
@@ -396,7 +400,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
               <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
             </div>
             <button onClick="{{ p.deletePick }}" disabled="{{ p.deleteDisabled }}" aria-label="{{ p.deleteAria }}" title="{{ p.deleteAria }}" style="{{ p.deleteStyle }}" style-hover="background:#fff;border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
             </button>
             <sc-if value="{{ p.menuOpen }}" hint-placeholder-val="{{ false }}">
               <div role="menu" aria-label="{{ p.handleAria }}" style="{{ p.menuStyle }}">
@@ -405,11 +409,11 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
                   <span>{{ t.pageDuplicate }}</span>
                 </button>
                 <button role="menuitem" onClick="{{ p.moveUp }}" disabled="{{ p.upDisabled }}" style="{{ p.menuUpStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
-                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   <span>{{ t.pageMoveUp }}</span>
                 </button>
                 <button role="menuitem" onClick="{{ p.moveDown }}" disabled="{{ p.downDisabled }}" style="{{ p.menuDownStyle }}" style-hover="background:rgba(var(--ts-primary-rgb),0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">
-                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 5v14M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M12 5v14M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   <span>{{ t.pageMoveDown }}</span>
                 </button>
               </div>
@@ -589,20 +593,20 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
            own left-hand segment; the divider makes it distinct from zoom. -->
       <div role="group" aria-label="{{ t.canvasViewLabel }}" style="position:absolute;right:16px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
         <button class="ts-zoom-btn" onClick="{{ toggleGrid }}" aria-pressed="{{ gridActive }}" aria-label="{{ gridToggleLabel }}" title="{{ gridToggleLabel }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridToggleColor }};display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM9.33 4v16M14.67 4v16M4 9.33h16M4 14.67h16" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM9.33 4v16M14.67 4v16M4 9.33h16M4 14.67h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg>
         </button>
         <button class="ts-zoom-btn" onClick="{{ cycleGridStrength }}" disabled="{{ gridStrengthDisabled }}" aria-label="{{ gridStrengthLabel }}" title="{{ gridStrengthLabel }}" style="min-width:42px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridStrengthColor }};display:grid;place-items:center;padding:0 7px;font-size:11px;font-weight:750;letter-spacing:-0.2px;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ gridStrengthText }}</button>
         <span aria-hidden="true" style="width:1px;height:22px;background:var(--ts-border-decor);margin:0 3px;flex:none"></span>
         <button class="ts-zoom-btn" onClick="{{ zoomOut }}" disabled="{{ zoomOutDisabled }}" aria-label="{{ t.zoomOutL }}" aria-keyshortcuts="{{ zoomOutKeys }}" onMouseEnter="{{ zoomOutTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomOutTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         </button>
         <button class="ts-zoom-reset" onClick="{{ zoomReset }}" aria-label="{{ t.zoomResetL }}" aria-keyshortcuts="{{ zoomResetKeys }}" onMouseEnter="{{ zoomResetTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomResetTip }}" onBlur="{{ hideTip }}" style="min-width:48px;height:30px;flex:none;padding:0 6px;border:none;border-radius:100px;background:transparent;color:#1E1C1A;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ zoomPct }}</button>
         <button class="ts-zoom-btn" onClick="{{ zoomIn }}" disabled="{{ zoomInDisabled }}" aria-label="{{ t.zoomInL }}" aria-keyshortcuts="{{ zoomInKeys }}" onMouseEnter="{{ zoomInTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ zoomInTip }}" onBlur="{{ hideTip }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         </button>
         <span aria-hidden="true" style="width:1px;height:22px;background:var(--ts-border-decor);margin:0 3px;flex:none"></span>
         <button class="ts-zoom-btn" onClick="{{ toggleA11y }}" aria-pressed="{{ a11yMode }}" aria-label="{{ keyboardAssistLabel }}" title="{{ keyboardAssistLabel }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:{{ keyboardAssistBg }};color:{{ keyboardAssistColor }};display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"></rect><path d="M6.5 10h.01M9.5 10h.01M12.5 10h.01M15.5 10h.01M18 10h.01M8 14h8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M6.5 10h.01M9.5 10h.01M12.5 10h.01M15.5 10h.01M18 10h.01M8 14h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         </button>
       </div>
 
@@ -888,7 +892,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <!-- disconnected → connect -->
           <sc-if value="{{ dpPhaseDisconnected }}" hint-placeholder-val="{{ true }}">
             <button onClick="{{ dpConnectAction }}" aria-label="{{ t.dpConnectBtn }}" style="{{ dpPrimaryBtnStyle }}" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M7 8l10 8-5 4V4l5 4L7 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M7 8l10 8-5 4V4l5 4L7 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               {{ t.dpConnectBtn }}
             </button>
           </sc-if>
@@ -906,11 +910,11 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <!-- connected / sent → send (primary) + disconnect (secondary) -->
           <sc-if value="{{ dpShowReadyActions }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ dpSendAction }}" aria-label="{{ t.dpSendBtn }}" style="{{ dpPrimaryBtnStyle }}" style-hover="background:#D64A1C" style-focus="outline:2px solid #1E1C1A;outline-offset:2px">
-              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M10 14L21 3M21 3l-6.5 18a.5.5 0 0 1-1 0L10 14l-7-3.5a.5.5 0 0 1 0-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               {{ t.dpSendBtn }}
             </button>
             <button onClick="{{ dpDisconnectAction }}" aria-label="{{ t.dpDisconnectBtn }}" style="{{ dpGhostBtnStyle }}" style-hover="border-color:var(--ts-danger);color:var(--ts-danger)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
               {{ t.dpDisconnectBtn }}
             </button>
           </sc-if>
