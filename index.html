@@ -1735,7 +1735,9 @@ class Component extends DCLogic {
     zoom: 1, focusMode: false,
     // A quiet guide is useful from the first stroke. It remains screen-only —
     // never saved/exported/sent to DotPad — and can be hidden at any time.
-    showGrid: true, gridStrength: 2,
+    // Start with the quietest useful guide. Higher-detail modes stay one click
+    // away for alignment work, while the first canvas view keeps the dots calm.
+    showGrid: true, gridStrength: 1,
     corpusCtx: null,
     saved: []
   };
@@ -3061,12 +3063,12 @@ class Component extends DCLogic {
     // visual guide: it is not saved, not embossed, and never sent to DotPad.
     // Sits under the dots so tactile content stays the most prominent layer.
     if (this.state.showGrid) {
-      const strength = this.state.gridStrength || 2; // 1=soft, 2=guide, 3=detail
+      const strength = this.state.gridStrength || 1; // 1=soft, 2=guide, 3=detail
       const wpx = gridW * c, hpx = gridH * c;
-      const alpha = strength === 1 ? 0.055 : strength === 2 ? 0.085 : 0.115;
+      const alpha = strength === 1 ? 0.038 : strength === 2 ? 0.065 : 0.095;
       // Alternating 10×10 zones provide orientation without turning the canvas
       // into graph paper. This is intentionally almost imperceptible behind dots.
-      g.fillStyle = 'rgba(196,61,0,' + alpha.toFixed(3) + ')';
+      g.fillStyle = 'rgba(105,94,83,' + alpha.toFixed(3) + ')';
       for (let y = 0; y < gridH; y += 10) for (let x = 0; x < gridW; x += 10) {
         if (((x / 10) + (y / 10)) % 2) g.fillRect(x * c, y * c, Math.min(10, gridW - x) * c, Math.min(10, gridH - y) * c);
       }
@@ -3082,16 +3084,18 @@ class Component extends DCLogic {
       }
       // 5-cell guides make short shapes easy to count; 10-cell guides form the
       // stable alignment rhythm. They are crisp half-pixel strokes at every zoom.
-      const guideAlpha = strength === 1 ? 0.22 : strength === 2 ? 0.30 : 0.38;
+      const guideAlpha = strength === 1 ? 0.18 : strength === 2 ? 0.26 : 0.34;
       g.lineWidth = 1;
       g.strokeStyle = 'rgba(113,103,92,' + guideAlpha.toFixed(3) + ')';
       g.setLineDash([2, 3]); g.beginPath();
       for (let x = 5; x < gridW; x += 5) { if (x % 10) { const px = x * c + 0.5; g.moveTo(px, 0); g.lineTo(px, hpx); } }
       for (let y = 5; y < gridH; y += 5) { if (y % 10) { const py = y * c + 0.5; g.moveTo(0, py); g.lineTo(wpx, py); } }
       g.stroke(); g.setLineDash([]);
-      const majorAlpha = strength === 1 ? 0.34 : strength === 2 ? 0.46 : 0.60;
-      g.lineWidth = 1.25;
-      g.strokeStyle = 'rgba(196,61,0,' + majorAlpha.toFixed(3) + ')';
+      // Primary orange stays reserved for active drawing, selection, and focus.
+      // Major grid lines use a calm neutral so they guide without competing.
+      const majorAlpha = strength === 1 ? 0.30 : strength === 2 ? 0.42 : 0.56;
+      g.lineWidth = 1.15;
+      g.strokeStyle = 'rgba(82,73,65,' + majorAlpha.toFixed(3) + ')';
       g.beginPath();
       for (let x = 0; x <= gridW; x += 10) { const px = Math.min(wpx - 0.625, x * c + 0.625); g.moveTo(px, 0); g.lineTo(px, hpx); }
       for (let y = 0; y <= gridH; y += 10) { const py = Math.min(hpx - 0.625, y * c + 0.625); g.moveTo(0, py); g.lineTo(wpx, py); }
@@ -5645,7 +5649,7 @@ class Component extends DCLogic {
       gridToggleColor: st.showGrid ? 'var(--ts-primary)' : '#1E1C1A',
       gridStrengthLabel: t.gridStrengthL + ' — ' + t.gridStrengthNames[(st.gridStrength || 1) - 1],
       gridStrengthDisabled: !st.showGrid,
-      gridStrengthText: t.gridStrengthNames[(st.gridStrength || 2) - 1],
+      gridStrengthText: t.gridStrengthNames[(st.gridStrength || 1) - 1],
       gridStrengthColor: st.showGrid ? 'var(--ts-primary)' : '#8A8177',
       zoomOutDisabled: st.zoom <= this.zoomSteps[0] + 0.001,
       zoomInDisabled: st.zoom >= this.zoomSteps[this.zoomSteps.length - 1] - 0.001,
