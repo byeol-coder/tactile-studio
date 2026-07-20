@@ -1061,7 +1061,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </div>
             <div>
               <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:6px">{{ t.tactilePreview }}</div>
-              <div class="tactile-preview-frame" style="position:relative;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
+              <div class="tactile-preview-frame" style="position:relative;width:min(100%,330px);margin:0 auto;background:#141210;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:10px;box-shadow:inset -30px -40px 120px rgba(58,58,58,0.15)"><span style="position:absolute;left:10px;bottom:9px;z-index:1;font-size:12px;font-weight:600;color:rgba(242,233,221,0.75);background:rgba(20,18,16,0.55);border-radius:5px;padding:2px 7px">{{ gridLabel }}</span>
                 <canvas ref="{{ impRef }}" aria-label="{{ t.tactilePreview }}"></canvas>
               </div>
             </div>
@@ -1071,41 +1071,29 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 
       <!-- STEP 3 · REVIEW -->
       <sc-if value="{{ impIsReview }}" hint-placeholder-val="{{ false }}">
-        <p style="margin:0 0 18px;font-size:14px;color:var(--ts-text-secondary);line-height:1.55">{{ t.impReviewSub }}</p>
-
-        <!-- Crop choice + output size: a single compact row (was two big
-             cards with icon+title+description, plus a separate prompt
-             paragraph, plus a separate output-size row below — simplified to
-             match the output-size selector's own compact segmented style,
-             since crop-or-not defaults to "full" for most conversions and
-             doesn't need its own visual weight). Choosing 자르기 still reveals
-             the same drag handles on the Original preview below. -->
-        <div style="display:flex;align-items:center;gap:22px;margin-bottom:18px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.impCropQ }}</span>
+        <!-- Review controls are intentionally one quiet row: the preview is the
+             decision surface, while crop/output/original remain one-click tools. -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px">
             <div role="group" aria-label="{{ t.impCropQ }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
               <button onClick="{{ pickCropFull }}" aria-pressed="{{ cropIsFull }}" title="{{ t.impFull }} — {{ t.impFullDesc }}" style="{{ cropFullSegStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.impFullShort }}</button>
               <button onClick="{{ pickCropCrop }}" aria-pressed="{{ cropIsCrop }}" title="{{ t.impCrop }} — {{ t.impCropDesc }}" style="{{ cropCropSegStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.impCropShort }}</button>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px">
+          <div style="display:flex;align-items:center;gap:6px">
             <span style="font-size:13px;font-weight:700;color:var(--ts-text-secondary)">{{ t.outputL }}</span>
             <div role="group" aria-label="{{ t.outputL }}" style="display:flex;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
               <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
                 <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
               </sc-for>
             </div>
-            <span style="font-size:13px;color:var(--ts-text-secondary)">{{ outName }}</span>
           </div>
-        </div>
-
-        <div style="display:flex;justify-content:flex-end;margin:-4px 0 8px">
-          <button onClick="{{ toggleOrigPreview }}" aria-pressed="{{ origPreviewOpen }}" style="height:32px;padding:0 10px;border:1px solid var(--ts-border-decor);border-radius:7px;background:#fff;color:var(--ts-text-secondary);font-size:12.5px;font-weight:700;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impShowOrig }}</button>
+          <button onClick="{{ toggleOrigPreview }}" aria-pressed="{{ origPreviewOpen }}" style="height:30px;padding:0 9px;border:1px solid var(--ts-border-decor);border-radius:7px;background:#fff;color:var(--ts-text-secondary);font-size:12px;font-weight:700;cursor:pointer" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">{{ t.impShowOrig }}</button>
         </div>
         <div class="ts-2col" style="{{ reviewPreviewGridStyle }}">
           <div style="display:{{ origPreviewDisplay }}">
             <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px;height:18px;display:flex;align-items:center">{{ t.original }}</div>
-            <div class="image-preview-frame" style="background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:14px">
+            <div class="image-preview-frame" style="width:min(100%,330px);margin:0 auto;background:#F7F4EF;border:1px solid #E8DFD6;border-radius:10px;aspect-ratio:3/2;padding:12px">
               <canvas ref="{{ impOrigRef }}" onPointerDown="{{ cropDown }}" onPointerMove="{{ cropMove }}" onPointerUp="{{ cropUp }}" onPointerCancel="{{ cropUp }}" aria-label="{{ t.original }}" style="border-radius:6px;touch-action:none;cursor:{{ cropCursor }}"></canvas>
             </div>
             <sc-if value="{{ cropIsCrop }}" hint-placeholder-val="{{ false }}">
@@ -1133,9 +1121,9 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             </div>
           </div>
         </div>
-        <div style="margin-top:4px">
-          <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:7px">{{ presetLabel }}</div>
-          <div role="group" aria-label="{{ presetLabel }}" style="display:flex;gap:5px">
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <div style="font-size:12px;font-weight:700;color:var(--ts-text-secondary)">{{ presetLabel }}</div>
+          <div role="group" aria-label="{{ presetLabel }}" style="display:flex;gap:5px;flex-wrap:wrap">
             <sc-for list="{{ convPresets }}" as="pp" hint-placeholder-count="4">
               <button onClick="{{ pp.setIt }}" aria-pressed="{{ pp.sel }}" title="{{ pp.label }} — {{ pp.sub }}" style="{{ pp.style }}" style-focus="outline:2px solid #C43D00;outline-offset:2px">
                 <span style="font-size:12.5px;font-weight:800;color:#1E1C1A">{{ pp.label }}</span>
@@ -1150,10 +1138,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
         <sc-if value="{{ qAdv }}" hint-placeholder-val="{{ true }}">
           <div role="status" style="{{ qAdv.box }}">
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 8v5M12 15.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" fill="none" stroke="{{ qAdv.color }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <div>
-              <div style="font-size:12.5px;font-weight:800;color:{{ qAdv.color }}">{{ qAdv.metrics }}</div>
-              <div style="font-size:13px;color:#57534E;line-height:1.45;margin-top:2px">{{ qAdv.msg }}</div>
-            </div>
+            <div style="font-size:12px;line-height:1.35"><b style="color:{{ qAdv.color }}">{{ qAdv.metrics }}</b><span style="color:#57534E"> · {{ qAdv.msg }}</span></div>
           </div>
         </sc-if>
 
@@ -5923,7 +5908,7 @@ class Component extends DCLogic {
         const msg = q.key === 'tooSparse' ? t.qSparseMsg : q.key === 'tooDense' ? t.qDenseMsg : q.key === 'manyIsolated' ? t.qIsoMsg : t.qOkMsg;
         const good = q.key === 'readable';
         return { good, msg, metrics: this.callI18n(t.qMetrics, '', q.dots, +(q.density * 100).toFixed(1)),
-          box: { display: 'flex', gap: 9, alignItems: 'flex-start', marginTop: 14, padding: '10px 12px', borderRadius: 9, background: good ? 'rgba(11,136,0,0.07)' : 'rgba(196,61,0,0.07)', border: '1px solid ' + (good ? 'rgba(11,136,0,0.25)' : 'rgba(196,61,0,0.25)') },
+          box: { display: 'flex', gap: 7, alignItems: 'center', marginTop: 8, padding: '7px 10px', borderRadius: 8, background: good ? 'rgba(11,136,0,0.07)' : 'rgba(196,61,0,0.07)', border: '1px solid ' + (good ? 'rgba(11,136,0,0.25)' : 'rgba(196,61,0,0.25)') },
           color: good ? 'var(--ts-success)' : '#B93E15' };
       })(),
       vectorizeEnabled: st.vectorizeEnabled,
