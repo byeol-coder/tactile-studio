@@ -104,6 +104,12 @@ if ('caches' in window) {
   --ts-panel:#FFFFFF;
   --ts-panel-muted:#F5F3F0;
   --ts-shadow-panel:0 12px 30px -22px rgba(41,35,29,0.30);
+  --ts-radius-sm:8px;
+  --ts-radius-md:10px;
+  --ts-radius-lg:14px;
+  --ts-duration-fast:0.12s;
+  --ts-duration-normal:0.2s;
+  --ts-easing-standard:cubic-bezier(0.2,0,0,1);
 }
 html,body{margin:0;padding:0;background:#F7F4EF}
 *{box-sizing:border-box}
@@ -181,6 +187,17 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 .ts-side-panel [role="tablist"] + *{border-top:none!important}
 .ts-statusbar{height:36px!important;padding:0 16px!important;gap:12px!important;background:rgba(255,255,255,0.94)!important;font-size:12.5px!important}
 .ts-tool-rail{border:1px solid rgba(255,255,255,0.08)!important;border-radius:14px!important;padding:5px!important;box-shadow:0 14px 34px -14px rgba(16,24,40,0.42)!important}
+/* Top-bar toggles (focus mode): aria-pressed is the source of truth, so the
+   pressed visual rides on the same attribute the screen reader announces. */
+.ts-topbar-button[aria-pressed="true"]{background:#1E1C1A!important;color:#fff!important;border-color:#1E1C1A!important}
+/* Layer action row: one shared shape for the five per-layer operations.
+   Disabled = visibly parked (not just unclickable), per "비활성 메뉴의 명확한 분리". */
+.ts-layer-act{height:32px;border:1px solid var(--ts-border-functional);border-radius:var(--ts-radius-sm);background:#fff;color:#1E1C1A;display:grid;place-items:center;cursor:pointer;transition:border-color var(--ts-duration-fast) var(--ts-easing-standard),color var(--ts-duration-fast) var(--ts-easing-standard),background var(--ts-duration-fast) var(--ts-easing-standard)}
+.ts-layer-act:hover:not(:disabled){border-color:var(--ts-primary);color:var(--ts-primary)}
+.ts-layer-act:focus-visible{outline:2px solid var(--ts-primary);outline-offset:1px}
+.ts-layer-act:disabled{opacity:0.4;cursor:not-allowed;border-color:var(--ts-border-decor);color:var(--ts-text-secondary)}
+.ts-layer-act--danger{color:var(--ts-danger)}
+.ts-layer-act--danger:hover:not(:disabled){border-color:var(--ts-danger);color:var(--ts-danger);background:#FFF7F5}
 @media (max-width:1080px){
   .ts-side-panel{width:248px!important}
   .ts-pages-rail{width:164px!important}
@@ -666,52 +683,64 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             <span class="ts-action-label">{{ t.export }}</span>
           </button>
         </div>
-        <div role="tablist" aria-label="편집 패널" style="display:flex;align-items:center;gap:0;padding:0 6px;border-bottom:1px solid #F2ECE4">
-          <button onClick="{{ setInspLayers }}" role="tab" aria-selected="{{ inspTabLayers }}" style="{{ inspTabLayersStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ layerTabLabel }}</button>
-          <button onClick="{{ setInspProps }}" role="tab" aria-selected="{{ inspTabProps }}" style="{{ inspTabPropsStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspProps }}</button>
-          <button onClick="{{ setInspDevice }}" role="tab" aria-selected="{{ inspTabDevice }}" style="{{ inspTabDeviceStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspDevice }}</button>
+        <div role="tablist" aria-label="{{ t.inspPanelTabsL }}" style="display:flex;align-items:center;gap:0;padding:0 6px;border-bottom:1px solid #F2ECE4">
+          <button id="ts-insp-tab-layers" onClick="{{ setInspLayers }}" onKeyDown="{{ inspTabKey }}" role="tab" aria-selected="{{ inspTabLayers }}" aria-controls="ts-insp-panel-layers" tabIndex="{{ inspTabLayersTabIndex }}" style="{{ inspTabLayersStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ layerTabLabel }}</button>
+          <button id="ts-insp-tab-props" onClick="{{ setInspProps }}" onKeyDown="{{ inspTabKey }}" role="tab" aria-selected="{{ inspTabProps }}" aria-controls="ts-insp-panel-props" tabIndex="{{ inspTabPropsTabIndex }}" style="{{ inspTabPropsStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspProps }}</button>
+          <button id="ts-insp-tab-device" onClick="{{ setInspDevice }}" onKeyDown="{{ inspTabKey }}" role="tab" aria-selected="{{ inspTabDevice }}" aria-controls="ts-insp-panel-device" tabIndex="{{ inspTabDeviceTabIndex }}" style="{{ inspTabDeviceStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ t.inspDevice }}</button>
           <button onClick="{{ toggleInspector }}" aria-label="{{ t.dpCollapse }}" title="{{ t.dpCollapse }}" aria-expanded="{{ inspectorOpen }}" aria-controls="ts-dotpad-panel" style="width:24px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center;flex:none;margin-left:2px" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
             <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </div>
 
         <sc-if value="{{ inspTabLayers }}" hint-placeholder-val="{{ false }}">
-        <div data-screen-label="Inspector · Layers" style="padding:14px 14px 16px;display:flex;flex-direction:column;gap:12px">
+        <div id="ts-insp-panel-layers" role="tabpanel" aria-labelledby="ts-insp-tab-layers" data-screen-label="Inspector · Layers" style="padding:14px 14px 16px;display:flex;flex-direction:column;gap:12px">
           <div style="display:flex;align-items:center;gap:10px;padding-bottom:11px;border-bottom:1px solid #F2ECE4">
             <div style="flex:1;min-width:0">
               <div style="font-size:14px;font-weight:800;color:#1E1C1A">{{ layerTabLabel }}</div>
               <div style="font-size:11.5px;color:var(--ts-text-secondary);margin-top:2px">{{ layerCountLabel }}</div>
             </div>
-            <button onClick="{{ addLayer }}" aria-label="레이어 추가" style="height:32px;padding:0 10px;border:1px solid rgba(var(--ts-primary-rgb),0.28);border-radius:8px;background:#FFF7F2;color:var(--ts-primary);font-size:12.5px;font-weight:800;white-space:nowrap" style-hover="border-color:var(--ts-primary);background:#FFF1E9" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">+ 추가</button>
+            <button onClick="{{ addLayer }}" aria-label="{{ t.layerAddL }}" title="{{ t.layerAddL }}" style="height:32px;padding:0 10px;border:1px solid rgba(var(--ts-primary-rgb),0.28);border-radius:8px;background:#FFF7F2;color:var(--ts-primary);font-size:12.5px;font-weight:800;white-space:nowrap" style-hover="border-color:var(--ts-primary);background:#FFF1E9" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.layerAdd }}</button>
           </div>
 
-          <div role="list" aria-label="레이어 목록" style="display:flex;flex-direction:column;gap:6px">
+          <div role="list" aria-label="{{ t.layerListL }}" style="display:flex;flex-direction:column;gap:6px">
             <sc-for list="{{ layerRows }}" as="layer" hint-placeholder-count="2">
               <div role="listitem" style="display:flex;align-items:center;gap:5px;min-height:42px;padding:4px 5px 4px 4px;border:1px solid {{ layer.border }};border-left:3px solid {{ layer.accent }};border-radius:9px;background:{{ layer.bg }};box-sizing:border-box">
                 <button onClick="{{ layer.toggle }}" aria-pressed="{{ layer.visible }}" aria-label="{{ layer.visibilityLabel }}" title="{{ layer.visibilityLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:{{ layer.iconColor }};display:grid;place-items:center;flex:none" style-hover="background:rgba(140,131,119,0.09)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
                   <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 </button>
                 <button onClick="{{ layer.pick }}" aria-pressed="{{ layer.active }}" style="flex:1;min-width:0;height:28px;border:none;background:transparent;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:{{ layer.weight }};color:#1E1C1A">{{ layer.name }}</button>
-                <button onClick="{{ layer.more }}" aria-label="{{ layer.moreLabel }}" title="{{ layer.moreLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--ts-text-secondary);font-size:17px;line-height:1;flex:none" style-hover="background:rgba(140,131,119,0.09)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">⋯</button>
+                <button onClick="{{ layer.more }}" aria-label="{{ layer.moreLabel }}" title="{{ layer.moreLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center;flex:none" style-hover="background:rgba(140,131,119,0.09);color:#1E1C1A" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                  <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
               </div>
             </sc-for>
           </div>
 
           <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding-top:2px">
-            <button onClick="{{ layerUp }}" disabled="{{ layerUpDisabled }}" aria-label="레이어 위로" title="레이어 위로" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">↑</button>
-            <button onClick="{{ layerDown }}" disabled="{{ layerDownDisabled }}" aria-label="레이어 아래로" title="레이어 아래로" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">↓</button>
-            <button onClick="{{ layerDuplicate }}" disabled="{{ layerActionsDisabled }}" aria-label="레이어 복제" title="레이어 복제" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">⧉</button>
-            <button onClick="{{ layerMerge }}" disabled="{{ layerMergeDisabled }}" aria-label="아래 레이어와 병합" title="아래 레이어와 병합" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">⇩</button>
-            <button onClick="{{ layerDelete }}" disabled="{{ layerDeleteDisabled }}" aria-label="레이어 삭제" title="레이어 삭제" style="height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-danger);font-size:15px" style-hover="border-color:var(--ts-danger);background:#FFF7F5">⌫</button>
+            <button class="ts-layer-act" onClick="{{ layerUp }}" disabled="{{ layerUpDisabled }}" aria-label="{{ t.layerUpL }}" title="{{ t.layerUpL }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <button class="ts-layer-act" onClick="{{ layerDown }}" disabled="{{ layerDownDisabled }}" aria-label="{{ t.layerDownL }}" title="{{ t.layerDownL }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <button class="ts-layer-act" onClick="{{ layerDuplicate }}" disabled="{{ layerActionsDisabled }}" aria-label="{{ t.layerDuplicateL }}" title="{{ t.layerDuplicateL }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><rect x="5" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"></rect></svg>
+            </button>
+            <button class="ts-layer-act" onClick="{{ layerMerge }}" disabled="{{ layerMergeDisabled }}" aria-label="{{ t.layerMergeL }}" title="{{ t.layerMergeL }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10M8 9l4 4 4-4M5 17h14M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <button class="ts-layer-act ts-layer-act--danger" onClick="{{ layerDelete }}" disabled="{{ layerDeleteDisabled }}" aria-label="{{ t.layerDeleteL }}" title="{{ t.layerDeleteL }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
           </div>
 
-          <div style="padding:9px 10px;border:1px solid #EEE7DE;border-radius:8px;background:#FBF9F6;font-size:11.5px;color:var(--ts-text-secondary);line-height:1.5">보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.</div>
+          <div style="padding:9px 10px;border:1px solid #EEE7DE;border-radius:8px;background:#FBF9F6;font-size:11.5px;color:var(--ts-text-secondary);line-height:1.5">{{ t.layerCompositeNote }}</div>
         </div>
         </sc-if>
 
         <!-- Properties tab: contextual tool options (wired to window.TW post-processing later) -->
         <sc-if value="{{ inspTabProps }}" hint-placeholder-val="{{ true }}">
-        <div data-screen-label="Inspector · Properties" style="padding:16px;display:flex;flex-direction:column;gap:16px">
+        <div id="ts-insp-panel-props" role="tabpanel" aria-labelledby="ts-insp-tab-props" data-screen-label="Inspector · Properties" style="padding:16px;display:flex;flex-direction:column;gap:16px">
           <div>
             <div style="font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em;margin-bottom:8px">{{ t.inspToolOpts }}</div>
             <div style="font-size:14px;font-weight:800;color:#1E1C1A">{{ propToolName }}</div>
@@ -836,7 +865,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 
         <!-- DotPad tab: existing device panel content -->
         <sc-if value="{{ inspTabDevice }}" hint-placeholder-val="{{ false }}">
-        <div data-screen-label="Inspector · DotPad">
+        <div id="ts-insp-panel-device" role="tabpanel" aria-labelledby="ts-insp-tab-device" data-screen-label="Inspector · DotPad">
 
         <!-- DotPad connection: one unified flow — connect → send → disconnect.
              All device-connection state lives here (the top bar no longer duplicates it). -->
@@ -1742,10 +1771,18 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
 </sc-if>
 
 <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
-<div role="status" style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;background:#1E1C1A;color:#fff;font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:13.5px;font-weight:600;border-radius:100px;padding:11px 22px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
-  <svg width="15" height="15" viewBox="0 0 24 24" style="color:#7CC96B"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<sc-if value="{{ toastIsError }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;background:#1E1C1A;color:#fff;font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:13.5px;font-weight:600;border-radius:100px;padding:11px 22px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
+  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="color:#FFB199;flex:none"><path d="M12 9v4M12 16h.01M10.3 4.6L2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
   {{ toast }}
 </div>
+</sc-if>
+<sc-if value="{{ toastIsSuccess }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:90;background:#1E1C1A;color:#fff;font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:13.5px;font-weight:600;border-radius:100px;padding:11px 22px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 8px -4px rgba(10,13,18,0.04),0 20px 24px -4px rgba(10,13,18,0.08);animation:tsUp 0.25s ease-out">
+  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" style="color:#7CC96B;flex:none"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+  {{ toast }}
+</div>
+</sc-if>
 </sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;dotpadPanel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;modal&quot;,&quot;sheet&quot;,&quot;dock&quot;],&quot;default&quot;:&quot;modal&quot;,&quot;section&quot;:&quot;Variants&quot;,&quot;tsType&quot;:&quot;'modal'|'sheet'|'dock'&quot;}}">
@@ -1895,7 +1932,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
+      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspPanelTabsL: '편집 패널', layerAdd: '+ 추가', layerAddL: '레이어 추가', layerListL: '레이어 목록', layerUpL: '레이어 위로', layerDownL: '레이어 아래로', layerDuplicateL: '레이어 복제', layerMergeL: '아래 레이어와 병합', layerDeleteL: '레이어 삭제', layerHideL: '레이어 숨기기', layerShowL: '레이어 표시', layerRenameL: '레이어 이름 변경', layerCompositeNote: '보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
       stUnsaved: '저장되지 않은 변경사항', stSaving: '저장 중…', stSaved: '✓ 저장됨', stError: '저장하지 못했습니다. 다시 시도', stSavedAt: (tm) => '✓ 저장됨 · ' + tm,
       applyBraille: '점자 적용', applyNarr: '나레이션 적용', applyHint: (m) => m + ' + Enter로 적용',
       applyDescOk: '점자 설명이 현재 페이지에 적용되었습니다.', applyNarrOk: '나레이션 텍스트가 현재 페이지에 적용되었습니다.', applyFail: '적용하지 못했습니다. 다시 시도하세요.',
@@ -2028,7 +2065,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
+      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspPanelTabsL: 'Editor panels', layerAdd: '+ Add', layerAddL: 'Add layer', layerListL: 'Layer list', layerUpL: 'Move layer up', layerDownL: 'Move layer down', layerDuplicateL: 'Duplicate layer', layerMergeL: 'Merge with layer below', layerDeleteL: 'Delete layer', layerHideL: 'Hide layer', layerShowL: 'Show layer', layerRenameL: 'Rename layer', layerCompositeNote: 'Only visible layers are composited into one tactile graphic for DotPad output and export.', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
       stUnsaved: 'Unsaved changes', stSaving: 'Saving…', stSaved: '✓ Saved', stError: "Couldn't save. Try again", stSavedAt: (tm) => '✓ Saved · ' + tm,
       applyBraille: 'Apply braille', applyNarr: 'Apply narration', applyHint: (m) => 'Press ' + m + ' + Enter to apply',
       applyDescOk: 'Braille description applied to the current page.', applyNarrOk: 'Narration text applied to the current page.', applyFail: "Couldn't apply. Please try again.",
@@ -2448,10 +2485,29 @@ class Component extends DCLogic {
       fileName: `${ctx.title} · ${num}`
     });
   }
-  toastMsg(msg) {
+  toastMsg(msg, kind) {
     clearTimeout(this._toastT);
-    this.setState({ toast: msg });
-    this._toastT = setTimeout(() => this.setState({ toast: null }), 2600);
+    const isError = kind === 'error';
+    this.setState({ toast: msg, toastKind: isError ? 'error' : 'success' });
+    // Errors stay visibly longer than confirmations — they carry an action cost.
+    this._toastT = setTimeout(() => this.setState({ toast: null }), isError ? 5200 : 2600);
+  }
+  // Inspector tablist: standard ARIA tabs keyboard pattern. Left/Right (or
+  // Up/Down) move between Layers / Properties / DotPad, Home/End jump to the
+  // ends; the newly selected tab receives focus (roving tabindex).
+  inspectorTabKey(e) {
+    const order = ['layers', 'props', 'device'];
+    const idx = order.indexOf(this.state.inspectorTab);
+    let next = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = order[(idx + 1) % order.length];
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = order[(idx + order.length - 1) % order.length];
+    else if (e.key === 'Home') next = order[0];
+    else if (e.key === 'End') next = order[order.length - 1];
+    if (!next || next === this.state.inspectorTab) { if (next) e.preventDefault(); return; }
+    e.preventDefault();
+    this.setState({ inspectorTab: next });
+    const focusTab = () => { if (typeof document === 'undefined') return; const el = document.getElementById('ts-insp-tab-' + next); if (el) el.focus(); };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(focusTab); else setTimeout(focusTab, 0);
   }
   toggleMenu(kind, ev) {
     const st = this.state;
@@ -2856,7 +2912,7 @@ class Component extends DCLogic {
     const hex = page && (page.graphic || page.data);
     const cells = this.corpusCellsFromHex(hex); // null unless exactly 600 hex → 2400 cells
     if (!cells) {
-      this.toastMsg(st.lang === 'ko' ? '이 코퍼스 페이지의 그래픽을 불러올 수 없습니다.' : 'This corpus page graphic could not be loaded.');
+      this.toastMsg(st.lang === 'ko' ? '이 코퍼스 페이지의 그래픽을 불러올 수 없습니다.' : 'This corpus page graphic could not be loaded.', 'error');
       return;
     }
     const dir = i > ctx.index ? 'next' : 'prev';
@@ -4811,7 +4867,7 @@ class Component extends DCLogic {
   // SVG (vector). Preview = a reference raster of the current page: PNG.
   exportFormat(fmt) {
     const TW = window.TW, t = this.T();
-    if (!TW || !TW.downloadBlob) { this.toastMsg(t.aExportUnavail || 'Export unavailable'); return; }
+    if (!TW || !TW.downloadBlob) { this.toastMsg(t.aExportUnavail || 'Export unavailable', 'error'); return; }
     const { gridW: w, gridH: h } = this.state;
     const name = this.state.fileName || t.untitled;
     this.syncAllComposites();
@@ -4840,7 +4896,7 @@ class Component extends DCLogic {
       this.toastMsg(msg);
       this.say(msg);
     } catch (e) {
-      this.toastMsg(t.aExportUnavail || 'Export failed');
+      this.toastMsg(t.aExportUnavail || 'Export failed', 'error');
     }
   }
   // Preview raster: draw the current page to an offscreen canvas → PNG blob.
@@ -5115,7 +5171,7 @@ class Component extends DCLogic {
       // surface the error via the toast, which — unlike the top-bar save-status
       // indicator (display:none ≤1180px) — stays visible on every viewport.
       this.say(t.tSaveErr);
-      this.toastMsg(t.tSaveErr);
+      this.toastMsg(t.tSaveErr, 'error');
       this._flashSaveStatus('error');
     }
   }
@@ -5209,8 +5265,8 @@ class Component extends DCLogic {
   attachPageAudio(file) {
     const t = this.T(), i = this.state.pageIndex;
     if (!file) return;
-    if (!/^audio\//.test(file.type || '')) { this.toastMsg(t.audErrType); this.say(t.audErrType); return; }
-    if (file.size > 26214400 /* 25MB */) { this.toastMsg(t.audErrSize); this.say(t.audErrSize); return; }
+    if (!/^audio\//.test(file.type || '')) { this.toastMsg(t.audErrType, 'error'); this.say(t.audErrType); return; }
+    if (file.size > 26214400 /* 25MB */) { this.toastMsg(t.audErrSize, 'error'); this.say(t.audErrSize); return; }
     const prev = this.pageAudio[i];
     if (prev && prev._url) { try { URL.revokeObjectURL(prev._url); } catch (e) {} }
     const url = URL.createObjectURL(file);
@@ -5330,7 +5386,7 @@ class Component extends DCLogic {
     const fail = () => {
       if (this.state.pageIndex !== i) { this.setState({ applyBusy: null, brBusy: false }); return; }
       this.setState({ applyBusy: null, applyErr: field, brBusy: false, braillePreview: { ok: false, unicode: '', cells: 0 } });
-      const msg = t.applyFail; this.toastMsg(msg); this.say(msg);
+      const msg = t.applyFail; this.toastMsg(msg, 'error'); this.say(msg);
       this._refocusField(field);
     };
     if (!window.TSBraille) { fail(); return; }
@@ -5764,18 +5820,24 @@ class Component extends DCLogic {
       inspTabLayersStyle: this.tabStyle(st.inspectorTab === 'layers'),
       inspTabPropsStyle: this.tabStyle(st.inspectorTab === 'props'),
       inspTabDeviceStyle: this.tabStyle(st.inspectorTab === 'device'),
+      // ARIA tabs pattern: one tab stop (roving tabindex), arrow keys move
+      // between Layers / Properties / DotPad (see inspectorTabKey).
+      inspTabLayersTabIndex: st.inspectorTab === 'layers' ? '0' : '-1',
+      inspTabPropsTabIndex: st.inspectorTab === 'props' ? '0' : '-1',
+      inspTabDeviceTabIndex: st.inspectorTab === 'device' ? '0' : '-1',
+      inspTabKey: (e) => this.inspectorTabKey(e),
       layerTabLabel: st.lang === 'en' ? 'Layers' : '레이어',
       layerCountLabel: st.lang === 'en' ? `${this._layersAt().length} layers · edit separately` : `${this._layersAt().length}개 레이어 · 개별로 편집`,
       // Page-local raster layers: the active layer receives edits; all visible
       // layers are composited only for output/preview.
       layerRows: (() => {
-        const active = this._activeLayer(), layers = this._layersAt();
+        const active = this._activeLayer(), layers = this._layersAt(), tt = this.T();
         return layers.slice().reverse().map(layer => ({
           id: layer.id, name: layer.name, visible: layer.visible !== false, active: layer.id === active.id,
           border: layer.id === active.id ? 'rgba(var(--ts-primary-rgb),0.32)' : '#EDE4DA', accent: layer.id === active.id ? 'var(--ts-primary)' : 'transparent', bg: layer.id === active.id ? '#FFF9F5' : '#fff',
           weight: layer.id === active.id ? 800 : 650, iconColor: layer.visible !== false ? '#1E1C1A' : '#B7AEA4',
-          visibilityLabel: (layer.visible !== false ? '레이어 숨기기: ' : '레이어 표시: ') + layer.name,
-          moreLabel: '레이어 이름 변경: ' + layer.name,
+          visibilityLabel: (layer.visible !== false ? tt.layerHideL : tt.layerShowL) + ': ' + layer.name,
+          moreLabel: tt.layerRenameL + ': ' + layer.name,
           pick: () => this.activateLayer(layer.id), toggle: () => this.toggleLayer(layer.id), more: () => this.renameLayer(layer.id)
         }));
       })(),
@@ -5924,7 +5986,7 @@ class Component extends DCLogic {
         this.exportEmbossPNG(name).then(ok => {
           this.setState({ embossPhase: ok ? 'done' : 'idle' });
           if (ok) this.say(t.embossReadyMsg);
-          else this.toastMsg(t.aExportUnavail || 'Export unavailable');
+          else this.toastMsg(t.aExportUnavail || 'Export unavailable', 'error');
         });
       },
       exportGroups: [
@@ -6465,7 +6527,7 @@ class Component extends DCLogic {
         const ok = this.saveLibrary(saved);
         this.setState({ dotpadOpen: false, saveLoc: 'drive', saved });
         const msg = ok ? t.tSavedDrive : t.tSaveErr;
-        this.toastMsg(msg); this.say(msg);
+        this.toastMsg(msg, ok ? 'success' : 'error'); this.say(msg);
       },
       successAddLibrary: () => {
         const name = st.fileName || t.untitled;
@@ -6477,7 +6539,7 @@ class Component extends DCLogic {
         const ok = this.saveLibrary(saved);
         this.setState({ dotpadOpen: false, saveLoc: 'library', saved });
         const msg = ok ? t.tSavedLib : t.tSaveErr;
-        this.toastMsg(msg); this.say(msg);
+        this.toastMsg(msg, ok ? 'success' : 'error'); this.say(msg);
       },
       continueEditing: () => this.setState({ dotpadOpen: false }),
       successReturn: () => { this.setState({ dotpadOpen: false }); this.toastMsg(t.aSent); },
@@ -6528,6 +6590,8 @@ class Component extends DCLogic {
       })(),
       canvasAria: st.a11yMode && t.canvasAriaA11y ? t.canvasAriaA11y : t.canvasAria,
       toastOn: !!st.toast, toast: st.toast,
+      toastIsError: !!st.toast && st.toastKind === 'error',
+      toastIsSuccess: !!st.toast && st.toastKind !== 'error',
       stopProp: e => e.stopPropagation()
     };
   }
