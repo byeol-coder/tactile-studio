@@ -646,6 +646,32 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
             <div style="font-size:14px;font-weight:800;color:#1E1C1A">{{ propToolName }}</div>
           </div>
 
+          <div style="border-top:1px solid #F2ECE4;padding-top:14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+              <div style="flex:1;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em">레이어</div>
+              <button onClick="{{ addLayer }}" aria-label="레이어 추가" title="레이어 추가" style="width:30px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-primary);display:grid;place-items:center;font-size:19px;font-weight:700" style-hover="border-color:var(--ts-primary);background:#FFF7F2" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">+</button>
+            </div>
+            <div role="list" aria-label="레이어 목록" style="display:flex;flex-direction:column;gap:5px">
+              <sc-for list="{{ layerRows }}" as="layer" hint-placeholder-count="2">
+                <div role="listitem" style="display:flex;align-items:center;gap:5px;padding:5px;border:1px solid {{ layer.border }};border-radius:8px;background:{{ layer.bg }}">
+                  <button onClick="{{ layer.toggle }}" aria-pressed="{{ layer.visible }}" aria-label="{{ layer.visibilityLabel }}" title="{{ layer.visibilityLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:{{ layer.iconColor }};display:grid;place-items:center" style-hover="background:#F7F4EF">
+                    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  </button>
+                  <button onClick="{{ layer.pick }}" aria-pressed="{{ layer.active }}" style="flex:1;min-width:0;height:28px;border:none;background:transparent;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:{{ layer.weight }};color:#1E1C1A">{{ layer.name }}</button>
+                  <button onClick="{{ layer.more }}" aria-label="{{ layer.moreLabel }}" title="{{ layer.moreLabel }}" style="width:28px;height:28px;border:none;border-radius:6px;background:transparent;color:var(--ts-text-secondary);font-size:17px;line-height:1" style-hover="background:#F7F4EF">⋯</button>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:5px;margin-top:8px">
+              <button onClick="{{ layerUp }}" disabled="{{ layerUpDisabled }}" style="width:30px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" title="레이어 위로">↑</button>
+              <button onClick="{{ layerDown }}" disabled="{{ layerDownDisabled }}" style="width:30px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:14px;font-weight:800;color:#1E1C1A" title="레이어 아래로">↓</button>
+              <button onClick="{{ layerDuplicate }}" disabled="{{ layerActionsDisabled }}" style="flex:1;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:11.5px;font-weight:700;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">복제</button>
+              <button onClick="{{ layerMerge }}" disabled="{{ layerMergeDisabled }}" style="flex:1;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;font-size:11.5px;font-weight:700;color:#1E1C1A" style-hover="border-color:var(--ts-primary);color:var(--ts-primary)">아래와 병합</button>
+              <button onClick="{{ layerDelete }}" disabled="{{ layerDeleteDisabled }}" style="width:34px;height:30px;border:1px solid var(--ts-border-functional);border-radius:7px;background:#fff;color:var(--ts-danger);font-size:15px" title="레이어 삭제">⌫</button>
+            </div>
+            <div style="margin-top:8px;font-size:11.5px;color:var(--ts-text-secondary);line-height:1.45">보이는 레이어만 DotPad·내보내기에서 하나의 촉각 그래픽으로 합성됩니다.</div>
+          </div>
+
           <label style="display:flex;flex-direction:column;align-items:stretch;gap:6px;border-top:1px solid #F2ECE4;padding-top:14px">
             <span style="font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em">{{ t.canvasSizeL }}</span>
             <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.canvasSizeL }}" style="width:100%;box-sizing:border-box;height:38px;border:1px solid var(--ts-border-functional);border-radius:8px;background:#fff;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 10px" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -1731,6 +1757,11 @@ class Component extends DCLogic {
     this.pagesRailRef = React.createRef();
     this.cells = new Uint8Array(60 * 40);
     this.pages = [this.cells];   // multi-page document; this.cells === this.pages[state.pageIndex]
+    // Editing uses the active layer buffer. pages[] remains the visible-layer
+    // composite used by page thumbnails, DotPad and file output.
+    this.layerSeq = 1;
+    this.pageLayers = [[{ id: 'layer-1', name: '레이어 1', visible: true, cells: this.cells }]];
+    this.activeLayerIds = ['layer-1'];
     this.pageAudio = {};         // pageIndex → { src, mime, bytes, durationSec, narration } (DTMA, path-reference)
     this.pageVectors = {};       // pageIndex → vectorLineObjects[] (optional, experimental — see vectorizeGrid)
     this.undoStack = []; this.redoStack = [];
@@ -2037,8 +2068,68 @@ class Component extends DCLogic {
   idx(x, y) { return y * this.state.gridW + x; }
   inb(x, y) { return x >= 0 && y >= 0 && x < this.state.gridW && y < this.state.gridH; }
   cellPx() { const w = this.state.gridW; return w <= 28 ? 20 : w <= 60 ? 13 : w <= 84 ? 7 : 9; }
-  // keep this.cells and the current page slot pointing at the same buffer
-  setCells(arr) { this.cells = arr; if (this.pages) this.pages[this.state.pageIndex] = arr; this.queueLivePreview(); }
+  _newLayer(cells, name) {
+    this.layerSeq = Number.isFinite(this.layerSeq) ? this.layerSeq : 0;
+    const id = 'layer-' + (++this.layerSeq);
+    return { id, name: name || ('레이어 ' + this.layerSeq), visible: true, cells: cells || new Uint8Array(this.state.gridW * this.state.gridH) };
+  }
+  _layersAt(pageIndex) {
+    const i = pageIndex == null ? this.state.pageIndex : pageIndex;
+    if (!this.pageLayers) this.pageLayers = [];
+    if (!this.activeLayerIds) this.activeLayerIds = [];
+    // Harnesses and legacy documents can provide pages without layer metadata.
+    // Give every page a stable base layer before structural page operations.
+    for (let p = 0; p < (this.pages || []).length; p++) {
+      if (!this.pageLayers[p] || !this.pageLayers[p].length) {
+        const base = this.pages[p] || this.cells || new Uint8Array(this.state.gridW * this.state.gridH);
+        const layer = this._newLayer(base, '레이어 1');
+        this.pageLayers[p] = [layer]; this.activeLayerIds[p] = layer.id;
+      }
+    }
+    if (!this.pageLayers[i] || !this.pageLayers[i].length) {
+      const base = (this.pages && this.pages[i]) || this.cells || new Uint8Array(this.state.gridW * this.state.gridH);
+      this.pageLayers[i] = [this._newLayer(base, '레이어 1')];
+      this.activeLayerIds[i] = this.pageLayers[i][0].id;
+    }
+    return this.pageLayers[i];
+  }
+  _activeLayer(pageIndex) {
+    const i = pageIndex == null ? this.state.pageIndex : pageIndex;
+    const layers = this._layersAt(i);
+    let layer = layers.find(l => l.id === this.activeLayerIds[i]);
+    if (!layer) { layer = layers[layers.length - 1]; this.activeLayerIds[i] = layer.id; }
+    return layer;
+  }
+  compositeCells(pageIndex) {
+    const i = pageIndex == null ? this.state.pageIndex : pageIndex;
+    const layers = this._layersAt(i);
+    const len = (this.state.gridW * this.state.gridH) || (layers[0] && layers[0].cells.length) || 0;
+    const out = new Uint8Array(len);
+    layers.forEach(layer => { if (layer.visible) for (let n = 0; n < out.length; n++) if (layer.cells[n]) out[n] = 1; });
+    return out;
+  }
+  syncComposite(pageIndex) {
+    const i = pageIndex == null ? this.state.pageIndex : pageIndex;
+    if (!this.pages) this.pages = [];
+    this.pages[i] = this.compositeCells(i);
+    return this.pages[i];
+  }
+  syncAllComposites() { for (let i = 0; i < (this.pageLayers || []).length; i++) this.syncComposite(i); }
+  activateLayer(id, pageIndex) {
+    const i = pageIndex == null ? this.state.pageIndex : pageIndex;
+    const layers = this._layersAt(i), layer = layers.find(l => l.id === id);
+    if (!layer) return;
+    this.activeLayerIds[i] = layer.id;
+    this.cells = layer.cells;
+    this.syncComposite(i);
+    this.setState(s => ({ rev: s.rev + 1 }));
+    this.say(this.state.lang === 'en' ? (layer.name + ' selected.') : (layer.name + '을 선택했습니다.'));
+  }
+  // Keep this.cells bound to the active editable layer, then refresh the page composite.
+  setCells(arr) {
+    const layer = this._activeLayer();
+    layer.cells = arr; this.cells = arr; this.syncComposite(); this.queueLivePreview();
+  }
   // tactile-grid brush: size 1 = single dot, 2 = 2×2 block, 3 = 3×3 block
   brushCb(baseCb, size) {
     const n = size || 1;
@@ -2096,7 +2187,7 @@ class Component extends DCLogic {
       // drop the in-memory object URL (invalid after reload); keep path + text meta
       const { _url, ...rest } = r; audio[k] = rest;
     }
-    return {
+    const out = {
       v: 1, savedAt: Date.now(),
       gridW: st.gridW, gridH: st.gridH, output: st.output,
       pageIndex: st.pageIndex, fileName: st.fileName || null, brailleLang: st.brailleLang,
@@ -2104,6 +2195,13 @@ class Component extends DCLogic {
       audio,
       vectors: this.pageVectors || {}
     };
+    const layers = this.pageLayers || [];
+    const hasLayerState = layers.some(ls => ls && (ls.length > 1 || ls.some((l, i) => l.visible === false || (i > 0 && l.name))));
+    if (hasLayerState) {
+      out.layers = layers.map((ls) => (ls || []).map((l) => ({ id: l.id, name: l.name, visible: l.visible !== false, cells: this._packCells(l.cells) })));
+      out.activeLayerIds = (this.activeLayerIds || []).slice();
+    }
+    return out;
   }
   _saveSession() {
     // Never clobber a snapshot the user hasn't answered the recovery prompt for.
@@ -2133,8 +2231,20 @@ class Component extends DCLogic {
     if (!snap || !snap._pages || !snap._pages.length) return;
     const gw = +snap.gridW || 60, gh = +snap.gridH || 40;
     this.pages = snap._pages;
+    if (Array.isArray(snap.layers) && snap.layers.length) {
+      this.pageLayers = snap.layers.map((layers, pi) => (layers || []).map((l, li) => ({
+        id: l.id || ('layer-restored-' + pi + '-' + li), name: l.name || ('레이어 ' + (li + 1)), visible: l.visible !== false,
+        cells: this._unpackCells(l.cells, len)
+      })));
+      this.activeLayerIds = Array.isArray(snap.activeLayerIds) ? snap.activeLayerIds.slice() : [];
+      this.layerSeq = Math.max(this.layerSeq || 1, this.pageLayers.reduce((n, ls) => n + ls.length, 1));
+      for (let p = 0; p < this.pages.length; p++) this.syncComposite(p);
+    } else {
+      this.pageLayers = this.pages.map((cells, i) => [{ id: 'layer-restored-' + i, name: '레이어 1', visible: true, cells }]);
+      this.activeLayerIds = this.pageLayers.map(ls => ls[0].id);
+    }
     let idx = +snap.pageIndex || 0; if (idx < 0 || idx >= this.pages.length) idx = 0;
-    this.cells = this.pages[idx];
+    this.cells = this._activeLayer(idx).cells;
     this.pageAudio = (snap.audio && typeof snap.audio === 'object') ? Object.assign({}, snap.audio) : {};
     this.pageVectors = (snap.vectors && typeof snap.vectors === 'object') ? Object.assign({}, snap.vectors) : {};
     this.undoStack = []; this.redoStack = []; this.polyPts = []; this.preview = null;
@@ -2172,7 +2282,7 @@ class Component extends DCLogic {
   }
   thickenFx(level) { const fx = window.TW && window.TW.thickenBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h, level), this.T().aThicken); }
   denoiseFx() { const fx = window.TW && window.TW.denoiseBits; if (fx) this.applyGridFx((b, w, h) => fx(b, w, h), this.T().aDenoise); }
-  bump() { this._dirty = true; this._scheduleSession(); this.setState(s => ({ rev: s.rev + 1 })); this.queueLivePreview(); }
+  bump() { this.syncComposite(); this._dirty = true; this._scheduleSession(); this.setState(s => ({ rev: s.rev + 1 })); this.queueLivePreview(); }
   say(msg) { this.setState({ announce: msg }); }
   // Safe i18n invoker: locale value may be a function, a string, or missing.
   callI18n(value, fallback, ...args) {
@@ -2642,8 +2752,8 @@ class Component extends DCLogic {
     if (this.state.gridW !== 60 || this.state.gridH !== 40) this.setGrid(60, 40);
     if (mode === 'new') {
       const at = this.state.pageIndex + 1;
-      this.pages.splice(at, 0, cells);
-      this.cells = cells; this.undoStack = []; this.redoStack = [];
+      this.insertPageWithLayer(at, cells);
+      this.undoStack = []; this.redoStack = [];
       this.setState({ output: out, cmdGenerating: false, cmdOpen: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: ctx });
       this.queueLivePreview();
     } else {
@@ -3063,7 +3173,8 @@ class Component extends DCLogic {
     const s = Math.min((PW - 2 * margin) / w, (PH - 2 * margin) / h);
     const offX = (PW - w * s) / 2, offY = (PH - h * s) / 2;
     g.fillStyle = '#1E1C1A';
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (this.cells[y * w + x]) {
+    const composite = this.compositeCells();
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (composite[y * w + x]) {
       g.beginPath(); g.arc(offX + (x + 0.5) * s, offY + (y + 0.5) * s, Math.max(0.9, s * 0.34), 0, Math.PI * 2); g.fill();
     }
   }
@@ -3124,10 +3235,15 @@ class Component extends DCLogic {
       for (let y = 0; y <= gridH; y += 10) { const py = Math.min(hpx - 0.625, y * c + 0.625); g.moveTo(0, py); g.lineTo(wpx, py); }
       g.stroke();
     }
+    const layers = this._layersAt(), activeLayer = this._activeLayer();
     for (let y = 0; y < gridH; y++) for (let x = 0; x < gridW; x++) {
       const i = y * gridW + x, px = x * c + c / 2, py = y * c + c / 2;
-      if (this.cells[i]) {
-        g.fillStyle = '#1E1C1A';
+      const activeOn = activeLayer.visible && activeLayer.cells[i];
+      const otherOn = layers.some(layer => layer !== activeLayer && layer.visible && layer.cells[i]);
+      if (activeOn || otherOn) {
+        // The active layer stays black; visible background layers remain muted
+        // so users can edit precisely without losing the whole composition.
+        g.fillStyle = activeOn ? '#1E1C1A' : '#8A8177';
         g.beginPath(); g.arc(px, py, c * 0.36, 0, Math.PI * 2); g.fill();
       } else {
         g.fillStyle = '#E3D9CE';
@@ -3160,8 +3276,9 @@ class Component extends DCLogic {
     cv.width = gridW * s; cv.height = gridH * s;
     const g = cv.getContext('2d');
     g.fillStyle = '#141210'; g.fillRect(0, 0, cv.width, cv.height);
+    const composite = this.compositeCells();
     for (let y = 0; y < gridH; y++) for (let x = 0; x < gridW; x++) {
-      const on = this.cells[y * gridW + x];
+      const on = composite[y * gridW + x];
       g.fillStyle = on ? '#F2E9DD' : 'rgba(255,255,255,0.07)';
       g.beginPath(); g.arc(x * s + s / 2, y * s + s / 2, on ? s * 0.36 : s * 0.16, 0, Math.PI * 2); g.fill();
     }
@@ -3935,13 +4052,62 @@ class Component extends DCLogic {
     if (wasOpenForThisTool) return;
     this.toggleRail('stroke', ev);
   }
+  // ---------- layers (page-local, raster dots) ----------
+  addLayer() {
+    const layers = this._layersAt(), layer = this._newLayer(null, '레이어 ' + (layers.length + 1));
+    layers.push(layer); this.activeLayerIds[this.state.pageIndex] = layer.id; this.cells = layer.cells;
+    this.bump(); this.say(this.state.lang === 'en' ? 'New layer added.' : '새 레이어를 추가했습니다.');
+  }
+  deleteLayer(id) {
+    const layers = this._layersAt(); if (layers.length <= 1) return;
+    const at = layers.findIndex(l => l.id === id); if (at < 0) return;
+    layers.splice(at, 1);
+    const next = layers[Math.max(0, at - 1)]; this.activeLayerIds[this.state.pageIndex] = next.id; this.cells = next.cells;
+    this.bump(); this.say(this.state.lang === 'en' ? 'Layer deleted.' : '레이어를 삭제했습니다.');
+  }
+  duplicateLayer(id) {
+    const layers = this._layersAt(), at = layers.findIndex(l => l.id === id); if (at < 0) return;
+    const copy = this._newLayer(layers[at].cells.slice(), layers[at].name + ' 복제본'); copy.visible = layers[at].visible;
+    layers.splice(at + 1, 0, copy); this.activeLayerIds[this.state.pageIndex] = copy.id; this.cells = copy.cells;
+    this.bump(); this.say(this.state.lang === 'en' ? 'Layer duplicated.' : '레이어를 복제했습니다.');
+  }
+  moveLayer(id, dir) {
+    const layers = this._layersAt(), at = layers.findIndex(l => l.id === id), to = at + dir;
+    if (at < 0 || to < 0 || to >= layers.length) return;
+    const [layer] = layers.splice(at, 1); layers.splice(to, 0, layer); this.bump();
+  }
+  toggleLayer(id) {
+    const layer = this._layersAt().find(l => l.id === id); if (!layer) return;
+    layer.visible = !layer.visible; this.bump();
+    this.say(this.state.lang === 'en' ? (layer.visible ? 'Layer shown.' : 'Layer hidden.') : (layer.visible ? '레이어를 표시합니다.' : '레이어를 숨겼습니다.'));
+  }
+  renameLayer(id) {
+    const layer = this._layersAt().find(l => l.id === id); if (!layer) return;
+    const value = window.prompt(this.state.lang === 'en' ? 'Layer name' : '레이어 이름', layer.name);
+    if (value && value.trim()) { layer.name = value.trim().slice(0, 40); this.bump(); }
+  }
+  mergeLayerDown(id) {
+    const layers = this._layersAt(), at = layers.findIndex(l => l.id === id);
+    if (at <= 0) return;
+    const top = layers[at], below = layers[at - 1];
+    for (let i = 0; i < below.cells.length; i++) if (top.cells[i]) below.cells[i] = 1;
+    layers.splice(at, 1); this.activeLayerIds[this.state.pageIndex] = below.id; this.cells = below.cells;
+    this.bump(); this.say(this.state.lang === 'en' ? 'Layer merged down.' : '아래 레이어와 병합했습니다.');
+  }
+  insertPageWithLayer(at, cells) {
+    this.pages.splice(at, 0, cells);
+    const layer = this._newLayer(cells, '레이어 1');
+    this.pageLayers.splice(at, 0, [layer]); this.activeLayerIds.splice(at, 0, layer.id);
+    this.cells = layer.cells;
+    return layer;
+  }
   // ---------- pages (v1: simple multi-page document) ----------
   goPage(i) {
     const n = this.pages.length;
     i = Math.max(0, Math.min(n - 1, i));
     if (i === this.state.pageIndex) return;
     this.undoStack = []; this.redoStack = [];
-    this.cells = this.pages[i];
+    this.cells = this._activeLayer(i).cells;
     this.polyPts = []; this.preview = null; this.drag = null;
     // Transient Apply state is per-page; drop it so the incoming page derives
     // its own status (saved/unsaved) from its own model, and refresh preview.
@@ -3959,10 +4125,12 @@ class Component extends DCLogic {
     const blank = new Uint8Array(this.state.gridW * this.state.gridH);
     const at = this.state.pageIndex + 1;
     this.pages.splice(at, 0, blank);
+    const layer = this._newLayer(blank, '레이어 1');
+    this.pageLayers.splice(at, 0, [layer]); this.activeLayerIds.splice(at, 0, layer.id);
     this._reindexPageAudioInsert(at);
     this._reindexPageVectorsInsert(at);
     this.undoStack = []; this.redoStack = [];
-    this.cells = blank; this.polyPts = []; this.preview = null; this.drag = null;
+    this.cells = layer.cells; this.polyPts = []; this.preview = null; this.drag = null;
     const n = this.pages.length;
     this.setState({ pageIndex: at, pageCount: n, cx: 0, cy: 0, selRect: null });
     this.bump();   // structural change (page added) — dirty + autosave
@@ -3984,12 +4152,15 @@ class Component extends DCLogic {
     const at = idx + 1;
     const copy = this.pages[idx].slice();
     this.pages.splice(at, 0, copy);
+    const sourceLayers = this._layersAt(idx);
+    const copiedLayers = sourceLayers.map((l, li) => this._newLayer(l.cells.slice(), l.name + (li === 0 ? ' 복제본' : '')));
+    this.pageLayers.splice(at, 0, copiedLayers); this.activeLayerIds.splice(at, 0, copiedLayers[copiedLayers.length - 1].id);
     this._reindexPageAudioInsert(at);
     this._reindexPageVectorsInsert(at);
     if (this.pageAudio[idx]) this.pageAudio[at] = this.pageAudio[idx];
     if (this.pageVectors[idx]) this.pageVectors[at] = this.pageVectors[idx];
     this.undoStack = []; this.redoStack = [];
-    this.cells = copy; this.polyPts = []; this.preview = null; this.drag = null;
+    this.cells = copiedLayers[copiedLayers.length - 1].cells; this.polyPts = []; this.preview = null; this.drag = null;
     const n = this.pages.length;
     this.setState({ pageIndex: at, pageCount: n, cx: 0, cy: 0, selRect: null });
     this.bump();   // structural change (page duplicated) — dirty + autosave
@@ -4000,6 +4171,7 @@ class Component extends DCLogic {
     if (this.pages.length <= 1) return;
     const wasActive = idx === this.state.pageIndex;
     this.pages.splice(idx, 1);
+    this.pageLayers.splice(idx, 1); this.activeLayerIds.splice(idx, 1);
     this._reindexPageAudioDelete(idx);
     this._reindexPageVectorsDelete(idx);
     const n = this.pages.length;
@@ -4008,7 +4180,7 @@ class Component extends DCLogic {
     if (wasActive) {
       ni = Math.max(0, Math.min(n - 1, idx));
       this.undoStack = []; this.redoStack = [];
-      this.cells = this.pages[ni]; this.polyPts = []; this.preview = null; this.drag = null;
+      this.cells = this._activeLayer(ni).cells; this.polyPts = []; this.preview = null; this.drag = null;
       patch.cx = 0; patch.cy = 0; patch.selRect = null;
     } else {
       // a non-active page was removed: the active page's own buffer/undo
@@ -4022,7 +4194,11 @@ class Component extends DCLogic {
     this.say(this.T().aPageDel(ni + 1, n));
   }
   deletePage() { this.deletePageAt(this.state.pageIndex); }
-  resetPages(cells) { this.pages = [cells]; this.pageAudio = {}; this.pageVectors = {}; }
+  resetPages(cells) {
+    this.pages = [cells]; this.pageAudio = {}; this.pageVectors = {};
+    const layer = this._newLayer(cells, '레이어 1');
+    this.pageLayers = [[layer]]; this.activeLayerIds = [layer.id]; this.cells = layer.cells;
+  }
   // ---------- page reordering (drag handle · overflow menu · Alt+Arrow) ----------
   // Single source of truth: drag-and-drop, the Move up/down menu, and the keyboard
   // shortcuts all route through movePage(). Pages are tracked by their stable
@@ -4038,10 +4214,12 @@ class Component extends DCLogic {
     const active = this.pages[this.state.pageIndex];
     const [moved] = this.pages.splice(from, 1);
     this.pages.splice(to, 0, moved);
+    const [movedLayers] = this.pageLayers.splice(from, 1); this.pageLayers.splice(to, 0, movedLayers);
+    const [movedActive] = this.activeLayerIds.splice(from, 1); this.activeLayerIds.splice(to, 0, movedActive);
     this.pageAudio = this._reindexPageMapMove(this.pageAudio, from, to);
     this.pageVectors = this._reindexPageMapMove(this.pageVectors, from, to);
     const ni = this.pages.indexOf(active);
-    this.cells = this.pages[ni];
+    this.cells = this._activeLayer(ni).cells;
     this.setState({ pageIndex: ni, pageCount: n });
     this.bump();   // structural change (page reordered) — dirty + autosave
     this.queueBraillePreview();
@@ -4171,14 +4349,18 @@ class Component extends DCLogic {
   setGrid(w, h) {
     if (w === this.state.gridW && h === this.state.gridH) return;
     const ow = this.state.gridW, oh = this.state.gridH;
-    this.pages = this.pages.map(old => {
+    const resize = (old) => {
       const nw = new Uint8Array(w * h);
-      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-        nw[y * w + x] = old[Math.floor(y * oh / h) * ow + Math.floor(x * ow / w)];
-      }
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) nw[y * w + x] = old[Math.floor(y * oh / h) * ow + Math.floor(x * ow / w)];
       return nw;
+    };
+    this.pageLayers.forEach(layers => layers.forEach(layer => { layer.cells = resize(layer.cells); }));
+    this.pages = this.pageLayers.map((layers) => {
+      const out = new Uint8Array(w * h);
+      layers.forEach(layer => { if (layer.visible) for (let i = 0; i < out.length; i++) if (layer.cells[i]) out[i] = 1; });
+      return out;
     });
-    this.cells = this.pages[this.state.pageIndex]; this.undoStack = []; this.redoStack = [];
+    this.cells = this._activeLayer(this.state.pageIndex).cells; this.undoStack = []; this.redoStack = [];
     this.setState({ gridW: w, gridH: h, cx: 0, cy: 0, selRect: null });
     this.bump();   // structural change (grid resized, all pages resampled) — dirty + autosave
     this.say(this.T().aGrid(w + '×' + h));
@@ -4357,13 +4539,19 @@ class Component extends DCLogic {
   assetPagesFromJson(obj) {
     if (!obj || typeof obj !== 'object') return null;
     // schema-v1 / corpus record: pages[].graphic (hex string)
-    let raw = Array.isArray(obj.pages) ? obj.pages.map(p => ({ hex: p.graphic || p.data, label: p.label, desc: p.desc, narration: p.narration }))
+    let raw = Array.isArray(obj.pages) ? obj.pages.map(p => ({ hex: p.graphic || p.data, label: p.label, desc: p.desc, narration: p.narration, layers: p.tactileLayers }))
       // raw DTMS export: items[].graphic.data
       : Array.isArray(obj.items) ? obj.items.map((it, i) => ({ hex: it.graphic && it.graphic.data, label: it.title || (i + 1) + '쪽' }))
       : null;
     if (!raw) return null;
     const pages = [];
-    for (const r of raw) { const cells = this.corpusCellsFromHex(r.hex); if (cells) pages.push({ cells, label: r.label, desc: r.desc, narration: r.narration }); }
+    for (const r of raw) {
+      const cells = this.corpusCellsFromHex(r.hex); if (!cells) continue;
+      const layers = Array.isArray(r.layers) ? r.layers.map((l, i) => {
+        const lc = this.corpusCellsFromHex(l.graphic); return lc ? { id: l.id || ('layer-file-' + i), name: l.name || ('레이어 ' + (i + 1)), visible: l.visible !== false, cells: lc } : null;
+      }).filter(Boolean) : null;
+      pages.push({ cells, label: r.label, desc: r.desc, narration: r.narration, layers });
+    }
     return pages.length ? { title: obj.title || '', pages } : null;
   }
   importAssetFile(file) {
@@ -4378,6 +4566,8 @@ class Component extends DCLogic {
       if (!parsed) { this.setState({ impErr: 'assetFormat', impLoading: false }); this.say(t.aAssetBadFmt); return; }
       // Load every page as a fresh document (clean undo checkpoint).
       this.pages = parsed.pages.map(p => p.cells);
+      this.pageLayers = parsed.pages.map((page, i) => (page.layers && page.layers.length) || [{ id: 'layer-import-' + i, name: '레이어 1', visible: true, cells: page.cells }]);
+      this.activeLayerIds = this.pageLayers.map(layers => layers[0].id);
       this.pageAudio = {};
       this.pageVectors = {};
       // ROOT-CAUSE FIX: a page's desc/narration may arrive as a bare string OR
@@ -4395,7 +4585,7 @@ class Component extends DCLogic {
         if (nMeta) rec.narrMeta = nMeta;
         if (Object.keys(rec).length) this.pageAudio[i] = rec;
       });
-      this.cells = this.pages[0];
+      this.cells = this._activeLayer(0).cells;
       this.undoStack = []; this.redoStack = [];
       if (this.state.gridW !== 60 || this.state.gridH !== 40) this.setGrid(60, 40);
       // Auto BANA print-standard check on the FIRST page (informational).
@@ -4434,10 +4624,10 @@ class Component extends DCLogic {
     const name = base || st.fileName || (st.lang === 'ko' ? '고양이' : 'Cat');
     if (mode === 'new') {
       const at = st.pageIndex + 1;
-      this.pages.splice(at, 0, conv);
+      this.insertPageWithLayer(at, conv);
       this._reindexPageVectorsInsert(at);
       if (vecObjects && vecObjects.length) this.pageVectors[at] = vecObjects;
-      this.cells = conv; this.undoStack = []; this.redoStack = [];
+      this.undoStack = []; this.redoStack = [];
       this.setState({ importOpen: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
       this.say(this.callI18n(t.aImgNewPage, '', at + 1, this.pages.length));
     } else if (mode === 'replace') {
@@ -4484,8 +4674,8 @@ class Component extends DCLogic {
       const name = intent ? (st.lang === 'ko' ? intent.name : intent.nameEn) : (st.lang === 'ko' ? '명령어 초안' : 'Command draft');
       if (mode === 'new') {
         const at = this.state.pageIndex + 1;
-        this.pages.splice(at, 0, cells);
-        this.cells = cells; this.undoStack = []; this.redoStack = [];
+        this.insertPageWithLayer(at, cells);
+        this.undoStack = []; this.redoStack = [];
         this.setState({ output: o.key, cmdGenerating: false, cmdOpen: false, fileName: name, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
         this.queueLivePreview();
         this.say(this.callI18n(t.aCmdNewPage, '', at + 1, this.pages.length));
@@ -4567,7 +4757,7 @@ class Component extends DCLogic {
     const { gridW: w, gridH: h } = this.state;
     const TW = window.TW;
     if (!TW || !TW.encodeBits) return '';
-    return TW.encodeBits(this.cellsToBits(this.cells, w, h), w, h);
+    return TW.encodeBits(this.cellsToBits(this.compositeCells(), w, h), w, h);
   }
   // ── real file export, split by purpose (TGIL Original vs Preview) ─────────
   // Original = editable/output data for DotPad + embossing: DTMS (all pages),
@@ -4577,6 +4767,7 @@ class Component extends DCLogic {
     if (!TW || !TW.downloadBlob) { this.toastMsg(t.aExportUnavail || 'Export unavailable'); return; }
     const { gridW: w, gridH: h } = this.state;
     const name = this.state.fileName || t.untitled;
+    this.syncAllComposites();
     const bitsOf = (cellBuf) => this.cellsToBits(cellBuf, w, h);
     try {
       if (fmt === 'DTMS') {
@@ -4588,7 +4779,7 @@ class Component extends DCLogic {
         const json = TW.buildDtms(name, w + 'x' + h, items);
         TW.downloadBlob(new Blob([json], { type: 'application/json' }), TW.safeName(name, 'dtms'));
       } else if (fmt === 'SVG') {
-        const svg = TW.bitsToSVG(bitsOf(this.cells), w, h, { title: name });
+        const svg = TW.bitsToSVG(bitsOf(this.compositeCells()), w, h, { title: name });
         TW.downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), TW.safeName(name, 'svg'));
       } else if (fmt === 'PNG') {
         this.exportPNG(name, w, h);
@@ -4613,8 +4804,9 @@ class Component extends DCLogic {
     const g = cnv.getContext('2d');
     g.fillStyle = '#ffffff'; g.fillRect(0, 0, cnv.width, cnv.height);
     g.fillStyle = '#1a1a1a';
+    const composite = this.compositeCells();
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      if (this.cells[y * w + x]) { g.beginPath(); g.arc(pad + x * cell + cell / 2, pad + y * cell + cell / 2, cell * 0.42, 0, Math.PI * 2); g.fill(); }
+      if (composite[y * w + x]) { g.beginPath(); g.arc(pad + x * cell + cell / 2, pad + y * cell + cell / 2, cell * 0.42, 0, Math.PI * 2); g.fill(); }
     }
     cnv.toBlob((blob) => { if (blob && TW && TW.downloadBlob) TW.downloadBlob(blob, TW.safeName(name || 'preview', 'png')); }, 'image/png');
   }
@@ -4849,8 +5041,9 @@ class Component extends DCLogic {
   }
   doSaveCommit() {
     const t = this.T(), st = this.state, name = st.fileName || t.untitled;
-    const thumb = this.thumbFrom(this.cells, st.gridW, st.gridH);
-    const cells = this.cells.slice();
+    const composite = this.compositeCells();
+    const thumb = this.thumbFrom(composite, st.gridW, st.gridH);
+    const cells = composite.slice();
     // Persist first so success/failure is known before we announce anything.
     // (saveLibrary is kept out of the setState updater — updaters must be pure.)
     const saved = [{ name, loc: st.saveLoc, thumb, cells, grid: st.gridW + '×' + st.gridH, savedAt: Date.now(), favorite: false }, ...st.saved];
@@ -4902,6 +5095,7 @@ class Component extends DCLogic {
   }
   buildLibraryAsset(name) {
     const st = this.state, ctx = st.corpusCtx;
+    this.syncAllComposites();
     const w = st.gridW, h = st.gridH, TW = window.TW;
     const hexOf = (cellBuf) => (TW && TW.encodeBits) ? TW.encodeBits(this.cellsToBits(cellBuf, w, h), w, h) : '';
     const audioMap = this.pageAudio || {};
@@ -4916,6 +5110,9 @@ class Component extends DCLogic {
         braille: (audioMap[i] && audioMap[i].brl) || (ctx && ctx.pages && ctx.pages[i] && ctx.pages[i].braille) || '',
         graphic: hexOf(cellBuf),
       };
+      const layers = this._layersAt(i);
+      const hasLayerState = layers.length > 1 || layers.some(layer => layer.visible === false || layer.name !== '레이어 1');
+      if (hasLayerState) page.tactileLayers = layers.map(layer => ({ id: layer.id, name: layer.name, visible: layer.visible !== false, graphic: hexOf(layer.cells) }));
       const a = audioMap[i];
       const narr = this.pageNarr(i);
       if (narr) page.narration = narr;
@@ -5517,6 +5714,30 @@ class Component extends DCLogic {
       setInspDevice: () => this.setState({ inspectorTab: 'device' }),
       inspTabPropsStyle: this.tabStyle(st.inspectorTab === 'props'),
       inspTabDeviceStyle: this.tabStyle(st.inspectorTab === 'device'),
+      // Page-local raster layers: the active layer receives edits; all visible
+      // layers are composited only for output/preview.
+      layerRows: (() => {
+        const active = this._activeLayer(), layers = this._layersAt();
+        return layers.slice().reverse().map(layer => ({
+          id: layer.id, name: layer.name, visible: layer.visible !== false, active: layer.id === active.id,
+          border: layer.id === active.id ? 'var(--ts-primary)' : '#EDE4DA', bg: layer.id === active.id ? '#FFF7F2' : '#fff',
+          weight: layer.id === active.id ? 800 : 650, iconColor: layer.visible !== false ? '#1E1C1A' : '#B7AEA4',
+          visibilityLabel: (layer.visible !== false ? '레이어 숨기기: ' : '레이어 표시: ') + layer.name,
+          moreLabel: '레이어 이름 변경: ' + layer.name,
+          pick: () => this.activateLayer(layer.id), toggle: () => this.toggleLayer(layer.id), more: () => this.renameLayer(layer.id)
+        }));
+      })(),
+      addLayer: () => this.addLayer(),
+      layerActionsDisabled: !this._activeLayer(),
+      layerDeleteDisabled: this._layersAt().length <= 1,
+      layerMergeDisabled: this._layersAt().findIndex(l => l.id === this._activeLayer().id) <= 0,
+      layerUpDisabled: this._layersAt().findIndex(l => l.id === this._activeLayer().id) >= this._layersAt().length - 1,
+      layerDownDisabled: this._layersAt().findIndex(l => l.id === this._activeLayer().id) <= 0,
+      layerUp: () => this.moveLayer(this._activeLayer().id, 1),
+      layerDown: () => this.moveLayer(this._activeLayer().id, -1),
+      layerDuplicate: () => this.duplicateLayer(this._activeLayer().id),
+      layerMerge: () => this.mergeLayerDown(this._activeLayer().id),
+      layerDelete: () => this.deleteLayer(this._activeLayer().id),
       // Properties tab: contextual tool options + window.TW canvas cleanup
       propToolName: (this.T().toolNames || {})[st.tool] || st.tool,
       fxThinner: () => this.thickenFx(-1),
@@ -6083,8 +6304,8 @@ class Component extends DCLogic {
           } else if (st.tplApply === 'newpage') {
             const cells = this.makePattern(it.kind, st.gridW, st.gridH);
             const at = st.pageIndex + 1;
-            this.pages.splice(at, 0, cells);
-            this.cells = cells; this.undoStack = []; this.redoStack = [];
+            this.insertPageWithLayer(at, cells);
+            this.undoStack = []; this.redoStack = [];
             this.setState({ tplOpen: false, fileName: st.lang === 'ko' ? it.ko : it.en, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null });
             this.queueLivePreview();
             this.say(this.callI18n(t.aTplNewPage, '', at + 1, this.pages.length));
