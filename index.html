@@ -928,7 +928,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <h3 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-0.3px">{{ impHeaderTitle }}</h3>
-          <span role="status" aria-live="polite" style="font-size:13px;font-weight:700;color:var(--ts-text-secondary);white-space:nowrap">{{ impProgressLabel }}</span>
+          <span role="status" aria-live="polite" style="{{ impProgressStyle }}">{{ impProgressLabel }}</span>
         </div>
         <sc-if value="{{ impIsImport }}" hint-placeholder-val="{{ true }}">
           <p style="margin:8px 0 0;font-size:13.5px;color:var(--ts-text-secondary);line-height:1.5;max-width:520px">{{ t.impImportSub }}</p>
@@ -937,26 +937,6 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       <button onClick="{{ closeImport }}" aria-label="{{ t.close }}" style="flex:none;width:32px;height:32px;border:none;border-radius:8px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
         <svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
       </button>
-    </div>
-
-    <!-- Wizard stepper (industry-standard numbered-step pattern): dots fill in
-         and connecting lines light up as you progress, replacing the need to
-         restate "what happens next" further down in step 1's body. -->
-    <div role="list" aria-label="{{ impProgressLabel }}" style="display:flex;align-items:center;padding:14px 26px;border-bottom:1px solid #F2ECE4;overflow-x:auto;flex:none">
-      <sc-for list="{{ impSteps }}" as="s" hint-placeholder-count="5">
-        <div role="listitem" style="{{ s.style }}" aria-current="{{ s.ariaCurrent }}">
-          <span aria-hidden="true" style="{{ s.dotStyle }}">
-            <sc-if value="{{ s.isDone }}" hint-placeholder-val="{{ false }}">
-              <svg width="12" height="12" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </sc-if>
-            <sc-if value="{{ s.showNum }}" hint-placeholder-val="{{ true }}">{{ s.num }}</sc-if>
-          </span>
-          <span style="{{ s.labelStyle }}">{{ s.label }}</span>
-        </div>
-        <sc-if value="{{ s.hasNext }}" hint-placeholder-val="{{ true }}">
-          <div aria-hidden="true" style="{{ s.lineStyle }}"></div>
-        </sc-if>
-      </sc-for>
     </div>
 
     <input type="file" ref="{{ fileInputRef }}" onChange="{{ onFilePick }}" accept="image/png,image/jpeg,image/svg+xml,.png,.jpg,.jpeg,.svg" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none" tabIndex="-1" aria-hidden="true">
@@ -5869,28 +5849,13 @@ class Component extends DCLogic {
       threshold: st.threshold,
       thresholdChange: e => this.setState({ threshold: +e.target.value }),
       impRef: this.impRef, impOrigRef: this.impOrigRef,
-      // wizard step state
-      impSteps: (t.impSteps || []).map((label, i, arr) => {
-        const state = i < impIdx ? 'done' : (i === impIdx ? 'current' : 'todo');
-        return { label, num: i + 1, state, isDone: state === 'done', isCurrent: state === 'current', showNum: state !== 'done',
-          ariaCurrent: state === 'current' ? 'step' : 'false',
-          hasNext: i < arr.length - 1,
-          style: { display: 'flex', alignItems: 'center', gap: 7, flex: 'none' },
-          lineStyle: { flex: 1, minWidth: 20, height: 2, margin: '0 8px', borderRadius: 2, background: state === 'done' ? 'var(--ts-primary)' : '#E8DFD6' },
-          dotStyle: {
-            width: 24, height: 24, borderRadius: 100, display: 'grid', placeItems: 'center', flex: 'none',
-            fontSize: 13, fontWeight: 800,
-            background: state === 'todo' ? '#fff' : 'var(--ts-primary)',
-            color: state === 'todo' ? 'var(--ts-text-secondary)' : '#fff',
-            border: state === 'todo' ? '1.5px solid var(--ts-border-decor)' : (state === 'current' ? '1.5px solid var(--ts-primary)' : '1.5px solid var(--ts-primary)'),
-            boxShadow: state === 'current' ? '0 0 0 3px rgba(var(--ts-primary-rgb),0.18)' : 'none'
-          },
-          labelStyle: { fontSize: 12.5, fontWeight: state === 'current' ? 800 : 600, color: state === 'todo' ? 'var(--ts-text-secondary)' : '#1E1C1A', whiteSpace: 'nowrap' } };
-      }),
+      // Compact progress badge: the workflow context remains visible without
+      // spending a full row on a three-step rail.
       impIsImport: st.impStep === 'import', impIsReview: st.impStep === 'review',
       imgNotReady: !st.imgReady,
       impHeaderTitle: st.impStep === 'import' ? t.impImportTitle : t.impReviewTitle,
-      impProgressLabel: (typeof t.impStepOf === 'function' ? t.impStepOf(impIdx + 1) : ('Step ' + (impIdx + 1) + ' / 5')) + ' · ' + ((t.impSteps || [])[impIdx] || ''),
+      impProgressLabel: (impIdx + 1) + ' / ' + (t.impSteps || []).length + ' · ' + ((t.impSteps || [])[impIdx] || ''),
+      impProgressStyle: { display: 'inline-flex', alignItems: 'center', minHeight: 26, padding: '0 9px', borderRadius: 100, background: 'rgba(var(--ts-primary-rgb),0.09)', color: '#B93E15', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap' },
       impBackLabel: st.impStep === 'import' ? t.impCancel : t.impBack,
       // step 1 upload
       fileInputRef: this.fileRef,
