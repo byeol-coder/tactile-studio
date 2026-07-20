@@ -524,15 +524,15 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
         </button>
       </div>
-      <!-- Working-grid pill — toggle a 5/10-cell alignment grid plus a strength
-           cycle. Sibling of the zoom pill (same right edge, stacked above) so it
-           also stays put on scroll. The grid it controls is drawn in drawMain()
-           only and is never saved/exported/sent to DotPad. -->
-      <div role="group" aria-label="{{ t.gridLabelUi }}" style="position:absolute;right:16px;bottom:118px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
+      <!-- Canvas view controls live together at the lower right: grid is a view
+           option, while zoom changes magnification. Keeping them side by side
+           makes their relationship clear without competing with the tool rail. -->
+      <div role="group" aria-label="{{ t.gridLabelUi }}" style="position:absolute;right:150px;bottom:78px;z-index:16;display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--ts-border-decor);border-radius:100px;padding:4px;box-shadow:0 1px 2px rgba(16,24,40,0.06),0 4px 10px -4px rgba(16,24,40,0.16)">
         <button class="ts-zoom-btn" onClick="{{ toggleGrid }}" aria-pressed="{{ gridActive }}" aria-label="{{ gridToggleLabel }}" title="{{ gridToggleLabel }}" style="width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridToggleColor }};display:grid;place-items:center;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
         </button>
-        <button class="ts-zoom-btn" onClick="{{ cycleGridStrength }}" disabled="{{ gridStrengthDisabled }}" aria-label="{{ gridStrengthLabel }}" title="{{ gridStrengthLabel }}" style="min-width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:#1E1C1A;display:grid;place-items:center;font-size:14px;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ gridStrengthText }}</button>
+        <span aria-hidden="true" style="width:1px;height:18px;background:var(--ts-border-decor);margin:0 1px;flex:none"></span>
+        <button class="ts-zoom-btn" onClick="{{ cycleGridStrength }}" disabled="{{ gridStrengthDisabled }}" aria-label="{{ gridStrengthLabel }}" title="{{ gridStrengthLabel }}" style="min-width:30px;height:30px;flex:none;border:none;border-radius:100px;background:transparent;color:{{ gridStrengthColor }};display:grid;place-items:center;font-size:14px;cursor:pointer" style-hover="background:#F7F4EF" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ gridStrengthText }}</button>
       </div>
       <!-- Zoom pill (Figma-style): Ctrl/Cmd + wheel or trackpad pinch zooms
            continuously anywhere over the canvas viewport (see cvWheel on the
@@ -5623,6 +5623,7 @@ class Component extends DCLogic {
       gridActive: !!st.showGrid,
       gridToggleLabel: st.showGrid ? t.gridToggleOffL : t.gridToggleOnL,
       gridToggleColor: st.showGrid ? 'var(--ts-primary)' : '#1E1C1A',
+      gridStrengthColor: st.showGrid ? '#1E1C1A' : '#A79D93',
       gridStrengthLabel: t.gridStrengthL + ' — ' + t.gridStrengthNames[(st.gridStrength || 1) - 1],
       gridStrengthDisabled: !st.showGrid,
       gridStrengthText: ['◔', '◑', '●'][(st.gridStrength || 1) - 1],
