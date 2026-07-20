@@ -950,6 +950,7 @@ describe('ImportDialog — image import + crop UI (injected decoder for tests)',
     });
     expect(fakeDecoder).toHaveBeenCalledWith(file);
     expect(screen.getByTestId('crop-rect')).toBeTruthy();
+    expect(screen.getByTestId('tactile-preview').getAttribute('data-dot-count')).not.toBe('0');
 
     fireEvent.click(screen.getByRole('button', { name: 'Convert' }));
     expect(capturedStore!.getSnapshot().pageCount).toBe(1);
@@ -1019,8 +1020,10 @@ describe('ImportDialog — image import + crop UI (injected decoder for tests)',
     expect(screen.getByText('72')).toBeTruthy(); // live value readout, no separate "apply" step
 
     fireEvent.click(screen.getByRole('button', { name: 'Convert' }));
-    expect(convert).toHaveBeenCalledTimes(1);
-    const opts = convert.mock.calls[0][5];
+    // Preview recomputes immediately as the slider changes; Convert reuses that
+    // reviewed result instead of running a divergent second conversion.
+    expect(convert).toHaveBeenCalledTimes(2);
+    const opts = convert.mock.calls.at(-1)![5];
     expect(opts.threshold).toBe(72);
   });
 

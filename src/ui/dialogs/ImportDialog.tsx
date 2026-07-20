@@ -13,7 +13,7 @@
 // DEFERRED (documented): auto BANA check display, braille-language
 // detection UI for imported assets.
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { parseLibraryAssetPages } from '../../codecs/library-asset-v1/library-asset-v1.js';
 import { imgToCells, CONV_PRESETS, type ConvOptions } from '../../codecs/image/image.js';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
@@ -34,6 +34,7 @@ export interface ImportDialogProps {
 }
 
 type CropRect = { x: number; y: number; w: number; h: number };
+type ImageConversionPreview = { cells: Uint8Array; removedDots: number };
 
 export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeImageFileInBrowser, imageProcessing }: ImportDialogProps) {
   const { store } = useEditorStore();
@@ -52,6 +53,16 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
   const dragRef = useRef<{ x0: number; y0: number } | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useFocusTrap<HTMLDivElement>(open);
+
+  // The preview and the committed page share one conversion result, so the
+  // author can judge exactly what will be loaded into the editor.
+  const conversion = useMemo<ImageConversionPreview | null>(() => {
+    if (!image) return null;
+    const selectedCrop = crop.w > 0.02 && crop.h > 0.02 ? crop : null;
+    return imageProcessing
+      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, 60, 40, { preset, threshold, invert }, selectedCrop)
+      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, 60, 40, { preset, threshold, invert } as ConvOptions, selectedCrop);
+  }, [image, crop, preset, threshold, invert, imageProcessing]);
 
   const close = useCallback(() => {
     if (image) URL.revokeObjectURL(image.previewUrl);
@@ -92,6 +103,14 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
     }
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (file.type.startsWith('image/')) void handleImageFile(file);
+    else void handleAssetFile(file);
+  };
+
   const evNorm = (e: { clientX: number; clientY: number }): { x: number; y: number } => {
     const el = previewRef.current!;
     const r = el.getBoundingClientRect();
@@ -115,13 +134,8 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
   const onCropPointerUp = () => { dragRef.current = null; };
 
   const commitImage = () => {
-    if (!image) return;
-    const w = 60, h = 40;
-    const c = crop.w > 0.02 && crop.h > 0.02 ? crop : null;
-    const result = imageProcessing
-      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold, invert }, c)
-      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, w, h, { preset, threshold, invert } as ConvOptions, c);
-    store.loadPages([result.cells], image.fileName.replace(/\.[^.]+$/, ''));
+    if (!image || !conversion) return;
+    store.loadPages([conversion.cells], image.fileName.replace(/\.[^.]+$/, ''));
     close();
   };
 
@@ -133,7 +147,8 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
         {!image && (
           <>
             <p style={{ fontSize: 13, marginBottom: 12 }}>{(labels?.impAssetSub as string) || 'Load a TGIL / DTMS / library file (.json/.dtms), or an image to convert.'}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div onDragOver={(e) => e.preventDefault()} onDrop={handleDrop} style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12, border: '1px dashed var(--ts-line, #CEC6BA)', borderRadius: 10, background: '#FCFAF7' }}>
+              <div style={{ fontSize: 12, color: 'var(--ts-muted, #675F56)' }}>Drop an image or tactile asset here, or choose a file below.</div>
               <label>
                 <div style={{ fontSize: 12, marginBottom: 4 }}>{(labels?.impAssetChoose as string) || 'Asset file (.json/.dtms)'}</div>
                 <input
@@ -158,23 +173,34 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
 
         {image && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div
-              ref={previewRef}
-              onPointerDown={onCropPointerDown}
-              onPointerMove={onCropPointerMove}
-              onPointerUp={onCropPointerUp}
-              style={{ position: 'relative', width: '100%', height: 200, backgroundImage: `url(${image.previewUrl})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', border: '1px solid var(--ts-line, #ECE6DC)', touchAction: 'none', cursor: 'crosshair' }}
-              aria-label={(labels?.impCropLabel as string) || 'Drag to select a crop region'}
-              role="img"
-            >
-              <div
-                data-testid="crop-rect"
-                style={{
-                  position: 'absolute', left: `${crop.x * 100}%`, top: `${crop.y * 100}%`,
-                  width: `${crop.w * 100}%`, height: `${crop.h * 100}%`,
-                  border: '2px dashed var(--ts-primary, #C43D00)', background: 'rgba(196,61,0,0.1)', pointerEvents: 'none',
-                }}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 5 }}>Original · crop</div>
+                <div
+                  ref={previewRef}
+                  onPointerDown={onCropPointerDown}
+                  onPointerMove={onCropPointerMove}
+                  onPointerUp={onCropPointerUp}
+                  style={{ position: 'relative', width: '100%', height: 180, backgroundImage: `url(${image.previewUrl})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, touchAction: 'none', cursor: 'crosshair' }}
+                  aria-label={(labels?.impCropLabel as string) || 'Drag to select a crop region'}
+                  role="img"
+                >
+                  <div
+                    data-testid="crop-rect"
+                    style={{
+                      position: 'absolute', left: `${crop.x * 100}%`, top: `${crop.y * 100}%`,
+                      width: `${crop.w * 100}%`, height: `${crop.h * 100}%`,
+                      border: '2px dashed var(--ts-primary, #C43D00)', background: 'rgba(196,61,0,0.1)', pointerEvents: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 5 }}>Tactile result · 60 × 40</div>
+                <div data-testid="tactile-preview" data-dot-count={conversion?.cells.reduce((total, cell) => total + cell, 0) || 0} role="img" aria-label={`Tactile conversion preview, ${conversion?.cells.reduce((total, cell) => total + cell, 0) || 0} raised dots`} style={{ display: 'grid', gridTemplateColumns: 'repeat(60, minmax(0, 1fr))', gap: 1, height: 180, padding: 6, overflow: 'hidden', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, background: '#F8F5F0' }}>
+                  {conversion && Array.from(conversion.cells, (cell, i) => <span key={i} aria-hidden="true" style={{ borderRadius: '50%', minWidth: 0, background: cell ? 'var(--ts-ink, #26221F)' : 'transparent' }} />)}
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
