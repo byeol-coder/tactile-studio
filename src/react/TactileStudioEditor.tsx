@@ -16,7 +16,7 @@
 // spacing/typography and pixel-level visual polish that needs direct Figma
 // file access to verify.
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TactileStudioProvider } from './TactileStudioProvider.js';
 import { useEditorStore } from './hooks/useEditorStore.js';
 import { StudioCanvas } from '../ui/canvas/StudioCanvas.js';
@@ -74,6 +74,26 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [showPanels, setShowPanels] = useState(false);
+  const focusRoot = useRef<HTMLDivElement>(null);
+
+  const exitFocusMode = () => {
+    setFocusMode(false);
+    if (typeof document !== 'undefined' && document.fullscreenElement) void document.exitFullscreen?.();
+  };
+  const toggleFocusMode = async () => {
+    if (focusMode) return exitFocusMode();
+    setFocusMode(true);
+    try { await focusRoot.current?.requestFullscreen?.(); } catch { /* browser fullscreen is optional */ }
+  };
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (typeof document !== 'undefined' && !document.fullscreenElement) setFocusMode(false);
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => { document.removeEventListener('fullscreenchange', onFullscreenChange); };
+  }, [focusMode]);
 
   const reportError = (err: StudioErrorLike) => { onError?.(err); };
 
@@ -109,10 +129,11 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
   }, [services.storage, labels]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div ref={focusRoot} tabIndex={focusMode ? -1 : undefined} onKeyDown={(e) => { if (e.key === 'Escape' && focusMode) { e.preventDefault(); exitFocusMode(); } }} data-focus-mode={focusMode || undefined} style={{ display: 'flex', flexDirection: 'column', gap: 8, ...(focusMode ? { minHeight: '100vh', padding: 16, background: 'var(--ts-bg, #FFFFFF)' } : {}) }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <Toolbar labels={labels} />
         <span style={{ flex: 1 }} />
+        <button type="button" onClick={toggleFocusMode} aria-pressed={focusMode} aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode'}>{focusMode ? 'Exit focus' : 'Focus mode'}</button>
         <button type="button" disabled={saving} onClick={handleSave}>{saving ? ((labels?.saving as string) || 'Saving…') : ((labels?.save as string) || 'Save')}</button>
         <button type="button" onClick={() => setImportOpen(true)}>{(labels?.impAssetTitle as string) || 'Import'}</button>
         <div style={{ position: 'relative' }}>
@@ -130,19 +151,18 @@ function EditorBody({ services, labels, onSave, onError, onExport }: EditorBodyP
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap', maxWidth: '100%' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap', maxWidth: '100%', justifyContent: focusMode ? 'center' : undefined }}>
+        {focusMode && <button type="button" onClick={() => setShowPanels((v) => !v)} aria-expanded={showPanels} aria-controls="ts-focus-panels">{showPanels ? 'Hide panels' : 'Show panels'}</button>}
+        {(!focusMode || showPanels) && <div id="ts-focus-panels" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <PagePanel labels={labels} />
           {services.corpus && <CorpusSearchPanel corpus={services.corpus} labels={labels} />}
-        </div>
+        </div>}
         <StudioCanvas ariaLabel={(labels?.canvasAria as string) || 'Tactile drawing canvas'} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {(!focusMode || showPanels) && <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Inspector labels={labels} gridFx={services.gridFx} braille={services.braille} />
           <QualityPanel />
-          {services.tactileDisplay && (
-            <DotPadPanel adapter={services.tactileDisplay} encodeBits={services.encodeBits} labels={labels} onError={reportError} />
-          )}
-        </div>
+          {services.tactileDisplay && <DotPadPanel adapter={services.tactileDisplay} encodeBits={services.encodeBits} labels={labels} onError={reportError} />}
+        </div>}
       </div>
 
       <LiveRegion />
