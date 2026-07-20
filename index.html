@@ -230,12 +230,14 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
    line inside the fixed ~256px inspector panel without overflowing neighbours. */
 .ts-pin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
 .ts-page-handle[data-dragging="true"]{cursor:grabbing}
+[data-ts-focus="true"] .ts-pages-rail,[data-ts-focus="true"] .ts-side-panel{display:none!important}
+[data-ts-focus="true"] .ts-canvas-zone{background:#1E1C1A}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </helmet>
 
 
-<div data-screen-label="Tactile Studio" style="height:100vh;display:flex;flex-direction:column;background:#F7F4EF;font-family:'Pretendard Variable',Pretendard,sans-serif;color:#1E1C1A;overflow:hidden">
+<div data-screen-label="Tactile Studio" data-ts-focus="{{ focusMode }}" style="height:100vh;display:flex;flex-direction:column;background:#F7F4EF;font-family:'Pretendard Variable',Pretendard,sans-serif;color:#1E1C1A;overflow:hidden">
   <div style="height:10px;background:var(--ts-primary);flex:none"></div>
 
   <div class="ts-topbar">
@@ -271,6 +273,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
       </button>
 
       <button class="ts-help-button ts-topbar-button" onClick="{{ toggleHelp }}" aria-label="{{ t.helpTitle }}" aria-keyshortcuts="Shift+/" title="{{ t.helpHint }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">?</button>
+      <button class="ts-help-button ts-topbar-button" onClick="{{ toggleFocusMode }}" aria-pressed="{{ focusMode }}" aria-label="{{ focusLabel }}" title="{{ focusLabel }}" style="width:44px;border:1px solid var(--ts-border-decor);border-radius:12px;background:#fff;color:#1E1C1A;font-weight:800;font-size:14px" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">⛶</button>
     </div>
   </div>
 
@@ -1703,7 +1706,7 @@ class Component extends DCLogic {
     toolbarPos: null,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
     fileName: null, announce: '', toast: null,
-    zoom: 1,
+    zoom: 1, focusMode: false,
     corpusCtx: null,
     saved: []
   };
@@ -2892,6 +2895,12 @@ class Component extends DCLogic {
   }
 
   // ---------- lifecycle ----------
+  toggleFocusMode() {
+    const entering = !this.state.focusMode;
+    this.setState({ focusMode: entering, inspectorOpen: entering ? false : this.state.inspectorOpen });
+    if (entering && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    else if (!entering && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  }
   componentDidMount() {
     // Crash recovery: if a rolling session snapshot survived a refresh/close/crash,
     // offer to restore it. Read BEFORE the first bump() so the debounced autosave
@@ -3718,6 +3727,7 @@ class Component extends DCLogic {
     if (editable) { if (e.key === 'Escape') e.target.blur(); return; }
     const t = this.T(), st = this.state;
     if (e.key === 'Escape') {
+      if (st.focusMode) return this.toggleFocusMode();
       if (st.tip) this.hideTip();   // dismiss any open tooltip first (does not consume Escape)
       if (st.pageMenu != null) return this.setState({ pageMenu: null });
       if (st.textPopover) return this.setState({ textPopover: null });
@@ -5355,6 +5365,9 @@ class Component extends DCLogic {
       inspectorOpen: st.inspectorOpen,
       inspectorHidden: !st.inspectorOpen,
       toggleInspector: () => this.setState(s => ({ inspectorOpen: !s.inspectorOpen })),
+      focusMode: st.focusMode,
+      focusLabel: st.lang === 'en' ? (st.focusMode ? 'Exit focus mode' : 'Enter focus mode') : (st.focusMode ? '집중 모드 종료' : '집중 모드'),
+      toggleFocusMode: () => this.toggleFocusMode(),
       inspectorTab: st.inspectorTab,
       inspTabProps: st.inspectorTab === 'props',
       inspTabDevice: st.inspectorTab === 'device',
