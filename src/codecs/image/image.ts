@@ -112,6 +112,29 @@ export function cvDilate(cells: Uint8Array, w: number, h: number): Uint8Array {
   return out;
 }
 
+/**
+ * monolith _cvHysteresis: Canny-style double threshold. Seed on strong edges
+ * (norm < thrHi), then flood-extend through weak edges (norm < thrLo) only where
+ * 8-connected to a seed. Bridges gaps a single global threshold leaves in faint
+ * outline segments; additive when thrHi equals the old single threshold.
+ */
+export function cvHysteresis(norm: Float32Array, w: number, h: number, thrHi: number, thrLo: number): Uint8Array {
+  const out = new Uint8Array(w * h);
+  const stack: number[] = [];
+  for (let i = 0; i < norm.length; i++) if (norm[i] < thrHi) { out[i] = 1; stack.push(i); }
+  while (stack.length) {
+    const p = stack.pop() as number, px = p % w, py = (p / w) | 0;
+    for (let j = -1; j <= 1; j++) for (let k = -1; k <= 1; k++) {
+      if (!j && !k) continue;
+      const nx = px + k, ny = py + j;
+      if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+      const q = ny * w + nx;
+      if (!out[q] && norm[q] < thrLo) { out[q] = 1; stack.push(q); }
+    }
+  }
+  return out;
+}
+
 /** monolith _cvRemoveSmall: 4-connected component size filter. */
 export function cvRemoveSmall(cells: Uint8Array, w: number, h: number, minSize: number): { cells: Uint8Array; removed: number } {
   const seen = new Uint8Array(w * h), out = cells.slice();
@@ -159,7 +182,11 @@ export function imgToCells(
       for (let i = 0; i < edges.length; i++) norm[i] = 255 - (edges[i] / max) * 255;
       const base = cvOtsu(norm);
       const thr = base - preset.edgeBias * 255 - ((opts.threshold != null ? opts.threshold - 50 : 0) * 1.2);
-      for (let i = 0; i < norm.length; i++) cells[i] = norm[i] < thr ? 1 : 0;
+      // Hysteresis instead of a single global cut: seed at `thr` (strong edges
+      // unchanged), then reconnect faint continuation pixels within a weak-edge
+      // band so outlines stop breaking apart. Additive by construction.
+      const thrLo = Math.min(255, thr + 30);
+      cells = cvHysteresis(norm, w, h, thr, thrLo);
       if (preset.dilateOutline) cells = cvDilate(cells, w, h);
     } else {
       const T = opts.threshold != null ? Math.round((opts.threshold / 100) * 255) : cvOtsu(grid);
