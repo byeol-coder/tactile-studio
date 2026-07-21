@@ -43,6 +43,7 @@ if ('caches' in window) {
 <script src="./support.js"></script>
 <script src="./corpus.js"></script>
 <script src="./corpus-search.js"></script>
+<script src="./embed-bridge.js"></script>
 <!-- Ported from tw-app (verified byte-identical pin encoding). Exposes window.TW.*
      (imageToPins, pins encode/DTMS/post-process) and window.DotPad* (real SDK).
      dotpad-sdk.js must load before dotpad.js (side-effect global). -->
@@ -3228,6 +3229,13 @@ class Component extends DCLogic {
     })();
     this._onLocale = (e) => this.onParentLocale(e);
     window.addEventListener('message', this._onLocale);
+    // Read-only facade for the iframe embed bridge (embed-bridge.js). Lets the
+    // host pull the current page's title/spec/hex on demand (publish flow).
+    // No auth, no publish here — the host owns that.
+    window.__tsStudioGraphic = () => {
+      const { gridW: w, gridH: h } = this.state;
+      return { title: this.state.fileName || this.T().untitled, spec: w + 'x' + h, data: this.cellsToHex() };
+    };
     // DotPad connection health watch — no-ops instantly when no real device
     // is present (dpReal() returns null), so this costs nothing for anyone
     // without hardware attached.
@@ -3238,7 +3246,7 @@ class Component extends DCLogic {
     this._heroFrame = (ts) => this.heroFrame(ts);
     this.heroRAF = requestAnimationFrame(this._heroFrame);
   }
-  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); window.removeEventListener('beforeunload', this._beforeUnload); clearInterval(this._connWatchT); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); window.removeEventListener('message', this._onLocale); try { delete window.__tsStudioGraphic; } catch (e) { window.__tsStudioGraphic = undefined; } window.removeEventListener('beforeunload', this._beforeUnload); clearInterval(this._connWatchT); clearTimeout(this._sessT); clearTimeout(this._toastT); clearTimeout(this._sendT); clearTimeout(this._hintT); clearTimeout(this._connT); clearTimeout(this._liveT); clearTimeout(this._brT); clearTimeout(this._tipT); cancelAnimationFrame(this.heroRAF); if (this._pageRAF) cancelAnimationFrame(this._pageRAF); }
   componentDidUpdate() { this.drawAll(); this.syncAudioPreview(); this._restorePageFocus(); }
   // 부모(Tactile World)에서 온 로케일 변경만 수용: 발신창·출처·형식·값을 모두 검증한 뒤 반영.
   onParentLocale(e) {
