@@ -62,6 +62,17 @@ export interface TwDotPadSingleton {
 
 declare global {
   interface Window {
-    TW?: { DP?: TwDotPadSingleton };
+    // DP comes from vendor/tw/dotpad.js; the rest come from vendor/tw/pins.js
+    // (encodeBits/bitsToSVG/thickenBits/denoiseBits) — both land on the same
+    // window.TW namespace, so this is the one place both are declared
+    // (TypeScript requires a single consistent shape per ambient property;
+    // see src/app/standalone/StandaloneApp.tsx, the other consumer of these).
+    TW?: {
+      DP?: TwDotPadSingleton;
+      encodeBits?: (bits: boolean[][], cols: number, rows: number) => string;
+      bitsToSVG?: (bits: boolean[][], cols: number, rows: number, opts?: { cell?: number; dotR?: number; title?: string }) => string;
+      thickenBits?: (cells: Uint8Array, w: number, h: number, level: number) => Uint8Array;
+      denoiseBits?: (cells: Uint8Array, w: number, h: number) => Uint8Array;
+    };
   }
 }
