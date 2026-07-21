@@ -135,6 +135,50 @@ export function cvHysteresis(norm: Float32Array, w: number, h: number, thrHi: nu
   return out;
 }
 
+/**
+ * cvErode: 3×3 binary erosion (8-neighborhood). Dual of cvDilate — a pixel
+ * survives only if it and all 8 neighbors are on; out-of-bounds neighbors
+ * count as off, so the border erodes inward too (standard "zero border"
+ * convention, matching cvDilate's own boundary handling).
+ */
+export function cvErode(cells: Uint8Array, w: number, h: number): Uint8Array {
+  const out = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!cells[y * w + x]) continue;
+    let all = 1;
+    for (let j = -1; j <= 1 && all; j++) for (let i = -1; i <= 1; i++) {
+      const nx = x + i, ny = y + j;
+      if (nx < 0 || ny < 0 || nx >= w || ny >= h || !cells[ny * w + nx]) { all = 0; break; }
+    }
+    out[y * w + x] = all;
+  }
+  return out;
+}
+
+/**
+ * thickenBits: signed line-weight control — negative levels erode (thin the
+ * line), positive levels dilate (thicken it), 0 is a no-op. Each unit of
+ * |level| is one more 3×3 morphological pass. Mirrors the shipped Tactile
+ * World "선 굵기" control (얇게/보통/굵게/더 굵게 = -1/0/+1/+2).
+ */
+export function thickenBits(cells: Uint8Array, w: number, h: number, level: number): Uint8Array {
+  let out = cells;
+  const n = Math.trunc(level);
+  for (let i = 0; i < Math.abs(n); i++) out = n < 0 ? cvErode(out, w, h) : cvDilate(out, w, h);
+  return out;
+}
+
+/**
+ * denoiseBits: drop small isolated dot clusters below minSize (default 3),
+ * reusing the same 4-connected component filter cvRemoveSmall already uses
+ * internally for preset.minCluster. Exposed as an explicit, user-toggled
+ * cleanup pass (the shipped Tactile World "노이즈 제거" control) rather than
+ * folded silently into the preset.
+ */
+export function denoiseBits(cells: Uint8Array, w: number, h: number, minSize = 3): Uint8Array {
+  return cvRemoveSmall(cells, w, h, minSize).cells;
+}
+
 /** monolith _cvRemoveSmall: 4-connected component size filter. */
 export function cvRemoveSmall(cells: Uint8Array, w: number, h: number, minSize: number): { cells: Uint8Array; removed: number } {
   const seen = new Uint8Array(w * h), out = cells.slice();

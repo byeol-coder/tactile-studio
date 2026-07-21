@@ -15,7 +15,7 @@
 
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { parseLibraryAssetPages } from '../../codecs/library-asset-v1/library-asset-v1.js';
-import { imgToCells, CONV_PRESETS, type ConvOptions } from '../../codecs/image/image.js';
+import { imgToCells, thickenBits, denoiseBits, type ConvOptions } from '../../codecs/image/image.js';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import type { StudioLabels, ImageProcessingService } from '../../react/types/public-api.js';
 import { useFocusTrap } from './useFocusTrap.js';
@@ -41,8 +41,24 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
   const [error, setError] = useState<string | null>(null);
   const [image, setImage] = useState<{ decoded: DecodedImage; previewUrl: string; fileName: string } | null>(null);
   const [crop, setCrop] = useState<CropRect>({ x: 0.1, y: 0.1, w: 0.8, h: 0.8 });
-  const [preset, setPreset] = useState<keyof typeof CONV_PRESETS>('balanced');
+  // Output size (60×40 / 96×64 — the two real DotPad specs; imgToCells is
+  // already fully size-agnostic, this was previously hardcoded at the call
+  // site only).
+  const [outW, setOutW] = useState(60);
+  const [outH, setOutH] = useState(40);
+  // Conversion method — 채움 (fill) vs 윤곽선 (outline), matching the shipped
+  // Tactile World "방식" control exactly (a plain binary, not the fuller
+  // 4-name preset set this dialog previously exposed via a <select>).
+  const [edgeMode, setEdgeMode] = useState(false);
+  const preset: 'balanced' | 'outline' = edgeMode ? 'outline' : 'balanced';
   const [invert, setInvert] = useState(false);
+  // 선 굵기 (line weight): -1 얇게 / 0 보통 / 1 굵게 / 2 더 굵게 — a signed
+  // morphological post-process (see codecs/image thickenBits), matching the
+  // shipped Tactile World control 1:1.
+  const [lineWeight, setLineWeight] = useState(0);
+  // 노이즈 제거 (denoise): drops small isolated dot clusters after the main
+  // conversion (+ line-weight pass), matching the shipped "보정" group.
+  const [denoise, setDenoise] = useState(false);
   // Tactile detail level (monolith's "촉각 디테일 정도" slider, 10-90/step 1,
   // default 50 — matches the shipped range exactly). React's onChange on a
   // range input already fires continuously while dragging (it normalizes to
@@ -59,10 +75,14 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
   const conversion = useMemo<ImageConversionPreview | null>(() => {
     if (!image) return null;
     const selectedCrop = crop.w > 0.02 && crop.h > 0.02 ? crop : null;
-    return imageProcessing
-      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, 60, 40, { preset, threshold, invert }, selectedCrop)
-      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, 60, 40, { preset, threshold, invert } as ConvOptions, selectedCrop);
-  }, [image, crop, preset, threshold, invert, imageProcessing]);
+    const base = imageProcessing
+      ? imageProcessing.convert(image.decoded.data, image.decoded.width, image.decoded.height, outW, outH, { preset, threshold, invert }, selectedCrop)
+      : imgToCells(image.decoded.data, image.decoded.width, image.decoded.height, outW, outH, { preset, threshold, invert } as ConvOptions, selectedCrop);
+    let cells = base.cells;
+    if (lineWeight !== 0) cells = thickenBits(cells, outW, outH, lineWeight);
+    if (denoise) cells = denoiseBits(cells, outW, outH);
+    return { cells, removedDots: base.removedDots };
+  }, [image, crop, preset, threshold, invert, outW, outH, lineWeight, denoise, imageProcessing]);
 
   const close = useCallback(() => {
     if (image) URL.revokeObjectURL(image.previewUrl);
@@ -98,6 +118,10 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
       setImage({ decoded, previewUrl, fileName: file.name });
       setCrop({ x: 0.1, y: 0.1, w: 0.8, h: 0.8 });
       setThreshold(50);
+      setOutW(60); setOutH(40);
+      setEdgeMode(false);
+      setLineWeight(0);
+      setDenoise(false);
     } catch (e: any) {
       setError(e?.message || 'Failed to decode image file.');
     }
@@ -196,23 +220,42 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 5 }}>Tactile result · 60 × 40</div>
-                <div data-testid="tactile-preview" data-dot-count={conversion?.cells.reduce((total, cell) => total + cell, 0) || 0} role="img" aria-label={`Tactile conversion preview, ${conversion?.cells.reduce((total, cell) => total + cell, 0) || 0} raised dots`} style={{ display: 'grid', gridTemplateColumns: 'repeat(60, minmax(0, 1fr))', gap: 1, height: 180, padding: 6, overflow: 'hidden', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, background: '#F8F5F0' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 5 }}>Tactile result · {outW} × {outH}</div>
+                <div data-testid="tactile-preview" data-dot-count={conversion?.cells.reduce((total, cell) => total + cell, 0) || 0} role="img" aria-label={`Tactile conversion preview, ${conversion?.cells.reduce((total, cell) => total + cell, 0) || 0} raised dots`} style={{ display: 'grid', gridTemplateColumns: `repeat(${outW}, minmax(0, 1fr))`, gap: 1, height: 180, padding: 6, overflow: 'hidden', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, background: '#F8F5F0' }}>
                   {conversion && Array.from(conversion.cells, (cell, i) => <span key={i} aria-hidden="true" style={{ borderRadius: '50%', minWidth: 0, background: cell ? 'var(--ts-ink, #26221F)' : 'transparent' }} />)}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <label style={{ fontSize: 12 }}>
-                {(labels?.impConvPreset as string) || 'Preset'}{' '}
-                <select value={preset} onChange={(e) => setPreset(e.target.value as keyof typeof CONV_PRESETS)} aria-label={(labels?.impConvPreset as string) || 'Preset'}>
-                  {Object.keys(CONV_PRESETS).map((k) => <option key={k} value={k}>{k}</option>)}
-                </select>
-              </label>
+            <SegRow label={(labels?.impConvSize as string) || 'Size'}>
+              {([[60, 40], [96, 64]] as const).map(([w, h]) => (
+                <SegButton key={`${w}x${h}`} active={outW === w} onClick={() => { setOutW(w); setOutH(h); }}>
+                  {w}×{h}
+                </SegButton>
+              ))}
+            </SegRow>
+
+            <SegRow label={(labels?.impConvMethod as string) || 'Method'}>
+              <SegButton active={!edgeMode} onClick={() => setEdgeMode(false)}>{(labels?.impConvFill as string) || 'Fill'}</SegButton>
+              <SegButton active={edgeMode} onClick={() => setEdgeMode(true)}>{(labels?.impConvOutline as string) || 'Outline'}</SegButton>
+            </SegRow>
+
+            <SegRow label={(labels?.impConvLineWeight as string) || 'Line weight'}>
+              {([[-1, 'Thin'], [0, 'Normal'], [1, 'Thick'], [2, 'Thicker']] as const).map(([level, name]) => (
+                <SegButton key={level} active={lineWeight === level} onClick={() => setLineWeight(level)}>
+                  {(labels?.[`impConvWeight${level}`] as string) || name}
+                </SegButton>
+              ))}
+            </SegRow>
+
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
               <label style={{ fontSize: 12 }}>
                 <input type="checkbox" checked={invert} onChange={(e) => setInvert(e.target.checked)} />
                 {' '}{(labels?.impConvInvert as string) || 'Invert'}
+              </label>
+              <label style={{ fontSize: 12 }}>
+                <input type="checkbox" checked={denoise} onChange={(e) => setDenoise(e.target.checked)} />
+                {' '}{(labels?.impConvDenoise as string) || 'Denoise'}
               </label>
             </div>
 
@@ -246,5 +289,34 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
         </div>
       </div>
     </div>
+  );
+}
+
+/** A labeled row of SegButton choices — one visual pattern for size/method/line-weight. */
+function SegRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ts-muted, #675F56)' }}>{label}</span>
+      <div role="group" aria-label={label} style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{children}</div>
+    </div>
+  );
+}
+
+/** A single pressed/unpressed segment button, reusing the dialog's existing accent color. */
+function SegButton({ active, onClick, children }: { active: boolean; onClick(): void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      style={{
+        fontSize: 12, padding: '5px 10px', borderRadius: 7, cursor: 'pointer',
+        border: active ? '1px solid var(--ts-primary, #C43D00)' : '1px solid var(--ts-line, #ECE6DC)',
+        background: active ? 'var(--ts-primary, #C43D00)' : 'transparent',
+        color: active ? '#FFFFFF' : 'var(--ts-ink, #26221F)',
+      }}
+    >
+      {children}
+    </button>
   );
 }
