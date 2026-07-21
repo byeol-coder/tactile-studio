@@ -17,16 +17,30 @@
 //                        vendor scripts, same load order as the vanilla app.
 //
 // Deliberately NOT wired yet (documented gap, not an oversight):
-//   - imageProcessing → vendor TW.imageToBits takes an HTMLImageElement and
-//                        has no crop/removedDots concept, so it doesn't
-//                        satisfy ImageProcessingService's shape without a
-//                        real bridge. Import-by-image is unavailable in this
-//                        build until that bridge is written.
 //   - braille, corpus → need liblouis / a real corpus.js data source neither
 //                        of which this entry point loads yet.
-// Both are additive follow-ups; the editor works fully without them (those
+// This is additive follow-up work; the editor works fully without it (those
 // features are simply absent from the UI), same graceful-degradation
 // contract the library already documents for optional services.
+//
+// imageProcessing is deliberately left UNSET here too, but for a different
+// reason than the two gaps above: leaving it unset is not a gap at all.
+// ImportDialog's `imageProcessing` prop is an OPTIONAL host override — when
+// absent, ImportDialog already falls back to codecs/image/image.ts's own
+// imgToCells, a pure, parity-tested TypeScript port of the conversion
+// algorithm, fed by a real browser canvas decode step
+// (browser-image-decoder.ts). That path needs no vendor bridge and image
+// import already works end-to-end in this build today (see
+// tests/parity/react-editor.test.tsx's "converts via the real imgToCells
+// codec" test, which exercises exactly this default path). Wiring vendor's
+// TW.imageToBits here would only replace one already-correct algorithm with
+// another (and would need a real bridge, since TW.imageToBits takes an
+// HTMLImageElement with no crop/removedDots concept, unlike
+// ImageProcessingService's shape) — worth doing only if pixel-parity with
+// the vendor's own Otsu/Sobel output specifically is ever required, not to
+// unblock the feature itself. (An earlier version of this comment claimed
+// image import was unavailable without that bridge; it wasn't accurate —
+// corrected here.)
 //
 // First-run size choice: a saved document (localStorage) always wins and
 // loads straight into the editor, no picker shown. Only when NOTHING is
