@@ -181,6 +181,52 @@ describe('Toolbar wiring', () => {
     expect(screen.getByRole('button', { name: '펜' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Eraser' })).toBeTruthy(); // untranslated fallback
   });
+
+  it('does not render the center-guide button when the host does not wire onToggleCenterGuide', () => {
+    render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar />
+      </TactileStudioProvider>,
+    );
+    expect(screen.queryByRole('button', { name: 'Center guide' })).toBeNull();
+  });
+
+  it('renders the center-guide button when wired, reflects pressed state, and calls the toggle callback', () => {
+    const onToggle = vi.fn();
+    const { rerender } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar showCenterGuide={false} onToggleCenterGuide={onToggle} />
+      </TactileStudioProvider>,
+    );
+    const guideBtn = screen.getByRole('button', { name: 'Center guide' });
+    expect(guideBtn.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(guideBtn);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <Toolbar showCenterGuide onToggleCenterGuide={onToggle} />
+      </TactileStudioProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Center guide' }).getAttribute('aria-pressed')).toBe('true');
+  });
+});
+
+describe('StudioCanvas — center guide prop wiring', () => {
+  it('accepts showCenterGuide (true or false) without throwing — jsdom has no real 2D context to assert pixels against, so this only covers the prop threading, not the drawn line itself', () => {
+    const { rerender } = render(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <StudioCanvas ariaLabel="canvas" showCenterGuide={false} />
+      </TactileStudioProvider>,
+    );
+    expect(screen.getByLabelText(/^canvas\./)).toBeTruthy();
+    rerender(
+      <TactileStudioProvider initialDocument={createDocument('t', 10, 10)}>
+        <StudioCanvas ariaLabel="canvas" showCenterGuide />
+      </TactileStudioProvider>,
+    );
+    expect(screen.getByLabelText(/^canvas\./)).toBeTruthy();
+  });
 });
 
 describe('StudioCanvas — pointer-to-store wiring (pen tool)', () => {

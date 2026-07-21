@@ -83,6 +83,9 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
   const [version, setVersion] = useState<string | undefined>(initialVersion);
   const [focusMode, setFocusMode] = useState(false);
   const [showPanels, setShowPanels] = useState(false);
+  // Center guide toggle — see Toolbar/StudioCanvas doc comments for why
+  // this lives here (lifted local state) rather than in the store.
+  const [showCenterGuide, setShowCenterGuide] = useState(false);
   const focusRoot = useRef<HTMLDivElement>(null);
 
   const exitFocusMode = () => {
@@ -160,7 +163,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
   return (
     <div ref={focusRoot} tabIndex={focusMode ? -1 : undefined} onKeyDown={(e) => { if (e.key === 'Escape' && focusMode) { e.preventDefault(); exitFocusMode(); } }} data-focus-mode={focusMode || undefined} style={{ display: 'flex', flexDirection: 'column', gap: 8, ...(focusMode ? { minHeight: '100vh', padding: 16, background: 'var(--ts-bg, #FFFFFF)' } : {}) }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <Toolbar labels={labels} />
+        <Toolbar labels={labels} showCenterGuide={showCenterGuide} onToggleCenterGuide={() => setShowCenterGuide((v) => !v)} />
         <span style={{ flex: 1 }} />
         {onExit && <button type="button" onClick={onExit}>{(labels?.exit as string) || 'Exit'}</button>}
         <button type="button" onClick={toggleFocusMode} aria-pressed={focusMode} aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode'}>{focusMode ? 'Exit focus' : 'Focus mode'}</button>
@@ -188,7 +191,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
           <PagePanel labels={labels} />
           {services.corpus && <CorpusSearchPanel corpus={services.corpus} labels={labels} />}
         </div>}
-        <StudioCanvas ariaLabel={(labels?.canvasAria as string) || 'Tactile drawing canvas'} labels={labels} />
+        <StudioCanvas ariaLabel={(labels?.canvasAria as string) || 'Tactile drawing canvas'} labels={labels} showCenterGuide={showCenterGuide} />
         {(!focusMode || showPanels) && <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Inspector labels={labels} gridFx={services.gridFx} braille={services.braille} />
           <QualityPanel />
