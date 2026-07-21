@@ -94,6 +94,11 @@ if ('caches' in window) {
   --ts-primary:#C43D00;            /* brand orange — text/CTA/UI, AA 4.5:1 on white & warm */
   --ts-primary-rgb:196,61,0;       /* tints: rgba(var(--ts-primary-rgb),.08) */
   --ts-primary-decor:#EC5927;      /* LARGE graphics/decor only (3.49:1 — never body text) */
+  --ts-accent-icon:#C43D00;        /* icon/label accent — kept equal to --ts-primary (not the
+                                       reference token migration's #E04500: that only reaches
+                                       4.18:1 on white, short of the 4.5:1 text/label bar) */
+  --ts-accent-bg-soft:#FFF1EA;     /* soft tinted chip background — background-only, no text
+                                       sits directly in this color so it carries no contrast risk */
   --ts-text-primary:#1E1C1A;
   --ts-text-secondary:#6B6862;     /* replaces #9C9994 (AA fail) — 5.5:1 */
   --ts-border-decor:#EAE1D7;       /* decorative separators only (1.4.11 exempt) */
@@ -105,9 +110,19 @@ if ('caches' in window) {
   --ts-panel:#FFFFFF;
   --ts-panel-muted:#F5F3F0;
   --ts-shadow-panel:0 12px 30px -22px rgba(41,35,29,0.30);
-  --ts-radius-sm:8px;
-  --ts-radius-md:10px;
-  --ts-radius-lg:14px;
+  --ts-shadow-popover:0 8px 24px rgba(31,29,26,0.12);
+  --ts-radius-sm:6px;
+  --ts-radius-md:8px;
+  --ts-radius-lg:10px;
+  --ts-radius-xl:12px;             /* dropdown/popover panels */
+  --ts-radius-pill:999px;          /* avatars, pill-shaped badges */
+  --ts-spacing-btn:7px 14px;       /* CTA button padding */
+  --ts-spacing-input:9px 10px;     /* textarea/input padding */
+  --ts-spacing-list-item:8px 10px; /* export/library row padding */
+  --ts-spacing-menu-item:9px 11px; /* dropdown menu item padding */
+  --ts-spacing-badge:2px 7px;      /* extension/format badge padding */
+  --ts-font-weight-button:500;
+  --ts-font-size-button:13px;
   --ts-duration-fast:0.12s;
   --ts-duration-normal:0.2s;
   --ts-easing-standard:cubic-bezier(0.2,0,0,1);
@@ -756,23 +771,23 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
             <div style="font-size:14px;font-weight:800;color:#1E1C1A">{{ propToolName }}</div>
           </div>
 
-          <label style="display:flex;flex-direction:column;align-items:stretch;gap:6px;border-top:1px solid #F2ECE4;padding-top:14px">
+          <div style="display:flex;flex-direction:column;align-items:stretch;gap:6px;border-top:1px solid #F2ECE4;padding-top:14px">
             <span style="font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em">{{ t.canvasSizeL }}</span>
-            <select value="{{ output }}" onChange="{{ outputChange }}" aria-label="{{ t.canvasSizeL }}" style="width:100%;box-sizing:border-box;height:38px;border:1px solid var(--ts-border-functional);border-radius:8px;background:#fff;font-weight:800;font-size:13px;color:#1E1C1A;padding:0 10px" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+            <div role="group" aria-label="{{ t.canvasSizeL }}" style="display:flex;flex-wrap:wrap;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
               <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
-                <option value="{{ o.key }}">{{ o.name }}</option>
+                <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
               </sc-for>
-            </select>
-          </label>
+            </div>
+          </div>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
             <div style="font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:3px">{{ t.inspCleanup }}</div>
             <div style="font-size:13px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
             <div style="display:flex;gap:6px;margin-bottom:6px">
-              <button class="ts-fx-btn" onClick="{{ fxThinner }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThinner }}</button>
-              <button class="ts-fx-btn" onClick="{{ fxThicker }}" style="flex:1;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspThicker }}</button>
+              <button class="ts-fx-btn" onClick="{{ fxThinner }}" style="flex:1;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldOffIcon }} {{ t.inspThinner }}</button>
+              <button class="ts-fx-btn" onClick="{{ fxThicker }}" style="flex:1;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldIcon }} {{ t.inspThicker }}</button>
             </div>
-            <button class="ts-fx-btn" onClick="{{ fxDenoise }}" style="width:100%;height:34px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspDenoise }}</button>
+            <button class="ts-fx-btn" onClick="{{ fxDenoise }}" style="width:100%;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ sparklesIcon }} {{ t.inspDenoise }}</button>
           </div>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
@@ -4546,7 +4561,16 @@ class Component extends DCLogic {
     // Icon Set this map is otherwise synced from, so it comes from Tabler
     // rather than being hand-drawn, same rationale already documented for
     // any other Tabler-sourced entry in this map.
-    crosshair: [{ d: 'M4 8v-2a2 2 0 0 1 2 -2h2' }, { d: 'M4 16v2a2 2 0 0 0 2 2h2' }, { d: 'M16 4h2a2 2 0 0 1 2 2v2' }, { d: 'M16 20h2a2 2 0 0 0 2 -2v-2' }, { d: 'M9 12l6 0' }, { d: 'M12 9l0 6' }]
+    crosshair: [{ d: 'M4 8v-2a2 2 0 0 1 2 -2h2' }, { d: 'M4 16v2a2 2 0 0 0 2 2h2' }, { d: 'M16 4h2a2 2 0 0 1 2 2v2' }, { d: 'M16 20h2a2 2 0 0 0 2 -2v-2' }, { d: 'M9 12l6 0' }, { d: 'M12 9l0 6' }],
+    // Sourced from Tabler Icons (MIT, @tabler/icons 3.45.0, icons/outline/
+    // bold.svg, bold-off.svg, sparkles.svg) — same rationale as crosshair
+    // above. bold/boldOff form the natural thick/thin pair for the "선 굵기"
+    // cleanup buttons (no closer literal "thin line"/"thick line" concept
+    // exists in Tabler); sparkles is the conventional "auto-clean" glyph for
+    // the "노이즈 제거" button.
+    bold: [{ d: 'M7 5h6a3.5 3.5 0 0 1 0 7h-6l0 -7' }, { d: 'M13 12h1a3.5 3.5 0 0 1 0 7h-7v-7' }],
+    boldOff: [{ d: 'M9 5h4a3.5 3.5 0 0 1 2.222 6.204m-3.222 .796h-5v-5' }, { d: 'M17.107 17.112a3.5 3.5 0 0 1 -3.107 1.888h-7v-7' }, { d: 'M3 3l18 18' }],
+    sparkles: [{ d: 'M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6' }]
   };
   icon(id, size) {
     const spec = this.ICONS[id] || [];
@@ -5839,8 +5863,6 @@ class Component extends DCLogic {
         cardStyle: { textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 3, padding: '11px 13px', borderRadius: 11, cursor: 'pointer', background: st.output === o.key ? 'rgba(var(--ts-primary-rgb),0.06)' : '#fff', border: st.output === o.key ? '1px solid var(--ts-primary)' : '1px solid #EFE7DE', color: '#1E1C1A', boxShadow: st.output === o.key ? '0 1px 2px rgba(var(--ts-primary-rgb),0.12)' : 'none', transition: 'background 0.15s ease, border-color 0.15s ease' }
       })),
       isA4: this.isA4(), outName: (t.outNames && t.outNames[st.output]) || '',
-      output: st.output,
-      outputChange: e => this.setOutput(e.target.value),
       doUndo: () => this.undo(), doRedo: () => this.redo(),
       // Icon-only history / zoom controls: unified custom tooltip (label + real
       // key cap) plus aria-keyshortcuts, replacing the platform-wrong native
@@ -5910,6 +5932,7 @@ class Component extends DCLogic {
       fxThinner: () => this.thickenFx(-1),
       fxThicker: () => this.thickenFx(1),
       fxDenoise: () => this.denoiseFx(),
+      boldOffIcon: this.icon('boldOff', 15), boldIcon: this.icon('bold', 15), sparklesIcon: this.icon('sparkles', 15),
       // DTMA: current-page audio + narration
       pgAudio: (() => {
         const a = (this.pageAudio || {})[st.pageIndex];

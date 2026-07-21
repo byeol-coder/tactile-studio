@@ -24,6 +24,8 @@ const ratio = (a, b) => {
 const P = {
   primary: '#C43D00',        // brand orange (text/CTA)
   primaryLegacy: '#EC5927',  // decorative/large-graphic only
+  accentIcon: '#C43D00',     // icon/label accent — aliased to primary (NOT the reference
+                             // token migration's #E04500, which only reaches 4.18:1 on white)
   textPrimary: '#1E1C1A',
   textSecondary: '#6B6862',
   borderDecor: '#EAE1D7',    // decorative only — 1.4.11 exempt
@@ -42,6 +44,7 @@ const checks = [
   ['secondary text on warm bg', P.textSecondary, P.warm, 'text'],
   ['body text on white', P.textPrimary, P.white, 'text'],
   ['danger text on white', P.danger, P.white, 'text'],
+  ['accent-icon text on white', P.accentIcon, P.white, 'text'],
   // large text / UI components (3:1)
   ['success indicator on white', P.success, P.white, 'large'],
   ['legacy orange as LARGE graphic on white', P.primaryLegacy, P.white, 'large'],
@@ -62,6 +65,11 @@ for (const [name, fg, bg, kind] of checks) {
 console.log(
   `\nnote: --ts-border-decor(${P.borderDecor}) is decorative-only (WCAG 1.4.11 exempt);` +
     ` functional boundaries must use --ts-primary or a ≥3:1 tone (tracked in migration report).`
+);
+console.log(
+  `note: --ts-accent-bg-soft(#FFF1EA) is a background-only tint (chip fills) — no text` +
+    ` renders directly in it, so it carries no contrast obligation of its own; whatever` +
+    ` foreground sits on top of it must still be checked against #FFF1EA's luminance.`
 );
 if (fail) {
   console.error(`\n${fail} contrast check(s) FAILED`);
