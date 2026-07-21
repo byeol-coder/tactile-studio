@@ -29,6 +29,8 @@ import { line, rectOutline, ellipseOutline, makeBrush, floodFill } from '../../c
 import { cellIndex, inBounds } from '../../core/grid/grid.js';
 import { stampTextLayout, type GlyphRasterizer } from '../../codecs/tactile-text/tactile-text.js';
 import { browserGlyphRasterizer } from './browser-glyph-rasterizer.js';
+import { ZoomControls } from './ZoomControls.js';
+import type { StudioLabels } from '../../react/types/public-api.js';
 
 function cellPx(gridW: number): number {
   return gridW <= 28 ? 20 : gridW <= 60 ? 13 : gridW <= 84 ? 7 : 9;
@@ -50,9 +52,11 @@ export interface StudioCanvasProps {
   ariaLabel?: string;
   /** Overrides the real canvas-based glyph rasterizer — for tests only. */
   glyphRasterizer?: GlyphRasterizer;
+  /** Passed through to the zoom pill's button labels/tooltips. */
+  labels?: StudioLabels;
 }
 
-export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasterizer }: StudioCanvasProps) {
+export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasterizer, labels }: StudioCanvasProps) {
   const { snapshot, store } = useEditorStore();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dragRef = useRef<DragState>(null);
@@ -360,6 +364,18 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
     store.announce(`Row ${cy + 1}, column ${cx + 1}: ${raised ? 'raised' : 'lowered'}.`);
   };
 
+  // Zoom-scaled CSS size (verbatim port of the monolith's canvasStyle
+  // branch, index.html's `st.zoom === 1 ? {...} : {...width/height...}`):
+  // at 1x, let the browser fit the canvas within its container as before
+  // (maxWidth:100%, height:auto); at any other zoom, size it explicitly to
+  // gridW/gridH * cellPx * zoom so it renders at the requested magnification
+  // rather than being auto-fit. See editor-store.ts's zoom-preset doc
+  // comment for what's deferred (scroll-position anchoring).
+  const zoom = snapshot.zoom;
+  const canvasStyle: React.CSSProperties = zoom === 1
+    ? { display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated', maxWidth: '100%', height: 'auto' }
+    : { display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated', width: gridW * c * zoom, height: gridH * c * zoom };
+
   return (
     <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
       <canvas
@@ -373,8 +389,9 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
         onPointerCancel={onPointerUp}
         onDoubleClick={onDoubleClick}
         onKeyDown={onKeyDown}
-        style={{ display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated', maxWidth: '100%', height: 'auto' }}
+        style={canvasStyle}
       />
+      <ZoomControls labels={labels} />
       {textPopover && (
         <div style={{ position: 'fixed', left: textPopover.left, top: textPopover.top, zIndex: 50, background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 6 }}>
           <input

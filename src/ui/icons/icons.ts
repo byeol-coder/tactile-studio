@@ -27,7 +27,32 @@ export const ICONS: Record<string, IconPath[]> = {
     invert: [{ d: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z' }, { d: 'M12 4a8 8 0 0 1 0 16Z', fill: true }],
     flipH: [{ d: 'M12 3v18' }, { d: 'M8 8L4 12l4 4V8z', fill: true }, { d: 'M16 8l4 4-4 4V8z', fill: true }],
     flipV: [{ d: 'M3 12h18' }, { d: 'M8 8l4-4 4 4H8z', fill: true }, { d: 'M8 16l4 4 4-4H8z', fill: true }],
-    more: [{ d: 'M6 12h.01M12 12h.01M18 12h.01' }]
+    more: [{ d: 'M6 12h.01M12 12h.01M18 12h.01' }],
+    // Verbatim copy of the monolith's OWN hand-drawn undo/redo icons
+    // (index.html, the ts-rail-history buttons around `doUndo`/`doRedo` --
+    // NOT part of the separate Figma ICONS map, but real SVG path data does
+    // exist in the monolith itself, just outside that map). Corrects an
+    // earlier, inaccurate assumption in this file's history (see
+    // Toolbar.tsx's prior doc comment, since removed) that no such path
+    // data existed anywhere and these would need to come from Tabler --
+    // when the monolith's own asset is available, porting it verbatim
+    // takes precedence over substituting a library icon, same as every
+    // other entry in this map.
+    undo: [{ d: 'M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11' }],
+    redo: [{ d: 'M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13' }],
+    // Sourced from Tabler Icons (MIT, @tabler/icons 3.45.0, icons/outline/
+    // plus.svg and minus.svg) rather than hand-drawn -- these two concepts
+    // aren't part of the original Figma ICONS map (see this file's header),
+    // and per the target stack's own convention, icons missing from BOTH
+    // Figma and the monolith's own inline SVGs are meant to come from
+    // Tabler, not be invented (unlike undo/redo above, the monolith itself
+    // has no hand-drawn zoom plus/minus outside its own zoom-pill buttons,
+    // which this file's ZoomControls.tsx now reuses verbatim in spirit --
+    // same two line segments, Tabler's path notation just differs).
+    // Kept as generic plus/minus (not zoom-specific names) so any future
+    // +/- control can reuse them instead of each one hand-rolling its own.
+    plus: [{ d: 'M12 5v14M5 12h14' }],
+    minus: [{ d: 'M5 12h14' }]
   };
 
 export type IconName = keyof typeof ICONS;

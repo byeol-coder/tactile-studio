@@ -176,6 +176,50 @@ export class EditorStore {
   setCursor(cx: number, cy: number) { this.cursor = { cx, cy }; this.notify(); }
   setZoom(z: number) { this.zoom = z; this.notify(); }
 
+  // ── canvas zoom presets (Figma-style, verbatim port of the monolith's
+  // zoomSteps/zoomClamp/zoomIn/zoomOut/zoomReset — index.html's "Canvas zoom
+  // (Figma-style)" section) ────────────────────────────────────────────────
+  //
+  // setZoom() above is the raw setter (any value, no clamping); these four
+  // are the "jump to the next preset" behavior that actually drives the
+  // zoom pill and keyboard shortcuts (Ctrl/Cmd +/-/0), always clamped and
+  // step-quantized the same way the monolith's helpers are.
+  //
+  // Deliberately NOT ported in this pass: zoomAround()/zoomAtViewportCenter()'s
+  // scroll-position compensation (adjusting scrollLeft/scrollTop so the
+  // zoom "stays under your cursor" or centered). This package's canvas has
+  // no dedicated scrollable zoom viewport yet — it sits in a plain
+  // inline-block wrapper (see StudioCanvas.tsx) — so anchoring is a
+  // separate, larger gap than the step logic itself. The zoom VALUE these
+  // methods produce is identical to vanilla; only the "what the viewport
+  // scrolls to" side effect is absent.
+  private static readonly ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 8];
+
+  private zoomClamp(z: number): number {
+    const steps = EditorStore.ZOOM_STEPS;
+    return Math.max(steps[0], Math.min(steps[steps.length - 1], z));
+  }
+
+  zoomIn() {
+    const steps = EditorStore.ZOOM_STEPS, cur = this.zoom;
+    const next = steps.find((s) => s > cur + 0.001);
+    this.setZoom(this.zoomClamp(next !== undefined ? next : steps[steps.length - 1]));
+  }
+
+  zoomOut() {
+    const steps = EditorStore.ZOOM_STEPS, cur = this.zoom;
+    let prev = steps[0];
+    for (const s of steps) { if (s < cur - 0.001) prev = s; }
+    this.setZoom(this.zoomClamp(prev));
+  }
+
+  zoomReset() { this.setZoom(1); }
+
+  /** Exposed read-only so the zoom pill can disable zoom-out/zoom-in at the
+   *  ends of the range, matching the monolith's zoomOutDisabled/zoomInDisabled. */
+  isAtMinZoom(): boolean { return this.zoom <= EditorStore.ZOOM_STEPS[0] + 0.001; }
+  isAtMaxZoom(): boolean { return this.zoom >= EditorStore.ZOOM_STEPS[EditorStore.ZOOM_STEPS.length - 1] - 0.001; }
+
   // ── stroke transaction API (see file header) ─────────────────────────────
 
   /** Snapshot for undo (monolith `snapshot()`); does NOT notify by itself —

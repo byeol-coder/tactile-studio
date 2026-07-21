@@ -465,3 +465,73 @@ describe('EditorStore — toastMsg (monolith toastMsg() port, backs ui/toast/Toa
     }
   });
 });
+
+describe('EditorStore — canvas zoom presets (verbatim port of monolith zoomSteps/zoomIn/zoomOut/zoomReset)', () => {
+  it('starts at 1 (100%) by default', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    expect(store.getSnapshot().zoom).toBe(1);
+  });
+
+  it('zoomIn() steps up through the preset table, one step at a time', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.zoomIn();
+    expect(store.getSnapshot().zoom).toBe(1.25);
+    store.zoomIn();
+    expect(store.getSnapshot().zoom).toBe(1.5);
+    store.zoomIn();
+    expect(store.getSnapshot().zoom).toBe(2);
+  });
+
+  it('zoomOut() steps down through the preset table, one step at a time', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.zoomOut();
+    expect(store.getSnapshot().zoom).toBe(0.75);
+    store.zoomOut();
+    expect(store.getSnapshot().zoom).toBe(0.5);
+  });
+
+  it('zoomIn() at the top of the table clamps to the max step (8) instead of throwing/overshooting', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10), { initialZoom: 8 });
+    store.zoomIn();
+    expect(store.getSnapshot().zoom).toBe(8);
+  });
+
+  it('zoomOut() at the bottom of the table clamps to the min step (0.1)', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10), { initialZoom: 0.1 });
+    store.zoomOut();
+    expect(store.getSnapshot().zoom).toBe(0.1);
+  });
+
+  it('zoomReset() always returns to exactly 1, regardless of current zoom', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10), { initialZoom: 4 });
+    store.zoomReset();
+    expect(store.getSnapshot().zoom).toBe(1);
+  });
+
+  it('zoomIn()/zoomOut() snap an off-step initial value onto the nearest step in the stepping direction (matches monolith\u2019s steps.find/for-loop scan, not a plain lookup)', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10), { initialZoom: 0.6 });
+    store.zoomIn();
+    expect(store.getSnapshot().zoom).toBe(0.75); // next step strictly greater than 0.6
+    const store2 = new EditorStore(createDocument('doc', 10, 10), { initialZoom: 0.6 });
+    store2.zoomOut();
+    expect(store2.getSnapshot().zoom).toBe(0.5); // last step strictly less than 0.6
+  });
+
+  it('isAtMinZoom()/isAtMaxZoom() report the ends of the range for disabling the zoom pill\u2019s buttons', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    expect(store.isAtMinZoom()).toBe(false);
+    expect(store.isAtMaxZoom()).toBe(false);
+    store.zoomReset();
+    for (let i = 0; i < 10; i++) store.zoomOut();
+    expect(store.isAtMinZoom()).toBe(true);
+    store.zoomReset();
+    for (let i = 0; i < 10; i++) store.zoomIn();
+    expect(store.isAtMaxZoom()).toBe(true);
+  });
+
+  it('setZoom() (the raw setter) is unaffected by the new preset helpers -- still accepts any value with no clamping', () => {
+    const store = new EditorStore(createDocument('doc', 10, 10));
+    store.setZoom(3.33);
+    expect(store.getSnapshot().zoom).toBe(3.33);
+  });
+});
