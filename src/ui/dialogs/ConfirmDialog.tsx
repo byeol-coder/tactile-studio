@@ -1,4 +1,10 @@
 // src/ui/dialogs/ConfirmDialog.tsx
+//
+// General-purpose confirm/cancel dialog. `onCancel` is optional: when
+// omitted, this renders as a single-button acknowledgment ("info" mode) —
+// e.g. explaining why an action is unavailable, rather than offering a real
+// two-way choice. Existing two-button callers (PagePanel's delete-page
+// confirmation) are unaffected since they always pass onCancel.
 import React, { useEffect, useRef } from 'react';
 import { useFocusTrap } from './useFocusTrap.js';
 
@@ -9,7 +15,7 @@ export interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm(): void;
-  onCancel(): void;
+  onCancel?(): void;
 }
 
 export function ConfirmDialog({ open, title, message, confirmLabel = 'OK', cancelLabel = 'Cancel', onConfirm, onCancel }: ConfirmDialogProps) {
@@ -18,10 +24,10 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'OK', cance
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') (onCancel ?? onConfirm)(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onCancel]);
+  }, [open, onCancel, onConfirm]);
 
   if (!open) return null;
 
@@ -31,7 +37,7 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'OK', cance
         <div style={{ fontWeight: 600, marginBottom: 8 }}>{title}</div>
         {message && <div style={{ fontSize: 13, marginBottom: 16 }}>{message}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button type="button" onClick={onCancel}>{cancelLabel}</button>
+          {onCancel && <button type="button" onClick={onCancel}>{cancelLabel}</button>}
           <button type="button" ref={confirmRef} onClick={onConfirm}>{confirmLabel}</button>
         </div>
       </div>
