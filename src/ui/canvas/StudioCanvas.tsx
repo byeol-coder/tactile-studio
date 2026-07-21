@@ -54,9 +54,14 @@ export interface StudioCanvasProps {
   glyphRasterizer?: GlyphRasterizer;
   /** Passed through to the zoom pill's button labels/tooltips. */
   labels?: StudioLabels;
+  /** Center cross-hair guide (horizontal + vertical line through the grid's
+   *  midpoint) — a sighted-collaborator layout aid only, toggled from the
+   *  toolbar (see Toolbar's crosshair IconButton). Purely visual: never
+   *  written to cells, never exported, doesn't affect DotPad output. */
+  showCenterGuide?: boolean;
 }
 
-export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasterizer, labels }: StudioCanvasProps) {
+export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasterizer, labels, showCenterGuide = false }: StudioCanvasProps) {
   const { snapshot, store } = useEditorStore();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dragRef = useRef<DragState>(null);
@@ -94,6 +99,23 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
         g.fillStyle = '#E3D9CE';
         g.beginPath(); g.arc(px, py, Math.max(1, c * 0.1), 0, Math.PI * 2); g.fill();
       }
+    }
+
+    // Center cross-hair guide — a passive layout aid (see StudioCanvasProps
+    // doc comment), drawn under the active-editing overlays below so a live
+    // drag/selection/cursor is never visually competing with it. Subtle
+    // dashed accent line, distinct from the stronger solid/dashed orange
+    // used for actual selection and drag-snap feedback further down.
+    if (showCenterGuide) {
+      g.save();
+      g.strokeStyle = 'rgba(196,61,0,0.35)';
+      g.lineWidth = 1;
+      g.setLineDash([4, 4]);
+      g.beginPath();
+      g.moveTo(cv.width / 2, 0); g.lineTo(cv.width / 2, cv.height);
+      g.moveTo(0, cv.height / 2); g.lineTo(cv.width, cv.height / 2);
+      g.stroke();
+      g.restore();
     }
 
     const drag = dragRef.current;
@@ -140,7 +162,7 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
       g.strokeStyle = '#C43D00'; g.lineWidth = 2;
       g.strokeRect(snapshot.cursor.cx * c + 1, snapshot.cursor.cy * c + 1, c - 2, c - 2);
     }
-  }, [gridW, gridH, c, snapshot.selRect, snapshot.tool, snapshot.cursor, store]);
+  }, [gridW, gridH, c, snapshot.selRect, snapshot.tool, snapshot.cursor, store, showCenterGuide]);
 
   // Redraw on every store-visible change (low-frequency: tool switch, page
   // switch, selection change, undo/redo, stroke-end). Mid-drag redraws are

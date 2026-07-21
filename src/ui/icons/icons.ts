@@ -52,7 +52,24 @@ export const ICONS: Record<string, IconPath[]> = {
     // Kept as generic plus/minus (not zoom-specific names) so any future
     // +/- control can reuse them instead of each one hand-rolling its own.
     plus: [{ d: 'M12 5v14M5 12h14' }],
-    minus: [{ d: 'M5 12h14' }]
+    minus: [{ d: 'M5 12h14' }],
+    // Sourced from Tabler Icons (MIT, @tabler/icons 3.45.0, icons/outline/
+    // crosshair.svg) -- same rationale as plus/minus above: the "center
+    // guide line" concept (StudioCanvas's optional cross-hair overlay) has
+    // no equivalent in either the Figma ICONS map or the monolith's own
+    // hand-drawn SVGs, so it comes from Tabler rather than being invented.
+    // The four corner-bracket paths plus the two center-line paths are
+    // copied verbatim; Tabler's own invisible 24x24 hit-box path (present
+    // in every icon file, never rendered) is omitted like it is everywhere
+    // else in this map.
+    crosshair: [
+      { d: 'M4 8v-2a2 2 0 0 1 2 -2h2' },
+      { d: 'M4 16v2a2 2 0 0 0 2 2h2' },
+      { d: 'M16 4h2a2 2 0 0 1 2 2v2' },
+      { d: 'M16 20h2a2 2 0 0 0 2 -2v-2' },
+      { d: 'M9 12l6 0' },
+      { d: 'M12 9l0 6' },
+    ]
   };
 
 export type IconName = keyof typeof ICONS;

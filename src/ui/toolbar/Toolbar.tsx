@@ -48,9 +48,15 @@ const Divider = () => <span style={{ width: 1, alignSelf: 'stretch', background:
 
 export interface ToolbarProps {
   labels?: StudioLabels;
+  /** Center guide toggle state — lifted to EditorBody (see
+   *  TactileStudioEditor.tsx) rather than the store, since it's a purely
+   *  visual/local UI toggle, not part of the verbatim-ported document
+   *  state (same reasoning as focusMode/showPanels there). */
+  showCenterGuide?: boolean;
+  onToggleCenterGuide?(): void;
 }
 
-export function Toolbar({ labels }: ToolbarProps) {
+export function Toolbar({ labels, showCenterGuide, onToggleCenterGuide }: ToolbarProps) {
   const { tool, setTool, strokeSize, eraserSize, setStrokeSize, setEraserSize } = useTool();
   const { canUndo, canRedo, undo, redo } = useHistory();
   const { store } = useEditorStore();
@@ -183,6 +189,18 @@ export function Toolbar({ labels }: ToolbarProps) {
       <IconButton icon="flipV" label={(labels?.flipV as string) || 'Flip vertical'} onClick={doFlipV} />
       <IconButton icon="invert" label={(labels?.invert as string) || 'Invert'} onClick={doInvert} />
       <IconButton icon="clearAll" label={(labels?.clearAll as string) || 'Clear all'} onClick={doClear} />
+
+      {onToggleCenterGuide && (
+        <>
+          <Divider />
+          <IconButton
+            icon="crosshair"
+            label={(labels?.centerGuide as string) || 'Center guide'}
+            pressed={showCenterGuide}
+            onClick={onToggleCenterGuide}
+          />
+        </>
+      )}
     </div>
   );
 }
