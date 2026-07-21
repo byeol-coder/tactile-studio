@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tactile Studio</title>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Vendor DotPad SDK — same 4 files, same load order as the vanilla app's
+       index.html (dotpad-sdk.js -> pins.js -> imageToPins.js -> dotpad.js),
+       so window.TW.* and window.TW.DP exist before main.tsx's module script
+       runs. vite.standalone.config.ts's publicDir points at the repo's own
+       vendor/tw/ folder specifically, whose CONTENTS land directly at the
+       output root — hence "./dotpad-sdk.js" here, no "vendor/" or "tw/"
+       prefix. Not duplicated on disk; same files the vanilla app ships. -->
+  <script src="./dotpad-sdk.js"></script>
+  <script src="./pins.js"></script>
+  <script src="./imageToPins.js"></script>
+  <script src="./dotpad.js"></script>
+
+  <script type="module" src="./main.tsx"></script>
+</body>
+</html>

@@ -1,28 +1,41 @@
 // src/react/hooks/useKeyboardShortcuts.ts
 //
-// Minimal shortcut set for this pass (documented in known-issues.md #5 as
-// partial): Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z (and Ctrl+Y) redo. The
-// monolith's full shortcut registry (per-tool keys, Cmd-vs-Ctrl display
-// logic via _isMac(), tooltips showing the shortcut) is NOT ported yet.
-// Ignores events with a text-input target so typing "z" in the text-tool
-// popover or a future dialog input never triggers undo/redo.
+// Global keyboard shortcuts: undo/redo (Ctrl/Cmd+Z, +Shift+Z, +Y) plus, as of
+// this pass, the tool-picking shortcuts ported from the monolith's canonical
+// toolKeys() map (index.html) -- P/E/L/R/O/G/F/S/T/V for
+// pen/eraser/line/rect/ellipse/poly/fill/select/text/cursor. This is the
+// SAME id->key mapping vanilla uses, so a shortcut means the same thing in
+// both apps.
 //
-// BUG FIX (found while wiring the undo/redo toast, see ui/toast/Toast.tsx):
-// this hook called store.undo()/store.redo() directly and never announced
-// anything, unlike Toolbar's doUndo/doRedo which also call
-// store.announce(...). That meant the keyboard path silently skipped BOTH
-// the screen-reader live region AND (now) the visual toast -- a real,
-// user-facing parity gap versus the monolith (whose undo()/redo() announce
-// unconditionally, regardless of trigger source), not something
-// intentionally deferred. Fixed by accepting the same `labels` the toolbar
-// already receives and mirroring its announce+toastMsg pair here. Only
-// fires when store.undo()/redo() actually changed something (returns
-// true) -- mirrors the monolith's own early-return on an empty
-// undo/redo stack, so Ctrl+Z with nothing to undo stays silent.
+// STILL NOT ported here (tracked as a separate, larger gap -- these need UI
+// that doesn't exist in this package yet, unlike the tool shortcuts above
+// which only needed useTool().setTool(), already present):
+//   - Ctrl/Cmd +/-/0 zoom (no zoom UI/steps anywhere in src/ui yet)
+//   - Space (toggle dot under keyboard cursor) / arrow-key cell nudge / Enter
+//     (close polygon) -- monolith's accessibility-mode canvas keyboard nav,
+//     which depends on a cell-cursor position (state.cx/cy) this port's
+//     core state doesn't track yet
+// Ctrl/Cmd+S (save) and "?" (help toggle) are NOT here either -- both need
+// EditorBody-local state/services this hook doesn't have, so they get their
+// own dedicated listeners in TactileStudioEditor.tsx (same reasoning
+// documented there for Ctrl+S already).
+//
+// Ignores events with a text-input target so typing "p"/"e"/etc. in the
+// text-tool popover or a dialog input never triggers a tool switch --same
+// guard the undo/redo path already used, now shared by both.
 
 import { useEffect } from 'react';
 import { useEditorStore } from './useEditorStore.js';
+import { useTool } from './useTool.js';
+import type { ToolId } from '../../core/state/types.js';
 import type { StudioLabels } from '../types/public-api.js';
+
+// Canonical tool->key map -- identical ids/letters to vanilla's toolKeys()
+// (index.html), so this is a port, not a reinterpretation.
+const TOOL_KEYS: Record<string, ToolId> = {
+  p: 'pen', e: 'eraser', l: 'line', r: 'rect', o: 'ellipse',
+  g: 'poly', f: 'fill', s: 'select', t: 'text', v: 'cursor',
+};
 
 function isTextInputTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -32,24 +45,38 @@ function isTextInputTarget(target: EventTarget | null): boolean {
 
 export function useKeyboardShortcuts(labels?: StudioLabels) {
   const { store } = useEditorStore();
+  const { setTool } = useTool();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTextInputTarget(e.target)) return;
       const mod = e.ctrlKey || e.metaKey;
-      if (!mod) return;
       const key = e.key.toLowerCase();
-      if (key === 'z' && e.shiftKey) {
+      if (mod) {
+        if (key === 'z' && e.shiftKey) {
+          e.preventDefault();
+          if (store.redo()) { const msg = (labels?.aRedo as string) || 'Redone'; store.announce(msg); store.toastMsg(msg); }
+        } else if (key === 'z') {
+          e.preventDefault();
+          if (store.undo()) { const msg = (labels?.aUndo as string) || 'Undone'; store.announce(msg); store.toastMsg(msg); }
+        } else if (key === 'y') {
+          e.preventDefault();
+          if (store.redo()) { const msg = (labels?.aRedo as string) || 'Redone'; store.announce(msg); store.toastMsg(msg); }
+        }
+        return;
+      }
+      // Tool shortcuts -- only plain letter keys, no modifier (matches
+      // vanilla's onKey: `if (!e.ctrlKey && !e.metaKey && tools[k])`).
+      const toolId = TOOL_KEYS[key];
+      if (toolId) {
         e.preventDefault();
-        if (store.redo()) { const msg = (labels?.aRedo as string) || 'Redone'; store.announce(msg); store.toastMsg(msg); }
-      } else if (key === 'z') {
-        e.preventDefault();
-        if (store.undo()) { const msg = (labels?.aUndo as string) || 'Undone'; store.announce(msg); store.toastMsg(msg); }
-      } else if (key === 'y') {
-        e.preventDefault();
-        if (store.redo()) { const msg = (labels?.aRedo as string) || 'Redone'; store.announce(msg); store.toastMsg(msg); }
+        setTool(toolId);
+        const names = labels?.toolNames as Record<string, string> | undefined;
+        const name = names?.[toolId] || toolId;
+        const msg = (labels?.aToolSel as string)?.replace('{tool}', name) || `Tool: ${name}`;
+        store.announce(msg);
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [store, labels]);
+  }, [store, setTool, labels]);
 }

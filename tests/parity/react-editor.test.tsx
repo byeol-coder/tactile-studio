@@ -117,7 +117,7 @@ describe('TactileStudioEditor — mount/unmount safety', () => {
   it('registers keydown listeners (undo/redo shortcut + save shortcut) per mount and removes them on unmount (no leak/duplication across remounts)', () => {
     const addSpy = vi.spyOn(document, 'addEventListener');
     const removeSpy = vi.spyOn(document, 'removeEventListener');
-    const LISTENERS_PER_MOUNT = 2; // useKeyboardShortcuts (undo/redo) + EditorBody's Ctrl/Cmd+S handler
+    const LISTENERS_PER_MOUNT = 3; // useKeyboardShortcuts (undo/redo + tool shortcuts) + EditorBody's Ctrl/Cmd+S handler + EditorBody's "?" help-toggle handler
     for (let i = 0; i < 3; i++) {
       const { unmount } = render(
         <TactileStudioEditor

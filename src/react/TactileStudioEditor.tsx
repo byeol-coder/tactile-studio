@@ -26,6 +26,7 @@ import { Inspector } from '../ui/inspector/Inspector.js';
 import { DotPadPanel } from '../ui/dotpad/DotPadPanel.js';
 import { ImportDialog } from '../ui/dialogs/ImportDialog.js';
 import { ExportMenu } from '../ui/dialogs/ExportMenu.js';
+import { HelpDialog } from '../ui/help/HelpDialog.js';
 import { CorpusSearchPanel } from '../ui/corpus/CorpusSearchPanel.js';
 import { LiveRegion } from '../ui/live-region/LiveRegion.js';
 import { Toast } from '../ui/toast/Toast.js';
@@ -77,6 +78,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
   const { store } = useEditorStore();
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [version, setVersion] = useState<string | undefined>(initialVersion);
   const [focusMode, setFocusMode] = useState(false);
@@ -142,6 +144,19 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services.storage, labels]);
 
+  // "?" toggles the help dialog, same reasoning as Ctrl/Cmd+S above: helpOpen
+  // is EditorBody-local state, so useKeyboardShortcuts (which only knows the
+  // store) can't own this toggle.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === '?') { e.preventDefault(); setHelpOpen((v) => !v); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div ref={focusRoot} tabIndex={focusMode ? -1 : undefined} onKeyDown={(e) => { if (e.key === 'Escape' && focusMode) { e.preventDefault(); exitFocusMode(); } }} data-focus-mode={focusMode || undefined} style={{ display: 'flex', flexDirection: 'column', gap: 8, ...(focusMode ? { minHeight: '100vh', padding: 16, background: 'var(--ts-bg, #FFFFFF)' } : {}) }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -149,6 +164,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
         <span style={{ flex: 1 }} />
         {onExit && <button type="button" onClick={onExit}>{(labels?.exit as string) || 'Exit'}</button>}
         <button type="button" onClick={toggleFocusMode} aria-pressed={focusMode} aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode'}>{focusMode ? 'Exit focus' : 'Focus mode'}</button>
+        <button type="button" onClick={() => setHelpOpen(true)} aria-label={(labels?.helpTitle as string) || 'Keyboard shortcuts'} aria-keyshortcuts="Shift+/">?</button>
         <button type="button" disabled={saving} onClick={handleSave}>{saving ? ((labels?.saving as string) || 'Saving…') : ((labels?.save as string) || 'Save')}</button>
         <button type="button" onClick={() => setImportOpen(true)}>{(labels?.impAssetTitle as string) || 'Import'}</button>
         <div style={{ position: 'relative' }}>
@@ -187,6 +203,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
       <EmptyStateHint labels={labels} />
 
       <ImportDialog open={importOpen} labels={labels} onClose={() => setImportOpen(false)} imageProcessing={services.imageProcessing} />
+      <HelpDialog open={helpOpen} labels={labels} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }

@@ -12,6 +12,13 @@ import type { TactileDisplayAdapter, ConnectionState } from '../../device/dotpad
 import { encodeDtmsHex, type TwEncodeBits } from '../../codecs/dtms/dtms.js';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import type { StudioLabels, StudioErrorLike } from '../../react/types/public-api.js';
+import { ConfirmDialog } from '../dialogs/ConfirmDialog.js';
+
+// A4 braille-paper grid, matching vanilla's OUTPUTS table exactly
+// (index.html: { key: 'a4', gw: 84, gh: 118, label: 'A4' }) — an embossing-only
+// format, never a real DotPad hardware resolution (60x40 / 96x64).
+const A4_GRID_W = 84;
+const A4_GRID_H = 118;
 
 export interface DotPadPanelProps {
   adapter: TactileDisplayAdapter;
@@ -55,12 +62,25 @@ export function DotPadPanel({ adapter, encodeBits, labels, onError }: DotPadPane
   };
   const disconnect = async () => { await adapter.disconnect(); refresh(); };
 
+  const [showA4Warning, setShowA4Warning] = useState(false);
+  const isA4Grid = snapshot.gridW === A4_GRID_W && snapshot.gridH === A4_GRID_H;
+
   const send = async () => {
     if (!encodeBits) return;
+    if (isA4Grid) { setShowA4Warning(true); return; }
     setError(null);
     try {
       const hex = encodeDtmsHex(encodeBits, store.getActiveCells(), snapshot.gridW, snapshot.gridH);
       await adapter.display(hex);
+      // Success feedback — same pairing convention as the rest of the store
+      // (Toolbar.tsx, useKeyboardShortcuts.ts): toastMsg for the sighted-user
+      // pill, announce for the screen-reader live region, fired together.
+      // Matches the monolith's "6b. Send success" screen intent (see vanilla
+      // index.html's data-screen-label="6b. Send success"), just realized as
+      // a toast/announce pair here rather than a dedicated screen.
+      const successMsg = (labels?.dpSendSuccess as string) || 'Sent to DotPad.';
+      store.toastMsg(successMsg);
+      store.announce(successMsg);
     } catch (e: any) {
       setError(e?.message || 'Send failed');
       onError?.({ code: e?.code || 'send-failed', message: e?.message || 'Send failed', cause: e });
@@ -68,6 +88,7 @@ export function DotPadPanel({ adapter, encodeBits, labels, onError }: DotPadPane
   };
   const deviceTest = async (kind: 'raise' | 'lower' | 'invert') => {
     if (busy) return;
+    if (kind === 'invert' && isA4Grid && encodeBits) { setShowA4Warning(true); return; }
     setBusy(true); setError(null);
     try {
       if (kind === 'raise') await adapter.raiseAll?.();
@@ -113,6 +134,13 @@ export function DotPadPanel({ adapter, encodeBits, labels, onError }: DotPadPane
         </>
       )}
       {error && <div role="alert" style={{ color: 'var(--ts-danger, #DA120D)', fontSize: 12 }}>{error}</div>}
+      <ConfirmDialog
+        open={showA4Warning}
+        title={(labels?.dpA4IncompatTitle as string) || 'This format can\u2019t be sent to DotPad'}
+        message={(labels?.dpA4IncompatSub as string) || 'A4 braille-paper documents can be converted to a DotPad grid before sending, or exported for embossing.'}
+        confirmLabel={(labels?.dpA4IncompatConfirm as string) || 'OK'}
+        onConfirm={() => setShowA4Warning(false)}
+      />
     </div>
   );
 }
