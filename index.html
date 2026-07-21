@@ -142,17 +142,17 @@ input[type=range]{accent-color:var(--ts-primary)}
    Selected state is toggled via [data-sel] rather than inline background, so the
    :hover feedback is uniform across every toolbar button instead of being masked
    by inline styles. active / focus keep their existing per-button rules. */
-.ts-rail-tool{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;border:none;border-radius:10px;background:transparent;color:#B7AEA4;cursor:pointer;padding:0;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease}
+.ts-rail-tool{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;border:none;border-radius:10px;background:transparent;color:var(--ts-text-secondary);cursor:pointer;padding:0;transition:background 0.15s ease,color 0.15s ease,transform 0.1s ease}
 .ts-rail-group{position:relative;width:40px;height:40px;flex:none;border-radius:10px;transition:background 0.15s ease}
-.ts-rail-tool:not([data-sel="1"]):hover,.ts-rail-group:not([data-sel="1"]):hover{background:rgba(255,255,255,0.10)}
+.ts-rail-tool:not([data-sel="1"]):hover,.ts-rail-group:not([data-sel="1"]):hover{background:rgba(30,28,26,0.06)}
 .ts-rail-tool[data-sel="1"],.ts-rail-group[data-sel="1"]{background:var(--ts-primary)}
 .ts-rail-tool[data-sel="1"]{color:#fff}
-.ts-rail-group-main{position:absolute;inset:0;width:100%;height:100%;display:grid;place-items:center;border:none;background:transparent;border-radius:10px;color:#B7AEA4;cursor:pointer;padding:0;transition:color 0.15s ease,transform 0.1s ease}
+.ts-rail-group-main{position:absolute;inset:0;width:100%;height:100%;display:grid;place-items:center;border:none;background:transparent;border-radius:10px;color:var(--ts-text-secondary);cursor:pointer;padding:0;transition:color 0.15s ease,transform 0.1s ease}
 .ts-rail-group[data-sel="1"] .ts-rail-group-main{color:#fff}
 .ts-rail-group-main:active{transform:scale(0.9)}
-.ts-rail-group-caret{position:absolute;right:2px;bottom:2px;width:14px;height:14px;display:grid;place-items:center;border:none;background:transparent;border-radius:5px;padding:0;cursor:pointer;color:#8A8177;transition:color 0.12s ease,background 0.12s ease}
+.ts-rail-group-caret{position:absolute;right:2px;bottom:2px;width:14px;height:14px;display:grid;place-items:center;border:none;background:transparent;border-radius:5px;padding:0;cursor:pointer;color:var(--ts-border-functional);transition:color 0.12s ease,background 0.12s ease}
 .ts-rail-group[data-sel="1"] .ts-rail-group-caret,.ts-rail-tool[data-sel="1"] .ts-rail-group-caret{color:rgba(255,255,255,0.85)}
-button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)}
+button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30,28,26,0.08)}
 .ts-rail-group-caret--static{pointer-events:none}
 .ts-rail-group-main:focus-visible,.ts-rail-group-caret:focus-visible{outline:2px solid var(--ts-primary);outline-offset:2px}
 .ts-project-name{min-width:0!important;width:clamp(96px,14vw,220px)!important;max-width:100%!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -617,7 +617,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
            was needed for the new position. -->
       <div class="ts-tool-rail" role="toolbar" aria-label="Tools" aria-orientation="horizontal" style="{{ toolbarStyle }}">
         <div onPointerDown="{{ railDragDown }}" onPointerMove="{{ railDragMove }}" onPointerUp="{{ railDragUp }}" onPointerCancel="{{ railDragUp }}" onDoubleClick="{{ railDragReset }}" role="button" tabindex="0" aria-label="{{ t.dragToolbar }}" title="{{ t.dragToolbar }}" style="width:16px;height:32px;flex:none;border-radius:6px;cursor:grab;display:grid;place-items:center;touch-action:none;margin-right:2px" style-hover="background:rgba(255,255,255,0.08)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-          <svg width="6" height="16" viewBox="0 0 6 16" aria-hidden="true"><circle cx="1.2" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="1.4" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="8" r="1.2" fill="#B7AEA4"></circle><circle cx="1.2" cy="14.6" r="1.2" fill="#B7AEA4"></circle><circle cx="4.8" cy="14.6" r="1.2" fill="#B7AEA4"></circle></svg>
+          <svg width="6" height="16" viewBox="0 0 6 16" aria-hidden="true"><circle cx="1.2" cy="1.4" r="1.2" fill="var(--ts-text-secondary)"></circle><circle cx="4.8" cy="1.4" r="1.2" fill="var(--ts-text-secondary)"></circle><circle cx="1.2" cy="8" r="1.2" fill="var(--ts-text-secondary)"></circle><circle cx="4.8" cy="8" r="1.2" fill="var(--ts-text-secondary)"></circle><circle cx="1.2" cy="14.6" r="1.2" fill="var(--ts-text-secondary)"></circle><circle cx="4.8" cy="14.6" r="1.2" fill="var(--ts-text-secondary)"></circle></svg>
         </div>
         <sc-for list="{{ primaryTools }}" as="tl" hint-placeholder-count="3">
           <button class="ts-rail-tool" data-sel="{{ tl.sel }}" onClick="{{ tl.pick }}" onMouseEnter="{{ tl.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ tl.onEnter }}" onBlur="{{ hideTip }}" aria-pressed="{{ tl.selected }}" aria-haspopup="{{ tl.haspopup }}" aria-expanded="{{ tl.expanded }}" aria-label="{{ tl.aria }}" aria-keyshortcuts="{{ tl.aks }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
@@ -630,7 +630,7 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           </button>
         </sc-for>
 
-        <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
+        <div class="ts-rail-div" style="width:1px;height:26px;background:var(--ts-border-decor);margin:0 4px;flex:none"></div>
 
         <!-- Shapes: split control. Main region reuses the active/last shape tool;
              the corner caret (or long-press / re-click when active) opens the flyout. -->
@@ -664,15 +664,15 @@ button.ts-rail-group-caret:hover{color:#EFE8DE;background:rgba(255,255,255,0.16)
           {{ textTool.iconEl }}
         </button>
 
-        <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
-        <button class="ts-rail-history" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" aria-keyshortcuts="{{ undoKeys }}" onMouseEnter="{{ undoTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ undoTip }}" onBlur="{{ hideTip }}" style="{{ undoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <div class="ts-rail-div" style="width:1px;height:26px;background:var(--ts-border-decor);margin:0 4px;flex:none"></div>
+        <button class="ts-rail-history" onClick="{{ doUndo }}" aria-label="{{ t.undo }}" aria-keyshortcuts="{{ undoKeys }}" onMouseEnter="{{ undoTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ undoTip }}" onBlur="{{ hideTip }}" style="{{ undoBarStyle }}" style-hover="background:rgba(30,28,26,0.06)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14l-4 -4l4 -4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 10h11a4 4 0 1 1 0 8h-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
-        <button class="ts-rail-history" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" aria-keyshortcuts="{{ redoKeys }}" onMouseEnter="{{ redoTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ redoTip }}" onBlur="{{ hideTip }}" style="{{ redoBarStyle }}" style-hover="background:rgba(255,255,255,0.10)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <button class="ts-rail-history" onClick="{{ doRedo }}" aria-label="{{ t.redo }}" aria-keyshortcuts="{{ redoKeys }}" onMouseEnter="{{ redoTip }}" onMouseLeave="{{ hideTip }}" onFocus="{{ redoTip }}" onBlur="{{ hideTip }}" style="{{ redoBarStyle }}" style-hover="background:rgba(30,28,26,0.06)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l4 -4l-4 -4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 10h-11a4 4 0 1 0 0 8h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
 
-        <div class="ts-rail-div" style="width:1px;height:26px;background:rgba(255,255,255,0.14);margin:0 4px;flex:none"></div>
+        <div class="ts-rail-div" style="width:1px;height:26px;background:var(--ts-border-decor);margin:0 4px;flex:none"></div>
         <button class="ts-rail-tool" data-sel="{{ quickGroup.sel }}" onClick="{{ quickGroup.toggle }}" onMouseEnter="{{ quickGroup.onEnter }}" onMouseLeave="{{ hideTip }}" onFocus="{{ quickGroup.onEnter }}" onBlur="{{ hideTip }}" aria-haspopup="menu" aria-expanded="{{ quickMenuOpen }}" aria-label="{{ quickGroup.aria }}" style-active="transform:scale(0.9)" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
           {{ quickGroup.iconEl }}
         </button>
@@ -4490,22 +4490,22 @@ class Component extends DCLogic {
   // Toolbar icon set — synced from Figma "02. Components / 01. Toolbar / Icon Set"
   // (canonical vector paths, offset-corrected into the shared 24x24 viewBox).
   ICONS = {
-    cursor: [{ d: 'M 7.91 16.91 C 7.96 17.15 8.08 17.37 8.26 17.54 C 8.44 17.7 8.67 17.81 8.91 17.84 C 9.15 17.88 9.4 17.83 9.62 17.72 C 9.84 17.61 10.02 17.44 10.13 17.22 L 12.22 14.13 L 17.13 19.04 C 17.23 19.14 17.35 19.21 17.48 19.27 C 17.61 19.32 17.74 19.35 17.88 19.35 C 18.03 19.35 18.16 19.32 18.29 19.27 C 18.42 19.21 18.54 19.14 18.64 19.04 L 19.69 17.99 C 19.79 17.89 19.86 17.77 19.92 17.64 C 19.97 17.51 20 17.38 20 17.24 C 20 17.09 19.97 16.96 19.92 16.83 C 19.86 16.7 19.79 16.58 19.69 16.48 L 14.78 11.57 L 17.89 9.48 C 18.11 9.37 18.28 9.19 18.39 8.97 C 18.5 8.75 18.55 8.5 18.51 8.26 C 18.48 8.02 18.37 7.79 18.21 7.61 C 18.04 7.43 17.82 7.31 17.58 7.26 L 4 3.35 L 7.91 16.91 Z' }],
-    pen: [{ d: 'M 8 19.33 L 4 19.33 L 4 15.33 L 14.5 4.83 C 14.76 4.57 15.07 4.36 15.42 4.22 C 15.76 4.07 16.13 4 16.5 4 C 16.87 4 17.24 4.07 17.58 4.22 C 17.93 4.36 18.24 4.57 18.5 4.83 C 18.76 5.09 18.97 5.4 19.11 5.75 C 19.26 6.09 19.33 6.46 19.33 6.83 C 19.33 7.2 19.26 7.57 19.11 7.91 C 18.97 8.25 18.76 8.57 18.5 8.83 L 8 19.33 Z' }, { d: 'M 8 19.33 L 17.58 19.33' }, { d: 'M 13.5 5.83 L 17.5 9.83' }, { d: 'M 13.67 6.83 L 19.33 6.83' }],
-    eraser: [{ d: 'M 18.02 19.96 L 7.52 19.96 L 3.31 15.66 C 3.13 15.47 3.02 15.22 3.02 14.95 C 3.02 14.69 3.13 14.43 3.31 14.25 L 13.31 4.25 C 13.5 4.06 13.75 3.96 14.02 3.96 C 14.28 3.96 14.54 4.06 14.72 4.25 L 19.72 9.25 C 19.91 9.43 20.01 9.69 20.01 9.95 C 20.01 10.22 19.91 10.47 19.72 10.66 L 10.52 19.96' }, { d: 'M 17.02 13.26 L 10.72 6.96' }, { d: 'M 6.25 18.25 L 3.25 15.25' }],
-    line: [{ d: 'M 4 18 C 4 18.53 4.21 19.04 4.59 19.41 C 4.96 19.79 5.47 20 6 20 C 6.53 20 7.04 19.79 7.41 19.41 C 7.79 19.04 8 18.53 8 18 C 8 17.47 7.79 16.96 7.41 16.59 C 7.04 16.21 6.53 16 6 16 C 5.47 16 4.96 16.21 4.59 16.59 C 4.21 16.96 4 17.47 4 18 Z' }, { d: 'M 16 6 C 16 6.53 16.21 7.04 16.59 7.41 C 16.96 7.79 17.47 8 18 8 C 18.53 8 19.04 7.79 19.41 7.41 C 19.79 7.04 20 6.53 20 6 C 20 5.47 19.79 4.96 19.41 4.59 C 19.04 4.21 18.53 4 18 4 C 17.47 4 16.96 4.21 16.59 4.59 C 16.21 4.96 16 5.47 16 6 Z' }, { d: 'M 7.5 16.5 L 16.5 7.5' }],
-    rect: [{ d: 'M 3 7 C 3 6.47 3.21 5.96 3.59 5.59 C 3.96 5.21 4.47 5 5 5 L 19 5 C 19.53 5 20.04 5.21 20.41 5.59 C 20.79 5.96 21 6.47 21 7 L 21 17 C 21 17.53 20.79 18.04 20.41 18.41 C 20.04 18.79 19.53 19 19 19 L 5 19 C 4.47 19 3.96 18.79 3.59 18.41 C 3.21 18.04 3 17.53 3 17 L 3 7 Z' }],
-    ellipse: [{ d: 'M 20 12 C 20 16.42 16.42 20 12 20 C 7.58 20 4 16.42 4 12 C 4 7.58 7.58 4 12 4 C 16.42 4 20 7.58 20 12 Z' }],
-    poly: [{ d: 'M 12 3.5 L 20 9.4 L 17 19 L 7 19 L 4 9.4 L 12 3.5 Z' }],
-    fill: [{ d: 'M 6 11.5 L 12 5.5 L 18 11.5 L 12 17.5 C 11.85 17.65 11.67 17.78 11.47 17.86 C 11.28 17.94 11.06 17.99 10.85 17.99 C 10.64 17.99 10.42 17.94 10.23 17.86 C 10.03 17.78 9.85 17.65 9.7 17.5 L 6 13.8 C 5.85 13.65 5.72 13.47 5.64 13.27 C 5.56 13.08 5.51 12.86 5.51 12.65 C 5.51 12.44 5.56 12.22 5.64 12.03 C 5.72 11.83 5.85 11.65 6 11.5 Z' }, { d: 'M 12 5.5 L 10 3.5' }, { d: 'M 19.5 15.5 C 19.5 15.5 21 17.4 21 18.5 C 21 18.9 20.84 19.28 20.56 19.56 C 20.28 19.84 19.9 20 19.5 20 C 19.1 20 18.72 19.84 18.44 19.56 C 18.16 19.28 18 18.9 18 18.5 C 18 17.4 19.5 15.5 19.5 15.5 Z', fill: true }],
-    select: [{ d: 'M 4 8.5 L 4 5.5 C 4 5.1 4.16 4.72 4.44 4.44 C 4.72 4.16 5.1 4 5.5 4 L 8.5 4' }, { d: 'M 15.5 4 L 18.5 4 C 18.9 4 19.28 4.16 19.56 4.44 C 19.84 4.72 20 5.1 20 5.5 L 20 8.5' }, { d: 'M 20 15.5 L 20 18.5 C 20 18.9 19.84 19.28 19.56 19.56 C 19.28 19.84 18.9 20 18.5 20 L 15.5 20' }, { d: 'M 8.5 20 L 5.5 20 C 5.1 20 4.72 19.84 4.44 19.56 C 4.16 19.28 4 18.9 4 18.5 L 4 15.5' }],
-    text: [{ d: 'M5 5h14M12 5v14M9 19h6' }],
+    cursor: [{ d: 'M7.904 17.563a1.2 1.2 0 0 0 2.228 .308l2.09 -3.093l4.907 4.907a1.067 1.067 0 0 0 1.509 0l1.047 -1.047a1.067 1.067 0 0 0 0 -1.509l-4.907 -4.907l3.113 -2.09a1.2 1.2 0 0 0 -.309 -2.228l-13.582 -3.904l3.904 13.563' }],
+    pen: [{ d: 'M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4' }, { d: 'M13.5 6.5l4 4' }],
+    eraser: [{ d: 'M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l10 -10a1 1 0 0 1 1.41 0l5 5a1 1 0 0 1 0 1.41l-9.2 9.3' }, { d: 'M18 13.3l-6.3 -6.3' }],
+    line: [{ d: 'M4 18a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' }, { d: 'M16 6a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' }, { d: 'M7.5 16.5l9 -9' }],
+    rect: [{ d: 'M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14' }],
+    ellipse: [{ d: 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0' }],
+    poly: [{ d: 'M10 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' }, { d: 'M17 8a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' }, { d: 'M3 11a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' }, { d: 'M13 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' }, { d: 'M6.5 9.5l3.5 -3' }, { d: 'M14 5.5l3 1.5' }, { d: 'M18.5 10l-2.5 7' }, { d: 'M13.5 17.5l-7 -5' }],
+    fill: [{ d: 'M4 7a8 4 0 1 0 16 0a8 4 0 1 0 -16 0' }, { d: 'M4 7c0 .664 .088 1.324 .263 1.965l2.737 10.035c.5 1.5 2.239 2 5 2s4.5 -.5 5 -2c.333 -1 1.246 -4.345 2.737 -10.035a7.45 7.45 0 0 0 .263 -1.965' }],
+    select: [{ d: 'M4 6a2 2 0 0 1 2 -2m3 0h1.5m3 0h1.5m3 0a2 2 0 0 1 2 2m0 3v1.5m0 3v1.5m0 3a2 2 0 0 1 -2 2m-3 0h-1.5m-3 0h-1.5m-3 0a2 2 0 0 1 -2 -2m0 -3v-1.5m0 -3v-1.5m0 -3' }],
+    text: [{ d: 'M6 4l12 0' }, { d: 'M12 4l0 16' }],
     shapes: [{ d: 'M4 5h8v8H4z' }, { d: 'M20 15.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z' }],
-    clearAll: [{ d: 'M4 7h16' }, { d: 'M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2' }, { d: 'M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12' }],
-    invert: [{ d: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z' }, { d: 'M12 4a8 8 0 0 1 0 16Z', fill: true }],
-    flipH: [{ d: 'M12 3v18' }, { d: 'M8 8L4 12l4 4V8z', fill: true }, { d: 'M16 8l4 4-4 4V8z', fill: true }],
-    flipV: [{ d: 'M3 12h18' }, { d: 'M8 8l4-4 4 4H8z', fill: true }, { d: 'M8 16l4 4 4-4H8z', fill: true }],
-    more: [{ d: 'M6 12h.01M12 12h.01M18 12h.01' }]
+    clearAll: [{ d: 'M8 6h12' }, { d: 'M6 12h12' }, { d: 'M4 18h12' }],
+    invert: [{ d: 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0' }, { d: 'M12 17a5 5 0 0 0 0 -10v10' }],
+    flipH: [{ d: 'M12 3l0 18' }, { d: 'M16 7l0 10l5 0l-5 -10' }, { d: 'M8 7l0 10l-5 0l5 -10' }],
+    flipV: [{ d: 'M3 12l18 0' }, { d: 'M7 16l10 0l-10 5l0 -5' }, { d: 'M7 8l10 0l-10 -5l0 5' }],
+    more: [{ d: 'M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }, { d: 'M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }, { d: 'M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }]
   };
   icon(id, size) {
     const spec = this.ICONS[id] || [];
@@ -6081,7 +6081,7 @@ class Component extends DCLogic {
       // over the bottom of the canvas; once dragged, toolbarPos pins it to
       // fixed viewport coordinates captured at drag-start (see railDragDown).
       toolbarStyle: Object.assign(
-        { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, background: '#1E1C1A', borderRadius: 16, padding: 6, boxShadow: '0 12px 32px -8px rgba(16,24,40,0.35),0 4px 10px rgba(16,24,40,0.18)', maxWidth: 'calc(100vw - 24px)', overflowX: 'auto', scrollbarWidth: 'none', zIndex: 15, boxSizing: 'border-box' },
+        { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, background: 'var(--ts-panel)', borderRadius: 16, padding: 6, boxShadow: '0 12px 32px -8px rgba(16,24,40,0.35),0 4px 10px rgba(16,24,40,0.18)', maxWidth: 'calc(100vw - 24px)', overflowX: 'auto', scrollbarWidth: 'none', zIndex: 15, boxSizing: 'border-box' },
         st.toolbarPos
           ? { position: 'fixed', left: st.toolbarPos.x, top: st.toolbarPos.y, right: 'auto', bottom: 'auto', transform: 'none' }
           : { position: 'absolute', left: '50%', bottom: 20, top: 'auto', transform: 'translateX(-50%)' }
