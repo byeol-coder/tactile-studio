@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embed Harness — tactile-studio iframe 브리지 눈 확인</title>
+<style>
+  :root { --line:#ECE6DC; --primary:#C43D00; --ink:#1F1D1A; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.5 Pretendard, system-ui, sans-serif; color:var(--ink); }
+  header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 14px; border-bottom:1px solid var(--line); }
+  header h1 { font-size:15px; margin:0 12px 0 0; }
+  button, select { min-height:36px; padding:0 12px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:pointer; font:inherit; }
+  button.primary { border-color:var(--primary); color:var(--primary); font-weight:700; }
+  .spacer { flex:1; }
+  main { display:grid; grid-template-columns: 1fr 360px; gap:0; height:calc(100vh - 57px); }
+  iframe { width:100%; height:100%; border:0; background:#fff; }
+  aside { border-left:1px solid var(--line); display:flex; flex-direction:column; min-width:0; }
+  aside h2 { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#8A817A; margin:12px 14px 6px; }
+  #log { flex:1; overflow:auto; margin:0; padding:8px 12px; font:12px/1.5 "JetBrains Mono", ui-monospace, monospace; white-space:pre-wrap; word-break:break-all; }
+  .row { padding:6px 12px; border-top:1px solid var(--line); }
+  .ok { color:#0a7d5a; } .warn { color:#b45309; } .err { color:#b91c1c; }
+  code { background:#F7F4EF; padding:1px 5px; border-radius:5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Embed Harness</h1>
+  <label>studio URL
+    <input id="url" value="../index.html" style="min-height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;width:220px">
+  </label>
+  <button id="reload">불러오기</button>
+  <div class="spacer"></div>
+  <label>lang
+    <select id="lang"><option value="ko">ko</option><option value="en">en</option></select>
+  </label>
+  <button id="sendLocale">locale-change 전송</button>
+  <button id="publish" class="primary">공개하기 (request-graphic)</button>
+  <button id="badOrigin">오리진 위조 테스트</button>
+</header>
+<main>
+  <iframe id="studio" title="tactile-studio" allow="bluetooth; clipboard-write"></iframe>
+  <aside>
+    <h2>수신 그래픽</h2>
+    <div class="row" id="graphic">—</div>
+    <h2>메시지 로그</h2>
+    <pre id="log"></pre>
+  </aside>
+</main>
+<script>
+  var frame = document.getElementById('studio');
+  var logEl = document.getElementById('log');
+  var studioOrigin = null; // 로드 후 iframe src에서 도출
+
+  function log(kind, msg) {
+    var t = new Date().toLocaleTimeString();
+    var cls = kind === 'in' ? 'ok' : kind === 'err' ? 'err' : kind === 'warn' ? 'warn' : '';
+    logEl.innerHTML += '<span class="' + cls + '">[' + t + '] ' + kind + ' · ' + msg + '</span>\n';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function computeOrigin(u) {
+    try { return new URL(u, location.href).origin; } catch (e) { return location.origin; }
+  }
+  function sendToStudio(type, payload) {
+    if (!frame.contentWindow) return;
+    frame.contentWindow.postMessage({ source: 'tactile-world', type: type, payload: payload }, studioOrigin || '*');
+    log('out', type + (payload ? ' · ' + JSON.stringify(payload) : ''));
+  }
+
+  document.getElementById('reload').onclick = function () {
+    var u = document.getElementById('url').value.trim();
+    var withEmbed = u + (u.indexOf('?') >= 0 ? '&' : '?') + 'embed=1';
+    studioOrigin = computeOrigin(u);
+    document.getElementById('graphic').textContent = '—';
+    log('info', 'load ' + withEmbed + '  (origin=' + studioOrigin + ')');
+    frame.src = withEmbed;
+  };
+  document.getElementById('sendLocale').onclick = function () {
+    sendToStudio('locale-change', { locale: document.getElementById('lang').value });
+  };
+  document.getElementById('publish').onclick = function () { sendToStudio('request-graphic'); };
+  document.getElementById('badOrigin').onclick = function () {
+    // 스튜디오가 오리진 검증을 하는지: 존재하지 않는 타깃으로 보내면 스튜디오엔 도달하지 않음.
+    // 대신 여기서는 잘못된 source로 보내 스튜디오가 무시하는지 확인.
+    frame.contentWindow.postMessage({ source: 'not-tactile-world', type: 'request-graphic' }, studioOrigin || '*');
+    log('warn', "foreign source 전송 — 스튜디오는 응답하지 않아야 정상 (아래 로그에 graphic 안 뜨면 OK)");
+  };
+
+  window.addEventListener('message', function (e) {
+    if (studioOrigin && e.origin !== studioOrigin) { log('warn', 'ignored (origin ' + e.origin + ')'); return; }
+    var d = e.data;
+    if (!d || d.source !== 'tactile-studio') return;
+    if (d.type === 'ready') {
+      log('in', 'ready — 핸드셰이크 OK, locale 자동 전송');
+      sendToStudio('locale-change', { locale: document.getElementById('lang').value });
+    } else if (d.type === 'graphic') {
+      var p = d.payload || {};
+      var len = (p.data || '').length;
+      document.getElementById('graphic').innerHTML =
+        '<b>' + (p.title || '') + '</b> · <code>' + p.spec + '</code> · hex ' + len +
+        (len === (p.spec === '96x64' ? 1536 : 600) ? ' <span class="ok">✓ 길이 정상</span>' : ' <span class="err">✗ 길이 이상</span>') +
+        '<br><span style="color:#8A817A">' + (p.data || '').slice(0, 64) + '…</span>';
+      log('in', 'graphic · ' + p.title + ' · ' + p.spec + ' · hex ' + len);
+    } else if (d.type === 'graphic-error') {
+      document.getElementById('graphic').innerHTML = '<span class="err">graphic-error: ' + (d.payload && d.payload.reason) + '</span>';
+      log('err', 'graphic-error · ' + (d.payload && d.payload.reason));
+    } else if (d.type === 'exit') {
+      log('in', 'exit — 부모가 모달을 닫아야 함');
+    } else {
+      log('in', d.type);
+    }
+  });
+
+  // 초기 자동 로드
+  document.getElementById('reload').click();
+</script>
+</body>
+</html>
