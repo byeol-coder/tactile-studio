@@ -170,13 +170,13 @@ export function Toolbar({ labels }: ToolbarProps) {
       )}
 
       <Divider />
-      {/* No undo/redo icon exists in the ported ICONS map (the monolith's
-          announcements for these exist — aUndo/aRedo — but no SVG path data
-          was found for them; per the target stack these likely come from
-          Tabler Icons, not yet sourced into src/ui/icons). Plain glyphs here
-          rather than guessing at path data. */}
-      <button type="button" disabled={!canUndo} onClick={doUndo} aria-label={(labels?.undo as string) || 'Undo'} title={(labels?.undo as string) || 'Undo'} style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid var(--ts-line, #ECE6DC)', background: 'var(--ts-surface, #FFFFFF)', cursor: canUndo ? 'pointer' : 'default', opacity: canUndo ? 1 : 0.4 }}>↶</button>
-      <button type="button" disabled={!canRedo} onClick={doRedo} aria-label={(labels?.redo as string) || 'Redo'} title={(labels?.redo as string) || 'Redo'} style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid var(--ts-line, #ECE6DC)', background: 'var(--ts-surface, #FFFFFF)', cursor: canRedo ? 'pointer' : 'default', opacity: canRedo ? 1 : 0.4 }}>↷</button>
+      {/* Verbatim vanilla undo/redo icons, now sourced in icons.ts (ported
+          from the monolith's own hand-drawn ts-rail-history SVGs -- see
+          that file's doc comment). Reuses the shared IconButton/Tooltip
+          the rest of this toolbar already uses, instead of the plain-glyph
+          stopgap this button used before those paths were found. */}
+      <IconButton icon="undo" label={(labels?.undo as string) || 'Undo'} disabled={!canUndo} onClick={doUndo} />
+      <IconButton icon="redo" label={(labels?.redo as string) || 'Redo'} disabled={!canRedo} onClick={doRedo} />
 
       <Divider />
       <IconButton icon="flipH" label={(labels?.flipH as string) || 'Flip horizontal'} onClick={doFlipH} />

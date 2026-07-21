@@ -188,7 +188,7 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
           <PagePanel labels={labels} />
           {services.corpus && <CorpusSearchPanel corpus={services.corpus} labels={labels} />}
         </div>}
-        <StudioCanvas ariaLabel={(labels?.canvasAria as string) || 'Tactile drawing canvas'} />
+        <StudioCanvas ariaLabel={(labels?.canvasAria as string) || 'Tactile drawing canvas'} labels={labels} />
         {(!focusMode || showPanels) && <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Inspector labels={labels} gridFx={services.gridFx} braille={services.braille} />
           <QualityPanel />

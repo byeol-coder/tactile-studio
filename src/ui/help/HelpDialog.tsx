@@ -1,9 +1,9 @@
 // src/ui/help/HelpDialog.tsx
 //
 // Keyboard-shortcuts help dialog. Lists ONLY what actually works in this
-// package right now (tool shortcuts, ported in useKeyboardShortcuts.ts this
-// same pass, plus undo/redo which already existed) -- not vanilla's full
-// shortcutRegistry(), which also documents zoom (Ctrl+/-/0) and
+// package right now (tool shortcuts and zoom, both ported in
+// useKeyboardShortcuts.ts, plus undo/redo which already existed) -- not
+// vanilla's full shortcutRegistry(), which also documents
 // accessibility-mode canvas navigation (Space/arrows/Enter) that this port
 // doesn't have UI for yet (see useKeyboardShortcuts.ts's own doc comment).
 // Listing shortcuts that don't fire here would be actively misleading, not
@@ -71,6 +71,11 @@ export function HelpDialog({ open, labels, onClose }: HelpDialogProps) {
     { keys: `${mod}Z`, nameKey: 'undo', fallback: (labels?.undo as string) || 'Undo' },
     { keys: `${mod}\u21e7Z`, nameKey: 'redo', fallback: (labels?.redo as string) || 'Redo' },
   ];
+  const viewRows: ShortcutRow[] = [
+    { keys: `${mod}+`, nameKey: 'zoomIn', fallback: (labels?.zoomInL as string) || 'Zoom in' },
+    { keys: `${mod}\u2212`, nameKey: 'zoomOut', fallback: (labels?.zoomOutL as string) || 'Zoom out' },
+    { keys: `${mod}0`, nameKey: 'zoomReset', fallback: (labels?.zoomResetL as string) || 'Reset to 100%' },
+  ];
 
   return (
     <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'grid', placeItems: 'center', zIndex: 100 }}>
@@ -98,8 +103,20 @@ export function HelpDialog({ open, labels, onClose }: HelpDialogProps) {
         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ts-text-secondary, #6B6862)', marginBottom: 4 }}>
           {(labels?.scgEditing as string) || 'Editing'}
         </div>
-        <ul style={{ listStyle: 'none', margin: '0 0 16px', padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <ul style={{ listStyle: 'none', margin: '0 0 14px', padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           {editingRows.map((row) => (
+            <li key={row.nameKey} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+              <span>{row.fallback}</span>
+              <kbd style={{ fontFamily: 'inherit', fontSize: 12, background: 'var(--ts-bg-warm, #F7F4EF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 4, padding: '1px 6px' }}>{row.keys}</kbd>
+            </li>
+          ))}
+        </ul>
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ts-text-secondary, #6B6862)', marginBottom: 4 }}>
+          {(labels?.scgView as string) || 'View'}
+        </div>
+        <ul style={{ listStyle: 'none', margin: '0 0 16px', padding: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {viewRows.map((row) => (
             <li key={row.nameKey} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
               <span>{row.fallback}</span>
               <kbd style={{ fontFamily: 'inherit', fontSize: 12, background: 'var(--ts-bg-warm, #F7F4EF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 4, padding: '1px 6px' }}>{row.keys}</kbd>

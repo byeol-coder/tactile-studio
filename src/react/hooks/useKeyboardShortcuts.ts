@@ -7,10 +7,17 @@
 // SAME id->key mapping vanilla uses, so a shortcut means the same thing in
 // both apps.
 //
-// STILL NOT ported here (tracked as a separate, larger gap -- these need UI
-// that doesn't exist in this package yet, unlike the tool shortcuts above
-// which only needed useTool().setTool(), already present):
-//   - Ctrl/Cmd +/-/0 zoom (no zoom UI/steps anywhere in src/ui yet)
+// Zoom shortcuts (Ctrl/Cmd +/-/0) now live here too, ported once
+// EditorStore grew zoomIn/zoomOut/zoomReset (see editor-store.ts's zoom-
+// preset doc comment) and StudioCanvas grew a ZoomControls pill to display
+// the result -- same id->action mapping as vanilla's onKey (index.html):
+// `=`/`+`/NumpadAdd -> zoomIn, `-`/`_`/NumpadSubtract -> zoomOut, `0` ->
+// zoomReset. Deliberately still NOT stealing plain `=`/`-`/`0` (no modifier)
+// the way tool letters are stolen above -- those are common text-input
+// characters, and vanilla itself only binds them with Ctrl/Cmd held.
+//
+// STILL NOT ported here (tracked as a separate, larger gap -- needs UI that
+// doesn't exist in this package yet):
 //   - Space (toggle dot under keyboard cursor) / arrow-key cell nudge / Enter
 //     (close polygon) -- monolith's accessibility-mode canvas keyboard nav,
 //     which depends on a cell-cursor position (state.cx/cy) this port's
@@ -61,6 +68,15 @@ export function useKeyboardShortcuts(labels?: StudioLabels) {
         } else if (key === 'y') {
           e.preventDefault();
           if (store.redo()) { const msg = (labels?.aRedo as string) || 'Redone'; store.announce(msg); store.toastMsg(msg); }
+        } else if (key === '=' || key === '+' || e.code === 'NumpadAdd') {
+          e.preventDefault();
+          store.zoomIn();
+        } else if (key === '-' || key === '_' || e.code === 'NumpadSubtract') {
+          e.preventDefault();
+          store.zoomOut();
+        } else if (key === '0') {
+          e.preventDefault();
+          store.zoomReset();
         }
         return;
       }
