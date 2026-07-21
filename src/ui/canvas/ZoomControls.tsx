@@ -22,7 +22,8 @@
 // Reads/writes zoom via useZoom() (thin wrapper over EditorStore's
 // zoomIn/zoomOut/zoomReset preset-stepping methods) -- see that hook and
 // editor-store.ts's own doc comment for what IS and is NOT ported (the
-// preset values are verbatim; scroll-position anchoring is deferred).
+// preset values are verbatim; scroll-anchoring math and the wheel handler
+// live in StudioCanvas.tsx alongside the actual scrollable viewport).
 
 import React from 'react';
 import { useZoom } from '../../react/hooks/useZoom.js';

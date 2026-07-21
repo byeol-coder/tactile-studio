@@ -23,7 +23,7 @@
 // props for tests, since jsdom has no real 2D canvas (documented, see
 // docs/known-issues.md #5 and #2).
 
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useCallback, useState } from 'react';
 import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import { line, rectOutline, ellipseOutline, makeBrush, floodFill } from '../../core/geometry/raster.js';
 import { cellIndex, inBounds } from '../../core/grid/grid.js';
@@ -63,6 +63,13 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
   const rafRef = useRef<number | null>(null);
   const polyRef = useRef<{ points: Array<[number, number]>; preview: Set<number> }>({ points: [], preview: new Set() });
   const [textPopover, setTextPopover] = useState<{ gx: number; gy: number; left: number; top: number; value: string } | null>(null);
+  // Zoom scroll-anchoring refs (verbatim port of the monolith's
+  // zoomAround/zoomAtViewportCenter — see the useLayoutEffect and onWheel
+  // handler near the return statement for the actual math and their own
+  // doc comments for why this needed a real scrollable viewport at all).
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const prevZoomRef = useRef(snapshot.zoom);
+  const pendingAnchorRef = useRef<{ x: number; y: number } | null>(null);
 
   const c = cellPx(snapshot.gridW);
   const { gridW, gridH } = snapshot;
@@ -369,45 +376,107 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
   // at 1x, let the browser fit the canvas within its container as before
   // (maxWidth:100%, height:auto); at any other zoom, size it explicitly to
   // gridW/gridH * cellPx * zoom so it renders at the requested magnification
-  // rather than being auto-fit. See editor-store.ts's zoom-preset doc
-  // comment for what's deferred (scroll-position anchoring).
+  // rather than being auto-fit. Scroll-position anchoring for the resulting
+  // overflow now lives just below (see the useLayoutEffect's own comment).
   const zoom = snapshot.zoom;
   const canvasStyle: React.CSSProperties = zoom === 1
     ? { display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated', maxWidth: '100%', height: 'auto' }
     : { display: 'block', outline: 'none', touchAction: 'none', imageRendering: 'pixelated', width: gridW * c * zoom, height: gridH * c * zoom };
 
+  // Scroll-position anchoring (verbatim port of the monolith's zoomAround/
+  // zoomAtViewportCenter, index.html's "Canvas zoom (Figma-style)" section):
+  // re-derives viewportRef's scrollLeft/scrollTop after every zoom change so
+  // whatever point was under the anchor stays visually put, instead of the
+  // content jumping to a different part of the canvas. Runs as a layout
+  // effect (before paint) so the corrected scroll position is never
+  // flashed/visible mid-jump, matching the monolith's own setState-callback
+  // timing (it adjusts scroll synchronously once the resize from the new
+  // zoom has been committed to the DOM).
+  //
+  // Anchor priority: pendingAnchorRef (set by onWheel just before the store
+  // update, holding the exact mouse position for that gesture) if present,
+  // else the viewport's own center (matching zoomAtViewportCenter, used by
+  // the pill buttons and Ctrl/Cmd +/-/0 keyboard shortcuts -- neither of
+  // which have a "mouse position" of their own to anchor to).
+  useLayoutEffect(() => {
+    const oldZoom = prevZoomRef.current;
+    const newZoom = snapshot.zoom;
+    prevZoomRef.current = newZoom;
+    if (oldZoom === newZoom) return;
+    const el = viewportRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const anchor = pendingAnchorRef.current ?? { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    pendingAnchorRef.current = null;
+    const ax = anchor.x - r.left, ay = anchor.y - r.top;   // anchor, viewport-relative
+    const px = el.scrollLeft + ax, py = el.scrollTop + ay; // same point, in content coordinates
+    const ratio = newZoom / oldZoom;
+    el.scrollLeft = px * ratio - ax;
+    el.scrollTop = py * ratio - ay;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.zoom]);
+
+  // Ctrl/Cmd+wheel (and trackpad pinch, which browsers report as a ctrlKey
+  // wheel event) zooms continuously around the mouse position -- verbatim
+  // port of the monolith's cvWheel. Plain wheel (no modifier) is NOT
+  // preventDefault'd, so the viewport's native overflow:auto scroll/pan
+  // still works exactly as it would on any scrollable div.
+  const onViewportWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.08 : 1 / 1.08;
+    pendingAnchorRef.current = { x: e.clientX, y: e.clientY };
+    store.setZoomClamped(snapshot.zoom * factor);
+  };
+
   return (
-    <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
-      <canvas
-        ref={canvasRef}
-        tabIndex={0}
-        role="img"
-        aria-label={`${ariaLabel || 'Tactile drawing canvas'}. Arrow keys move; Shift moves 5 cells and Alt moves 10. Hold Shift while shaping to snap to 5 cells, or Alt to snap to 10. Space or Enter edits, U undoes, R redoes.`}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-        onDoubleClick={onDoubleClick}
-        onKeyDown={onKeyDown}
-        style={canvasStyle}
-      />
-      <ZoomControls labels={labels} />
-      {textPopover && (
-        <div style={{ position: 'fixed', left: textPopover.left, top: textPopover.top, zIndex: 50, background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 6 }}>
-          <input
-            autoFocus
-            value={textPopover.value}
-            onChange={(e) => setTextPopover({ ...textPopover, value: e.target.value })}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') { e.preventDefault(); commitText(); }
-              else if (e.key === 'Escape') { e.preventDefault(); setTextPopover(null); }
-            }}
-            onBlur={commitText}
-            aria-label="Tactile text"
-            style={{ font: 'inherit' }}
+    <div style={{ position: 'relative', overflow: 'hidden', height: 'var(--ts-canvas-viewport-height, min(70vh, 640px))' }}>
+      <div
+        ref={viewportRef}
+        data-testid="canvas-viewport"
+        onWheel={onViewportWheel}
+        style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: 20 }}
+      >
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <canvas
+            ref={canvasRef}
+            tabIndex={0}
+            role="img"
+            aria-label={`${ariaLabel || 'Tactile drawing canvas'}. Arrow keys move; Shift moves 5 cells and Alt moves 10. Hold Shift while shaping to snap to 5 cells, or Alt to snap to 10. Space or Enter edits, U undoes, R redoes.`}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onDoubleClick={onDoubleClick}
+            onKeyDown={onKeyDown}
+            style={canvasStyle}
           />
+          {textPopover && (
+            <div style={{ position: 'fixed', left: textPopover.left, top: textPopover.top, zIndex: 50, background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 6 }}>
+              <input
+                autoFocus
+                value={textPopover.value}
+                onChange={(e) => setTextPopover({ ...textPopover, value: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') { e.preventDefault(); commitText(); }
+                  else if (e.key === 'Escape') { e.preventDefault(); setTextPopover(null); }
+                }}
+                onBlur={commitText}
+                aria-label="Tactile text"
+                style={{ font: 'inherit' }}
+              />
+            </div>
+          )}
         </div>
-      )}
+      </div>
+      {/* OUTSIDE viewportRef, deliberately -- a verbatim port of vanilla's
+          own nesting (its zoom pill is a sibling AFTER the scrolling
+          viewport div closes, both children of the same outer, non-
+          scrolling, position:relative "canvas zone"). If ZoomControls were
+          nested INSIDE the scrolling viewport instead, it would scroll out
+          of view along with the canvas at high zoom/pan offsets, instead of
+          staying fixed in the corner the way it does here and in vanilla. */}
+      <ZoomControls labels={labels} />
     </div>
   );
 }

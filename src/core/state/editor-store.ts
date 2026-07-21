@@ -185,14 +185,15 @@ export class EditorStore {
   // zoom pill and keyboard shortcuts (Ctrl/Cmd +/-/0), always clamped and
   // step-quantized the same way the monolith's helpers are.
   //
-  // Deliberately NOT ported in this pass: zoomAround()/zoomAtViewportCenter()'s
-  // scroll-position compensation (adjusting scrollLeft/scrollTop so the
-  // zoom "stays under your cursor" or centered). This package's canvas has
-  // no dedicated scrollable zoom viewport yet — it sits in a plain
-  // inline-block wrapper (see StudioCanvas.tsx) — so anchoring is a
-  // separate, larger gap than the step logic itself. The zoom VALUE these
-  // methods produce is identical to vanilla; only the "what the viewport
-  // scrolls to" side effect is absent.
+  // zoomAround()/zoomAtViewportCenter()'s scroll-position compensation
+  // (adjusting scrollLeft/scrollTop so the zoom "stays under your cursor"
+  // or centered) is ported too, but lives in StudioCanvas.tsx's
+  // useLayoutEffect + onWheel handler, not here — it needs a real DOM
+  // viewport ref and getBoundingClientRect(), which this framework-agnostic
+  // store deliberately has no access to (see this file's own header comment
+  // on why drawing/pointer state stays out of the store entirely). This
+  // store only ever produces the zoom VALUE; the component owns turning a
+  // value change into a scroll-position side effect.
   private static readonly ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 8];
 
   private zoomClamp(z: number): number {
@@ -214,6 +215,16 @@ export class EditorStore {
   }
 
   zoomReset() { this.setZoom(1); }
+
+  /** Raw setter with the SAME clamp+round vanilla's zoomAround applies
+   *  (round to nearest 0.01, clamp to the [min,max] step range) -- for
+   *  CONTINUOUS zoom sources (wheel/trackpad pinch) that scale by a factor
+   *  rather than jumping to a fixed preset the way zoomIn/zoomOut do. Kept
+   *  here (not duplicated in the component) so ZOOM_STEPS' bounds stay the
+   *  single source of truth. */
+  setZoomClamped(z: number) {
+    this.setZoom(Math.round(this.zoomClamp(z) * 100) / 100);
+  }
 
   /** Exposed read-only so the zoom pill can disable zoom-out/zoom-in at the
    *  ends of the range, matching the monolith's zoomOutDisabled/zoomInDisabled. */
