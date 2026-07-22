@@ -400,7 +400,7 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
          thumb is a data: URL from thumbFrom, guarded by hasThumb so placeholder
          renders never leak a literal {{ }} into <img src> (no phantom 404). -->
     <div class="ts-pages-rail" role="tablist" aria-label="{{ t.pagesLabel }}" style="width:200px;flex:none;background:var(--ts-panel);border-right:1px solid var(--ts-border-decor);display:flex;flex-direction:column;overflow:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px;font-size:13px;font-weight:700;color:var(--ts-text-secondary)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 11px;font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase;border-bottom:1px solid var(--ts-border-decor)">
         <span>{{ t.pagesLabel }}</span>
         <button onClick="{{ addPageFn }}" aria-label="{{ t.addPage }}" title="{{ t.addPage }}" style="width:26px;height:26px;border:none;border-radius:7px;background:transparent;color:var(--ts-text-secondary);display:grid;place-items:center" style-hover="background:var(--ts-bg-warm);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
           <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
@@ -410,17 +410,18 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
         <sc-for list="{{ pageList }}" as="p" hint-placeholder-count="2">
           <div class="ts-page-item" data-page-index="{{ p.i }}" style="{{ p.wrapStyle }}">
             <sc-if value="{{ p.dropBefore }}" hint-placeholder-val="{{ false }}"><div style="{{ p.indicatorTopStyle }}"></div></sc-if>
-            <button data-page-pick="1" onClick="{{ p.pick }}" onKeyDown="{{ p.onKey }}" onPointerDown="{{ p.dragDownCard }}" onPointerMove="{{ p.dragMove }}" onPointerUp="{{ p.dragUpCard }}" onPointerCancel="{{ p.dragCancel }}" role="tab" aria-selected="{{ p.selected }}" aria-label="{{ p.aria }}" style="{{ p.style }}" style-hover="border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+            <button data-page-pick="1" onClick="{{ p.pick }}" onKeyDown="{{ p.onKey }}" onPointerDown="{{ p.dragDownCard }}" onPointerMove="{{ p.dragMove }}" onPointerUp="{{ p.dragUpCard }}" onPointerCancel="{{ p.dragCancel }}" role="tab" aria-selected="{{ p.selected }}" aria-label="{{ p.aria }}" style="{{ p.style }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
               <sc-if value="{{ p.hasThumb }}" hint-placeholder-val="{{ false }}">
                 <img src="{{ p.thumb }}" alt="" draggable="false" style="{{ p.thumbStyle }}">
               </sc-if>
-              <div style="{{ p.capStyle }}">
-                <span style="{{ p.numStyle }}">{{ p.label }}</span>
-                <sc-if value="{{ p.hasAudio }}" hint-placeholder-val="{{ false }}">
-                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;color:var(--ts-primary)"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </sc-if>
-              </div>
             </button>
+            <div style="{{ p.capStyle }}">
+              <span style="{{ p.numStyle }}">{{ p.n }}</span>
+              <input type="text" value="{{ p.title }}" onChange="{{ p.titleChange }}" placeholder="{{ p.titlePlaceholder }}" aria-label="{{ p.titleAria }}" style="{{ p.titleInputStyle }}" style-hover="border-color:var(--ts-border-decor)" style-focus="border-color:var(--ts-primary);outline:2px solid var(--ts-primary);outline-offset:1px">
+              <sc-if value="{{ p.hasAudio }}" hint-placeholder-val="{{ false }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;color:var(--ts-primary)"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </sc-if>
+            </div>
             <div class="ts-page-handle" data-dragging="{{ p.dragging }}" onPointerDown="{{ p.dragDownHandle }}" onPointerMove="{{ p.dragMove }}" onPointerUp="{{ p.dragUpHandle }}" onPointerCancel="{{ p.dragCancel }}" role="button" tabindex="-1" aria-haspopup="menu" aria-expanded="{{ p.menuOpen }}" aria-label="{{ p.handleAria }}" title="{{ p.handleAria }}">
               <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
             </div>
@@ -1923,6 +1924,7 @@ class Component extends DCLogic {
     this.activeLayerIds = ['layer-1'];
     this.pageAudio = {};         // pageIndex → { src, mime, bytes, durationSec, narration } (DTMA, path-reference)
     this.pageVectors = {};       // pageIndex → vectorLineObjects[] (optional, experimental — see vectorizeGrid)
+    this.pageTitles = {};        // pageIndex → user-entered page title (Pages panel caption row)
     this.undoStack = []; this.redoStack = [];
     this._dirty = false; this._sessT = null;   // session autosave / crash recovery
     this.preview = null;   // Set of idx (additive overlay)
@@ -2010,7 +2012,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspPanelTabsL: '편집 패널', layerAdd: '+ 추가', layerAddL: '레이어 추가', layerListL: '레이어 목록', layerUpL: '레이어 위로', layerDownL: '레이어 아래로', layerDuplicateL: '레이어 복제', layerMergeL: '아래 레이어와 병합', layerDeleteL: '레이어 삭제', layerHideL: '레이어 숨기기', layerShowL: '레이어 표시', layerRenameL: '레이어 이름 변경', layerCompositeNote: '보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspExportDtmsOf: (n) => `닷패드 파일 · 전체 ${n}쪽`, inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
+      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', pageTitlePh: '제목 없음', inspProps: '속성', inspDevice: 'DotPad', inspPanelTabsL: '편집 패널', layerAdd: '+ 추가', layerAddL: '레이어 추가', layerListL: '레이어 목록', layerUpL: '레이어 위로', layerDownL: '레이어 아래로', layerDuplicateL: '레이어 복제', layerMergeL: '아래 레이어와 병합', layerDeleteL: '레이어 삭제', layerHideL: '레이어 숨기기', layerShowL: '레이어 표시', layerRenameL: '레이어 이름 변경', layerCompositeNote: '보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspExportDtmsOf: (n) => `닷패드 파일 · 전체 ${n}쪽`, inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
       stUnsaved: '저장되지 않은 변경사항', stSaving: '저장 중…', stSaved: '✓ 저장됨', stError: '저장하지 못했습니다. 다시 시도', stSavedAt: (tm) => '✓ 저장됨 · ' + tm,
       applyBraille: '점자 적용', applyNarr: '나레이션 적용', applyHint: (m) => m + ' + Enter로 적용',
       applyDescOk: '점자 설명이 현재 페이지에 적용되었습니다.', applyNarrOk: '나레이션 텍스트가 현재 페이지에 적용되었습니다.', applyFail: '적용하지 못했습니다. 다시 시도하세요.',
@@ -2144,7 +2146,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspPanelTabsL: 'Editor panels', layerAdd: '+ Add', layerAddL: 'Add layer', layerListL: 'Layer list', layerUpL: 'Move layer up', layerDownL: 'Move layer down', layerDuplicateL: 'Duplicate layer', layerMergeL: 'Merge with layer below', layerDeleteL: 'Delete layer', layerHideL: 'Hide layer', layerShowL: 'Show layer', layerRenameL: 'Rename layer', layerCompositeNote: 'Only visible layers are composited into one tactile graphic for DotPad output and export.', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspExportDtmsOf: (n) => `DotPad file · All ${n} page${n === 1 ? '' : 's'}`, inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
+      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', pageTitlePh: 'Untitled', inspProps: 'Properties', inspDevice: 'DotPad', inspPanelTabsL: 'Editor panels', layerAdd: '+ Add', layerAddL: 'Add layer', layerListL: 'Layer list', layerUpL: 'Move layer up', layerDownL: 'Move layer down', layerDuplicateL: 'Duplicate layer', layerMergeL: 'Merge with layer below', layerDeleteL: 'Delete layer', layerHideL: 'Hide layer', layerShowL: 'Show layer', layerRenameL: 'Rename layer', layerCompositeNote: 'Only visible layers are composited into one tactile graphic for DotPad output and export.', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspExportDtmsOf: (n) => `DotPad file · All ${n} page${n === 1 ? '' : 's'}`, inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
       stUnsaved: 'Unsaved changes', stSaving: 'Saving…', stSaved: '✓ Saved', stError: "Couldn't save. Try again", stSavedAt: (tm) => '✓ Saved · ' + tm,
       applyBraille: 'Apply braille', applyNarr: 'Apply narration', applyHint: (m) => 'Press ' + m + ' + Enter to apply',
       applyDescOk: 'Braille description applied to the current page.', applyNarrOk: 'Narration text applied to the current page.', applyFail: "Couldn't apply. Please try again.",
@@ -2356,7 +2358,8 @@ class Component extends DCLogic {
       pageIndex: st.pageIndex, fileName: st.fileName || null, brailleLang: st.brailleLang,
       pages: (this.pages || []).map((c) => this._packCells(c)),
       audio,
-      vectors: this.pageVectors || {}
+      vectors: this.pageVectors || {},
+      titles: this.pageTitles || {}
     };
     const layers = this.pageLayers || [];
     const hasLayerState = layers.some(ls => ls && (ls.length > 1 || ls.some((l, i) => l.visible === false || (i > 0 && l.name))));
@@ -2409,6 +2412,7 @@ class Component extends DCLogic {
     let idx = +snap.pageIndex || 0; if (idx < 0 || idx >= this.pages.length) idx = 0;
     this.cells = this._activeLayer(idx).cells;
     this.pageAudio = (snap.audio && typeof snap.audio === 'object') ? Object.assign({}, snap.audio) : {};
+    this.pageTitles = (snap.titles && typeof snap.titles === 'object') ? Object.assign({}, snap.titles) : {};
     this.pageVectors = (snap.vectors && typeof snap.vectors === 'object') ? Object.assign({}, snap.vectors) : {};
     this.undoStack = []; this.redoStack = []; this.polyPts = []; this.preview = null;
     this.setState({
@@ -4340,6 +4344,7 @@ class Component extends DCLogic {
     this.pageLayers.splice(at, 0, [layer]); this.activeLayerIds.splice(at, 0, layer.id);
     this._reindexPageAudioInsert(at);
     this._reindexPageVectorsInsert(at);
+    this._reindexPageTitlesInsert(at);
     this.undoStack = []; this.redoStack = [];
     this.cells = layer.cells; this.polyPts = []; this.preview = null; this.drag = null;
     const n = this.pages.length;
@@ -4368,6 +4373,7 @@ class Component extends DCLogic {
     this.pageLayers.splice(at, 0, copiedLayers); this.activeLayerIds.splice(at, 0, copiedLayers[copiedLayers.length - 1].id);
     this._reindexPageAudioInsert(at);
     this._reindexPageVectorsInsert(at);
+    this._reindexPageTitlesInsert(at);
     if (this.pageAudio[idx]) this.pageAudio[at] = this.pageAudio[idx];
     if (this.pageVectors[idx]) this.pageVectors[at] = this.pageVectors[idx];
     this.undoStack = []; this.redoStack = [];
@@ -4385,6 +4391,7 @@ class Component extends DCLogic {
     this.pageLayers.splice(idx, 1); this.activeLayerIds.splice(idx, 1);
     this._reindexPageAudioDelete(idx);
     this._reindexPageVectorsDelete(idx);
+    this._reindexPageTitlesDelete(idx);
     const n = this.pages.length;
     const patch = { confirmOpen: false, pageCount: n };
     let ni;
@@ -4405,8 +4412,13 @@ class Component extends DCLogic {
     this.say(this.T().aPageDel(ni + 1, n));
   }
   deletePage() { this.deletePageAt(this.state.pageIndex); }
+  setPageTitle(i, value) {
+    const v = (value || '').slice(0, 120); // sane cap, matches other free-text fields
+    if (v) this.pageTitles[i] = v; else delete this.pageTitles[i];
+    this.bump(); // metadata-only change (no cell data touched) — dirty + autosave, no undo entry
+  }
   resetPages(cells) {
-    this.pages = [cells]; this.pageAudio = {}; this.pageVectors = {};
+    this.pages = [cells]; this.pageAudio = {}; this.pageVectors = {}; this.pageTitles = {};
     const layer = this._newLayer(cells, '레이어 1');
     this.pageLayers = [[layer]]; this.activeLayerIds = [layer.id]; this.cells = layer.cells;
   }
@@ -4429,6 +4441,7 @@ class Component extends DCLogic {
     const [movedActive] = this.activeLayerIds.splice(from, 1); this.activeLayerIds.splice(to, 0, movedActive);
     this.pageAudio = this._reindexPageMapMove(this.pageAudio, from, to);
     this.pageVectors = this._reindexPageMapMove(this.pageVectors, from, to);
+    this.pageTitles = this._reindexPageMapMove(this.pageTitles, from, to);
     const ni = this.pages.indexOf(active);
     this.cells = this._activeLayer(ni).cells;
     this.setState({ pageIndex: ni, pageCount: n });
@@ -4816,6 +4829,7 @@ class Component extends DCLogic {
       this.activeLayerIds = this.pageLayers.map(layers => layers[0].id);
       this.pageAudio = {};
       this.pageVectors = {};
+      this.pageTitles = {};
       // ROOT-CAUSE FIX: a page's desc/narration may arrive as a bare string OR
       // a structured record ({ text, … }). Normalize to a string at the point
       // of ingestion (so nothing downstream can coerce an object into
@@ -4872,6 +4886,7 @@ class Component extends DCLogic {
       const at = st.pageIndex + 1;
       this.insertPageWithLayer(at, conv);
       this._reindexPageVectorsInsert(at);
+      this._reindexPageTitlesInsert(at);
       if (vecObjects && vecObjects.length) this.pageVectors[at] = vecObjects;
       this.undoStack = []; this.redoStack = [];
       this.setState({ importOpen: false, retouchHint: true, armedPreset: null, fileName: name, confirmOpen: false, pageIndex: at, pageCount: this.pages.length, cx: 0, cy: 0, selRect: null, corpusCtx: null });
@@ -5685,6 +5700,25 @@ class Component extends DCLogic {
     });
     this.pageVectors = next;
   }
+  // Mirrors the pageAudio/pageVectors reindex helpers above, for per-page
+  // user-entered titles (Pages panel caption row).
+  _reindexPageTitlesInsert(at) {
+    const next = {};
+    Object.keys(this.pageTitles || {}).forEach(k => {
+      const idx = +k;
+      next[idx >= at ? idx + 1 : idx] = this.pageTitles[k];
+    });
+    this.pageTitles = next;
+  }
+  _reindexPageTitlesDelete(at) {
+    const next = {};
+    Object.keys(this.pageTitles || {}).forEach(k => {
+      const idx = +k;
+      if (idx === at) return;
+      next[idx > at ? idx - 1 : idx] = this.pageTitles[k];
+    });
+    this.pageTitles = next;
+  }
   // Remap an index-keyed page map for a move from → to (a single key deleted at
   // `from` and re-inserted at `to`), mirroring the insert/delete helpers above so
   // reordered pages keep the right audio/vector metadata.
@@ -6311,7 +6345,11 @@ class Component extends DCLogic {
           dragMove: e => this.pageDragMove(e),
           dragCancel: () => this.pageDragCancel(),
           dragging,
-          wrapStyle: 'position:relative' + (dragging ? ';opacity:0.5' : ''),
+          wrapStyle: 'position:relative;display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:12px;'
+            + 'border:1.5px solid ' + (sel ? 'var(--ts-primary)' : 'var(--ts-border-decor)') + ';'
+            + 'box-shadow:' + (sel ? '0 4px 16px rgba(var(--ts-primary-rgb),0.16)' : 'none') + ';'
+            + 'background:' + (sel ? '#FFF9F5' : 'var(--ts-panel)')
+            + (dragging ? ';opacity:0.5' : ''),
           dropBefore: realDrop && pdrag.over === i,
           dropAfter: realDrop && pdrag.over === total && i === total - 1,
           indicatorTopStyle: indicator + ';top:-6px',
@@ -6326,16 +6364,18 @@ class Component extends DCLogic {
           menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown), menuDupStyle: menuItem(true),
           aria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (sel ? (st.lang === 'ko' ? ' (현재)' : ' (current)') : ''),
           label: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1),
-          style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:12px;cursor:pointer;text-align:left;'
-            + 'border:1.5px solid ' + (sel ? 'var(--ts-primary)' : 'var(--ts-border-decor)') + ';'
-            + 'box-shadow:' + (sel ? '0 4px 16px rgba(var(--ts-primary-rgb),0.16)' : 'none') + ';'
-            + 'background:' + (sel ? '#FFF9F5' : 'var(--ts-panel)'),
+          title: this.pageTitles[i] || '',
+          titleChange: e => this.setPageTitle(i, e.target.value),
+          titlePlaceholder: t.pageTitlePh,
+          titleAria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (st.lang === 'ko' ? ' 제목' : ' title'),
+          style: 'display:block;width:100%;padding:0;border:none;background:transparent;cursor:pointer;text-align:left',
           thumbStyle: 'width:100%;aspect-ratio:' + st.gridW + '/' + st.gridH + ';border-radius:5px;background:var(--ts-panel);display:block;'
             + 'box-shadow:0 0 0 1px var(--ts-border-decor),0 2px 12px rgba(31,29,26,0.06);'
             + (th ? 'object-fit:contain' : ''),
-          capStyle: 'display:flex;align-items:center;justify-content:space-between;gap:6px',
-          numStyle: 'display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:6px;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;'
+          capStyle: 'display:flex;align-items:center;gap:8px',
+          numStyle: 'display:inline-flex;flex:none;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:6px;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;'
             + (sel ? 'background:var(--ts-primary);color:var(--ts-panel)' : 'background:var(--ts-bg-warm);color:var(--ts-text-primary)'),
+          titleInputStyle: 'flex:1;min-width:0;height:28px;border:1px solid transparent;border-radius:6px;background:transparent;font-size:13px;color:var(--ts-text-tertiary);padding:4px 7px;box-sizing:border-box',
           deleteDisabled: !canDelete,
           deleteAria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (st.lang === 'ko' ? ' 삭제' : ' delete'),
           deletePick: () => {

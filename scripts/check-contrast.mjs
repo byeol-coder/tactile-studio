@@ -33,6 +33,8 @@ const P = {
   success: '#0B8800',
   white: '#FFFFFF',
   warm: '#F7F4EF',
+  textTertiary: '#57534E',
+  selectedCardBg: '#FFF9F5',
 };
 
 const checks = [
@@ -49,6 +51,8 @@ const checks = [
   ['success indicator on white', P.success, P.white, 'large'],
   ['legacy orange as LARGE graphic on white', P.primaryLegacy, P.white, 'large'],
   ['primary as UI boundary on white', P.primary, P.white, 'large'],
+  ['page title input text on white card', P.textTertiary, P.white, 'text'],
+  ['page title input text on selected-card bg', P.textTertiary, P.selectedCardBg, 'text'],
 ];
 
 let fail = 0;

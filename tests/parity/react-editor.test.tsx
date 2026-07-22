@@ -1447,7 +1447,7 @@ describe('EmptyStateHint — first-run empty-canvas guidance (ported from vanill
   it('never co-shows with the recovery banner (recovery takes the same screen slot)', async () => {
     const snapshot = {
       v: 1 as const, savedAt: 1, gridW: 10, gridH: 10, output: '60' as const, pageIndex: 0,
-      fileName: 'recovered', brailleLang: 'ko-g1', pages: ['x'], audio: {}, vectors: {},
+      fileName: 'recovered', brailleLang: 'ko-g1', pages: ['x'], audio: {}, vectors: {}, titles: {},
       liveCells: [new Uint8Array(100)],
     };
     const sessionRecovery = { load: async () => snapshot, save: async () => true, clear: async () => {} };
