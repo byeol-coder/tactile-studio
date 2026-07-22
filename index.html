@@ -781,13 +781,37 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
           </div>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
-            <div style="font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:3px">{{ t.inspCleanup }}</div>
-            <div style="font-size:13px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
-            <div style="display:flex;gap:6px;margin-bottom:6px">
-              <button class="ts-fx-btn" onClick="{{ fxThinner }}" style="flex:1;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldOffIcon }} {{ t.inspThinner }}</button>
-              <button class="ts-fx-btn" onClick="{{ fxThicker }}" style="flex:1;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldIcon }} {{ t.inspThicker }}</button>
+            <button onClick="{{ toggleCleanup }}" aria-expanded="{{ cleanupOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <span style="flex:1;text-align:left;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;font-size:12px">{{ t.inspCleanup }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" style="{{ cleanupCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <sc-if value="{{ cleanupOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:9px">
+              <div style="font-size:13px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
+              <div style="display:flex;gap:6px">
+                <button class="ts-fx-btn" onClick="{{ fxThinner }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldOffIcon20 }}{{ t.inspThinner }}</button>
+                <button class="ts-fx-btn" onClick="{{ fxThicker }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldIcon20 }}{{ t.inspThicker }}</button>
+                <button class="ts-fx-btn" onClick="{{ fxDenoise }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ sparklesIcon20 }}{{ t.inspDenoise }}</button>
+              </div>
             </div>
-            <button class="ts-fx-btn" onClick="{{ fxDenoise }}" style="width:100%;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--ts-border-functional);background:#fff;color:#1E1C1A;cursor:pointer" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ sparklesIcon }} {{ t.inspDenoise }}</button>
+            </sc-if>
+          </div>
+
+          <div style="border-top:1px solid #F2ECE4;padding-top:14px">
+            <button onClick="{{ toggleExportPanel }}" aria-expanded="{{ exportPanelOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <span style="flex:1;text-align:left;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;font-size:12px">{{ t.export }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" style="{{ exportPanelCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <sc-if value="{{ exportPanelOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:9px">
+              <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.inspDevice }}</div>
+              <button onClick="{{ exportDtmsFromPanel }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:var(--ts-spacing-list-item);border:1px solid var(--ts-border-decor);border-radius:var(--ts-radius-lg);background:var(--ts-panel);cursor:pointer;text-align:left" style-hover="border:1px solid var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                <span style="flex:none;width:36px;height:36px;border-radius:var(--ts-radius-md);background:var(--ts-accent-bg-soft);color:var(--ts-accent-icon);display:grid;place-items:center">{{ downloadIcon }}</span>
+                <span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:#1E1C1A">{{ inspExportDtmsLabel }}</span>
+                <span style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);background:var(--ts-bg-warm);border:1px solid var(--ts-border-decor);border-radius:var(--ts-radius-sm);padding:var(--ts-spacing-badge)">.dtms</span>
+              </button>
+            </div>
+            </sc-if>
           </div>
 
           <div style="border-top:1px solid #F2ECE4;padding-top:14px">
@@ -894,6 +918,19 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
 
         <!-- DotPad connection: one unified flow — connect → send → disconnect.
              All device-connection state lives here (the top bar no longer duplicates it). -->
+        <div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;font-weight:800;color:var(--ts-text-secondary);letter-spacing:0.4px;text-transform:uppercase">{{ t.dpSpecL }}</div>
+          <div role="group" aria-label="{{ t.dpSpecL }}" style="display:flex;gap:8px">
+            <button onClick="{{ dpSetGrid60 }}" aria-pressed="{{ dpSpecActive60 }}" style="{{ dpSpecStyle60 }}" style-hover="border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+              {{ dotgridIcon }}
+              <span style="font-size:13px;font-weight:800">60 × 40</span>
+            </button>
+            <button onClick="{{ dpSetGrid96 }}" aria-pressed="{{ dpSpecActive96 }}" style="{{ dpSpecStyle96 }}" style-hover="border-color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+              {{ dotgridIcon }}
+              <span style="font-size:13px;font-weight:800">96 × 64</span>
+            </button>
+          </div>
+        </div>
         <div style="padding:14px 16px;border-bottom:1px solid #F2ECE4;display:flex;flex-direction:column;gap:11px">
           <div style="font-size:13px;font-weight:800;color:#1E1C1A">{{ t.dpConnSection }}</div>
 
@@ -1832,6 +1869,7 @@ class Component extends DCLogic {
     connected: true, connBusy: '', connFailed: false, dpReconnecting: false, livePreview: false, inspectorOpen: !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 820px)').matches), inspectorTab: 'props', pinFx: '',
     dotpadOpen: false, sendPhase: 'idle',
     narrOpen: false,
+    cleanupOpen: true, exportPanelOpen: true,
     brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 }, brBusy: false,
     applyBusy: null, applyErr: null,
     saveOpen: false, savePhase: 'form', saveLoc: 'drive', libraryOpen: false,
@@ -1963,7 +2001,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspPanelTabsL: '편집 패널', layerAdd: '+ 추가', layerAddL: '레이어 추가', layerListL: '레이어 목록', layerUpL: '레이어 위로', layerDownL: '레이어 아래로', layerDuplicateL: '레이어 복제', layerMergeL: '아래 레이어와 병합', layerDeleteL: '레이어 삭제', layerHideL: '레이어 숨기기', layerShowL: '레이어 표시', layerRenameL: '레이어 이름 변경', layerCompositeNote: '보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
+      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', inspProps: '속성', inspDevice: 'DotPad', inspPanelTabsL: '편집 패널', layerAdd: '+ 추가', layerAddL: '레이어 추가', layerListL: '레이어 목록', layerUpL: '레이어 위로', layerDownL: '레이어 아래로', layerDuplicateL: '레이어 복제', layerMergeL: '아래 레이어와 병합', layerDeleteL: '레이어 삭제', layerHideL: '레이어 숨기기', layerShowL: '레이어 표시', layerRenameL: '레이어 이름 변경', layerCompositeNote: '보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspExportDtmsOf: (n) => `닷패드 파일 · 전체 ${n}쪽`, inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
       stUnsaved: '저장되지 않은 변경사항', stSaving: '저장 중…', stSaved: '✓ 저장됨', stError: '저장하지 못했습니다. 다시 시도', stSavedAt: (tm) => '✓ 저장됨 · ' + tm,
       applyBraille: '점자 적용', applyNarr: '나레이션 적용', applyHint: (m) => m + ' + Enter로 적용',
       applyDescOk: '점자 설명이 현재 페이지에 적용되었습니다.', applyNarrOk: '나레이션 텍스트가 현재 페이지에 적용되었습니다.', applyFail: '적용하지 못했습니다. 다시 시도하세요.',
@@ -1973,7 +2011,7 @@ class Component extends DCLogic {
       scToggleDot: '점 켜기·끄기', scNudge: '커서 이동', scClosePoly: '다각형 닫기', scApply: '설명·나레이션 적용', scHelp: '단축키 도움말', scEscape: '닫기·취소',
       scgTools: '도구', scgCanvas: '캔버스', scgEditing: '편집', scgView: '보기', scgApply: '적용 및 출력', kbShortcutsTitle: '키보드 단축키',
       dpSupported: '지원 해상도', dpSupportedVal: '60×40 · 96×64', 
-      dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateReconnecting: 'DotPad에 재연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
+      dpSpecL: '규격', dpConnSection: 'DotPad 연결', dpStateDisconnected: 'DotPad가 연결되지 않았습니다.', dpStateConnecting: 'DotPad에 연결하는 중…', dpStateReconnecting: 'DotPad에 재연결하는 중…', dpStateConnected: 'DotPad가 연결되었습니다.', dpStateSending: 'DotPad로 전송 중…', dpStateSent: 'DotPad 전송 완료', dpStateError: 'DotPad 연결 또는 전송에 실패했습니다.', dpConnectBtn: 'DotPad 연결', dpSendBtn: 'DotPad로 전송', dpDisconnectBtn: '연결해제', dpRetryBtn: '다시 시도',
       dpLive: '실시간 미리보기', dpLiveHelp: 'DotPad에 변경 사항을 실시간으로 표시합니다.', dpLiveOn: '켜짐', dpLiveOff: '꺼짐',
       dpPins: '핀 테스트', dpRaise: '전체 올리기', dpLower: '전체 내리기', dpInvert: '반전', dpConnectHint: '핀 제어를 사용하려면 DotPad를 연결하세요.',
       
@@ -2097,7 +2135,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspPanelTabsL: 'Editor panels', layerAdd: '+ Add', layerAddL: 'Add layer', layerListL: 'Layer list', layerUpL: 'Move layer up', layerDownL: 'Move layer down', layerDuplicateL: 'Duplicate layer', layerMergeL: 'Merge with layer below', layerDeleteL: 'Delete layer', layerHideL: 'Hide layer', layerShowL: 'Show layer', layerRenameL: 'Rename layer', layerCompositeNote: 'Only visible layers are composited into one tactile graphic for DotPad output and export.', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
+      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', inspProps: 'Properties', inspDevice: 'DotPad', inspPanelTabsL: 'Editor panels', layerAdd: '+ Add', layerAddL: 'Add layer', layerListL: 'Layer list', layerUpL: 'Move layer up', layerDownL: 'Move layer down', layerDuplicateL: 'Duplicate layer', layerMergeL: 'Merge with layer below', layerDeleteL: 'Delete layer', layerHideL: 'Hide layer', layerShowL: 'Show layer', layerRenameL: 'Rename layer', layerCompositeNote: 'Only visible layers are composited into one tactile graphic for DotPad output and export.', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspExportDtmsOf: (n) => `DotPad file · All ${n} page${n === 1 ? '' : 's'}`, inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
       stUnsaved: 'Unsaved changes', stSaving: 'Saving…', stSaved: '✓ Saved', stError: "Couldn't save. Try again", stSavedAt: (tm) => '✓ Saved · ' + tm,
       applyBraille: 'Apply braille', applyNarr: 'Apply narration', applyHint: (m) => 'Press ' + m + ' + Enter to apply',
       applyDescOk: 'Braille description applied to the current page.', applyNarrOk: 'Narration text applied to the current page.', applyFail: "Couldn't apply. Please try again.",
@@ -2107,7 +2145,7 @@ class Component extends DCLogic {
       scToggleDot: 'Toggle dot', scNudge: 'Move cursor', scClosePoly: 'Close polygon', scApply: 'Apply description / narration', scHelp: 'Keyboard help', scEscape: 'Close / cancel',
       scgTools: 'Tools', scgCanvas: 'Canvas', scgEditing: 'Editing', scgView: 'View', scgApply: 'Apply & output', kbShortcutsTitle: 'Keyboard shortcuts',
       dpSupported: 'Supported', dpSupportedVal: '60×40 · 96×64', 
-      dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateReconnecting: 'Reconnecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
+      dpSpecL: 'Size', dpConnSection: 'DotPad Connection', dpStateDisconnected: 'DotPad is not connected.', dpStateConnecting: 'Connecting to DotPad…', dpStateReconnecting: 'Reconnecting to DotPad…', dpStateConnected: 'DotPad connected.', dpStateSending: 'Sending to DotPad…', dpStateSent: 'Sent to DotPad', dpStateError: 'DotPad connection or send failed.', dpConnectBtn: 'Connect DotPad', dpSendBtn: 'Send to DotPad', dpDisconnectBtn: 'Disconnect', dpRetryBtn: 'Try again',
       dpLive: 'Live Preview', dpLiveHelp: 'Preview changes on DotPad in real time.', dpLiveOn: 'On', dpLiveOff: 'Off',
       dpPins: 'Pin test', dpRaise: 'Raise all', dpLower: 'Lower all', dpInvert: 'Invert', dpConnectHint: 'Connect DotPad to use pin controls.',
       
@@ -4570,7 +4608,26 @@ class Component extends DCLogic {
     // the "노이즈 제거" button.
     bold: [{ d: 'M7 5h6a3.5 3.5 0 0 1 0 7h-6l0 -7' }, { d: 'M13 12h1a3.5 3.5 0 0 1 0 7h-7v-7' }],
     boldOff: [{ d: 'M9 5h4a3.5 3.5 0 0 1 2.222 6.204m-3.222 .796h-5v-5' }, { d: 'M17.107 17.112a3.5 3.5 0 0 1 -3.107 1.888h-7v-7' }, { d: 'M3 3l18 18' }],
-    sparkles: [{ d: 'M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6' }]
+    sparkles: [{ d: 'M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6' }],
+    // Reuses the exact path already inline on exportItems' DTMS/SVG/JSON/PNG rows
+    // (not a new icon source — just centralizing an existing, already-used glyph
+    // so the new Inspector export card can share it via this.icon()).
+    download: [{ d: 'M12 4v11M7 10l5 5 5-5M5 20h14' }],
+    // A literal 3x3 tactile dot matrix — represents the DotPad's own physical
+    // dot grid concept, not a generic UI glyph, so it's hand-built (same
+    // rationale as the purely-geometric 'shapes' icon) rather than sourced
+    // from Tabler or Figma.
+    dotgrid: [
+      { d: 'M4.2 6a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M10.2 6a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M16.2 6a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M4.2 12a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M10.2 12a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M16.2 12a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M4.2 18a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M10.2 18a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true },
+      { d: 'M16.2 18a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0', fill: true }
+    ]
   };
   icon(id, size) {
     const spec = this.ICONS[id] || [];
@@ -5693,6 +5750,7 @@ class Component extends DCLogic {
     const st = this.state, t = this.T(), p = this.props;
     const dpVar = p.dotpadPanel ?? 'modal';
     const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? '#1E1C1A' : '#fff', color: on ? '#fff' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
+    const specCard = on => ({ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 8px', borderRadius: 'var(--ts-radius-lg)', border: on ? '2px solid var(--ts-primary)' : '1px solid var(--ts-border-functional)', background: on ? '#FFF9F5' : '#fff', color: on ? 'var(--ts-primary)' : '#1E1C1A', cursor: 'pointer' });
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: '#fff', color: '#1E1C1A', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
     const mobilePagerBtn = en => ({ width: 44, height: 44, flex: 'none', border: 'none', borderRadius: 100, background: 'transparent', color: '#1E1C1A', display: 'grid', placeItems: 'center', cursor: en ? 'pointer' : 'not-allowed', opacity: en ? 1 : 0.35 });
@@ -5932,7 +5990,16 @@ class Component extends DCLogic {
       fxThinner: () => this.thickenFx(-1),
       fxThicker: () => this.thickenFx(1),
       fxDenoise: () => this.denoiseFx(),
-      boldOffIcon: this.icon('boldOff', 15), boldIcon: this.icon('bold', 15), sparklesIcon: this.icon('sparkles', 15),
+      boldOffIcon20: this.icon('boldOff', 20), boldIcon20: this.icon('bold', 20), sparklesIcon20: this.icon('sparkles', 20),
+      cleanupOpen: st.cleanupOpen,
+      toggleCleanup: () => this.setState(s => ({ cleanupOpen: !s.cleanupOpen })),
+      cleanupCaretStyle: { transition: 'transform 0.15s ease', transform: st.cleanupOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
+      exportPanelOpen: st.exportPanelOpen,
+      toggleExportPanel: () => this.setState(s => ({ exportPanelOpen: !s.exportPanelOpen })),
+      exportPanelCaretStyle: { transition: 'transform 0.15s ease', transform: st.exportPanelOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
+      downloadIcon: this.icon('download', 18),
+      inspExportDtmsLabel: t.inspExportDtmsOf(st.pageCount),
+      exportDtmsFromPanel: () => this.exportFormat('DTMS'),
       // DTMA: current-page audio + narration
       pgAudio: (() => {
         const a = (this.pageAudio || {})[st.pageIndex];
@@ -6025,6 +6092,13 @@ class Component extends DCLogic {
       dpGhostBtnStyle: dpBtnGhost,
       dpGhostBtnDisabledStyle: Object.assign({}, dpBtnGhost, { cursor: 'not-allowed', opacity: 0.5 }),
       dpConnectAction: () => this.connectDot('ble'),
+      dpSpecActive60: st.gridW === 60 && st.gridH === 40,
+      dpSpecActive96: st.gridW === 96 && st.gridH === 64,
+      dpSpecStyle60: specCard(st.gridW === 60 && st.gridH === 40),
+      dpSpecStyle96: specCard(st.gridW === 96 && st.gridH === 64),
+      dpSetGrid60: () => this.setGrid(60, 40),
+      dpSetGrid96: () => this.setGrid(96, 64),
+      dotgridIcon: this.icon('dotgrid', 22),
       dpDisconnectAction: () => this.disconnectDot(),
       dpSendAction: openSendFlow,
       dpRetryAction: () => { if (this.state.connected && this.state.sendPhase === 'error') { openSendFlow(); } else { this.connectDot('ble'); } },
@@ -6243,13 +6317,16 @@ class Component extends DCLogic {
           menuUpStyle: menuItem(canUp), menuDownStyle: menuItem(canDown), menuDupStyle: menuItem(true),
           aria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (sel ? (st.lang === 'ko' ? ' (현재)' : ' (current)') : ''),
           label: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1),
-          style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:9px;cursor:pointer;text-align:left;'
-            + 'border:1px solid ' + (sel ? 'rgba(var(--ts-primary-rgb),0.42)' : 'var(--ts-border-decor)') + ';'
+          style: 'display:flex;flex-direction:column;gap:6px;width:100%;padding:8px;border-radius:12px;cursor:pointer;text-align:left;'
+            + 'border:1.5px solid ' + (sel ? 'var(--ts-primary)' : 'var(--ts-border-decor)') + ';'
+            + 'box-shadow:' + (sel ? '0 4px 16px rgba(var(--ts-primary-rgb),0.16)' : 'none') + ';'
             + 'background:' + (sel ? '#FFF9F5' : '#fff'),
-          thumbStyle: 'width:100%;aspect-ratio:' + st.gridW + '/' + st.gridH + ';border-radius:5px;border:1px solid var(--ts-border-decor);background:#fff;display:block;'
+          thumbStyle: 'width:100%;aspect-ratio:' + st.gridW + '/' + st.gridH + ';border-radius:5px;background:#fff;display:block;'
+            + 'box-shadow:0 0 0 1px var(--ts-border-decor),0 2px 12px rgba(31,29,26,0.06);'
             + (th ? 'object-fit:contain' : ''),
           capStyle: 'display:flex;align-items:center;justify-content:space-between;gap:6px',
-          numStyle: 'font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:' + (sel ? 'var(--ts-primary)' : '#1E1C1A'),
+          numStyle: 'display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:6px;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;'
+            + (sel ? 'background:var(--ts-primary);color:#fff' : 'background:var(--ts-bg-warm);color:#1E1C1A'),
           deleteDisabled: !canDelete,
           deleteAria: (st.lang === 'ko' ? '페이지 ' : 'Page ') + (i + 1) + (st.lang === 'ko' ? ' 삭제' : ' delete'),
           deletePick: () => {
