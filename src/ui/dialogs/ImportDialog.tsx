@@ -20,6 +20,7 @@ import { useEditorStore } from '../../react/hooks/useEditorStore.js';
 import type { StudioLabels, ImageProcessingService } from '../../react/types/public-api.js';
 import { useFocusTrap } from './useFocusTrap.js';
 import { decodeImageFileInBrowser, type DecodedImage } from './browser-image-decoder.js';
+import { actionBtnStyle } from '../common/action-button-style.js';
 
 export interface ImportDialogProps {
   open: boolean;
@@ -165,8 +166,8 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
 
   return (
     <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'grid', placeItems: 'center', zIndex: 100 }}>
-      <div ref={containerRef} role="dialog" aria-modal="true" aria-label={(labels?.impAssetTitle as string) || 'Import tactile asset'} style={{ background: 'var(--ts-bg, #FFFFFF)', borderRadius: 12, padding: 20, minWidth: 320, maxWidth: 420 }}>
-        <div style={{ fontWeight: 600, marginBottom: 8 }}>{(labels?.impAssetTitle as string) || 'Import tactile asset'}</div>
+      <div ref={containerRef} role="dialog" aria-modal="true" aria-label={(labels?.impAssetTitle as string) || 'Import tactile asset'} style={{ background: 'var(--ts-surface, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 12, padding: 20, minWidth: 320, maxWidth: 420, color: 'var(--ts-ink, #1E1C1A)', fontFamily: 'inherit' }}>
+        <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 15 }}>{(labels?.impAssetTitle as string) || 'Import tactile asset'}</div>
 
         {!image && (
           <>
@@ -277,15 +278,15 @@ export function ImportDialog({ open, labels, onClose, decodeImageFile = decodeIm
             </label>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button type="button" onClick={() => setImage(null)}>{(labels?.back as string) || 'Back'}</button>
-              <button type="button" onClick={commitImage}>{(labels?.impConvert as string) || 'Convert'}</button>
+              <button type="button" onClick={() => setImage(null)} style={actionBtnStyle()}>{(labels?.back as string) || 'Back'}</button>
+              <button type="button" onClick={commitImage} style={actionBtnStyle({ pressed: true })}>{(labels?.impConvert as string) || 'Convert'}</button>
             </div>
           </div>
         )}
 
         {error && <div role="alert" style={{ color: 'var(--ts-danger, #DA120D)', fontSize: 12, marginTop: 8 }}>{error}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-          <button type="button" onClick={close}>Cancel</button>
+          <button type="button" onClick={close} style={actionBtnStyle()}>Cancel</button>
         </div>
       </div>
     </div>

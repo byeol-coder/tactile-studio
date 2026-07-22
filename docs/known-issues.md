@@ -47,7 +47,7 @@ Delivered a real, tested React editor shell: `EditorStore` (framework-agnostic, 
 
 Closed most of the initial pass's deferred list:
 
-- **Icon set**: `src/ui/icons/icons.ts` is a verbatim copy of the monolith's `ICONS` map (SVG path data), rendered via `<Icon>`/`<IconButton>`. No `undo`/`redo` icon exists in that map (the monolith's `aUndo`/`aRedo` announcements exist but no path data was found for them, likely Tabler Icons per the target stack, not yet sourced) — those two buttons use plain glyphs (↶ ↷), documented in code rather than inventing icon paths.
+- **Icon set**: `src/ui/icons/icons.ts` is a verbatim copy of the monolith's `ICONS` map (SVG path data), rendered via `<Icon>`/`<IconButton>`. Undo/redo (`arrow-back-up`/`arrow-forward-up`-style curved arrows) are now sourced verbatim from the monolith's own current path data too (synced 2026-07-22 — an earlier pass here had ported a close-but-not-identical curve radius from an older monolith state; corrected to match exactly).
 - **Pen/eraser thickness**: a plain segmented 1/2/3 control (not the dot-swatch dropdown popover) wired to `store.setStrokeSize`/`setEraserSize`.
 - **Clear/invert/flip**: wired to the already-ported Phase 2 `core/grid` functions via new `EditorStore` commands (`clearAll`/`invertAll`/`flipHoriz`/`flipVert`).
 - **Page panel**: list + Add/Delete/Move-up/Move-down + click-to-switch, via a new `goToPage` core operation (verbatim port of the monolith's `goPage`, which clears history on every page switch — confirmed by direct source read) and `EditorStore.setActivePage`. No page-duplication feature exists in the monolith (confirmed by search) — none was invented.

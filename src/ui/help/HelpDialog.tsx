@@ -19,6 +19,7 @@
 import React, { useEffect } from 'react';
 import { useFocusTrap } from '../dialogs/useFocusTrap.js';
 import type { StudioLabels } from '../../react/types/public-api.js';
+import { actionBtnStyle } from '../common/action-button-style.js';
 
 function isMac(): boolean {
   try { return /Mac|iPhone|iPad|iPod/.test((navigator.platform || '') + ' ' + (navigator.userAgent || '')); }
@@ -84,7 +85,7 @@ export function HelpDialog({ open, labels, onClose }: HelpDialogProps) {
         role="dialog"
         aria-modal="true"
         aria-label={(labels?.helpTitle as string) || 'Keyboard shortcuts'}
-        style={{ background: 'var(--ts-bg, #FFFFFF)', borderRadius: 12, padding: 20, minWidth: 280, maxWidth: 360, maxHeight: '80vh', overflowY: 'auto' }}
+        style={{ background: 'var(--ts-surface, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 12, padding: 20, minWidth: 280, maxWidth: 360, maxHeight: '80vh', overflowY: 'auto', color: 'var(--ts-ink, #1E1C1A)', fontFamily: 'inherit' }}
       >
         <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 15 }}>{(labels?.helpTitle as string) || 'Keyboard shortcuts'}</div>
 
@@ -125,7 +126,7 @@ export function HelpDialog({ open, labels, onClose }: HelpDialogProps) {
         </ul>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button type="button" onClick={onClose}>{(labels?.close as string) || 'Close'}</button>
+          <button type="button" onClick={onClose} style={actionBtnStyle()}>{(labels?.close as string) || 'Close'}</button>
         </div>
       </div>
     </div>

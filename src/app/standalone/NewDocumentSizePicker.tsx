@@ -55,7 +55,7 @@ export function NewDocumentSizePicker({ onChoose }: NewDocumentSizePickerProps) 
             style={{
               display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start',
               minWidth: 180, padding: '16px 18px', borderRadius: 12,
-              border: '1px solid var(--ts-line, #ECE6DC)', background: 'var(--ts-bg, #FFFFFF)',
+              border: '1px solid var(--ts-line, #ECE6DC)', background: 'var(--ts-surface, #FFFFFF)',
               cursor: 'pointer', textAlign: 'left',
             }}
           >

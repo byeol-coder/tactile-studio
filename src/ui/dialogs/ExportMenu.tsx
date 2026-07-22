@@ -107,12 +107,19 @@ export function ExportMenu({ encodeBits, bitsToSvg, labels, onExport }: ExportMe
     }, 'image/png');
   };
 
+  const menuItemStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', width: '100%', minHeight: 34,
+    padding: '6px 10px', border: 'none', borderRadius: 7, background: 'transparent',
+    fontSize: 13, fontWeight: 600, fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer',
+    color: 'var(--ts-ink, #1E1C1A)',
+  };
+
   return (
-    <div role="menu" aria-label={(labels?.tExport as string) || 'Export'} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <button type="button" role="menuitem" onClick={exportDtms}>DTMS ({snapshot.pageCount} page{snapshot.pageCount === 1 ? '' : 's'})</button>
-      <button type="button" role="menuitem" onClick={exportLibraryAsset}>Library Asset v1</button>
-      {bitsToSvg && <button type="button" role="menuitem" onClick={exportSvg}>SVG</button>}
-      <button type="button" role="menuitem" onClick={exportPng}>PNG</button>
+    <div role="menu" aria-label={(labels?.tExport as string) || 'Export'} style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 180 }}>
+      <button type="button" role="menuitem" onClick={exportDtms} style={menuItemStyle}>DTMS ({snapshot.pageCount} page{snapshot.pageCount === 1 ? '' : 's'})</button>
+      <button type="button" role="menuitem" onClick={exportLibraryAsset} style={menuItemStyle}>Library Asset v1</button>
+      {bitsToSvg && <button type="button" role="menuitem" onClick={exportSvg} style={menuItemStyle}>SVG</button>}
+      <button type="button" role="menuitem" onClick={exportPng} style={menuItemStyle}>PNG</button>
     </div>
   );
 }
