@@ -48,6 +48,7 @@ export interface SessionSnapshotV1 {
   pages: string[]; // base64-packed bits, one per page
   audio: PageMap<SessionPageAudioEntry>;
   vectors: PageMap<unknown[]>;
+  titles: PageMap<string>;
 }
 
 /** The snapshot after loading + unpacking + "worth restoring" validation --
@@ -131,6 +132,7 @@ export function serializeSessionSnapshot(
     pages: doc.pages.map((c) => packCells(c)),
     audio,
     vectors: (doc.pageVectors || {}) as PageMap<unknown[]>,
+    titles: (doc.pageTitles || {}) as PageMap<string>,
   };
 }
 

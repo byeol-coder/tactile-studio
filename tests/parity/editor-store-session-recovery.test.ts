@@ -15,7 +15,7 @@ function makeFakeSnapshot(overrides: Partial<ParsedSessionSnapshot> = {}): Parse
   cells[3] = 1;
   return {
     v: 1, savedAt: 123, gridW: 60, gridH: 40, output: '60', pageIndex: 0,
-    fileName: 'recovered', brailleLang: 'ko-g1', pages: ['x'], audio: {}, vectors: {},
+    fileName: 'recovered', brailleLang: 'ko-g1', pages: ['x'], audio: {}, vectors: {}, titles: {},
     liveCells: [cells],
     ...overrides,
   };

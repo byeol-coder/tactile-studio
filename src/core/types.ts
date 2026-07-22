@@ -55,4 +55,8 @@ export interface StudioDocument {
   pageIndex: number;
   pageAudio: PageMap<unknown>;
   pageVectors: PageMap<unknown[]>;
+  /** optional per-page user-entered titles (vanilla-only Pages-panel feature
+   *  as of 2026-07-22; not yet ported to this React tree's own UI, but kept
+   *  here so the shared session-snapshot JSON shape stays compatible). */
+  pageTitles?: PageMap<string>;
 }

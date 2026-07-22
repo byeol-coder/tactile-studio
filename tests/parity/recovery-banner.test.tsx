@@ -26,7 +26,7 @@ function makeFakeSnapshot(): ParsedSessionSnapshot {
   cells[9] = 1;
   return {
     v: 1, savedAt: 1, gridW: 60, gridH: 40, output: '60', pageIndex: 0,
-    fileName: '복구 문서', brailleLang: 'ko-g1', pages: ['x'], audio: {}, vectors: {},
+    fileName: '복구 문서', brailleLang: 'ko-g1', pages: ['x'], audio: {}, vectors: {}, titles: {},
     liveCells: [cells],
   };
 }
