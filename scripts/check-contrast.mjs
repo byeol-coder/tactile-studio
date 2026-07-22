@@ -33,6 +33,8 @@ const P = {
   success: '#0B8800',
   white: '#FFFFFF',
   warm: '#F7F4EF',
+  workspace: '#F8F7F5',
+  borderFunctional: '#8C8377',
   textTertiary: '#57534E',
   selectedCardBg: '#FFF9F5',
 };
@@ -53,6 +55,11 @@ const checks = [
   ['primary as UI boundary on white', P.primary, P.white, 'large'],
   ['page title input text on white card', P.textTertiary, P.white, 'text'],
   ['page title input text on selected-card bg', P.textTertiary, P.selectedCardBg, 'text'],
+  // Canvas/toolbar white fill is only ~1.07:1 against --ts-workspace
+  // (#F8F7F5) — too close for a reliable perceived boundary on its own —
+  // so both now carry a --ts-border-functional border instead; this check
+  // locks that border's own contrast in place.
+  ['canvas/toolbar border on workspace bg', P.borderFunctional, P.workspace, 'large'],
 ];
 
 let fail = 0;

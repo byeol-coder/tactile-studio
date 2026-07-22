@@ -6224,9 +6224,15 @@ class Component extends DCLogic {
       // At 100% this matches the original responsive (max-width:100%) behavior exactly.
       // Away from 100% we switch to an explicit pixel size so the scrollable viewport
       // can correctly grow/scroll — image-rendering keeps dots crisp instead of blurry.
+      // Canvas ↔ workspace boundary: white canvas fill on the near-white
+      // --ts-workspace background is only ~1.07:1 (no realistic background
+      // retune clears 3:1 without abandoning this app's low-contrast warm
+      // palette), so per WCAG 1.4.11 the boundary is made perceivable with a
+      // border instead — --ts-border-functional is already verified 3:1+ on
+      // white/warm surfaces.
       canvasStyle: st.zoom === 1
-        ? { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', maxWidth: '100%' }
-        : { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', width: (st.gridW * this.cellPx() * st.zoom) + 'px', height: (st.gridH * this.cellPx() * st.zoom) + 'px', imageRendering: 'pixelated' },
+        ? { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', maxWidth: '100%', border: '1px solid var(--ts-border-functional)' }
+        : { display: 'block', outline: 'none', touchAction: 'none', cursor: st.tool === 'eraser' ? 'none' : 'crosshair', width: (st.gridW * this.cellPx() * st.zoom) + 'px', height: (st.gridH * this.cellPx() * st.zoom) + 'px', imageRendering: 'pixelated', border: '1px solid var(--ts-border-functional)' },
       // Eraser cursor guide: a grid-aligned box over the exact cells the next
       // erase stroke will hit (mirrors the offsets brushCb() actually stamps),
       // so it stays correct at any zoom and never outruns the real erase area.
@@ -6270,7 +6276,7 @@ class Component extends DCLogic {
       // over the bottom of the canvas; once dragged, toolbarPos pins it to
       // fixed viewport coordinates captured at drag-start (see railDragDown).
       toolbarStyle: Object.assign(
-        { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, background: 'var(--ts-panel)', borderRadius: 16, padding: 6, boxShadow: '0 12px 32px -8px rgba(16,24,40,0.35),0 4px 10px rgba(16,24,40,0.18)', maxWidth: 'calc(100vw - 24px)', overflowX: 'auto', scrollbarWidth: 'none', zIndex: 15, boxSizing: 'border-box' },
+        { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, background: 'var(--ts-panel)', border: '1px solid var(--ts-border-functional)', borderRadius: 16, padding: 6, boxShadow: '0 12px 32px -8px rgba(16,24,40,0.35),0 4px 10px rgba(16,24,40,0.18)', maxWidth: 'calc(100vw - 24px)', overflowX: 'auto', scrollbarWidth: 'none', zIndex: 15, boxSizing: 'border-box' },
         st.toolbarPos
           ? { position: 'fixed', left: st.toolbarPos.x, top: st.toolbarPos.y, right: 'auto', bottom: 'auto', transform: 'none' }
           : { position: 'absolute', left: '50%', bottom: 20, top: 'auto', transform: 'translateX(-50%)' }
