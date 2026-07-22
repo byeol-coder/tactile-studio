@@ -51,7 +51,7 @@ export function Flyout({ trigger, children, ariaLabel }: FlyoutProps) {
           style={{
             position: 'absolute', top: '100%', left: 0, marginTop: 4, zIndex: 60,
             display: 'flex', gap: 2, padding: 6, borderRadius: 8,
-            background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)',
+            background: 'var(--ts-surface, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
           }}
         >

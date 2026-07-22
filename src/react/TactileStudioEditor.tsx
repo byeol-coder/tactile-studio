@@ -38,6 +38,7 @@ import { createSessionRecoveryStorageAdapter } from '../storage/adapters/session
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
 import { useHardwareKeyPanning } from './hooks/useHardwareKeyPanning.js';
 import type { TactileStudioEditorProps, StudioErrorLike } from './types/public-api.js';
+import { actionBtnStyle } from '../ui/common/action-button-style.js';
 
 function themeStyle(theme?: Record<string, string | undefined>): React.CSSProperties {
   if (!theme) return {};
@@ -165,15 +166,15 @@ function EditorBody({ services, labels, onSave, onSaveConflict, onError, onExpor
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <Toolbar labels={labels} showCenterGuide={showCenterGuide} onToggleCenterGuide={() => setShowCenterGuide((v) => !v)} />
         <span style={{ flex: 1 }} />
-        {onExit && <button type="button" onClick={onExit}>{(labels?.exit as string) || 'Exit'}</button>}
-        <button type="button" onClick={toggleFocusMode} aria-pressed={focusMode} aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode'}>{focusMode ? 'Exit focus' : 'Focus mode'}</button>
-        <button type="button" onClick={() => setHelpOpen(true)} aria-label={(labels?.helpTitle as string) || 'Keyboard shortcuts'} aria-keyshortcuts="Shift+/">?</button>
-        <button type="button" disabled={saving} onClick={handleSave}>{saving ? ((labels?.saving as string) || 'Saving…') : ((labels?.save as string) || 'Save')}</button>
-        <button type="button" onClick={() => setImportOpen(true)}>{(labels?.impAssetTitle as string) || 'Import'}</button>
+        {onExit && <button type="button" onClick={onExit} style={actionBtnStyle()}>{(labels?.exit as string) || 'Exit'}</button>}
+        <button type="button" onClick={toggleFocusMode} aria-pressed={focusMode} aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode'} style={actionBtnStyle({ pressed: focusMode })}>{focusMode ? 'Exit focus' : 'Focus mode'}</button>
+        <button type="button" onClick={() => setHelpOpen(true)} aria-label={(labels?.helpTitle as string) || 'Keyboard shortcuts'} aria-keyshortcuts="Shift+/" style={actionBtnStyle({ iconOnly: true })}>?</button>
+        <button type="button" disabled={saving} onClick={handleSave} style={actionBtnStyle({ disabled: saving })}>{saving ? ((labels?.saving as string) || 'Saving…') : ((labels?.save as string) || 'Save')}</button>
+        <button type="button" onClick={() => setImportOpen(true)} style={actionBtnStyle()}>{(labels?.impAssetTitle as string) || 'Import'}</button>
         <div style={{ position: 'relative' }}>
-          <button type="button" onClick={() => setExportOpen((v) => !v)}>{(labels?.tExport as string) || 'Export'}</button>
+          <button type="button" onClick={() => setExportOpen((v) => !v)} style={actionBtnStyle({ pressed: exportOpen })}>{(labels?.tExport as string) || 'Export'}</button>
           {exportOpen && services.encodeBits && (
-            <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4, background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 8, zIndex: 40 }}>
+            <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4, background: 'var(--ts-surface, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 8, zIndex: 40 }}>
               <ExportMenu
                 encodeBits={services.encodeBits}
                 bitsToSvg={services.bitsToSvg}

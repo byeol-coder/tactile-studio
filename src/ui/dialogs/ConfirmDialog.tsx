@@ -7,6 +7,7 @@
 // confirmation) are unaffected since they always pass onCancel.
 import React, { useEffect, useRef } from 'react';
 import { useFocusTrap } from './useFocusTrap.js';
+import { actionBtnStyle } from '../common/action-button-style.js';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -33,12 +34,12 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'OK', cance
 
   return (
     <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'grid', placeItems: 'center', zIndex: 100 }}>
-      <div ref={containerRef} role="alertdialog" aria-modal="true" aria-label={title} style={{ background: 'var(--ts-bg, #FFFFFF)', borderRadius: 12, padding: 20, minWidth: 280 }}>
-        <div style={{ fontWeight: 600, marginBottom: 8 }}>{title}</div>
-        {message && <div style={{ fontSize: 13, marginBottom: 16 }}>{message}</div>}
+      <div ref={containerRef} role="alertdialog" aria-modal="true" aria-label={title} style={{ background: 'var(--ts-surface, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 12, padding: 20, minWidth: 280, color: 'var(--ts-ink, #1E1C1A)', fontFamily: 'inherit' }}>
+        <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 15 }}>{title}</div>
+        {message && <div style={{ fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>{message}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          {onCancel && <button type="button" onClick={onCancel}>{cancelLabel}</button>}
-          <button type="button" ref={confirmRef} onClick={onConfirm}>{confirmLabel}</button>
+          {onCancel && <button type="button" onClick={onCancel} style={actionBtnStyle()}>{cancelLabel}</button>}
+          <button type="button" ref={confirmRef} onClick={onConfirm} style={actionBtnStyle({ pressed: true })}>{confirmLabel}</button>
         </div>
       </div>
     </div>

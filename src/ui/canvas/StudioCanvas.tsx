@@ -474,7 +474,7 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
             style={canvasStyle}
           />
           {textPopover && (
-            <div style={{ position: 'fixed', left: textPopover.left, top: textPopover.top, zIndex: 50, background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 6 }}>
+            <div style={{ position: 'fixed', left: textPopover.left, top: textPopover.top, zIndex: 50, background: 'var(--ts-surface, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)', borderRadius: 8, padding: 6 }}>
               <input
                 autoFocus
                 value={textPopover.value}

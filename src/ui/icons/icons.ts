@@ -38,8 +38,8 @@ export const ICONS: Record<string, IconPath[]> = {
     // when the monolith's own asset is available, porting it verbatim
     // takes precedence over substituting a library icon, same as every
     // other entry in this map.
-    undo: [{ d: 'M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11' }],
-    redo: [{ d: 'M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13' }],
+    undo: [{ d: 'M9 14l-4 -4l4 -4M5 10h11a4 4 0 1 1 0 8h-1' }],
+    redo: [{ d: 'M15 14l4 -4l-4 -4M19 10h-11a4 4 0 1 0 0 8h1' }],
     // Sourced from Tabler Icons (MIT, @tabler/icons 3.45.0, icons/outline/
     // plus.svg and minus.svg) rather than hand-drawn -- these two concepts
     // aren't part of the original Figma ICONS map (see this file's header),

@@ -49,7 +49,7 @@ export function ZoomControls({ labels }: ZoomControlsProps) {
       style={{
         position: 'absolute', right: 8, bottom: 8, zIndex: 16,
         display: 'inline-flex', alignItems: 'center', gap: 2,
-        background: 'var(--ts-bg, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)',
+        background: 'var(--ts-surface, #FFFFFF)', border: '1px solid var(--ts-line, #ECE6DC)',
         borderRadius: 100, padding: 4,
         boxShadow: '0 1px 2px rgba(16,24,40,0.06), 0 4px 10px -4px rgba(16,24,40,0.16)',
       }}
