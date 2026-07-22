@@ -781,49 +781,6 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
             <div style="font-size:14px;font-weight:800;color:var(--ts-text-primary)">{{ propToolName }}</div>
           </div>
 
-          <div style="display:flex;flex-direction:column;align-items:stretch;gap:6px;border-top:1px solid var(--ts-divider);padding-top:14px">
-            <span style="font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em">{{ t.canvasSizeL }}</span>
-            <div role="group" aria-label="{{ t.canvasSizeL }}" style="display:flex;flex-wrap:wrap;border:1px solid var(--ts-border-decor);border-radius:8px;overflow:hidden">
-              <sc-for list="{{ outputOpts }}" as="o" hint-placeholder-count="4">
-                <button onClick="{{ o.pick }}" aria-pressed="{{ o.active }}" aria-label="{{ o.name }}" title="{{ o.name }} — {{ o.sub }}" style="{{ o.segStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:-2px">{{ o.label }}</button>
-              </sc-for>
-            </div>
-          </div>
-
-          <div style="border-top:1px solid var(--ts-divider);padding-top:14px">
-            <button onClick="{{ toggleCleanup }}" aria-expanded="{{ cleanupOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <span style="flex:1;text-align:left;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;font-size:12px">{{ t.inspCleanup }}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" style="{{ cleanupCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </button>
-            <sc-if value="{{ cleanupOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:9px">
-              <div style="font-size:13px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
-              <div style="display:flex;gap:6px">
-                <button class="ts-fx-btn" onClick="{{ fxThinner }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:var(--ts-panel);color:var(--ts-text-primary);cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldOffIcon20 }}{{ t.inspThinner }}</button>
-                <button class="ts-fx-btn" onClick="{{ fxThicker }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:var(--ts-panel);color:var(--ts-text-primary);cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldIcon20 }}{{ t.inspThicker }}</button>
-                <button class="ts-fx-btn" onClick="{{ fxDenoise }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:var(--ts-panel);color:var(--ts-text-primary);cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ sparklesIcon20 }}{{ t.inspDenoise }}</button>
-              </div>
-            </div>
-            </sc-if>
-          </div>
-
-          <div style="border-top:1px solid var(--ts-divider);padding-top:14px">
-            <button onClick="{{ toggleExportPanel }}" aria-expanded="{{ exportPanelOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <span style="flex:1;text-align:left;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;font-size:12px">{{ t.export }}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" style="{{ exportPanelCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </button>
-            <sc-if value="{{ exportPanelOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:9px">
-              <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.inspDevice }}</div>
-              <button onClick="{{ exportDtmsFromPanel }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:var(--ts-spacing-list-item);border:1px solid var(--ts-border-decor);border-radius:var(--ts-radius-lg);background:var(--ts-panel);cursor:pointer;text-align:left" style-hover="border:1px solid var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
-                <span style="flex:none;width:36px;height:36px;border-radius:var(--ts-radius-md);background:var(--ts-accent-bg-soft);color:var(--ts-accent-icon);display:grid;place-items:center">{{ downloadIcon }}</span>
-                <span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ts-text-primary)">{{ inspExportDtmsLabel }}</span>
-                <span style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);background:var(--ts-bg-warm);border:1px solid var(--ts-border-decor);border-radius:var(--ts-radius-sm);padding:var(--ts-spacing-badge)">.dtms</span>
-              </button>
-            </div>
-            </sc-if>
-          </div>
-
           <div style="border-top:1px solid var(--ts-divider);padding-top:14px">
             <button onClick="{{ toggleNarr }}" aria-expanded="{{ narrOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
               <span style="flex:1;text-align:left;font-weight:700">{{ t.inspPageMeta }} · {{ t.inspAudio }}</span>
@@ -904,6 +861,42 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
             </div>
             </sc-if>
           </div>
+
+          <div style="border-top:1px solid var(--ts-divider);padding-top:14px">
+            <button onClick="{{ toggleCleanup }}" aria-expanded="{{ cleanupOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <span style="flex:1;text-align:left;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;font-size:12px">{{ t.inspCleanup }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" style="{{ cleanupCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <sc-if value="{{ cleanupOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:9px">
+              <div style="font-size:13px;color:var(--ts-text-secondary);line-height:1.5;margin-bottom:9px">{{ t.inspCanvasFx }}</div>
+              <div style="display:flex;gap:6px">
+                <button class="ts-fx-btn" onClick="{{ fxThinner }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:var(--ts-panel);color:var(--ts-text-primary);cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldOffIcon20 }}{{ t.inspThinner }}</button>
+                <button class="ts-fx-btn" onClick="{{ fxThicker }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:var(--ts-panel);color:var(--ts-text-primary);cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ boldIcon20 }}{{ t.inspThicker }}</button>
+                <button class="ts-fx-btn" onClick="{{ fxDenoise }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 4px;border-radius:var(--ts-radius-lg);font-size:12.5px;font-weight:700;border:1px solid var(--ts-border-functional);background:var(--ts-panel);color:var(--ts-text-primary);cursor:pointer;text-align:center" style-hover="border:1px solid var(--ts-primary);color:var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ sparklesIcon20 }}{{ t.inspDenoise }}</button>
+              </div>
+            </div>
+            </sc-if>
+          </div>
+
+          <div style="border-top:1px solid var(--ts-divider);padding-top:14px">
+            <button onClick="{{ toggleExportPanel }}" aria-expanded="{{ exportPanelOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <span style="flex:1;text-align:left;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;font-size:12px">{{ t.export }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" style="{{ exportPanelCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <sc-if value="{{ exportPanelOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:9px">
+              <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);margin-bottom:8px">{{ t.inspDevice }}</div>
+              <button onClick="{{ exportDtmsFromPanel }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:var(--ts-spacing-list-item);border:1px solid var(--ts-border-decor);border-radius:var(--ts-radius-lg);background:var(--ts-panel);cursor:pointer;text-align:left" style-hover="border:1px solid var(--ts-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">
+                <span style="flex:none;width:36px;height:36px;border-radius:var(--ts-radius-md);background:var(--ts-accent-bg-soft);color:var(--ts-accent-icon);display:grid;place-items:center">{{ downloadIcon }}</span>
+                <span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ts-text-primary)">{{ inspExportDtmsLabel }}</span>
+                <span style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-text-secondary);background:var(--ts-bg-warm);border:1px solid var(--ts-border-decor);border-radius:var(--ts-radius-sm);padding:var(--ts-spacing-badge)">.dtms</span>
+              </button>
+            </div>
+            </sc-if>
+          </div>
+
+
 
           <!-- Accessibility Mode: separate, opt-in keyboard-editing surface.
                When on, the cursor tool returns to the toolbar and the arrow/Space
