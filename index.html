@@ -1848,6 +1848,13 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
   {{ toast }}
 </div>
 </sc-if>
+
+<sc-if value="{{ focusMode }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ toggleFocusMode }}" aria-label="{{ focusLabel }}" style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:89;background:var(--ts-text-primary);color:var(--ts-panel);font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:14px;font-weight:600;border:none;border-radius:100px;padding:10px 16px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 8px 12px rgba(31,29,26,0.42)" style-hover="background:#000" style-focus="outline:2px solid var(--ts-panel);outline-offset:2px">
+  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 19v-2a2 2 0 0 1 2 -2h2M15 5v2a2 2 0 0 0 2 2h2M5 15h2a2 2 0 0 1 2 2v2M5 9h2a2 2 0 0 0 2 -2v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+  {{ focusLabel }}
+</button>
+</sc-if>
 </sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;dotpadPanel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;modal&quot;,&quot;sheet&quot;,&quot;dock&quot;],&quot;default&quot;:&quot;modal&quot;,&quot;section&quot;:&quot;Variants&quot;,&quot;tsType&quot;:&quot;'modal'|'sheet'|'dock'&quot;}}">
@@ -4624,6 +4631,17 @@ class Component extends DCLogic {
     bold: [{ d: 'M7 5h6a3.5 3.5 0 0 1 0 7h-6l0 -7' }, { d: 'M13 12h1a3.5 3.5 0 0 1 0 7h-7v-7' }],
     boldOff: [{ d: 'M9 5h4a3.5 3.5 0 0 1 2.222 6.204m-3.222 .796h-5v-5' }, { d: 'M17.107 17.112a3.5 3.5 0 0 1 -3.107 1.888h-7v-7' }, { d: 'M3 3l18 18' }],
     sparkles: [{ d: 'M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6' }],
+    // Sourced from Tabler Icons (MIT, @tabler/icons 3.45.0, icons/outline/
+    // minimize.svg) — the natural inward-corner pair to the outward-corner
+    // "maximize" icon already inline on the topbar's enter-focus-mode
+    // button (M8 4H5a1 1 0 0 0-1 1v3...), for the new floating exit-focus
+    // pill (Figma: 집중 모드 종료).
+    minimize: [
+      { d: 'M15 19v-2a2 2 0 0 1 2 -2h2' },
+      { d: 'M15 5v2a2 2 0 0 0 2 2h2' },
+      { d: 'M5 15h2a2 2 0 0 1 2 2v2' },
+      { d: 'M5 9h2a2 2 0 0 0 2 -2v-2' }
+    ],
     // Reuses the exact path already inline on exportItems' DTMS/SVG/JSON/PNG rows
     // (not a new icon source — just centralizing an existing, already-used glyph
     // so the new Inspector export card can share it via this.icon()).
