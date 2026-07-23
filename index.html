@@ -1708,7 +1708,7 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
         <input value="{{ fileName }}" onChange="{{ nameChange }}" style="display:block;width:100%;margin-top:7px;height:42px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 13px;font-size:14px;color:var(--ts-text-primary);background:var(--ts-panel)" style-focus="border:1px solid var(--ts-primary);outline:none">
       </label>
       <div style="font-size:12.5px;font-weight:700;color:var(--ts-text-primary);margin-bottom:8px">{{ t.saveLocL }}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
         <button onClick="{{ pickDrive }}" aria-pressed="{{ isDrive }}" style="{{ driveCardStyle }}">
           <span style="font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:7px">
             Tactile Drive
@@ -1727,6 +1727,39 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
           </span>
           <span style="font-size:12.5px;color:var(--ts-text-secondary);font-weight:500">{{ t.locLibSub }}</span>
         </button>
+        <sc-if value="{{ showAphCard }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ pickAph }}" aria-pressed="{{ isAph }}" style="{{ aphCardStyle }}">
+          <span style="font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:7px">
+            APH Library
+            <sc-if value="{{ isAph }}" hint-placeholder-val="{{ false }}">
+              <svg width="14" height="14" viewBox="0 0 24 24" style="color:var(--ts-primary)"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </sc-if>
+          </span>
+          <span style="font-size:12.5px;color:var(--ts-text-secondary);font-weight:500">{{ t.locAphSub }}</span>
+        </button>
+        </sc-if>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+        <label style="display:block;font-size:12.5px;font-weight:700;color:var(--ts-text-primary)">
+          {{ t.metaSubjectL }} <span style="font-weight:500;color:var(--ts-text-secondary)">{{ t.metaOptional }}</span>
+          <input value="{{ metaSubject }}" onChange="{{ onMetaSubject }}" placeholder="{{ t.metaSubjectPh }}" style="display:block;width:100%;box-sizing:border-box;margin-top:7px;height:38px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 11px;font-size:13px;color:var(--ts-text-primary);background:var(--ts-panel)" style-focus="border:1px solid var(--ts-primary);outline:none">
+        </label>
+        <label style="display:block;font-size:12.5px;font-weight:700;color:var(--ts-text-primary)">
+          {{ t.metaGradeL }} <span style="font-weight:500;color:var(--ts-text-secondary)">{{ t.metaOptional }}</span>
+          <input value="{{ metaGrade }}" onChange="{{ onMetaGrade }}" placeholder="{{ t.metaGradePh }}" style="display:block;width:100%;box-sizing:border-box;margin-top:7px;height:38px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 11px;font-size:13px;color:var(--ts-text-primary);background:var(--ts-panel)" style-focus="border:1px solid var(--ts-primary);outline:none">
+        </label>
+        <label style="display:block;font-size:12.5px;font-weight:700;color:var(--ts-text-primary)">
+          {{ t.metaLanguageL }}
+          <select value="{{ metaLanguageValue }}" onChange="{{ onMetaLanguage }}" style="display:block;width:100%;box-sizing:border-box;margin-top:7px;height:38px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 11px;font-size:13px;color:var(--ts-text-primary);background:var(--ts-panel)" style-focus="border:1px solid var(--ts-primary);outline:none">
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <label style="display:block;font-size:12.5px;font-weight:700;color:var(--ts-text-primary)">
+          {{ t.metaLicenseL }} <span style="font-weight:500;color:var(--ts-text-secondary)">{{ t.metaOptional }}</span>
+          <input value="{{ metaLicense }}" onChange="{{ onMetaLicense }}" placeholder="{{ t.metaLicensePh }}" style="display:block;width:100%;box-sizing:border-box;margin-top:7px;height:38px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 11px;font-size:13px;color:var(--ts-text-primary);background:var(--ts-panel)" style-focus="border:1px solid var(--ts-primary);outline:none">
+        </label>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:10px">
         <button onClick="{{ closeSave }}" style="height:40px;padding:0 18px;border:1px solid var(--ts-border-decor);border-radius:8px;background:var(--ts-panel);color:var(--ts-text-primary);font-weight:700;font-size:13.5px">{{ t.cancel }}</button>
@@ -1883,6 +1916,15 @@ class Component extends DCLogic {
     brailleLang: 'ko-g2', braillePreview: { ok: true, unicode: '', cells: 0 }, brBusy: false,
     applyBusy: null, applyErr: null,
     saveOpen: false, savePhase: 'form', saveLoc: 'drive', libraryOpen: false,
+    // Phase 5 (UI/UX 정교화 요청서, Publish): minimal metadata fields added
+    // to the EXISTING Save dialog rather than a new Publish screen/mode —
+    // Subject/Grade/License have no existing project data to auto-fill
+    // from (start empty); Language auto-fills from the current UI language
+    // below. featureAphPublishing defaults false: there is no real APH API
+    // in this codebase, and the request explicitly forbids shipping a
+    // button with no function, so the destination card only renders when
+    // this flag is deliberately turned on (see comment at its usage site).
+    metaSubject: '', metaGrade: '', metaLicense: '', metaLanguage: null, featureAphPublishing: false,
     helpOpen: false, menu: null, railMenu: null, tip: null, advOpen: false,
     toolbarPos: null,
     textPopover: null, textValue: '', textSize: 'medium', textOrient: 'horizontal', textStyle: 'filled',
@@ -2069,7 +2111,7 @@ class Component extends DCLogic {
       aRetouchReady: '변환 결과를 편집기로 불러왔습니다. 도구로 세부 수정하세요.', aAssetLoaded: '촉각 자산을 불러왔습니다 (%1페이지).', aAssetBadFmt: '지원하는 촉각 자산 파일이 아닙니다 (DTMS·라이브러리 JSON).', aAssetBanaWarn: 'BANA 인쇄 기준에서 확인할 점이 있습니다. 엠보싱 내보내기에서 상세를 확인하세요.', impAssetTitle: '촉각 자산 불러오기', impAssetSub: 'TGIL·DTMS·라이브러리 파일(.json/.dtms)을 DotPad로 불러옵니다', impAssetChoose: '자산 파일 선택', 
       preview: 'DotPad 미리보기', sendNow: '지금 전송', sending: 'DotPad로 전송 중…', sent: '전송 완료', sentSub: 'DotPad에서 촉각 그래픽이 출력되고 있습니다.',
       errTitle: 'DotPad에 연결할 수 없습니다', errSub: '케이블 또는 블루투스 연결을 확인한 뒤 다시 시도해주세요.',
-      saveTitle: '저장', saveLocL: '저장 위치', locDriveSub: '내 촉각 파일 보관함', locLibSub: '팀과 공유하는 라이브러리',
+      saveTitle: '저장', saveLocL: '저장 위치', locDriveSub: '내 촉각 파일 보관함', locLibSub: '팀과 공유하는 라이브러리', locAphSub: '미국점자인쇄소 라이브러리 (준비 중)', metaSubjectL: '과목', metaSubjectPh: '예: 수학, 과학', metaGradeL: '학년', metaGradePh: '예: 초등 3학년', metaLanguageL: '언어', metaLicenseL: '라이선스', metaLicensePh: '예: CC BY 4.0, 저작권 있음', metaOptional: '(선택)',
       saveBtn: '저장', savedTitle: '저장 완료', keepEditing: '계속 편집', nextStep: '다음 작업',
       
       libOpen: '라이브러리 열기', libOpenSub: '저장한 촉각 그래픽을 다시 열기', libTitle: '내 라이브러리', libEmpty: '아직 저장한 그래픽이 없습니다. 그래픽을 만들고 저장하면 여기에 모입니다.', libOpenCard: '열기', libSendCard: 'DotPad로 전송', libDeleteCard: '삭제', libDriveTag: '드라이브', libLibraryTag: '라이브러리', aLibDeleted: '삭제했습니다', 
@@ -2203,7 +2245,7 @@ class Component extends DCLogic {
       aRetouchReady: 'Conversion loaded into the editor. Refine details with the tools.', aAssetLoaded: 'Tactile asset loaded (%1 pages).', aAssetBadFmt: 'Not a supported tactile asset file (DTMS or library JSON).', aAssetBanaWarn: 'There are BANA print-standard notes. See details in emboss export.', impAssetTitle: 'Import tactile asset', impAssetSub: 'Load a TGIL / DTMS / library file (.json/.dtms) onto DotPad', impAssetChoose: 'Choose asset file', 
       preview: 'DotPad preview', sendNow: 'Send now', sending: 'Sending to DotPad…', sent: 'Sent to DotPad', sentSub: 'Your graphic is now rendering on the DotPad.',
       errTitle: "Can't reach DotPad", errSub: 'Check the cable or Bluetooth connection and try again.',
-      saveTitle: 'Save', saveLocL: 'Save to', locDriveSub: 'Your tactile file storage', locLibSub: 'Shared team library',
+      saveTitle: 'Save', saveLocL: 'Save to', locDriveSub: 'Your tactile file storage', locLibSub: 'Shared team library', locAphSub: 'American Printing House library (coming soon)', metaSubjectL: 'Subject', metaSubjectPh: 'e.g. Math, Science', metaGradeL: 'Grade', metaGradePh: 'e.g. Grade 3', metaLanguageL: 'Language', metaLicenseL: 'License', metaLicensePh: 'e.g. CC BY 4.0, All rights reserved', metaOptional: '(optional)',
       saveBtn: 'Save', savedTitle: 'Saved', keepEditing: 'Keep editing', nextStep: 'Next',
       
       libOpen: 'Open library', libOpenSub: 'Reopen your saved tactile graphics', libTitle: 'My library', libEmpty: 'No saved graphics yet. Create and save a graphic and it will appear here.', libOpenCard: 'Open', libSendCard: 'Send to DotPad', libDeleteCard: 'Delete', libDriveTag: 'Drive', libLibraryTag: 'Library', aLibDeleted: 'Deleted', 
@@ -5313,6 +5355,15 @@ class Component extends DCLogic {
   }
   doSaveCommit() {
     const t = this.T(), st = this.state, name = st.fileName || t.untitled;
+    // APH Library has no real publishing API in this codebase — per the
+    // request's explicit rule against buttons with no real function, this
+    // never pretends to succeed even if the (default-hidden) feature flag
+    // is turned on for preview purposes.
+    if (st.saveLoc === 'aph') {
+      this.toastMsg(t.locAphSub, 'error');
+      this.say(t.locAphSub);
+      return;
+    }
     const composite = this.compositeCells();
     const thumb = this.thumbFrom(composite, st.gridW, st.gridH);
     const cells = composite.slice();
@@ -6751,9 +6802,17 @@ class Component extends DCLogic {
       openSave: () => this.setState({ saveOpen: true, savePhase: 'form' }),
       closeSave: () => this.setState({ saveOpen: false }),
       saveForm: st.savePhase === 'form', saveDone: st.savePhase === 'done',
-      isDrive: st.saveLoc === 'drive', isLibrary: st.saveLoc === 'library',
+      isDrive: st.saveLoc === 'drive', isLibrary: st.saveLoc === 'library', isAph: st.saveLoc === 'aph',
       pickDrive: () => this.setState({ saveLoc: 'drive' }), pickLibrary: () => this.setState({ saveLoc: 'library' }),
+      pickAph: () => this.setState({ saveLoc: 'aph' }),
       driveCardStyle: locCard(st.saveLoc === 'drive'), libCardStyle: locCard(st.saveLoc === 'library'),
+      aphCardStyle: locCard(st.saveLoc === 'aph'),
+      showAphCard: st.featureAphPublishing,
+      metaSubject: st.metaSubject, onMetaSubject: e => this.setState({ metaSubject: e.target.value }),
+      metaGrade: st.metaGrade, onMetaGrade: e => this.setState({ metaGrade: e.target.value }),
+      metaLicense: st.metaLicense, onMetaLicense: e => this.setState({ metaLicense: e.target.value }),
+      metaLanguageValue: st.metaLanguage || st.lang,
+      onMetaLanguage: e => this.setState({ metaLanguage: e.target.value }),
       doSave: () => this.doSaveCommit(),
       savedWhere: st.saveLoc === 'drive' ? t.savedDrive : t.savedLib,
       // send-success next steps
