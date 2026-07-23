@@ -783,16 +783,81 @@ button.ts-rail-group-caret:hover{color:var(--ts-text-primary);background:rgba(30
 
           <div style="border-top:1px solid var(--ts-divider);padding-top:14px">
             <button onClick="{{ toggleNarr }}" aria-expanded="{{ narrOpen }}" style="width:100%;display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;padding:0;font-size:12.5px;color:var(--ts-text-secondary);letter-spacing:.02em" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
-              <span style="flex:1;text-align:left;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;font-size:12px">{{ t.inspContent }}</span>
+              <span style="flex:1;text-align:left;font-weight:700">{{ t.inspPageMeta }} · {{ t.inspAudio }}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" style="{{ narrCaretStyle }}" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
             <sc-if value="{{ narrOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:11px">
             <label id="ts-desc-label" style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspDesc }}</label>
-            <textarea id="ts-desc-input" value="{{ pgDesc }}" aria-labelledby="ts-desc-label" onChange="{{ onPgDesc }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:var(--ts-text-primary);margin-bottom:12px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px"></textarea>
+            <textarea ref="{{ descRef }}" id="ts-desc-input" value="{{ pgDesc }}" aria-labelledby="ts-desc-label" aria-describedby="{{ descField.describedby }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" aria-busy="{{ descField.busy }}" onChange="{{ onPgDesc }}" onKeyDown="{{ onDescKey }}" placeholder="{{ t.inspDescPh }}" rows="2" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:var(--ts-text-primary);margin-bottom:6px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px"></textarea>
+            <div style="display:flex;align-items:center;gap:8px;min-height:16px;margin-bottom:7px">
+              <span id="ts-desc-hint" style="flex:1;min-width:0;font-size:11.5px;color:var(--ts-text-secondary)">{{ applyHintText }}</span>
+              <sc-if value="{{ descField.showStatus }}" hint-placeholder-val="{{ false }}"><span id="ts-desc-status" role="status" aria-live="polite" style="flex:none;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px;{{ descField.colorStyle }}"><sc-if value="{{ descField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:10px;height:10px;border:2px solid currentColor;border-top-color:transparent;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>{{ descField.text }}</span></sc-if>
+              <sc-if value="{{ descField.isError }}" hint-placeholder-val="{{ false }}"><span id="ts-desc-status" role="alert" style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-danger)">{{ descField.text }}</span></sc-if>
+            </div>
+            <button onClick="{{ applyDesc }}" disabled="{{ descField.btnDisabled }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" style="{{ descField.btnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <sc-if value="{{ descField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:12px;height:12px;border:2px solid rgba(255,255,255,0.5);border-top-color:var(--ts-panel);border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>
+              {{ descField.label }}
+            </button>
+
+            <label id="ts-brl-lang-label" style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspBrailleLang }}</label>
+            <select onChange="{{ onBrailleLang }}" value="{{ brailleLangValue }}" aria-labelledby="ts-brl-lang-label" style="width:100%;height:34px;border:1px solid var(--ts-border-functional);border-radius:8px;padding:0 8px;font-size:13px;font-family:inherit;color:var(--ts-text-primary);background:var(--ts-panel);margin-bottom:8px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px">
+              <sc-for list="{{ brailleLangOptions }}" as="o" hint-placeholder-count="4">
+                <option value="{{ o.key }}">{{ o.label }}</option>
+              </sc-for>
+            </select>
+
+            <sc-if value="{{ braillePreviewEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:8px 10px;border:1px dashed var(--ts-border-decor);border-radius:8px;background:var(--ts-note-bg);font-size:12px;color:var(--ts-text-secondary);line-height:1.45;margin-bottom:12px">{{ braillePreviewEmptyText }}</div>
+            </sc-if>
+            <sc-if value="{{ braillePreviewProcessing }}" hint-placeholder-val="{{ false }}">
+              <div role="status" aria-live="polite" aria-busy="true" style="display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:var(--ts-note-bg);font-size:12px;color:var(--ts-text-secondary);margin-bottom:12px"><span aria-hidden="true" style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span>{{ braillePreviewProcessingText }}</div>
+            </sc-if>
+            <sc-if value="{{ braillePreviewError }}" hint-placeholder-val="{{ false }}">
+              <div role="alert" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ts-danger);border-radius:8px;background:#FCEFE9;margin-bottom:12px">
+                <span style="flex:1;min-width:0;font-size:12px;color:var(--ts-danger);line-height:1.4">{{ braillePreviewFailText }}</span>
+                <button onClick="{{ brailleRetry }}" style="flex:none;font-size:12px;font-weight:700;color:var(--ts-danger);background:var(--ts-panel);border:1px solid var(--ts-danger);border-radius:7px;padding:4px 9px;cursor:pointer" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ brailleRetryLabel }}</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ braillePreviewSuccess }}" hint-placeholder-val="{{ true }}">
+              <div aria-live="polite" style="padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:var(--ts-note-bg);margin-bottom:4px">
+                <div style="font-size:15px;letter-spacing:0.06em;color:var(--ts-text-primary);min-height:20px;word-break:break-all">{{ braillePreviewText }}</div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+                <span style="font-size:12.5px;font-weight:700;{{ brailleCounterColor }}">{{ brailleCounterText }}</span>
+              </div>
+            </sc-if>
 
             <label id="ts-narr-label" style="display:block;font-size:12.5px;color:var(--ts-text-secondary);margin-bottom:5px">{{ t.inspNarr }}</label>
-            <textarea id="ts-narr-input" value="{{ pgNarration }}" aria-labelledby="ts-narr-label" onChange="{{ onNarration }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:var(--ts-text-primary)" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px"></textarea>
+            <textarea ref="{{ narrRef }}" id="ts-narr-input" value="{{ pgNarration }}" aria-labelledby="ts-narr-label" aria-describedby="{{ narrField.describedby }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" aria-busy="{{ narrField.busy }}" onChange="{{ onNarration }}" onKeyDown="{{ onNarrKey }}" placeholder="{{ t.inspNarrPh }}" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid var(--ts-border-functional);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;color:var(--ts-text-primary);margin-bottom:6px" style-focus="outline:2px solid var(--ts-primary);outline-offset:-1px"></textarea>
+            <div style="display:flex;align-items:center;gap:8px;min-height:16px;margin-bottom:7px">
+              <span id="ts-narr-hint" style="flex:1;min-width:0;font-size:11.5px;color:var(--ts-text-secondary)">{{ applyHintText }}</span>
+              <sc-if value="{{ narrField.showStatus }}" hint-placeholder-val="{{ false }}"><span id="ts-narr-status" role="status" aria-live="polite" style="flex:none;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px;{{ narrField.colorStyle }}"><sc-if value="{{ narrField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:10px;height:10px;border:2px solid currentColor;border-top-color:transparent;border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>{{ narrField.text }}</span></sc-if>
+              <sc-if value="{{ narrField.isError }}" hint-placeholder-val="{{ false }}"><span id="ts-narr-status" role="alert" style="flex:none;font-size:11.5px;font-weight:700;color:var(--ts-danger)">{{ narrField.text }}</span></sc-if>
+            </div>
+            <button onClick="{{ applyNarr }}" disabled="{{ narrField.btnDisabled }}" aria-keyshortcuts="{{ applyKeyshortcuts }}" style="{{ narrField.btnStyle }}" style-focus="outline:2px solid var(--ts-primary);outline-offset:2px">
+              <sc-if value="{{ narrField.busy }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="width:12px;height:12px;border:2px solid rgba(255,255,255,0.5);border-top-color:var(--ts-panel);border-radius:100px;animation:tsSpin 0.8s linear infinite;flex:none"></span></sc-if>
+              {{ narrField.label }}
+            </button>
+            <div class="ts-inspector-divider" style="height:1px;background:var(--ts-border-functional);margin:2px 0 10px"></div>
+            <div class="ts-inspector-subtitle" style="font-size:12.5px;color:var(--ts-text-secondary);font-weight:700;margin-bottom:8px">{{ t.inspAudioSub }}</div>
+
+            <sc-if value="{{ pgAudio.has }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ts-border-decor);border-radius:8px;background:var(--ts-note-bg);margin-bottom:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="color:var(--ts-primary);flex:none" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.8"></circle><circle cx="19" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>
+                <span style="flex:1;font-size:13px;color:var(--ts-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pgAudio.fileName }} {{ pgAudio.dur }}</span>
+                <button onClick="{{ onAudioRemove }}" style="flex:none;font-size:12.5px;font-weight:700;color:var(--ts-text-secondary);background:transparent;border:none;cursor:pointer;padding:4px 6px;border-radius:6px" style-hover="color:var(--ts-primary-active);background:#F3E3DC" style-focus="outline:2px solid var(--ts-primary);outline-offset:1px">{{ t.inspAudioRemove }}</button>
+              </div>
+              <audio ref="{{ audioRef }}" controls style="width:100%;height:34px"></audio>
+            </sc-if>
+            <sc-if value="{{ pgAudio.none }}" hint-placeholder-val="{{ true }}">
+              <label style="display:flex;align-items:center;justify-content:center;gap:7px;height:36px;border:1.5px dashed var(--ts-border-functional);border-radius:9px;font-size:12.5px;font-weight:700;color:var(--ts-primary);cursor:pointer;background:var(--ts-panel)" style-hover="border-color:var(--ts-primary);background:rgba(var(--ts-primary-rgb),0.04)">
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+                {{ t.inspAudioAdd }}
+                <input type="file" accept="audio/*" onChange="{{ onAudioFile }}" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+              </label>
+              <div style="font-size:12px;color:var(--ts-text-secondary);line-height:1.5;margin-top:7px">{{ t.inspAudioHint }}</div>
+            </sc-if>
             </div>
             </sc-if>
           </div>
@@ -1947,7 +2012,7 @@ class Component extends DCLogic {
       qHint: g => '점 밀도 기준 촉각 가독성: ' + g, formatsL: '지원 형식',
       confirmTitle: '현재 작업을 대체할까요?', confirmSub: '저장하지 않은 변경 사항이 사라집니다. 계속하시겠어요?', confirmReplace: '대체하기', keepWork: '취소',
       connecting: '연결 중…', reSend: '다시 전송',
-      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', pageTitlePh: '제목 없음', inspProps: '속성', inspDevice: 'DotPad', inspPanelTabsL: '편집 패널', layerAdd: '+ 추가', layerAddL: '레이어 추가', layerListL: '레이어 목록', layerUpL: '레이어 위로', layerDownL: '레이어 아래로', layerDuplicateL: '레이어 복제', layerMergeL: '아래 레이어와 병합', layerDeleteL: '레이어 삭제', layerHideL: '레이어 숨기기', layerShowL: '레이어 표시', layerRenameL: '레이어 이름 변경', layerCompositeNote: '보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspExportDtmsOf: (n) => `닷패드 파일 · 전체 ${n}쪽`, inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션', inspNarrPh: '설명이 없을 때 점자로 대신 사용할 나레이션', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명', inspContent: '콘텐츠', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
+      dpPanelTitle: 'DotPad 출력', dpCollapse: 'DotPad 패널 접기', dpExpand: 'DotPad 패널 펼치기', pagesLabel: '페이지', addPage: '페이지 추가', pageTitlePh: '제목 없음', inspProps: '속성', inspDevice: 'DotPad', inspPanelTabsL: '편집 패널', layerAdd: '+ 추가', layerAddL: '레이어 추가', layerListL: '레이어 목록', layerUpL: '레이어 위로', layerDownL: '레이어 아래로', layerDuplicateL: '레이어 복제', layerMergeL: '아래 레이어와 병합', layerDeleteL: '레이어 삭제', layerHideL: '레이어 숨기기', layerShowL: '레이어 표시', layerRenameL: '레이어 이름 변경', layerCompositeNote: '보이는 레이어만 DotPad와 내보내기에서 하나의 촉각 그래픽으로 합성됩니다.', inspToolOpts: '도구 옵션', inspNoSel: '도구를 선택하면 옵션이 여기에 표시됩니다.', a11yModeL: '접근성 모드', a11yModeHelp: '키보드 커서 도구와 화살표·스페이스 편집 안내를 표시합니다.', inspCleanup: '정리', inspThinner: '얇게', inspThicker: '굵게', inspDenoise: '노이즈 제거', inspCanvasFx: '캔버스 정리 (전체 페이지에 적용)', inspExportDtmsOf: (n) => `닷패드 파일 · 전체 ${n}쪽`, inspPageMeta: '현재 페이지', inspAudio: '나레이션 오디오', inspAudioSub: '현재 페이지 · 나레이션 오디오', inspAudioAdd: '오디오 파일 업로드', inspAudioRemove: '제거', inspNarr: '나레이션 텍스트', inspNarrPh: '오디오가 읽을 내용 (비우면 설명을 사용)', inspAudioHint: '오디오 파일은 배포할 때 함께 올려야 재생됩니다.', inspDesc: '점자 설명', inspDescPh: 'DotPad 점자 줄로 보낼 짧은 설명 (비우면 나레이션 텍스트를 사용)', inspBrailleLang: '점역 언어', brailleLangKoG2: '한국어 (약자)', brailleLangKoG1: '한국어 (정자)', brailleLangUebG1: 'UEB (1급)', brailleLangUebG2: 'UEB (2급)', brailleCellsOf: (n, w) => n + '칸 / ' + w + '칸', braillePreviewEmpty: '점자 설명을 입력하면 변환 결과가 여기에 표시됩니다.', braillePreviewFail: '점역에 실패했습니다 — 점자 줄은 전송되지 않습니다.', braillePreviewProcessing: '점자 변환 중…', brailleRetry: '다시 시도',
       stUnsaved: '저장되지 않은 변경사항', stSaving: '저장 중…', stSaved: '✓ 저장됨', stError: '저장하지 못했습니다. 다시 시도', stSavedAt: (tm) => '✓ 저장됨 · ' + tm,
       applyBraille: '점자 적용', applyNarr: '나레이션 적용', applyHint: (m) => m + ' + Enter로 적용',
       applyDescOk: '점자 설명이 현재 페이지에 적용되었습니다.', applyNarrOk: '나레이션 텍스트가 현재 페이지에 적용되었습니다.', applyFail: '적용하지 못했습니다. 다시 시도하세요.',
@@ -2081,7 +2146,7 @@ class Component extends DCLogic {
       qHint: g => 'Tactile readability by dot density: ' + g, formatsL: 'Formats',
       confirmTitle: 'Replace the current work?', confirmSub: 'Unsaved changes will be lost. Do you want to continue?', confirmReplace: 'Replace', keepWork: 'Cancel',
       connecting: 'Connecting…', reSend: 'Send again',
-      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', pageTitlePh: 'Untitled', inspProps: 'Properties', inspDevice: 'DotPad', inspPanelTabsL: 'Editor panels', layerAdd: '+ Add', layerAddL: 'Add layer', layerListL: 'Layer list', layerUpL: 'Move layer up', layerDownL: 'Move layer down', layerDuplicateL: 'Duplicate layer', layerMergeL: 'Merge with layer below', layerDeleteL: 'Delete layer', layerHideL: 'Hide layer', layerShowL: 'Show layer', layerRenameL: 'Rename layer', layerCompositeNote: 'Only visible layers are composited into one tactile graphic for DotPad output and export.', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspExportDtmsOf: (n) => `DotPad file · All ${n} page${n === 1 ? '' : 's'}`, inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration', inspNarrPh: 'Used as the braille fallback when description is empty', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Description', inspDescPh: 'Short text sent as the DotPad braille line', inspContent: 'Content', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
+      dpPanelTitle: 'DotPad Output', dpCollapse: 'Collapse DotPad panel', dpExpand: 'Expand DotPad panel', pagesLabel: 'Pages', addPage: 'Add page', pageTitlePh: 'Untitled', inspProps: 'Properties', inspDevice: 'DotPad', inspPanelTabsL: 'Editor panels', layerAdd: '+ Add', layerAddL: 'Add layer', layerListL: 'Layer list', layerUpL: 'Move layer up', layerDownL: 'Move layer down', layerDuplicateL: 'Duplicate layer', layerMergeL: 'Merge with layer below', layerDeleteL: 'Delete layer', layerHideL: 'Hide layer', layerShowL: 'Show layer', layerRenameL: 'Rename layer', layerCompositeNote: 'Only visible layers are composited into one tactile graphic for DotPad output and export.', inspToolOpts: 'Tool options', inspNoSel: 'Select a tool to see its options here.', a11yModeL: 'Accessibility Mode', a11yModeHelp: 'Show the keyboard cursor tool and arrow/Space editing guidance.', inspCleanup: 'Cleanup', inspThinner: 'Thinner', inspThicker: 'Thicker', inspDenoise: 'Remove noise', inspCanvasFx: 'Clean up the whole canvas', inspExportDtmsOf: (n) => `DotPad file · All ${n} page${n === 1 ? '' : 's'}`, inspPageMeta: 'Current page', inspAudio: 'Narration audio', inspAudioSub: 'Current page · Narration audio', inspAudioAdd: 'Attach audio file', inspAudioRemove: 'Remove', inspNarr: 'Narration text', inspNarrPh: 'What the audio reads (falls back to description)', inspAudioHint: 'Upload a pre-made audio file; the asset stores its path.', inspDesc: 'Braille description', inspDescPh: 'Short text sent as the DotPad braille line (falls back to narration text)', inspBrailleLang: 'Braille language', brailleLangKoG2: 'Korean (Grade 2)', brailleLangKoG1: 'Korean (Grade 1)', brailleLangUebG1: 'UEB (Grade 1)', brailleLangUebG2: 'UEB (Grade 2)', brailleCellsOf: (n, w) => n + ' / ' + w + ' cells', braillePreviewEmpty: 'Enter a braille description to preview the converted result.', braillePreviewFail: 'Translation failed — the braille line will not be sent.', braillePreviewProcessing: 'Converting to braille…', brailleRetry: 'Retry',
       stUnsaved: 'Unsaved changes', stSaving: 'Saving…', stSaved: '✓ Saved', stError: "Couldn't save. Try again", stSavedAt: (tm) => '✓ Saved · ' + tm,
       applyBraille: 'Apply braille', applyNarr: 'Apply narration', applyHint: (m) => 'Press ' + m + ' + Enter to apply',
       applyDescOk: 'Braille description applied to the current page.', applyNarrOk: 'Narration text applied to the current page.', applyFail: "Couldn't apply. Please try again.",
@@ -5404,7 +5469,6 @@ class Component extends DCLogic {
     if (this.state.applyErr === 'narr') this.setState({ applyErr: null });
     this.bump();
     this.queueBraillePreview();
-    this._scheduleAutoApply('narr');
   }
   // ── Braille output ───────────────────────────────────────────────────────
   // Translates text to real braille via the vendored liblouis engine
@@ -5466,24 +5530,10 @@ class Component extends DCLogic {
     if (this.state.applyErr === 'desc') this.setState({ applyErr: null });
     this.bump();
     this.queueBraillePreview();
-    this._scheduleAutoApply('desc');
   }
   setBrailleLang(key) {
     this.setState({ brailleLang: key });
     this.queueBraillePreview();
-  }
-  // Debounced auto-apply: since the Apply button/live-preview UI was removed
-  // (2026-07-22, simplified content section to match the shipped design),
-  // this is now the ONLY thing that ever runs the real braille translation —
-  // without it, DotPad output and export would silently keep raw text
-  // forever and never get real braille cells. Runs ~1.1s after the user
-  // stops typing (longer than session-autosave's 800ms, since applyField
-  // itself is async and shouldn't retrigger mid-flight from a stray
-  // keystroke); per-field timers so desc/narration don't cancel each other.
-  _scheduleAutoApply(field) {
-    if (!this._autoApplyT) this._autoApplyT = {};
-    clearTimeout(this._autoApplyT[field]);
-    this._autoApplyT[field] = setTimeout(() => this.applyField(field), 1100);
   }
   // ── explicit Apply (desc / narration) ───────────────────────────────────────
   // Autosave already keeps the raw text on the page model on every keystroke.
