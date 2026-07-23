@@ -5805,6 +5805,19 @@ class Component extends DCLogic {
     const dpVar = p.dotpadPanel ?? 'modal';
     const seg = on => ({ height: 32, padding: '0 10px', border: 'none', background: on ? 'var(--ts-text-primary)' : 'var(--ts-panel)', color: on ? 'var(--ts-panel)' : 'var(--ts-text-secondary)', fontWeight: on ? 800 : 600, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' });
     const specCard = on => ({ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 8px', borderRadius: 'var(--ts-radius-lg)', border: on ? '2px solid var(--ts-primary)' : '1px solid var(--ts-border-functional)', background: on ? '#FFF9F5' : 'var(--ts-panel)', color: on ? 'var(--ts-primary)' : 'var(--ts-text-primary)', cursor: 'pointer' });
+    // Phase 2 consolidation (UI/UX 정교화 요청서): the 정리/내보내기/콘텐츠
+    // accordion sections each independently computed an identical caret-
+    // rotation style object, and 정리/내보내기's toggle functions were the
+    // same one-line setState shape repeated verbatim. Extracted here —
+    // output is byte-identical to what each call site computed inline
+    // before, so this changes nothing visually or behaviorally.
+    const caretStyle = open => ({ transition: 'transform 0.15s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' });
+    const toggleSection = key => () => this.setState(s => ({ [key]: !s[key] }));
+    // A second, separate family: advOpen/impAdvOpen's caret starts as a
+    // right-pointing chevron (rotates 0→90deg), not the down-pointing
+    // 0→180deg chevron the sections above use — kept as its own helper so
+    // consolidating doesn't change either family's actual rotation/icon.
+    const caretAngle90 = open => open ? '90deg' : '0deg';
     const pageBtn = en => ({ width: 28, height: 28, border: '1px solid var(--ts-border-decor)', borderRadius: 7, background: 'var(--ts-panel)', color: 'var(--ts-text-primary)', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed', flex: 'none' });
     const iconBtn = en => ({ width: 34, height: 34, border: '1px solid var(--ts-border-decor)', borderRadius: 8, background: 'var(--ts-panel)', color: 'var(--ts-text-primary)', display: 'grid', placeItems: 'center', opacity: en ? 1 : 0.35, cursor: en ? 'pointer' : 'not-allowed' });
     const mobilePagerBtn = en => ({ width: 44, height: 44, flex: 'none', border: 'none', borderRadius: 100, background: 'transparent', color: 'var(--ts-text-primary)', display: 'grid', placeItems: 'center', cursor: en ? 'pointer' : 'not-allowed', opacity: en ? 1 : 0.35 });
@@ -6046,11 +6059,11 @@ class Component extends DCLogic {
       fxDenoise: () => this.denoiseFx(),
       boldOffIcon20: this.icon('boldOff', 20), boldIcon20: this.icon('bold', 20), sparklesIcon20: this.icon('sparkles', 20),
       cleanupOpen: st.cleanupOpen,
-      toggleCleanup: () => this.setState(s => ({ cleanupOpen: !s.cleanupOpen })),
-      cleanupCaretStyle: { transition: 'transform 0.15s ease', transform: st.cleanupOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
+      toggleCleanup: toggleSection('cleanupOpen'),
+      cleanupCaretStyle: caretStyle(st.cleanupOpen),
       exportPanelOpen: st.exportPanelOpen,
-      toggleExportPanel: () => this.setState(s => ({ exportPanelOpen: !s.exportPanelOpen })),
-      exportPanelCaretStyle: { transition: 'transform 0.15s ease', transform: st.exportPanelOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
+      toggleExportPanel: toggleSection('exportPanelOpen'),
+      exportPanelCaretStyle: caretStyle(st.exportPanelOpen),
       downloadIcon: this.icon('download', 18),
       inspExportDtmsLabel: t.inspExportDtmsOf(st.pageCount),
       exportDtmsFromPanel: () => this.exportFormat('DTMS'),
@@ -6129,7 +6142,7 @@ class Component extends DCLogic {
         if (open) { window.TSBraille && window.TSBraille.preload().catch(() => {}); this.queueBraillePreview(); }
         return { narrOpen: open };
       }),
-      narrCaretStyle: { transition: 'transform 0.15s ease', transform: st.narrOpen ? 'rotate(180deg)' : 'rotate(0deg)', flex: 'none' },
+      narrCaretStyle: caretStyle(st.narrOpen),
       // Unified DotPad connection section (right pane) — reuses connectDot/disconnectDot/send state.
       dpPhaseDisconnected: dpFlow === 'disconnected',
       dpPhaseConnecting: dpFlow === 'connecting' || dpFlow === 'reconnecting',
@@ -6451,8 +6464,8 @@ class Component extends DCLogic {
       convPreset: st.convPreset,
       presetLabel: t.presetL,
       impAdvOpen: st.impAdvOpen,
-      toggleImpAdv: () => this.setState(x => ({ impAdvOpen: !x.impAdvOpen })),
-      impAdvCaret: st.impAdvOpen ? '90deg' : '0deg',
+      toggleImpAdv: toggleSection('impAdvOpen'),
+      impAdvCaret: caretAngle90(st.impAdvOpen),
       convPresets: [
         { k: 'balanced', label: t.presetBalanced, sub: t.presetSubBalanced },
         { k: 'outline', label: t.presetOutline, sub: t.presetSubOutline },
@@ -6504,8 +6517,8 @@ class Component extends DCLogic {
         };
       })(),
       advOpen: st.advOpen,
-      toggleAdv: () => this.setState(x => ({ advOpen: !x.advOpen })),
-      advCaret: st.advOpen ? '90deg' : '0deg',
+      toggleAdv: toggleSection('advOpen'),
+      advCaret: caretAngle90(st.advOpen),
       impChooseFile: () => { if (this.fileRef.current) this.fileRef.current.click(); },
       // Inner button lives INSIDE the clickable drop zone — stop the bubble so a
       // single user click can't trigger the hidden file input twice.
