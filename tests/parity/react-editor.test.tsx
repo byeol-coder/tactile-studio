@@ -11,7 +11,7 @@ import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import { TactileStudioEditor } from '../../src/react/TactileStudioEditor.js';
 import { TactileStudio } from '../../src/react/TactileStudio.js';
 import { TactileStudioProvider, useEditorStoreContext } from '../../src/react/TactileStudioProvider.js';
-import { StudioCanvas } from '../../src/ui/canvas/StudioCanvas.js';
+import { StudioCanvas, shouldDrawDetailCellLines } from '../../src/ui/canvas/StudioCanvas.js';
 import { Toolbar } from '../../src/ui/toolbar/Toolbar.js';
 import { CorpusSearchPanel } from '../../src/ui/corpus/CorpusSearchPanel.js';
 import { PagePanel } from '../../src/ui/panels/PagePanel.js';
@@ -209,6 +209,25 @@ describe('Toolbar wiring', () => {
       </TactileStudioProvider>,
     );
     expect(screen.getByRole('button', { name: 'Center guide' }).getAttribute('aria-pressed')).toBe('true');
+  });
+});
+
+describe('StudioCanvas working-grid guides', () => {
+  it('defaults to soft and changes modes through accessible pressed buttons', () => {
+    render(<TactileStudioEditor initialDocument={createDocument('t', 60, 40)} services={{ storage: createMemoryStorageAdapter() }} />);
+    const soft = screen.getByRole('button', { name: 'Soft' });
+    const guide = screen.getByRole('button', { name: 'Guide' });
+    const detail = screen.getByRole('button', { name: 'Detail' });
+    expect(soft.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(guide);
+    expect(guide.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(detail);
+    expect(detail.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('limits cell-level detail lines for a 96×64 grid', () => {
+    expect(shouldDrawDetailCellLines(60, 40)).toBe(true);
+    expect(shouldDrawDetailCellLines(96, 64)).toBe(false);
   });
 });
 

@@ -22,6 +22,8 @@ import type { SessionRecoveryStorageAdapter } from '../../storage/adapters/sessi
 import type { TactileDisplayAdapter } from '../../device/dotpad/types.js';
 import type { CorpusRecord } from '../../codecs/corpus/types.js';
 
+export type GridGuideMode = 'soft' | 'guide' | 'detail';
+
 /** Host-provided braille service — a narrower surface than the full
  *  liblouis-node module (host may back this with the browser TSBraille
  *  adapter, the Node adapter, or its own implementation). */
@@ -115,6 +117,10 @@ export interface StudioLabels {
   pagesLabel?: string;
   undo?: string;
   redo?: string;
+  gridGuideMode?: string;
+  gridSoft?: string;
+  gridGuide?: string;
+  gridDetail?: string;
   [key: string]: unknown;
 }
 

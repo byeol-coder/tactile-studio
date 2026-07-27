@@ -30,7 +30,7 @@ import { cellIndex, inBounds } from '../../core/grid/grid.js';
 import { stampTextLayout, type GlyphRasterizer } from '../../codecs/tactile-text/tactile-text.js';
 import { browserGlyphRasterizer } from './browser-glyph-rasterizer.js';
 import { ZoomControls } from './ZoomControls.js';
-import type { StudioLabels } from '../../react/types/public-api.js';
+import type { GridGuideMode, StudioLabels } from '../../react/types/public-api.js';
 
 function cellPx(gridW: number): number {
   return gridW <= 28 ? 20 : gridW <= 60 ? 13 : gridW <= 84 ? 7 : 9;
@@ -59,9 +59,21 @@ export interface StudioCanvasProps {
    *  toolbar (see Toolbar's crosshair IconButton). Purely visual: never
    *  written to cells, never exported, doesn't affect DotPad output. */
   showCenterGuide?: boolean;
+  gridGuideMode?: GridGuideMode;
 }
 
-export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasterizer, labels, showCenterGuide = false }: StudioCanvasProps) {
+export function shouldDrawDetailCellLines(gridW: number, gridH: number) { return gridW * gridH <= 3600 && Math.max(gridW, gridH) <= 84; }
+function drawGuideGrid(g: CanvasRenderingContext2D, gridW: number, gridH: number, c: number, mode: GridGuideMode) {
+  const w = gridW * c, h = gridH * c;
+  g.save(); g.fillStyle = 'rgba(97,85,72,.018)';
+  for (let y = 0; y < gridH; y += 10) for (let x = 0; x < gridW; x += 10) if (((x / 10 + y / 10) & 1) === 0) g.fillRect(x * c, y * c, Math.min(10, gridW - x) * c, Math.min(10, gridH - y) * c);
+  const lines = (step: number, color: string, width: number) => { g.strokeStyle = color; g.lineWidth = width; g.beginPath(); for (let x = step; x < gridW; x += step) { g.moveTo(x * c + .5, 0); g.lineTo(x * c + .5, h); } for (let y = step; y < gridH; y += step) { g.moveTo(0, y * c + .5); g.lineTo(w, y * c + .5); } g.stroke(); };
+  if (mode === 'detail' && shouldDrawDetailCellLines(gridW, gridH)) lines(1, 'rgba(97,85,72,.075)', .5);
+  if (mode === 'soft') lines(5, 'rgba(97,85,72,.055)', .5);
+  lines(10, mode === 'guide' ? 'rgba(97,85,72,.24)' : 'rgba(97,85,72,.12)', mode === 'guide' ? 1 : .75); g.restore();
+}
+
+export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasterizer, labels, showCenterGuide = false, gridGuideMode = 'soft' }: StudioCanvasProps) {
   const { snapshot, store } = useEditorStore();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dragRef = useRef<DragState>(null);
@@ -90,6 +102,7 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
 
     g.fillStyle = '#FFFFFF';
     g.fillRect(0, 0, cv.width, cv.height);
+    drawGuideGrid(g, gridW, gridH, c, gridGuideMode);
     for (let y = 0; y < gridH; y++) for (let x = 0; x < gridW; x++) {
       const i = y * gridW + x, px = x * c + c / 2, py = y * c + c / 2;
       if (cells[i]) {
@@ -162,7 +175,7 @@ export function StudioCanvas({ ariaLabel, glyphRasterizer = browserGlyphRasteriz
       g.strokeStyle = '#C43D00'; g.lineWidth = 2;
       g.strokeRect(snapshot.cursor.cx * c + 1, snapshot.cursor.cy * c + 1, c - 2, c - 2);
     }
-  }, [gridW, gridH, c, snapshot.selRect, snapshot.tool, snapshot.cursor, store, showCenterGuide]);
+  }, [gridW, gridH, c, gridGuideMode, snapshot.selRect, snapshot.tool, snapshot.cursor, store, showCenterGuide]);
 
   // Redraw on every store-visible change (low-frequency: tool switch, page
   // switch, selection change, undo/redo, stroke-end). Mid-drag redraws are
